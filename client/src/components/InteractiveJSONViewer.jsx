@@ -5,8 +5,35 @@ import {
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 
+// Helper function to safely extract actual values from provenance-wrapped objects
+const extractActualValue = (val) => {
+  if (
+    val &&
+    typeof val === "object" &&
+    val.hasOwnProperty("value") &&
+    val.hasOwnProperty("source")
+  ) {
+    return val.value;
+  }
+  return val;
+};
+
+// Helper function to safely convert any value to string for rendering
+const safeToString = (val) => {
+  const actualVal = extractActualValue(val);
+  if (actualVal === null || actualVal === undefined) {
+    return "";
+  }
+  return String(actualVal);
+};
+
 const ProvenanceTooltip = ({ source, isVisible, position }) => {
   if (!isVisible || !source) return null;
+
+  // Safely extract values from source object
+  const sourceType = safeToString(source.type);
+  const sourceName = safeToString(source.name);
+  const sourceId = safeToString(source.id);
 
   const getTypeColor = (type) => {
     switch (type) {
@@ -31,11 +58,11 @@ const ProvenanceTooltip = ({ source, isVisible, position }) => {
     >
       <div className="text-xs font-medium text-gray-700 mb-1">Defined in:</div>
       <div
-        className={`text-sm font-medium px-2 py-1 rounded border ${getTypeColor(source.type)}`}
+        className={`text-sm font-medium px-2 py-1 rounded border ${getTypeColor(sourceType)}`}
       >
-        {source.type}: {source.name}
+        {sourceType}: {sourceName}
       </div>
-      <div className="text-xs text-gray-500 mt-1">ID: {source.id}</div>
+      <div className="text-xs text-gray-500 mt-1">ID: {sourceId}</div>
     </div>
   );
 };
@@ -54,7 +81,6 @@ const TreeNode = ({
   const [isExpanded, setIsExpanded] = useState(depth < 2);
   const [editValue, setEditValue] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   const currentPath = path ? `${path}.${keyName}` : keyName;
 
@@ -81,11 +107,6 @@ const TreeNode = ({
 
   const handleMouseEnter = (e) => {
     if (source) {
-      const rect = e.target.getBoundingClientRect();
-      setMousePosition({
-        x: rect.left + rect.width / 2,
-        y: rect.top,
-      });
       onHover?.(currentPath, source);
     }
   };
@@ -95,7 +116,7 @@ const TreeNode = ({
   };
 
   const handleEditStart = () => {
-    setEditValue(String(actualValue));
+    setEditValue(safeToString(actualValue));
     setIsEditing(true);
   };
 
@@ -106,7 +127,7 @@ const TreeNode = ({
     try {
       if (editValue === "true" || editValue === "false") {
         newValue = editValue === "true";
-      } else if (!isNaN(editValue) && editValue !== "") {
+      } else if (!isNaN(editValue) && editValue !== "" && editValue !== null) {
         newValue = Number(editValue);
       } else if (editValue === "null") {
         newValue = null;
@@ -121,7 +142,7 @@ const TreeNode = ({
 
   const handleEditCancel = () => {
     setIsEditing(false);
-    setEditValue(String(actualValue));
+    setEditValue(safeToString(actualValue));
   };
 
   const isObject =
@@ -141,14 +162,14 @@ const TreeNode = ({
     }
 
     if (typeof actualValue === "number") {
-      return <span className="text-blue-600">{actualValue}</span>;
+      return <span className="text-blue-600">{String(actualValue)}</span>;
     }
 
     if (typeof actualValue === "boolean") {
-      return <span className="text-purple-600">{actualValue.toString()}</span>;
+      return <span className="text-purple-600">{String(actualValue)}</span>;
     }
 
-    return <span className="text-gray-600">{String(actualValue)}</span>;
+    return <span className="text-gray-600">{safeToString(actualValue)}</span>;
   };
 
   const renderEditableValue = () => {
@@ -200,24 +221,19 @@ const TreeNode = ({
   const renderArrayItems = () => {
     if (!isArray) return null;
 
-    return actualValue.map((item, index) => {
-      const { actualValue: itemValue, source: itemSource } =
-        getActualValueAndSource(item);
-
-      return (
-        <TreeNode
-          key={index}
-          keyName={index.toString()}
-          value={item}
-          path={currentPath}
-          depth={depth + 1}
-          onHover={onHover}
-          onHoverEnd={onHoverEnd}
-          isEditable={isEditable}
-          onValueChange={onValueChange}
-        />
-      );
-    });
+    return actualValue.map((item, index) => (
+      <TreeNode
+        key={index}
+        keyName={index.toString()}
+        value={item}
+        path={currentPath}
+        depth={depth + 1}
+        onHover={onHover}
+        onHoverEnd={onHoverEnd}
+        isEditable={isEditable}
+        onValueChange={onValueChange}
+      />
+    ));
   };
 
   const renderObjectProperties = () => {
@@ -359,17 +375,17 @@ const InteractiveJSONViewer = ({
           </h4>
           <div className="flex items-center space-x-2 text-sm">
             {metadata.chain.map((level, index) => (
-              <React.Fragment key={level.id}>
+              <React.Fragment key={safeToString(level.id)}>
                 <span
                   className={`px-2 py-1 rounded text-xs font-medium ${
-                    level.type === "PRODUCT"
+                    safeToString(level.type) === "PRODUCT"
                       ? "bg-blue-100 text-blue-800"
-                      : level.type === "INSTANCE"
+                      : safeToString(level.type) === "INSTANCE"
                         ? "bg-green-100 text-green-800"
                         : "bg-purple-100 text-purple-800"
                   }`}
                 >
-                  {level.name}
+                  {safeToString(level.name)}
                 </span>
                 {index < metadata.chain.length - 1 && (
                   <span className="text-gray-400">→</span>
