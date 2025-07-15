@@ -54,22 +54,30 @@ const TreeNode = ({
   const [isExpanded, setIsExpanded] = useState(depth < 2);
   const [editValue, setEditValue] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [hoveredPath, setHoveredPath] = useState(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   const currentPath = path ? `${path}.${keyName}` : keyName;
 
-  // Handle provenance-wrapped values
-  const actualValue =
-    value &&
-    typeof value === "object" &&
-    value.value !== undefined &&
-    value.source
-      ? value.value
-      : value;
+  // Safely extract actual value and source from provenance-wrapped values
+  const getActualValueAndSource = (val) => {
+    if (
+      val &&
+      typeof val === "object" &&
+      val.hasOwnProperty("value") &&
+      val.hasOwnProperty("source")
+    ) {
+      return {
+        actualValue: val.value,
+        source: val.source,
+      };
+    }
+    return {
+      actualValue: val,
+      source: null,
+    };
+  };
 
-  const source =
-    value && typeof value === "object" && value.source ? value.source : null;
+  const { actualValue, source } = getActualValueAndSource(value);
 
   const handleMouseEnter = (e) => {
     if (source) {
@@ -78,13 +86,11 @@ const TreeNode = ({
         x: rect.left + rect.width / 2,
         y: rect.top,
       });
-      setHoveredPath(currentPath);
       onHover?.(currentPath, source);
     }
   };
 
   const handleMouseLeave = () => {
-    setHoveredPath(null);
     onHoverEnd?.();
   };
 
@@ -191,6 +197,47 @@ const TreeNode = ({
     );
   };
 
+  const renderArrayItems = () => {
+    if (!isArray) return null;
+
+    return actualValue.map((item, index) => {
+      const { actualValue: itemValue, source: itemSource } =
+        getActualValueAndSource(item);
+
+      return (
+        <TreeNode
+          key={index}
+          keyName={index.toString()}
+          value={item}
+          path={currentPath}
+          depth={depth + 1}
+          onHover={onHover}
+          onHoverEnd={onHoverEnd}
+          isEditable={isEditable}
+          onValueChange={onValueChange}
+        />
+      );
+    });
+  };
+
+  const renderObjectProperties = () => {
+    if (!isObject) return null;
+
+    return Object.entries(actualValue).map(([key, val]) => (
+      <TreeNode
+        key={key}
+        keyName={key}
+        value={val}
+        path={currentPath}
+        depth={depth + 1}
+        onHover={onHover}
+        onHoverEnd={onHoverEnd}
+        isEditable={isEditable}
+        onValueChange={onValueChange}
+      />
+    ));
+  };
+
   return (
     <div className="group">
       <div
@@ -239,35 +286,7 @@ const TreeNode = ({
 
       {/* Expanded children */}
       {isExpanded && (isObject || isArray) && (
-        <div>
-          {isArray
-            ? actualValue.map((item, index) => (
-                <TreeNode
-                  key={index}
-                  keyName={index.toString()}
-                  value={item}
-                  path={currentPath}
-                  depth={depth + 1}
-                  onHover={onHover}
-                  onHoverEnd={onHoverEnd}
-                  isEditable={isEditable}
-                  onValueChange={onValueChange}
-                />
-              ))
-            : Object.entries(actualValue).map(([key, val]) => (
-                <TreeNode
-                  key={key}
-                  keyName={key}
-                  value={val}
-                  path={currentPath}
-                  depth={depth + 1}
-                  onHover={onHover}
-                  onHoverEnd={onHoverEnd}
-                  isEditable={isEditable}
-                  onValueChange={onValueChange}
-                />
-              ))}
-        </div>
+        <div>{isArray ? renderArrayItems() : renderObjectProperties()}</div>
       )}
     </div>
   );
