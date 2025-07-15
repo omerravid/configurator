@@ -11,6 +11,7 @@ import {
   CheckIcon,
   UserIcon,
   Cog6ToothIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 
 const Dashboard = () => {
@@ -22,6 +23,7 @@ const Dashboard = () => {
   const [showEditor, setShowEditor] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [showCreateProduct, setShowCreateProduct] = useState(false);
+  const [showRename, setShowRename] = useState(false);
 
   const loadConfigurationData = async (config) => {
     if (!config) return;
@@ -42,6 +44,7 @@ const Dashboard = () => {
   const handleConfigSelect = (config) => {
     setSelectedConfig(config);
     setShowEditor(false);
+    setShowRename(false);
     loadConfigurationData(config);
   };
 
@@ -49,16 +52,26 @@ const Dashboard = () => {
     if (!selectedConfig) return;
 
     setShowEditor(true);
+    setShowRename(false);
   };
 
   const handleCreateProduct = () => {
     setShowCreateProduct(true);
+    setShowRename(false);
   };
 
   const handleEdit = () => {
     if (!selectedConfig) return;
 
     setShowEditor(true);
+    setShowRename(false);
+  };
+
+  const handleRename = () => {
+    if (!selectedConfig) return;
+
+    setShowRename(true);
+    setShowEditor(false);
   };
 
   const handleCommit = async () => {
@@ -104,6 +117,7 @@ const Dashboard = () => {
   const handleEditorClose = (success) => {
     setShowEditor(false);
     setShowCreateProduct(false);
+    setShowRename(false);
     if (success) {
       setRefreshTrigger((prev) => prev + 1);
       // Reload current config if it was edited
@@ -121,6 +135,10 @@ const Dashboard = () => {
       selectedConfig.created_by === user.id &&
       selectedConfig.status === "DRAFT"
     );
+  };
+
+  const canRename = () => {
+    return selectedConfig && user.role === "ADMIN";
   };
 
   const canDelete = () => {
@@ -274,6 +292,16 @@ const Dashboard = () => {
                       </button>
                     )}
 
+                    {canRename() && (
+                      <button
+                        onClick={handleRename}
+                        className="btn-secondary flex items-center space-x-1"
+                      >
+                        <DocumentTextIcon className="w-4 h-4" />
+                        <span>Rename</span>
+                      </button>
+                    )}
+
                     {canCommit() && (
                       <button
                         onClick={handleCommit}
@@ -344,11 +372,12 @@ const Dashboard = () => {
       </div>
 
       {/* Configuration Editor Modal */}
-      {(showEditor || showCreateProduct) && (
+      {(showEditor || showCreateProduct || showRename) && (
         <ConfigurationEditor
           config={showCreateProduct ? null : selectedConfig}
           onClose={handleEditorClose}
           isCreatingProduct={showCreateProduct}
+          isRenaming={showRename}
         />
       )}
     </div>
