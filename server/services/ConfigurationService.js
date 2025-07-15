@@ -109,15 +109,14 @@ class ConfigurationService {
    * @returns {Object} Resolved configuration
    */
   static async resolveConfiguration(configIdOrName, includeProvenance = false) {
-    // Find the configuration
+    // Find the configuration - try by ID first, then by name
     let config;
-    if (
-      configIdOrName.match(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
-      )
-    ) {
-      config = await Configuration.findById(configIdOrName);
-    } else {
+
+    // First try to find by ID
+    config = await Configuration.findById(configIdOrName);
+
+    // If not found, try by name
+    if (!config) {
       config = await Configuration.findByName(configIdOrName);
     }
 
