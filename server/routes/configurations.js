@@ -10,7 +10,7 @@ const router = express.Router();
 const createConfigSchema = Joi.object({
   name: Joi.string().min(3).max(100).required(),
   type: Joi.string().valid("PRODUCT", "INSTANCE", "USER").required(),
-  parent_id: Joi.string().optional(),
+  parent_id: Joi.string().optional(), // Changed from UUID to string to support our custom IDs
   data: Joi.object().required(),
   description: Joi.string().max(500).optional(),
 });
