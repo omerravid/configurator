@@ -37,6 +37,8 @@ class Configuration {
   }
 
   static async findById(id) {
+    console.log(`[DEBUG] Looking for configuration with ID: ${id}`);
+
     const result = await db.query(
       `SELECT c.*, u.username as created_by_username,
               pc.name as parent_name, pc.type as parent_type
@@ -47,6 +49,11 @@ class Configuration {
       [id],
     );
 
+    console.log(`[DEBUG] Query returned ${result.rows.length} rows`);
+    if (result.rows.length > 0) {
+      console.log(`[DEBUG] Found config: ${result.rows[0].name}`);
+    }
+
     const config = result.rows[0];
     if (config && config.data) {
       config.data = JSON.parse(config.data);
@@ -55,6 +62,8 @@ class Configuration {
   }
 
   static async findByName(name) {
+    console.log(`[DEBUG] Looking for configuration with name: ${name}`);
+
     const result = await db.query(
       `SELECT c.*, u.username as created_by_username,
               pc.name as parent_name, pc.type as parent_type
@@ -64,6 +73,8 @@ class Configuration {
        WHERE c.name = ?`,
       [name],
     );
+
+    console.log(`[DEBUG] Query returned ${result.rows.length} rows`);
 
     const config = result.rows[0];
     if (config && config.data) {
@@ -129,6 +140,8 @@ class Configuration {
   }
 
   static async getInheritanceChain(configId) {
+    console.log(`[DEBUG] Getting inheritance chain for: ${configId}`);
+
     // Since SQLite doesn't support recursive CTEs easily, we'll do this iteratively
     const chain = [];
     let currentId = configId;
@@ -139,17 +152,23 @@ class Configuration {
         [currentId],
       );
 
-      if (result.rows.length === 0) break;
+      if (result.rows.length === 0) {
+        console.log(`[DEBUG] No configuration found for ID: ${currentId}`);
+        break;
+      }
 
       const config = result.rows[0];
       config.data = JSON.parse(config.data);
       chain.push(config);
+      console.log(`[DEBUG] Added to chain: ${config.name} (${config.type})`);
 
       currentId = config.parent_id;
     }
 
     // Reverse to get root first
-    return chain.reverse();
+    const reversedChain = chain.reverse();
+    console.log(`[DEBUG] Final chain length: ${reversedChain.length}`);
+    return reversedChain;
   }
 
   static async update(id, { data, description }) {
