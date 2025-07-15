@@ -1,45 +1,148 @@
-const { Pool } = require("pg");
+const sqlite3 = require("sqlite3").verbose();
+const path = require("path");
 
 class Database {
   constructor() {
-    this.pool = new Pool({
-      connectionString:
-        process.env.DATABASE_URL ||
-        "postgresql://postgres:password@localhost:5432/config_manager",
-      ssl:
-        process.env.NODE_ENV === "production"
-          ? { rejectUnauthorized: false }
-          : false,
+    const dbPath = path.join(__dirname, "../config_manager.db");
+    this.db = new sqlite3.Database(dbPath, (err) => {
+      if (err) {
+        console.error("Error opening database:", err);
+      } else {
+        console.log("Connected to SQLite database");
+        this.init();
+      }
     });
   }
 
-  async query(text, params = []) {
-    const client = await this.pool.connect();
-    try {
-      const result = await client.query(text, params);
-      return result;
-    } finally {
-      client.release();
-    }
+  init() {
+    const initSQL = `
+      -- Users table
+      CREATE TABLE IF NOT EXISTS users (
+          id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+          username TEXT UNIQUE NOT NULL,
+          password_hash TEXT NOT NULL,
+          role TEXT NOT NULL CHECK (role IN ('ADMIN', 'USER')),
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Configurations table
+      CREATE TABLE IF NOT EXISTS configurations (
+          id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+          name TEXT UNIQUE NOT NULL,
+          type TEXT NOT NULL CHECK (type IN ('PRODUCT', 'INSTANCE', 'USER')),
+          parent_id TEXT REFERENCES configurations(id) ON DELETE CASCADE,
+          data TEXT NOT NULL DEFAULT '{}',
+          status TEXT NOT NULL DEFAULT 'COMMITTED' CHECK (status IN ('DRAFT', 'COMMITTED')),
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          created_by TEXT NOT NULL REFERENCES users(id),
+          description TEXT
+      );
+
+      -- Insert default admin user (password: admin123)
+      INSERT OR IGNORE INTO users (id, username, password_hash, role) 
+      VALUES ('admin-id-123', 'admin', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'ADMIN');
+
+      -- Insert sample configurations
+      INSERT OR IGNORE INTO configurations (id, name, type, parent_id, data, created_by, description)
+      VALUES (
+          'prod-ecommerce-123',
+          'prod_ecommerce',
+          'PRODUCT',
+          NULL,
+          '{"system":{"logging":{"level":"INFO","retention_days":30},"api_keys":["key1","key2"],"database":{"connection_pool_size":10,"timeout":5000}},"feature_flags":{"new_ui":false,"beta_feature":false,"analytics":true},"business":{"tax_rate":0.08,"shipping_cost":9.99}}',
+          'admin-id-123',
+          'Main ecommerce product configuration'
+      );
+
+      INSERT OR IGNORE INTO configurations (id, name, type, parent_id, data, created_by, description)
+      VALUES (
+          'inst-staging-eu-123',
+          'inst_staging_eu',
+          'INSTANCE',
+          'prod-ecommerce-123',
+          '{"system":{"logging":{"level":"DEBUG"},"database":{"connection_pool_size":5}},"feature_flags":{"new_ui":true,"beta_feature":true}}',
+          'admin-id-123',
+          'Staging environment for EU region'
+      );
+
+      INSERT OR IGNORE INTO configurations (id, name, type, parent_id, data, status, created_by, description)
+      VALUES (
+          'user-dev-john-123',
+          'user_dev_john_v1',
+          'USER',
+          'inst-staging-eu-123',
+          '{"system":{"logging":{"retention_days":7}},"business":{"tax_rate":0.0}}',
+          'DRAFT',
+          'admin-id-123',
+          'John developer personal configuration'
+      );
+    `;
+
+    this.db.exec(initSQL, (err) => {
+      if (err) {
+        console.error("Error initializing database:", err);
+      } else {
+        console.log("Database initialized successfully");
+      }
+    });
   }
 
-  async transaction(callback) {
-    const client = await this.pool.connect();
-    try {
-      await client.query("BEGIN");
-      const result = await callback(client);
-      await client.query("COMMIT");
-      return result;
-    } catch (error) {
-      await client.query("ROLLBACK");
-      throw error;
-    } finally {
-      client.release();
-    }
+  query(sql, params = []) {
+    return new Promise((resolve, reject) => {
+      if (
+        sql.toUpperCase().startsWith("SELECT") ||
+        sql.toUpperCase().startsWith("WITH")
+      ) {
+        this.db.all(sql, params, (err, rows) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve({ rows });
+          }
+        });
+      } else {
+        this.db.run(sql, params, function (err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve({
+              rows: [{ id: this.lastID }],
+              rowsAffected: this.changes,
+            });
+          }
+        });
+      }
+    });
   }
 
-  async close() {
-    await this.pool.end();
+  transaction(callback) {
+    return new Promise((resolve, reject) => {
+      this.db.serialize(() => {
+        this.db.run("BEGIN TRANSACTION");
+
+        try {
+          const result = callback(this);
+          this.db.run("COMMIT");
+          resolve(result);
+        } catch (error) {
+          this.db.run("ROLLBACK");
+          reject(error);
+        }
+      });
+    });
+  }
+
+  close() {
+    return new Promise((resolve) => {
+      this.db.close((err) => {
+        if (err) {
+          console.error("Error closing database:", err);
+        }
+        resolve();
+      });
+    });
   }
 }
 
