@@ -181,6 +181,17 @@ class Configuration {
     return await this.findById(id);
   }
 
+  static async updateName(id, name) {
+    await db.query(
+      `UPDATE configurations 
+       SET name = ?, updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [name, id],
+    );
+
+    return await this.findById(id);
+  }
+
   static async commit(id) {
     await db.query(
       `UPDATE configurations 
