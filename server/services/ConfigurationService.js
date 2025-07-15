@@ -51,10 +51,14 @@ class ConfigurationService {
           finalSource = overrideSource;
         }
       } else if (baseValue !== undefined) {
-        // Only base value exists
-        if (isPlainObject(baseValue) && includeProvenance) {
-          // For objects, we need to traverse and add provenance to nested properties
-          finalValue = this.addProvenanceToObject(baseValue, baseSource);
+        // Only base value exists - this is an inherited value
+        if (isPlainObject(baseValue)) {
+          // For inherited objects, recursively add provenance
+          finalValue = this.addProvenanceToObject(
+            baseValue,
+            baseSource,
+            includeProvenance,
+          );
         } else {
           finalValue = cloneDeep(baseValue);
         }
@@ -62,11 +66,18 @@ class ConfigurationService {
       }
 
       if (includeProvenance && finalValue !== undefined) {
-        if (isPlainObject(finalValue) && finalValue.value === undefined) {
-          // This is already a merged object, don't wrap it again
+        if (
+          isPlainObject(finalValue) &&
+          !Array.isArray(finalValue) &&
+          !(
+            finalValue.hasOwnProperty("value") &&
+            finalValue.hasOwnProperty("source")
+          )
+        ) {
+          // This is an object that already has provenance for its children, don't wrap it
           result[key] = finalValue;
         } else {
-          // Wrap primitive values with provenance
+          // Wrap primitive values and arrays with provenance
           result[key] = {
             value: finalValue,
             source: finalSource,
@@ -81,18 +92,24 @@ class ConfigurationService {
   }
 
   /**
-   * Add provenance to all properties in an object
+   * Add provenance to all properties in an object (for inherited values)
    */
-  static addProvenanceToObject(obj, source) {
-    if (!isPlainObject(obj)) {
-      return obj;
+  static addProvenanceToObject(obj, source, includeProvenance) {
+    if (!isPlainObject(obj) || !includeProvenance) {
+      return cloneDeep(obj);
     }
 
     const result = {};
     for (const [key, value] of Object.entries(obj)) {
-      if (isPlainObject(value)) {
-        result[key] = this.addProvenanceToObject(value, source);
+      if (isPlainObject(value) && !Array.isArray(value)) {
+        // Recursively handle nested objects
+        result[key] = this.addProvenanceToObject(
+          value,
+          source,
+          includeProvenance,
+        );
       } else {
+        // Wrap primitive values and arrays with provenance
         result[key] = {
           value: cloneDeep(value),
           source: source,
@@ -133,7 +150,7 @@ class ConfigurationService {
       );
     }
 
-    // Start with the root (highest level in chain)
+    // Start with empty resolved configuration
     let resolved = {};
 
     // Merge each level in the chain
@@ -147,10 +164,13 @@ class ConfigurationService {
       const levelData =
         typeof level.data === "string" ? JSON.parse(level.data) : level.data;
 
+      // For the first level (root), there's no previous source
+      const previousSource = Object.keys(resolved).length === 0 ? null : source;
+
       resolved = this.deepMergeWithProvenance(
         resolved,
         levelData,
-        null, // Previous source is embedded in resolved already
+        previousSource,
         source,
         includeProvenance,
       );
