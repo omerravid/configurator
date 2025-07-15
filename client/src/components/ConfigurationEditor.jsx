@@ -7,12 +7,13 @@ const ConfigurationEditor = ({
   config,
   onClose,
   isCreatingProduct = false,
+  isRenaming = false,
 }) => {
   const { user } = useAuth();
   const [isCreating, setIsCreating] = useState(!config || isCreatingProduct);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isRenaming, setIsRenaming] = useState(false);
+  const [showRename, setShowRename] = useState(isRenaming);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -62,7 +63,7 @@ const ConfigurationEditor = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateJSON(formData.data)) {
+    if (!showRename && !validateJSON(formData.data)) {
       setError("Invalid JSON data");
       return;
     }
@@ -71,9 +72,12 @@ const ConfigurationEditor = ({
     setError(null);
 
     try {
-      const data = JSON.parse(formData.data);
-
-      if (isCreating) {
+      if (showRename) {
+        // Handle rename
+        await configAPI.rename(config.id, formData.name);
+      } else if (isCreating) {
+        // Handle create
+        const data = JSON.parse(formData.data);
         await configAPI.create({
           name: formData.name,
           type: formData.type,
@@ -82,6 +86,8 @@ const ConfigurationEditor = ({
           description: formData.description,
         });
       } else {
+        // Handle update
+        const data = JSON.parse(formData.data);
         await configAPI.update(config.id, {
           data,
           description: formData.description,
@@ -92,27 +98,6 @@ const ConfigurationEditor = ({
     } catch (err) {
       console.error("Failed to save configuration:", err);
       setError(err.response?.data?.error || "Failed to save configuration");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRename = async () => {
-    if (!config) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      // For now, we'll update just the description since renaming requires backend support
-      await configAPI.update(config.id, {
-        description: `Renamed from ${config.name} - ${formData.description}`,
-      });
-
-      onClose(true);
-    } catch (err) {
-      console.error("Failed to rename configuration:", err);
-      setError(err.response?.data?.error || "Failed to rename configuration");
     } finally {
       setLoading(false);
     }
@@ -151,7 +136,7 @@ const ConfigurationEditor = ({
   const typeOptions = getTypeOptions();
 
   const getTitle = () => {
-    if (isRenaming) return `Rename ${config.name}`;
+    if (showRename) return `Rename ${config.name}`;
     if (isCreatingProduct) return "Create New Product Configuration";
     if (isCreating) {
       return config
@@ -191,12 +176,20 @@ const ConfigurationEditor = ({
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">{getTitle()}</h2>
           <div className="flex items-center space-x-2">
-            {config && !isCreating && user.role === "ADMIN" && (
+            {config && !isCreating && user.role === "ADMIN" && !showRename && (
               <button
-                onClick={() => setIsRenaming(!isRenaming)}
+                onClick={() => setShowRename(true)}
                 className="text-sm text-primary-600 hover:text-primary-700"
               >
-                {isRenaming ? "Cancel Rename" : "Rename"}
+                Rename
+              </button>
+            )}
+            {showRename && (
+              <button
+                onClick={() => setShowRename(false)}
+                className="text-sm text-gray-600 hover:text-gray-700"
+              >
+                Cancel Rename
               </button>
             )}
             <button
@@ -209,10 +202,7 @@ const ConfigurationEditor = ({
         </div>
 
         {/* Form */}
-        <form
-          onSubmit={isRenaming ? handleRename : handleSubmit}
-          className="flex flex-col h-full max-h-96"
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col h-full max-h-96">
           <div className="flex-1 p-6 space-y-4 overflow-auto">
             {error && (
               <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded">
@@ -233,7 +223,7 @@ const ConfigurationEditor = ({
                 id="name"
                 name="name"
                 required
-                disabled={!isCreating && !isRenaming}
+                disabled={!isCreating && !showRename}
                 className="mt-1 input-field w-full disabled:bg-gray-50"
                 value={formData.name}
                 onChange={handleInputChange}
@@ -243,136 +233,145 @@ const ConfigurationEditor = ({
                     : "e.g., inst_staging_eu, user_dev_john_v2"
                 }
               />
-            </div>
-
-            {/* Type */}
-            <div>
-              <label
-                htmlFor="type"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Configuration Type
-              </label>
-              <select
-                id="type"
-                name="type"
-                disabled={!isCreating || typeOptions.length === 1}
-                className="mt-1 input-field w-full disabled:bg-gray-50"
-                value={formData.type}
-                onChange={handleInputChange}
-              >
-                {typeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              {isCreatingProduct && (
-                <p className="mt-1 text-xs text-blue-600">
-                  Product configurations define the base schema and can
-                  introduce new properties.
+              {showRename && (
+                <p className="mt-1 text-xs text-orange-600">
+                  ⚠️ Renaming will affect all references to this configuration
                 </p>
               )}
             </div>
 
-            {/* Parent (shown for context) */}
-            {formData.parent_id && config && !isCreatingProduct && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Parent Configuration
-                </label>
-                <div className="mt-1 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                  <div className="flex items-center space-x-2">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        config.type === "PRODUCT"
-                          ? "bg-blue-100 text-blue-800"
-                          : config.type === "INSTANCE"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-purple-100 text-purple-800"
-                      }`}
-                    >
-                      {config.type}
-                    </span>
-                    <span className="text-sm font-medium">{config.name}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Description */}
-            <div>
-              <label
-                htmlFor="description"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Description (Optional)
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                rows={3}
-                className="mt-1 input-field w-full"
-                value={formData.description}
-                onChange={handleInputChange}
-                placeholder="Describe the purpose of this configuration..."
-              />
-            </div>
-
-            {/* JSON Data (only if not renaming) */}
-            {!isRenaming && (
-              <div>
-                <div className="flex items-center justify-between">
+            {!showRename && (
+              <>
+                {/* Type */}
+                <div>
                   <label
-                    htmlFor="data"
+                    htmlFor="type"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Configuration Data (JSON)
+                    Configuration Type
                   </label>
+                  <select
+                    id="type"
+                    name="type"
+                    disabled={!isCreating || typeOptions.length === 1}
+                    className="mt-1 input-field w-full disabled:bg-gray-50"
+                    value={formData.type}
+                    onChange={handleInputChange}
+                  >
+                    {typeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                   {isCreatingProduct && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          data: getProductTemplate(),
-                        }))
-                      }
-                      className="text-xs text-primary-600 hover:text-primary-700"
+                    <p className="mt-1 text-xs text-blue-600">
+                      Product configurations define the base schema and can
+                      introduce new properties.
+                    </p>
+                  )}
+                </div>
+
+                {/* Parent (shown for context) */}
+                {formData.parent_id && config && !isCreatingProduct && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Parent Configuration
+                    </label>
+                    <div className="mt-1 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            config.type === "PRODUCT"
+                              ? "bg-blue-100 text-blue-800"
+                              : config.type === "INSTANCE"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-purple-100 text-purple-800"
+                          }`}
+                        >
+                          {config.type}
+                        </span>
+                        <span className="text-sm font-medium">
+                          {config.name}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Description */}
+                <div>
+                  <label
+                    htmlFor="description"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Description (Optional)
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    rows={3}
+                    className="mt-1 input-field w-full"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Describe the purpose of this configuration..."
+                  />
+                </div>
+
+                {/* JSON Data */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <label
+                      htmlFor="data"
+                      className="block text-sm font-medium text-gray-700"
                     >
-                      Use Template
-                    </button>
-                  )}
+                      Configuration Data (JSON)
+                    </label>
+                    {isCreatingProduct && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            data: getProductTemplate(),
+                          }))
+                        }
+                        className="text-xs text-primary-600 hover:text-primary-700"
+                      >
+                        Use Template
+                      </button>
+                    )}
+                  </div>
+                  <textarea
+                    id="data"
+                    name="data"
+                    rows={16}
+                    required
+                    className="mt-1 input-field w-full font-mono text-sm"
+                    value={formData.data}
+                    onChange={handleInputChange}
+                    placeholder={
+                      isCreatingProduct
+                        ? "Define your product configuration schema..."
+                        : '{\n  "property": "value"\n}'
+                    }
+                  />
+                  <div className="mt-1 text-xs text-gray-500">
+                    {isCreating && formData.parent_id && !isCreatingProduct && (
+                      <>
+                        ⚠️ Only properties that exist in the parent
+                        configuration are allowed.
+                      </>
+                    )}
+                    {isCreatingProduct && (
+                      <>
+                        ✅ As a Product configuration, you can define any new
+                        properties.
+                      </>
+                    )}
+                  </div>
                 </div>
-                <textarea
-                  id="data"
-                  name="data"
-                  rows={16}
-                  required
-                  className="mt-1 input-field w-full font-mono text-sm"
-                  value={formData.data}
-                  onChange={handleInputChange}
-                  placeholder={
-                    isCreatingProduct
-                      ? "Define your product configuration schema..."
-                      : '{\n  "property": "value"\n}'
-                  }
-                />
-                <div className="mt-1 text-xs text-gray-500">
-                  {isCreating && formData.parent_id && !isCreatingProduct && (
-                    <>
-                      ⚠️ Only properties that exist in the parent configuration
-                      are allowed.
-                    </>
-                  )}
-                  {isCreatingProduct && (
-                    <>
-                      ✅ As a Product configuration, you can define any new
-                      properties.
-                    </>
-                  )}
-                </div>
-              </div>
+              </>
             )}
           </div>
 
@@ -392,7 +391,7 @@ const ConfigurationEditor = ({
             >
               {loading
                 ? "Saving..."
-                : isRenaming
+                : showRename
                   ? "Rename Configuration"
                   : isCreating
                     ? "Create Configuration"
