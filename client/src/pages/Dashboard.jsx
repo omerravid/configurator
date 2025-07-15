@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import ConfigurationTree from "../components/ConfigurationTree";
-import JSONViewer from "../components/JSONViewer";
+import InteractiveJSONViewer from "../components/InteractiveJSONViewer";
 import ConfigurationEditor from "../components/ConfigurationEditor";
 import { configAPI } from "../services/api";
 import {
@@ -21,6 +21,7 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [showEditor, setShowEditor] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [showCreateProduct, setShowCreateProduct] = useState(false);
 
   const loadConfigurationData = async (config) => {
     if (!config) return;
@@ -48,6 +49,10 @@ const Dashboard = () => {
     if (!selectedConfig) return;
 
     setShowEditor(true);
+  };
+
+  const handleCreateProduct = () => {
+    setShowCreateProduct(true);
   };
 
   const handleEdit = () => {
@@ -98,6 +103,7 @@ const Dashboard = () => {
 
   const handleEditorClose = (success) => {
     setShowEditor(false);
+    setShowCreateProduct(false);
     if (success) {
       setRefreshTrigger((prev) => prev + 1);
       // Reload current config if it was edited
@@ -149,6 +155,16 @@ const Dashboard = () => {
           </div>
 
           <div className="flex items-center space-x-4">
+            {user.role === "ADMIN" && (
+              <button
+                onClick={handleCreateProduct}
+                className="btn-primary flex items-center space-x-1"
+              >
+                <PlusIcon className="w-4 h-4" />
+                <span>New Product</span>
+              </button>
+            )}
+
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <UserIcon className="w-4 h-4" />
               <span>{user.username}</span>
@@ -298,9 +314,10 @@ const Dashboard = () => {
                     </button>
                   </div>
                 ) : resolvedData ? (
-                  <JSONViewer
+                  <InteractiveJSONViewer
                     data={resolvedData.resolved}
-                    title="Resolved Configuration"
+                    metadata={resolvedData.metadata}
+                    title="Configuration Data"
                     className="max-w-none"
                   />
                 ) : (
@@ -327,10 +344,11 @@ const Dashboard = () => {
       </div>
 
       {/* Configuration Editor Modal */}
-      {showEditor && (
+      {(showEditor || showCreateProduct) && (
         <ConfigurationEditor
-          config={selectedConfig}
+          config={showCreateProduct ? null : selectedConfig}
           onClose={handleEditorClose}
+          isCreatingProduct={showCreateProduct}
         />
       )}
     </div>
