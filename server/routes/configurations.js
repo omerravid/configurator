@@ -10,14 +10,14 @@ const router = express.Router();
 const createConfigSchema = Joi.object({
   name: Joi.string().min(3).max(100).required(),
   type: Joi.string().valid("PRODUCT", "INSTANCE", "USER").required(),
-  parent_id: Joi.string().optional(), // Changed from UUID to string to support our custom IDs
+  parent_id: Joi.string().allow("", null).optional(), // Allow any string, empty string, or null
   data: Joi.object().required(),
-  description: Joi.string().max(500).optional(),
+  description: Joi.string().max(500).allow("").optional(), // Allow empty string
 });
 
 const updateConfigSchema = Joi.object({
   data: Joi.object().optional(),
-  description: Joi.string().max(500).optional(),
+  description: Joi.string().max(500).allow("").optional(), // Allow empty string
 }).min(1);
 
 const renameConfigSchema = Joi.object({
@@ -124,11 +124,15 @@ router.post("/", authenticateToken, async (req, res) => {
         });
     }
 
+    // Clean up parent_id - convert empty string to null
+    const cleanParentId =
+      parent_id && parent_id.trim() !== "" ? parent_id : null;
+
     // Create configuration using service
     const config = await ConfigurationService.createConfiguration({
       name,
       type,
-      parentId: parent_id,
+      parentId: cleanParentId,
       data,
       createdBy: req.user.id,
       description,
