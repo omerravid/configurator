@@ -1,0 +1,314 @@
+const express = require("express");
+const Joi = require("joi");
+const Configuration = require("../models/Configuration");
+const ConfigurationService = require("../services/ConfigurationService");
+const { authenticateToken, requireAdmin } = require("../middleware/auth");
+
+const router = express.Router();
+
+// Validation schemas
+const createConfigSchema = Joi.object({
+  name: Joi.string().min(3).max(100).required(),
+  type: Joi.string().valid("PRODUCT", "INSTANCE", "USER").required(),
+  parent_id: Joi.string().uuid().optional(),
+  data: Joi.object().required(),
+  description: Joi.string().max(500).optional(),
+});
+
+const updateConfigSchema = Joi.object({
+  data: Joi.object().optional(),
+  description: Joi.string().max(500).optional(),
+}).min(1);
+
+// Middleware to check permissions for config operations
+const checkConfigPermissions = async (req, res, next) => {
+  try {
+    const config = await Configuration.findById(req.params.id);
+    if (!config) {
+      return res.status(404).json({ error: "Configuration not found" });
+    }
+
+    req.config = config;
+
+    // Admin can do anything
+    if (req.user.role === "ADMIN") {
+      return next();
+    }
+
+    // For non-admin users
+    if (config.type === "PRODUCT" || config.type === "INSTANCE") {
+      return res
+        .status(403)
+        .json({
+          error: "Only admins can modify Product/Instance configurations",
+        });
+    }
+
+    // For USER configs, check ownership and draft status
+    if (config.type === "USER") {
+      if (config.created_by !== req.user.id) {
+        return res
+          .status(403)
+          .json({ error: "You can only modify your own configurations" });
+      }
+
+      if (req.method !== "GET" && config.status === "COMMITTED") {
+        return res
+          .status(403)
+          .json({ error: "Cannot modify committed configurations" });
+      }
+    }
+
+    next();
+  } catch (error) {
+    console.error("Permission check error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// GET /api/configs - List all configurations
+router.get("/", authenticateToken, async (req, res) => {
+  try {
+    const { type, status } = req.query;
+
+    let configs;
+    if (type) {
+      configs = await Configuration.findByType(type);
+    } else {
+      configs = await Configuration.findAll();
+    }
+
+    // Filter by status if specified
+    if (status) {
+      configs = configs.filter((config) => config.status === status);
+    }
+
+    // Non-admin users can only see their own USER configs
+    if (req.user.role !== "ADMIN") {
+      configs = configs.filter(
+        (config) => config.type !== "USER" || config.created_by === req.user.id,
+      );
+    }
+
+    res.json({ configs });
+  } catch (error) {
+    console.error("List configurations error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /api/configs - Create new configuration
+router.post("/", authenticateToken, async (req, res) => {
+  try {
+    // Validate input
+    const { error, value } = createConfigSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const { name, type, parent_id, data, description } = value;
+
+    // Check permissions
+    if (
+      (type === "PRODUCT" || type === "INSTANCE") &&
+      req.user.role !== "ADMIN"
+    ) {
+      return res
+        .status(403)
+        .json({
+          error: "Only admins can create Product/Instance configurations",
+        });
+    }
+
+    // Create configuration using service
+    const config = await ConfigurationService.createConfiguration({
+      name,
+      type,
+      parentId: parent_id,
+      data,
+      createdBy: req.user.id,
+      description,
+    });
+
+    res.status(201).json({
+      message: "Configuration created successfully",
+      config,
+    });
+  } catch (error) {
+    console.error("Create configuration error:", error);
+
+    if (
+      error.message.includes("already exists") ||
+      error.message.includes("not allowed")
+    ) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /api/configs/:id - Get resolved configuration
+router.get("/:id", authenticateToken, async (req, res) => {
+  try {
+    const { provenance } = req.query;
+    const includeProvenance = provenance === "true";
+
+    const result = await ConfigurationService.resolveConfiguration(
+      req.params.id,
+      includeProvenance,
+    );
+
+    res.json(result);
+  } catch (error) {
+    console.error("Get configuration error:", error);
+
+    if (error.message.includes("not found")) {
+      return res.status(404).json({ error: error.message });
+    }
+
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// PUT /api/configs/:id - Update configuration
+router.put(
+  "/:id",
+  authenticateToken,
+  checkConfigPermissions,
+  async (req, res) => {
+    try {
+      // Validate input
+      const { error, value } = updateConfigSchema.validate(req.body);
+      if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+      }
+
+      const config = await ConfigurationService.updateConfiguration(
+        req.params.id,
+        value,
+        req.user.id,
+      );
+
+      res.json({
+        message: "Configuration updated successfully",
+        config,
+      });
+    } catch (error) {
+      console.error("Update configuration error:", error);
+
+      if (
+        error.message.includes("not allowed") ||
+        error.message.includes("Cannot update")
+      ) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
+);
+
+// DELETE /api/configs/:id - Delete configuration
+router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const deletedConfig = await Configuration.delete(req.params.id);
+
+    if (!deletedConfig) {
+      return res.status(404).json({ error: "Configuration not found" });
+    }
+
+    res.json({
+      message: "Configuration deleted successfully",
+      config: deletedConfig,
+    });
+  } catch (error) {
+    console.error("Delete configuration error:", error);
+
+    if (error.message.includes("Cannot delete")) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /api/configs/:id/data - Get specific path from resolved configuration
+router.get("/:id/data", authenticateToken, async (req, res) => {
+  try {
+    const { path } = req.query;
+
+    if (!path) {
+      return res.status(400).json({ error: "Path parameter is required" });
+    }
+
+    const result = await ConfigurationService.getValueAtPath(
+      req.params.id,
+      path,
+    );
+
+    res.json(result);
+  } catch (error) {
+    console.error("Get configuration path error:", error);
+
+    if (error.message.includes("not found")) {
+      return res.status(404).json({ error: error.message });
+    }
+
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /api/configs/:id/commit - Commit user configuration
+router.post(
+  "/:id/commit",
+  authenticateToken,
+  checkConfigPermissions,
+  async (req, res) => {
+    try {
+      const config = await ConfigurationService.commitUserConfiguration(
+        req.params.id,
+      );
+
+      res.json({
+        message: "Configuration committed successfully",
+        config,
+      });
+    } catch (error) {
+      console.error("Commit configuration error:", error);
+
+      if (
+        error.message.includes("not found") ||
+        error.message.includes("Only user") ||
+        error.message.includes("already committed")
+      ) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
+);
+
+// GET /api/configs/:id/children - Get child configurations
+router.get("/:id/children", authenticateToken, async (req, res) => {
+  try {
+    const children = await Configuration.findByParentId(req.params.id);
+
+    // Filter user configs for non-admin users
+    const filteredChildren =
+      req.user.role === "ADMIN"
+        ? children
+        : children.filter(
+            (child) =>
+              child.type !== "USER" || child.created_by === req.user.id,
+          );
+
+    res.json({ children: filteredChildren });
+  } catch (error) {
+    console.error("Get children error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+module.exports = router;
