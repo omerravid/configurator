@@ -14,7 +14,6 @@ const ConfigurationEditor = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showRename, setShowRename] = useState(isRenaming);
-  const [rawConfigData, setRawConfigData] = useState(null);
   const [loadingRawData, setLoadingRawData] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -32,62 +31,50 @@ const ConfigurationEditor = ({
         setLoadingRawData(true);
         try {
           // Fetch the raw configuration data (without provenance/resolution)
-          const response = await configAPI.getById(config.id, false);
+          const response = await configAPI.getRawById(config.id);
 
-          // Extract just the configuration record, not the resolved data
-          const rawConfig = {
-            id: config.id,
+          // Use the raw data from this specific configuration level
+          setFormData({
             name: config.name,
             type: config.type,
-            parent_id: config.parent_id,
-            description: config.description,
-            status: config.status,
-            // The actual raw data for this configuration level only
-            data: response.data.resolved || {},
-          };
-
-          setRawConfigData(rawConfig);
+            parent_id: config.parent_id || "",
+            description: config.description || "",
+            data: JSON.stringify(response.data.resolved || {}, null, 2),
+          });
         } catch (err) {
           console.error("Failed to load raw config data:", err);
           // Fallback to using the passed config data
-          setRawConfigData(config);
+          setFormData({
+            name: config.name,
+            type: config.type,
+            parent_id: config.parent_id || "",
+            description: config.description || "",
+            data: JSON.stringify(config.data || {}, null, 2),
+          });
         } finally {
           setLoadingRawData(false);
         }
+      } else if (config && isCreating && !isCreatingProduct) {
+        // Creating child config
+        setFormData((prev) => ({
+          ...prev,
+          parent_id: config.id,
+          type: config.type === "PRODUCT" ? "INSTANCE" : "USER",
+        }));
+      } else if (config && !isCreating) {
+        // Fallback for when not loading raw data
+        setFormData({
+          name: config.name,
+          type: config.type,
+          parent_id: config.parent_id || "",
+          description: config.description || "",
+          data: JSON.stringify(config.data || {}, null, 2),
+        });
       }
     };
 
     loadRawConfigData();
   }, [config, isCreating, isCreatingProduct]);
-
-  useEffect(() => {
-    if (rawConfigData && !isCreating) {
-      // Editing existing config - load the raw data (only this level's overrides)
-      setFormData({
-        name: rawConfigData.name,
-        type: rawConfigData.type,
-        parent_id: rawConfigData.parent_id || "",
-        description: rawConfigData.description || "",
-        data: JSON.stringify(rawConfigData.data || {}, null, 2),
-      });
-    } else if (config && !isCreatingProduct && isCreating) {
-      // Creating child config
-      setFormData((prev) => ({
-        ...prev,
-        parent_id: config.id,
-        type: config.type === "PRODUCT" ? "INSTANCE" : "USER",
-      }));
-    } else if (config && !isCreating && !rawConfigData) {
-      // Fallback for when raw data hasn't loaded yet
-      setFormData({
-        name: config.name,
-        type: config.type,
-        parent_id: config.parent_id || "",
-        description: config.description || "",
-        data: JSON.stringify(config.data || {}, null, 2),
-      });
-    }
-  }, [config, rawConfigData, isCreating, isCreatingProduct]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -228,6 +215,19 @@ const ConfigurationEditor = ({
           return "You are editing Instance-level overrides. Only include properties you want to override from the Product configuration.";
         case "USER":
           return "You are editing User-level overrides. Only include properties you want to override from parent configurations.";
+        default:
+          return "";
+      }
+    }
+
+    if (isCreating && config) {
+      switch (config.type) {
+        case "PRODUCT":
+          return "Creating an Instance configuration. Define overrides for the selected Product configuration.";
+        case "INSTANCE":
+          return "Creating a User configuration. Define personal overrides for the selected Instance configuration.";
+        case "USER":
+          return "Creating a User configuration. Define personal overrides for the selected User configuration.";
         default:
           return "";
       }
@@ -406,8 +406,10 @@ const ConfigurationEditor = ({
                       htmlFor="data"
                       className="block text-sm font-medium text-gray-700"
                     >
-                      Configuration Data (JSON) -{" "}
-                      {!isCreating ? "Overrides Only" : "Full Configuration"}
+                      Configuration Data (JSON){" "}
+                      {!isCreating &&
+                        !isCreatingProduct &&
+                        "- Level-Specific Overrides Only"}
                     </label>
                     {isCreatingProduct && (
                       <button
@@ -441,8 +443,9 @@ const ConfigurationEditor = ({
                   <div className="mt-1 text-xs text-gray-500">
                     {!isCreating && !isCreatingProduct && (
                       <>
-                        📝 Only include properties you want to override. Empty
-                        object {} means inherit everything from parent.
+                        📝 This shows only the properties defined at this
+                        configuration level. Empty object {} means inherit
+                        everything from parent.
                       </>
                     )}
                     {isCreating && formData.parent_id && !isCreatingProduct && (
