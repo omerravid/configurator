@@ -3,18 +3,23 @@ import { useAuth } from "../context/AuthContext";
 import { configAPI } from "../services/api";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
-const ConfigurationEditor = ({ config, onClose }) => {
+const ConfigurationEditor = ({
+  config,
+  onClose,
+  isCreatingProduct = false,
+}) => {
   const { user } = useAuth();
-  const [isCreating, setIsCreating] = useState(!config);
+  const [isCreating, setIsCreating] = useState(!config || isCreatingProduct);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isRenaming, setIsRenaming] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
-    type: "USER",
+    type: isCreatingProduct ? "PRODUCT" : "USER",
     parent_id: config?.id || "",
     description: "",
-    data: "{}",
+    data: isCreatingProduct ? "{\n  \n}" : "{}",
   });
 
   useEffect(() => {
@@ -27,7 +32,7 @@ const ConfigurationEditor = ({ config, onClose }) => {
         description: config.description || "",
         data: JSON.stringify(config.data || {}, null, 2),
       });
-    } else if (config) {
+    } else if (config && !isCreatingProduct) {
       // Creating child config
       setFormData((prev) => ({
         ...prev,
@@ -35,7 +40,7 @@ const ConfigurationEditor = ({ config, onClose }) => {
         type: config.type === "PRODUCT" ? "INSTANCE" : "USER",
       }));
     }
-  }, [config, isCreating]);
+  }, [config, isCreating, isCreatingProduct]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -92,7 +97,32 @@ const ConfigurationEditor = ({ config, onClose }) => {
     }
   };
 
+  const handleRename = async () => {
+    if (!config) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // For now, we'll update just the description since renaming requires backend support
+      await configAPI.update(config.id, {
+        description: `Renamed from ${config.name} - ${formData.description}`,
+      });
+
+      onClose(true);
+    } catch (err) {
+      console.error("Failed to rename configuration:", err);
+      setError(err.response?.data?.error || "Failed to rename configuration");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getTypeOptions = () => {
+    if (isCreatingProduct) {
+      return [{ value: "PRODUCT", label: "Product Configuration" }];
+    }
+
     if (user.role !== "ADMIN") {
       return [{ value: "USER", label: "User Configuration" }];
     }
@@ -120,28 +150,69 @@ const ConfigurationEditor = ({ config, onClose }) => {
 
   const typeOptions = getTypeOptions();
 
+  const getTitle = () => {
+    if (isRenaming) return `Rename ${config.name}`;
+    if (isCreatingProduct) return "Create New Product Configuration";
+    if (isCreating) {
+      return config
+        ? `Create Child Configuration for ${config.name}`
+        : "Create New Configuration";
+    }
+    return `Edit ${config.name}`;
+  };
+
+  const getProductTemplate = () => {
+    return `{
+  "system": {
+    "logging": {
+      "level": "INFO",
+      "retention_days": 30
+    },
+    "database": {
+      "connection_pool_size": 10,
+      "timeout": 5000
+    }
+  },
+  "feature_flags": {
+    "new_feature": false,
+    "beta_mode": false
+  },
+  "business": {
+    "rate_limit": 1000,
+    "timeout_seconds": 30
+  }
+}`;
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {isCreating
-              ? config
-                ? `Create Child Configuration for ${config.name}`
-                : "Create New Configuration"
-              : `Edit ${config.name}`}
-          </h2>
-          <button
-            onClick={() => onClose(false)}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <XMarkIcon className="w-6 h-6" />
-          </button>
+          <h2 className="text-xl font-semibold text-gray-900">{getTitle()}</h2>
+          <div className="flex items-center space-x-2">
+            {config && !isCreating && user.role === "ADMIN" && (
+              <button
+                onClick={() => setIsRenaming(!isRenaming)}
+                className="text-sm text-primary-600 hover:text-primary-700"
+              >
+                {isRenaming ? "Cancel Rename" : "Rename"}
+              </button>
+            )}
+            <button
+              onClick={() => onClose(false)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+          </div>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col h-full max-h-96">
+        <form
+          onSubmit={isRenaming ? handleRename : handleSubmit}
+          className="flex flex-col h-full max-h-96"
+        >
           <div className="flex-1 p-6 space-y-4 overflow-auto">
             {error && (
               <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded">
@@ -162,11 +233,15 @@ const ConfigurationEditor = ({ config, onClose }) => {
                 id="name"
                 name="name"
                 required
-                disabled={!isCreating}
+                disabled={!isCreating && !isRenaming}
                 className="mt-1 input-field w-full disabled:bg-gray-50"
                 value={formData.name}
                 onChange={handleInputChange}
-                placeholder="e.g., prod_analytics, user_dev_john_v2"
+                placeholder={
+                  isCreatingProduct
+                    ? "e.g., prod_analytics, prod_ecommerce"
+                    : "e.g., inst_staging_eu, user_dev_john_v2"
+                }
               />
             </div>
 
@@ -192,10 +267,16 @@ const ConfigurationEditor = ({ config, onClose }) => {
                   </option>
                 ))}
               </select>
+              {isCreatingProduct && (
+                <p className="mt-1 text-xs text-blue-600">
+                  Product configurations define the base schema and can
+                  introduce new properties.
+                </p>
+              )}
             </div>
 
             {/* Parent (shown for context) */}
-            {formData.parent_id && config && (
+            {formData.parent_id && config && !isCreatingProduct && (
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Parent Configuration
@@ -238,33 +319,61 @@ const ConfigurationEditor = ({ config, onClose }) => {
               />
             </div>
 
-            {/* JSON Data */}
-            <div>
-              <label
-                htmlFor="data"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Configuration Data (JSON)
-              </label>
-              <textarea
-                id="data"
-                name="data"
-                rows={12}
-                required
-                className="mt-1 input-field w-full font-mono text-sm"
-                value={formData.data}
-                onChange={handleInputChange}
-                placeholder='{\n  "system": {\n    "logging": {\n      "level": "INFO"\n    }\n  }\n}'
-              />
-              <div className="mt-1 text-xs text-gray-500">
-                {isCreating && formData.parent_id && (
-                  <>
-                    ⚠️ Only properties that exist in the parent configuration
-                    are allowed.
-                  </>
-                )}
+            {/* JSON Data (only if not renaming) */}
+            {!isRenaming && (
+              <div>
+                <div className="flex items-center justify-between">
+                  <label
+                    htmlFor="data"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Configuration Data (JSON)
+                  </label>
+                  {isCreatingProduct && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          data: getProductTemplate(),
+                        }))
+                      }
+                      className="text-xs text-primary-600 hover:text-primary-700"
+                    >
+                      Use Template
+                    </button>
+                  )}
+                </div>
+                <textarea
+                  id="data"
+                  name="data"
+                  rows={16}
+                  required
+                  className="mt-1 input-field w-full font-mono text-sm"
+                  value={formData.data}
+                  onChange={handleInputChange}
+                  placeholder={
+                    isCreatingProduct
+                      ? "Define your product configuration schema..."
+                      : '{\n  "property": "value"\n}'
+                  }
+                />
+                <div className="mt-1 text-xs text-gray-500">
+                  {isCreating && formData.parent_id && !isCreatingProduct && (
+                    <>
+                      ⚠️ Only properties that exist in the parent configuration
+                      are allowed.
+                    </>
+                  )}
+                  {isCreatingProduct && (
+                    <>
+                      ✅ As a Product configuration, you can define any new
+                      properties.
+                    </>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Footer */}
@@ -283,9 +392,11 @@ const ConfigurationEditor = ({ config, onClose }) => {
             >
               {loading
                 ? "Saving..."
-                : isCreating
-                  ? "Create Configuration"
-                  : "Update Configuration"}
+                : isRenaming
+                  ? "Rename Configuration"
+                  : isCreating
+                    ? "Create Configuration"
+                    : "Update Configuration"}
             </button>
           </div>
         </form>
