@@ -4,20 +4,24 @@ const bcrypt = require("bcryptjs");
 class User {
   static async create({ username, password, role = "USER" }) {
     const passwordHash = await bcrypt.hash(password, 10);
+    const id = this.generateId();
 
-    const result = await db.query(
-      `INSERT INTO users (username, password_hash, role) 
-       VALUES ($1, $2, $3) 
-       RETURNING id, username, role, created_at, updated_at`,
-      [username, passwordHash, role],
+    await db.query(
+      `INSERT INTO users (id, username, password_hash, role) 
+       VALUES (?, ?, ?, ?)`,
+      [id, username, passwordHash, role],
     );
 
-    return result.rows[0];
+    return await this.findById(id);
+  }
+
+  static generateId() {
+    return Math.random().toString(36).substring(2) + Date.now().toString(36);
   }
 
   static async findById(id) {
     const result = await db.query(
-      "SELECT id, username, role, created_at, updated_at FROM users WHERE id = $1",
+      "SELECT id, username, role, created_at, updated_at FROM users WHERE id = ?",
       [id],
     );
 
@@ -25,7 +29,7 @@ class User {
   }
 
   static async findByUsername(username) {
-    const result = await db.query("SELECT * FROM users WHERE username = $1", [
+    const result = await db.query("SELECT * FROM users WHERE username = ?", [
       username,
     ]);
 
@@ -57,23 +61,18 @@ class User {
   }
 
   static async updateRole(id, role) {
-    const result = await db.query(
-      `UPDATE users SET role = $1 
-       WHERE id = $2 
-       RETURNING id, username, role, created_at, updated_at`,
+    await db.query(
+      `UPDATE users SET role = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
       [role, id],
     );
 
-    return result.rows[0];
+    return await this.findById(id);
   }
 
   static async delete(id) {
-    const result = await db.query(
-      "DELETE FROM users WHERE id = $1 RETURNING id",
-      [id],
-    );
-
-    return result.rows[0];
+    const user = await this.findById(id);
+    await db.query("DELETE FROM users WHERE id = ?", [id]);
+    return user;
   }
 }
 
