@@ -58,17 +58,24 @@ const ConfigurationEditor = ({
         }
       } else if (config && isCreating && !isCreatingProduct) {
         // CREATING a child configuration (config is the parent)
+        // Start with empty data, not the parent's data
         setFormData((prev) => ({
           ...prev,
+          name: "", // Empty name for new config
           parent_id: config.id, // The selected config becomes the parent
           type: config.type === "PRODUCT" ? "INSTANCE" : "USER", // Determine child type
+          description: "", // Empty description
+          data: "{}", // Start with empty JSON object
         }));
       } else if (isCreatingProduct) {
         // CREATING a new product configuration
         setFormData((prev) => ({
           ...prev,
+          name: "",
           type: "PRODUCT",
           parent_id: "", // Products have no parent
+          description: "",
+          data: "{\n  \n}", // Empty template for product
         }));
       }
     };
@@ -210,6 +217,35 @@ const ConfigurationEditor = ({
 }`;
   };
 
+  const getChildTemplate = () => {
+    if (!config) return "{}";
+
+    switch (config.type) {
+      case "PRODUCT":
+        return `{
+  "system": {
+    "logging": {
+      "level": "DEBUG"
+    }
+  },
+  "feature_flags": {
+    "new_feature": true
+  }
+}`;
+      case "INSTANCE":
+      case "USER":
+        return `{
+  "system": {
+    "logging": {
+      "retention_days": 7
+    }
+  }
+}`;
+      default:
+        return "{}";
+    }
+  };
+
   const getEditingHelp = () => {
     if (isCreatingProduct) {
       return "As a Product configuration, you can define any new properties.";
@@ -233,11 +269,11 @@ const ConfigurationEditor = ({
       // CREATING child configuration
       switch (config.type) {
         case "PRODUCT":
-          return "Creating an Instance configuration. Define overrides for the selected Product configuration.";
+          return "Creating an Instance configuration. Define overrides for the selected Product configuration. Start with {} to inherit everything, or add specific overrides.";
         case "INSTANCE":
-          return "Creating a User configuration. Define personal overrides for the selected Instance configuration.";
+          return "Creating a User configuration. Define personal overrides for the selected Instance configuration. Start with {} to inherit everything, or add specific overrides.";
         case "USER":
-          return "Creating a User configuration. Define personal overrides for the selected User configuration.";
+          return "Creating a User configuration. Define personal overrides for the selected User configuration. Start with {} to inherit everything, or add specific overrides.";
         default:
           return "";
       }
@@ -448,20 +484,36 @@ const ConfigurationEditor = ({
                         formData.type !== "PRODUCT" &&
                         " - Level-Specific Overrides Only"}
                     </label>
-                    {isCreatingProduct && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            data: getProductTemplate(),
-                          }))
-                        }
-                        className="text-xs text-primary-600 hover:text-primary-700"
-                      >
-                        Use Template
-                      </button>
-                    )}
+                    <div className="flex space-x-2">
+                      {isCreatingProduct && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              data: getProductTemplate(),
+                            }))
+                          }
+                          className="text-xs text-primary-600 hover:text-primary-700"
+                        >
+                          Use Template
+                        </button>
+                      )}
+                      {isCreating && config && !isCreatingProduct && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              data: getChildTemplate(),
+                            }))
+                          }
+                          className="text-xs text-primary-600 hover:text-primary-700"
+                        >
+                          Use Example
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <textarea
                     id="data"
@@ -474,7 +526,9 @@ const ConfigurationEditor = ({
                     placeholder={
                       isCreatingProduct
                         ? "Define your product configuration schema..."
-                        : '{\n  "property": "value"\n}'
+                        : isCreating
+                          ? "{}\n\n# Start with empty object to inherit everything from parent,\n# or add specific properties to override"
+                          : '{\n  "property": "value"\n}'
                     }
                   />
                   <div className="mt-1 text-xs text-gray-500">
@@ -496,7 +550,8 @@ const ConfigurationEditor = ({
                     {isCreating && formData.parent_id && !isCreatingProduct && (
                       <>
                         ⚠️ Only properties that exist in the parent
-                        configuration are allowed.
+                        configuration are allowed. Use {} to inherit everything,
+                        or specify overrides.
                       </>
                     )}
                     {isCreatingProduct && (
