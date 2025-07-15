@@ -53,6 +53,9 @@ export const configAPI = {
   getById: (id, includeProvenance = false) =>
     api.get(`/configs/${id}`, { params: { provenance: includeProvenance } }),
 
+  // Get raw configuration data (just this level's overrides)
+  getRawById: (id) => api.get(`/configs/${id}`, { params: { raw: true } }),
+
   // Create new configuration
   create: (configData) => api.post("/configs", configData),
 
