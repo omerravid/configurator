@@ -10,7 +10,7 @@ const router = express.Router();
 const createConfigSchema = Joi.object({
   name: Joi.string().min(3).max(100).required(),
   type: Joi.string().valid("PRODUCT", "INSTANCE", "USER").required(),
-  parent_id: Joi.string().uuid().optional(),
+  parent_id: Joi.string().optional(),
   data: Joi.object().required(),
   description: Joi.string().max(500).optional(),
 });
@@ -19,6 +19,10 @@ const updateConfigSchema = Joi.object({
   data: Joi.object().optional(),
   description: Joi.string().max(500).optional(),
 }).min(1);
+
+const renameConfigSchema = Joi.object({
+  name: Joi.string().min(3).max(100).required(),
+});
 
 // Middleware to check permissions for config operations
 const checkConfigPermissions = async (req, res, next) => {
@@ -208,6 +212,40 @@ router.put(
     }
   },
 );
+
+// PUT /api/configs/:id/rename - Rename configuration (admin only)
+router.put("/:id/rename", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    // Validate input
+    const { error, value } = renameConfigSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const { name } = value;
+
+    // Check if new name already exists
+    const existing = await Configuration.findByName(name);
+    if (existing && existing.id !== req.params.id) {
+      return res
+        .status(400)
+        .json({ error: "Configuration with this name already exists" });
+    }
+
+    // Update the configuration name
+    await Configuration.updateName(req.params.id, name);
+
+    const updatedConfig = await Configuration.findById(req.params.id);
+
+    res.json({
+      message: "Configuration renamed successfully",
+      config: updatedConfig,
+    });
+  } catch (error) {
+    console.error("Rename configuration error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 // DELETE /api/configs/:id - Delete configuration
 router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
