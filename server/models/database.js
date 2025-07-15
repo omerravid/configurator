@@ -1,5 +1,6 @@
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
+const bcrypt = require("bcryptjs");
 
 class Database {
   constructor() {
@@ -14,7 +15,7 @@ class Database {
     });
   }
 
-  init() {
+  async init() {
     const initSQL = `
       -- Users table
       CREATE TABLE IF NOT EXISTS users (
@@ -39,54 +40,135 @@ class Database {
           created_by TEXT NOT NULL REFERENCES users(id),
           description TEXT
       );
-
-      -- Insert default admin user (password: admin123)
-      INSERT OR IGNORE INTO users (id, username, password_hash, role) 
-      VALUES ('admin-id-123', 'admin', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'ADMIN');
-
-      -- Insert sample configurations
-      INSERT OR IGNORE INTO configurations (id, name, type, parent_id, data, created_by, description)
-      VALUES (
-          'prod-ecommerce-123',
-          'prod_ecommerce',
-          'PRODUCT',
-          NULL,
-          '{"system":{"logging":{"level":"INFO","retention_days":30},"api_keys":["key1","key2"],"database":{"connection_pool_size":10,"timeout":5000}},"feature_flags":{"new_ui":false,"beta_feature":false,"analytics":true},"business":{"tax_rate":0.08,"shipping_cost":9.99}}',
-          'admin-id-123',
-          'Main ecommerce product configuration'
-      );
-
-      INSERT OR IGNORE INTO configurations (id, name, type, parent_id, data, created_by, description)
-      VALUES (
-          'inst-staging-eu-123',
-          'inst_staging_eu',
-          'INSTANCE',
-          'prod-ecommerce-123',
-          '{"system":{"logging":{"level":"DEBUG"},"database":{"connection_pool_size":5}},"feature_flags":{"new_ui":true,"beta_feature":true}}',
-          'admin-id-123',
-          'Staging environment for EU region'
-      );
-
-      INSERT OR IGNORE INTO configurations (id, name, type, parent_id, data, status, created_by, description)
-      VALUES (
-          'user-dev-john-123',
-          'user_dev_john_v1',
-          'USER',
-          'inst-staging-eu-123',
-          '{"system":{"logging":{"retention_days":7}},"business":{"tax_rate":0.0}}',
-          'DRAFT',
-          'admin-id-123',
-          'John developer personal configuration'
-      );
     `;
 
-    this.db.exec(initSQL, (err) => {
-      if (err) {
-        console.error("Error initializing database:", err);
-      } else {
-        console.log("Database initialized successfully");
-      }
+    return new Promise((resolve, reject) => {
+      this.db.exec(initSQL, async (err) => {
+        if (err) {
+          console.error("Error initializing database:", err);
+          reject(err);
+        } else {
+          console.log("Database tables created successfully");
+          await this.createDefaultData();
+          resolve();
+        }
+      });
     });
+  }
+
+  async createDefaultData() {
+    try {
+      // Check if admin user exists
+      const adminExists = await this.query(
+        "SELECT id FROM users WHERE username = ?",
+        ["admin"],
+      );
+
+      if (adminExists.rows.length === 0) {
+        // Create admin user with proper bcrypt hash
+        const passwordHash = await bcrypt.hash("admin123", 10);
+
+        await this.query(
+          "INSERT INTO users (id, username, password_hash, role) VALUES (?, ?, ?, ?)",
+          ["admin-id-123", "admin", passwordHash, "ADMIN"],
+        );
+
+        console.log("Created default admin user");
+
+        // Create sample configurations
+        await this.query(
+          `INSERT OR IGNORE INTO configurations (id, name, type, parent_id, data, created_by, description)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [
+            "prod-ecommerce-123",
+            "prod_ecommerce",
+            "PRODUCT",
+            null,
+            JSON.stringify({
+              system: {
+                logging: {
+                  level: "INFO",
+                  retention_days: 30,
+                },
+                api_keys: ["key1", "key2"],
+                database: {
+                  connection_pool_size: 10,
+                  timeout: 5000,
+                },
+              },
+              feature_flags: {
+                new_ui: false,
+                beta_feature: false,
+                analytics: true,
+              },
+              business: {
+                tax_rate: 0.08,
+                shipping_cost: 9.99,
+              },
+            }),
+            "admin-id-123",
+            "Main ecommerce product configuration",
+          ],
+        );
+
+        await this.query(
+          `INSERT OR IGNORE INTO configurations (id, name, type, parent_id, data, created_by, description)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [
+            "inst-staging-eu-123",
+            "inst_staging_eu",
+            "INSTANCE",
+            "prod-ecommerce-123",
+            JSON.stringify({
+              system: {
+                logging: {
+                  level: "DEBUG",
+                },
+                database: {
+                  connection_pool_size: 5,
+                },
+              },
+              feature_flags: {
+                new_ui: true,
+                beta_feature: true,
+              },
+            }),
+            "admin-id-123",
+            "Staging environment for EU region",
+          ],
+        );
+
+        await this.query(
+          `INSERT OR IGNORE INTO configurations (id, name, type, parent_id, data, status, created_by, description)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            "user-dev-john-123",
+            "user_dev_john_v1",
+            "USER",
+            "inst-staging-eu-123",
+            JSON.stringify({
+              system: {
+                logging: {
+                  retention_days: 7,
+                },
+              },
+              business: {
+                tax_rate: 0.0,
+              },
+            }),
+            "DRAFT",
+            "admin-id-123",
+            "John developer personal configuration",
+          ],
+        );
+
+        console.log("Created sample configurations");
+      } else {
+        console.log("Admin user already exists");
+      }
+    } catch (error) {
+      console.error("Error creating default data:", error);
+    }
   }
 
   query(sql, params = []) {
