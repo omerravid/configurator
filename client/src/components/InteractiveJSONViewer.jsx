@@ -27,7 +27,7 @@ const safeToString = (val) => {
   return String(actualVal);
 };
 
-const ProvenanceTooltip = ({ source, isVisible, position }) => {
+const ProvenanceTooltip = ({ source, isVisible, position, path }) => {
   if (!isVisible || !source) return null;
 
   // Safely extract values from source object
@@ -48,6 +48,19 @@ const ProvenanceTooltip = ({ source, isVisible, position }) => {
     }
   };
 
+  const getInheritanceLabel = (type) => {
+    switch (type) {
+      case "PRODUCT":
+        return "Defined in Product";
+      case "INSTANCE":
+        return "Overridden in Instance";
+      case "USER":
+        return "Overridden in User Config";
+      default:
+        return "Defined in";
+    }
+  };
+
   return (
     <div
       className="fixed z-50 px-3 py-2 bg-white border-2 rounded-lg shadow-lg max-w-xs"
@@ -56,12 +69,15 @@ const ProvenanceTooltip = ({ source, isVisible, position }) => {
         top: Math.max(position.y - 10, 10),
       }}
     >
-      <div className="text-xs font-medium text-gray-700 mb-1">Defined in:</div>
+      <div className="text-xs font-medium text-gray-700 mb-1">
+        {getInheritanceLabel(sourceType)}:
+      </div>
       <div
         className={`text-sm font-medium px-2 py-1 rounded border ${getTypeColor(sourceType)}`}
       >
         {sourceType}: {sourceName}
       </div>
+      {path && <div className="text-xs text-gray-500 mt-1">Path: {path}</div>}
       <div className="text-xs text-gray-500 mt-1">ID: {sourceId}</div>
     </div>
   );
@@ -107,7 +123,7 @@ const TreeNode = ({
 
   const handleMouseEnter = (e) => {
     if (source) {
-      onHover?.(currentPath, source);
+      onHover?.(currentPath, source, currentPath);
     }
   };
 
@@ -254,6 +270,37 @@ const TreeNode = ({
     ));
   };
 
+  // Visual indicator for inherited vs overridden values
+  const getInheritanceIndicator = () => {
+    if (!source) return null;
+
+    const sourceType = safeToString(source.type);
+    let color = "text-gray-400";
+    let title = "Inherited";
+
+    switch (sourceType) {
+      case "PRODUCT":
+        color = "text-blue-400";
+        title = "From Product";
+        break;
+      case "INSTANCE":
+        color = "text-green-400";
+        title = "From Instance";
+        break;
+      case "USER":
+        color = "text-purple-400";
+        title = "From User Config";
+        break;
+    }
+
+    return (
+      <div
+        className={`w-2 h-2 rounded-full ${color.replace("text-", "bg-")} ml-1`}
+        title={title}
+      />
+    );
+  };
+
   return (
     <div className="group">
       <div
@@ -294,9 +341,12 @@ const TreeNode = ({
           </span>
         )}
 
+        {/* Inheritance indicator */}
+        {getInheritanceIndicator()}
+
         {/* Provenance indicator */}
         {source && (
-          <InformationCircleIcon className="w-4 h-4 text-gray-400 ml-2" />
+          <InformationCircleIcon className="w-4 h-4 text-gray-400 ml-1" />
         )}
       </div>
 
@@ -317,18 +367,21 @@ const InteractiveJSONViewer = ({
   onDataChange,
 }) => {
   const [hoveredSource, setHoveredSource] = useState(null);
+  const [hoveredPath, setHoveredPath] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
   const [showInheritanceChain, setShowInheritanceChain] = useState(false);
 
-  const handleHover = (path, source) => {
+  const handleHover = (path, source, fullPath) => {
     setHoveredSource(source);
+    setHoveredPath(fullPath);
     setShowTooltip(true);
   };
 
   const handleHoverEnd = () => {
     setShowTooltip(false);
     setHoveredSource(null);
+    setHoveredPath(null);
   };
 
   const handleMouseMove = (e) => {
@@ -365,6 +418,22 @@ const InteractiveJSONViewer = ({
             </button>
           </div>
         )}
+      </div>
+
+      {/* Inheritance Legend */}
+      <div className="mb-3 flex items-center space-x-4 text-xs text-gray-600">
+        <div className="flex items-center space-x-1">
+          <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+          <span>Product</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <div className="w-2 h-2 rounded-full bg-green-400"></div>
+          <span>Instance</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <div className="w-2 h-2 rounded-full bg-purple-400"></div>
+          <span>User</span>
+        </div>
       </div>
 
       {/* Inheritance Chain */}
@@ -414,11 +483,13 @@ const InteractiveJSONViewer = ({
         source={hoveredSource}
         isVisible={showTooltip}
         position={tooltipPosition}
+        path={hoveredPath}
       />
 
       {/* Help text */}
       <div className="mt-2 text-xs text-gray-500">
-        💡 Hover over values to see their source configuration
+        💡 Hover over values to see their source configuration • Colored dots
+        indicate inheritance level
         {isEditable && " • Click ✏️ to edit values"}
       </div>
     </div>
