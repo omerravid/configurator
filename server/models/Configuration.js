@@ -12,12 +12,13 @@ class Configuration {
   }) {
     // For USER configs, default to DRAFT, otherwise COMMITTED
     const finalStatus = type === "USER" ? status || "DRAFT" : "COMMITTED";
+    const id = this.generateId();
 
     const result = await db.query(
-      `INSERT INTO configurations (name, type, parent_id, data, created_by, description, status) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) 
-       RETURNING *`,
+      `INSERT INTO configurations (id, name, type, parent_id, data, created_by, description, status) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
+        id,
         name,
         type,
         parentId || null,
@@ -28,7 +29,11 @@ class Configuration {
       ],
     );
 
-    return result.rows[0];
+    return await this.findById(id);
+  }
+
+  static generateId() {
+    return Math.random().toString(36).substring(2) + Date.now().toString(36);
   }
 
   static async findById(id) {
@@ -38,11 +43,15 @@ class Configuration {
        FROM configurations c
        LEFT JOIN users u ON c.created_by = u.id
        LEFT JOIN configurations pc ON c.parent_id = pc.id
-       WHERE c.id = $1`,
+       WHERE c.id = ?`,
       [id],
     );
 
-    return result.rows[0];
+    const config = result.rows[0];
+    if (config && config.data) {
+      config.data = JSON.parse(config.data);
+    }
+    return config;
   }
 
   static async findByName(name) {
@@ -52,11 +61,15 @@ class Configuration {
        FROM configurations c
        LEFT JOIN users u ON c.created_by = u.id
        LEFT JOIN configurations pc ON c.parent_id = pc.id
-       WHERE c.name = $1`,
+       WHERE c.name = ?`,
       [name],
     );
 
-    return result.rows[0];
+    const config = result.rows[0];
+    if (config && config.data) {
+      config.data = JSON.parse(config.data);
+    }
+    return config;
   }
 
   static async findAll() {
@@ -69,7 +82,12 @@ class Configuration {
        ORDER BY c.type, c.created_at DESC`,
     );
 
-    return result.rows;
+    return result.rows.map((config) => {
+      if (config.data) {
+        config.data = JSON.parse(config.data);
+      }
+      return config;
+    });
   }
 
   static async findByType(type) {
@@ -79,12 +97,17 @@ class Configuration {
        FROM configurations c
        LEFT JOIN users u ON c.created_by = u.id
        LEFT JOIN configurations pc ON c.parent_id = pc.id
-       WHERE c.type = $1
+       WHERE c.type = ?
        ORDER BY c.created_at DESC`,
       [type],
     );
 
-    return result.rows;
+    return result.rows.map((config) => {
+      if (config.data) {
+        config.data = JSON.parse(config.data);
+      }
+      return config;
+    });
   }
 
   static async findByParentId(parentId) {
@@ -92,49 +115,54 @@ class Configuration {
       `SELECT c.*, u.username as created_by_username
        FROM configurations c
        LEFT JOIN users u ON c.created_by = u.id
-       WHERE c.parent_id = $1
+       WHERE c.parent_id = ?
        ORDER BY c.type, c.created_at DESC`,
       [parentId],
     );
 
-    return result.rows;
+    return result.rows.map((config) => {
+      if (config.data) {
+        config.data = JSON.parse(config.data);
+      }
+      return config;
+    });
   }
 
   static async getInheritanceChain(configId) {
-    const result = await db.query(
-      `WITH RECURSIVE inheritance_chain AS (
-         -- Start with the target configuration
-         SELECT id, name, type, parent_id, data, status, 0 as level
-         FROM configurations 
-         WHERE id = $1
-         
-         UNION ALL
-         
-         -- Recursively find parents
-         SELECT c.id, c.name, c.type, c.parent_id, c.data, c.status, ic.level + 1
-         FROM configurations c
-         INNER JOIN inheritance_chain ic ON c.id = ic.parent_id
-       )
-       SELECT * FROM inheritance_chain 
-       ORDER BY level DESC`,
-      [configId],
-    );
+    // Since SQLite doesn't support recursive CTEs easily, we'll do this iteratively
+    const chain = [];
+    let currentId = configId;
 
-    return result.rows;
+    while (currentId) {
+      const result = await db.query(
+        "SELECT id, name, type, parent_id, data, status FROM configurations WHERE id = ?",
+        [currentId],
+      );
+
+      if (result.rows.length === 0) break;
+
+      const config = result.rows[0];
+      config.data = JSON.parse(config.data);
+      chain.push(config);
+
+      currentId = config.parent_id;
+    }
+
+    // Reverse to get root first
+    return chain.reverse();
   }
 
   static async update(id, { data, description }) {
     const updateFields = [];
     const values = [];
-    let paramCounter = 1;
 
     if (data !== undefined) {
-      updateFields.push(`data = $${paramCounter++}`);
+      updateFields.push("data = ?");
       values.push(JSON.stringify(data));
     }
 
     if (description !== undefined) {
-      updateFields.push(`description = $${paramCounter++}`);
+      updateFields.push("description = ?");
       values.push(description);
     }
 
@@ -142,35 +170,32 @@ class Configuration {
       throw new Error("No fields to update");
     }
 
+    updateFields.push("updated_at = CURRENT_TIMESTAMP");
     values.push(id);
 
-    const result = await db.query(
-      `UPDATE configurations 
-       SET ${updateFields.join(", ")}, updated_at = CURRENT_TIMESTAMP
-       WHERE id = $${paramCounter}
-       RETURNING *`,
+    await db.query(
+      `UPDATE configurations SET ${updateFields.join(", ")} WHERE id = ?`,
       values,
     );
 
-    return result.rows[0];
+    return await this.findById(id);
   }
 
   static async commit(id) {
-    const result = await db.query(
+    await db.query(
       `UPDATE configurations 
        SET status = 'COMMITTED', updated_at = CURRENT_TIMESTAMP
-       WHERE id = $1 AND type = 'USER' AND status = 'DRAFT'
-       RETURNING *`,
+       WHERE id = ? AND type = 'USER' AND status = 'DRAFT'`,
       [id],
     );
 
-    return result.rows[0];
+    return await this.findById(id);
   }
 
   static async delete(id) {
     // Check if configuration has children
     const childrenResult = await db.query(
-      "SELECT COUNT(*) as child_count FROM configurations WHERE parent_id = $1",
+      "SELECT COUNT(*) as child_count FROM configurations WHERE parent_id = ?",
       [id],
     );
 
@@ -178,12 +203,10 @@ class Configuration {
       throw new Error("Cannot delete configuration with children");
     }
 
-    const result = await db.query(
-      "DELETE FROM configurations WHERE id = $1 RETURNING *",
-      [id],
-    );
+    const config = await this.findById(id);
+    await db.query("DELETE FROM configurations WHERE id = ?", [id]);
 
-    return result.rows[0];
+    return config;
   }
 
   static async findByCreatedBy(userId) {
@@ -191,12 +214,17 @@ class Configuration {
       `SELECT c.*, pc.name as parent_name, pc.type as parent_type
        FROM configurations c
        LEFT JOIN configurations pc ON c.parent_id = pc.id
-       WHERE c.created_by = $1
+       WHERE c.created_by = ?
        ORDER BY c.type, c.created_at DESC`,
       [userId],
     );
 
-    return result.rows;
+    return result.rows.map((config) => {
+      if (config.data) {
+        config.data = JSON.parse(config.data);
+      }
+      return config;
+    });
   }
 }
 
