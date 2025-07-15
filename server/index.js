@@ -2,30 +2,12 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
-const { Pool } = require("pg");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Database connection
-const pool = new Pool({
-  connectionString:
-    process.env.DATABASE_URL ||
-    "postgresql://postgres:password@localhost:5432/config_manager",
-  ssl:
-    process.env.NODE_ENV === "production"
-      ? { rejectUnauthorized: false }
-      : false,
-});
-
-// Test database connection
-pool.query("SELECT NOW()", (err, res) => {
-  if (err) {
-    console.error("Database connection error:", err);
-  } else {
-    console.log("Database connected successfully");
-  }
-});
+// Initialize database
+const db = require("./models/database");
 
 // Middleware
 app.use(helmet());
@@ -41,8 +23,8 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// Make pool available to all routes
-app.locals.db = pool;
+// Make database available to all routes
+app.locals.db = db;
 
 // Routes
 app.use("/api/auth", require("./routes/auth"));
