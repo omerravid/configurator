@@ -59,6 +59,9 @@ export const configAPI = {
   // Update configuration
   update: (id, data) => api.put(`/configs/${id}`, data),
 
+  // Rename configuration
+  rename: (id, name) => api.put(`/configs/${id}/rename`, { name }),
+
   // Delete configuration
   delete: (id) => api.delete(`/configs/${id}`),
 
