@@ -10,7 +10,8 @@ const ConfigurationEditor = ({
   isRenaming = false,
 }) => {
   const { user } = useAuth();
-  const [isCreating, setIsCreating] = useState(!config || isCreatingProduct);
+  // Determine if we're creating a new config or editing an existing one
+  const [isCreating, setIsCreating] = useState(isCreatingProduct || !config);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showRename, setShowRename] = useState(isRenaming);
@@ -19,7 +20,7 @@ const ConfigurationEditor = ({
   const [formData, setFormData] = useState({
     name: "",
     type: isCreatingProduct ? "PRODUCT" : "USER",
-    parent_id: config?.id || "",
+    parent_id: "",
     description: "",
     data: isCreatingProduct ? "{\n  \n}" : "{}",
   });
@@ -28,6 +29,7 @@ const ConfigurationEditor = ({
   useEffect(() => {
     const loadRawConfigData = async () => {
       if (config && !isCreating && !isCreatingProduct) {
+        // EDITING an existing configuration
         setLoadingRawData(true);
         try {
           // Fetch the raw configuration data (without provenance/resolution)
@@ -36,8 +38,8 @@ const ConfigurationEditor = ({
           // Use the raw data from this specific configuration level
           setFormData({
             name: config.name,
-            type: config.type,
-            parent_id: config.parent_id || "",
+            type: config.type, // Keep the original type
+            parent_id: config.parent_id || "", // Keep the original parent
             description: config.description || "",
             data: JSON.stringify(response.data.resolved || {}, null, 2),
           });
@@ -46,8 +48,8 @@ const ConfigurationEditor = ({
           // Fallback to using the passed config data
           setFormData({
             name: config.name,
-            type: config.type,
-            parent_id: config.parent_id || "",
+            type: config.type, // Keep the original type
+            parent_id: config.parent_id || "", // Keep the original parent
             description: config.description || "",
             data: JSON.stringify(config.data || {}, null, 2),
           });
@@ -55,21 +57,19 @@ const ConfigurationEditor = ({
           setLoadingRawData(false);
         }
       } else if (config && isCreating && !isCreatingProduct) {
-        // Creating child config
+        // CREATING a child configuration (config is the parent)
         setFormData((prev) => ({
           ...prev,
-          parent_id: config.id,
-          type: config.type === "PRODUCT" ? "INSTANCE" : "USER",
+          parent_id: config.id, // The selected config becomes the parent
+          type: config.type === "PRODUCT" ? "INSTANCE" : "USER", // Determine child type
         }));
-      } else if (config && !isCreating) {
-        // Fallback for when not loading raw data
-        setFormData({
-          name: config.name,
-          type: config.type,
-          parent_id: config.parent_id || "",
-          description: config.description || "",
-          data: JSON.stringify(config.data || {}, null, 2),
-        });
+      } else if (isCreatingProduct) {
+        // CREATING a new product configuration
+        setFormData((prev) => ({
+          ...prev,
+          type: "PRODUCT",
+          parent_id: "", // Products have no parent
+        }));
       }
     };
 
@@ -141,11 +141,19 @@ const ConfigurationEditor = ({
       return [{ value: "PRODUCT", label: "Product Configuration" }];
     }
 
+    if (!isCreating) {
+      // When editing, type cannot be changed
+      return [
+        { value: formData.type, label: `${formData.type} Configuration` },
+      ];
+    }
+
     if (user.role !== "ADMIN") {
       return [{ value: "USER", label: "User Configuration" }];
     }
 
     if (!config) {
+      // Creating standalone config
       return [
         { value: "PRODUCT", label: "Product Configuration" },
         { value: "INSTANCE", label: "Instance Configuration" },
@@ -208,6 +216,7 @@ const ConfigurationEditor = ({
     }
 
     if (!isCreating && config) {
+      // EDITING existing configuration
       switch (config.type) {
         case "PRODUCT":
           return "You are editing the base Product configuration. Changes will affect all derived configurations.";
@@ -221,6 +230,7 @@ const ConfigurationEditor = ({
     }
 
     if (isCreating && config) {
+      // CREATING child configuration
       switch (config.type) {
         case "PRODUCT":
           return "Creating an Instance configuration. Define overrides for the selected Product configuration.";
@@ -235,6 +245,25 @@ const ConfigurationEditor = ({
 
     return "";
   };
+
+  const getParentDisplayInfo = () => {
+    if (isCreating && config && !isCreatingProduct) {
+      // Creating child - show the parent (which is the selected config)
+      return {
+        name: config.name,
+        type: config.type,
+      };
+    } else if (!isCreating && config && config.parent_name) {
+      // Editing existing - show the actual parent
+      return {
+        name: config.parent_name,
+        type: config.parent_type,
+      };
+    }
+    return null;
+  };
+
+  const parentInfo = getParentDisplayInfo();
 
   if (loadingRawData) {
     return (
@@ -351,29 +380,36 @@ const ConfigurationEditor = ({
                       </option>
                     ))}
                   </select>
+                  {!isCreating && (
+                    <p className="mt-1 text-xs text-gray-500">
+                      Configuration type cannot be changed when editing.
+                    </p>
+                  )}
                 </div>
 
                 {/* Parent (shown for context) */}
-                {formData.parent_id && config && !isCreatingProduct && (
+                {parentInfo && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
-                      Parent Configuration
+                      {isCreating
+                        ? "Parent Configuration"
+                        : "Parent Configuration"}
                     </label>
                     <div className="mt-1 p-3 bg-gray-50 border border-gray-200 rounded-lg">
                       <div className="flex items-center space-x-2">
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            config.type === "PRODUCT"
+                            parentInfo.type === "PRODUCT"
                               ? "bg-blue-100 text-blue-800"
-                              : config.type === "INSTANCE"
+                              : parentInfo.type === "INSTANCE"
                                 ? "bg-green-100 text-green-800"
                                 : "bg-purple-100 text-purple-800"
                           }`}
                         >
-                          {config.type}
+                          {parentInfo.type}
                         </span>
                         <span className="text-sm font-medium">
-                          {config.name}
+                          {parentInfo.name}
                         </span>
                       </div>
                     </div>
@@ -406,10 +442,11 @@ const ConfigurationEditor = ({
                       htmlFor="data"
                       className="block text-sm font-medium text-gray-700"
                     >
-                      Configuration Data (JSON){" "}
+                      Configuration Data (JSON)
                       {!isCreating &&
                         !isCreatingProduct &&
-                        "- Level-Specific Overrides Only"}
+                        formData.type !== "PRODUCT" &&
+                        " - Level-Specific Overrides Only"}
                     </label>
                     {isCreatingProduct && (
                       <button
@@ -441,11 +478,19 @@ const ConfigurationEditor = ({
                     }
                   />
                   <div className="mt-1 text-xs text-gray-500">
-                    {!isCreating && !isCreatingProduct && (
+                    {!isCreating &&
+                      !isCreatingProduct &&
+                      formData.type !== "PRODUCT" && (
+                        <>
+                          📝 This shows only the properties defined at this
+                          configuration level. Empty object {} means inherit
+                          everything from parent.
+                        </>
+                      )}
+                    {!isCreating && formData.type === "PRODUCT" && (
                       <>
-                        📝 This shows only the properties defined at this
-                        configuration level. Empty object {} means inherit
-                        everything from parent.
+                        🔧 This is the base Product configuration. Changes here
+                        affect all derived configurations.
                       </>
                     )}
                     {isCreating && formData.parent_id && !isCreatingProduct && (
