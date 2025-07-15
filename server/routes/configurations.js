@@ -155,15 +155,34 @@ router.post("/", authenticateToken, async (req, res) => {
 // GET /api/configs/:id - Get resolved configuration
 router.get("/:id", authenticateToken, async (req, res) => {
   try {
-    const { provenance } = req.query;
+    const { provenance, raw } = req.query;
     const includeProvenance = provenance === "true";
+    const getRawData = raw === "true";
 
-    const result = await ConfigurationService.resolveConfiguration(
-      req.params.id,
-      includeProvenance,
-    );
+    if (getRawData) {
+      // Return just the raw configuration data for this specific level
+      const config = await Configuration.findById(req.params.id);
+      if (!config) {
+        return res.status(404).json({ error: "Configuration not found" });
+      }
 
-    res.json(result);
+      res.json({
+        resolved: config.data,
+        metadata: {
+          configId: config.id,
+          configName: config.name,
+          configType: config.type,
+          isRawData: true,
+        },
+      });
+    } else {
+      // Return resolved configuration with inheritance
+      const result = await ConfigurationService.resolveConfiguration(
+        req.params.id,
+        includeProvenance,
+      );
+      res.json(result);
+    }
   } catch (error) {
     console.error("Get configuration error:", error);
 
