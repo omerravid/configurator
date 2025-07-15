@@ -4,15 +4,15 @@
   "description": "Layered Configuration Manager with Deep Merge and Provenance Tracking",
   "main": "server/index.js",
   "scripts": {
-    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "dev": "node server/index.js",
     "server:dev": "cd server && npm run dev",
     "client:dev": "cd client && npm run dev",
     "server:install": "cd server && npm install",
     "client:install": "cd client && npm install",
     "install:all": "npm run server:install && npm run client:install",
     "build": "cd client && npm run build",
-    "start": "cd server && npm start",
-    "serve": "npm run dev"
+    "start": "node server/index.js",
+    "serve": "node server/index.js"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
