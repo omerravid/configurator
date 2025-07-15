@@ -6,18 +6,27 @@ const { authenticateToken, requireAdmin } = require("../middleware/auth");
 
 const router = express.Router();
 
-// Validation schemas
+// Validation schemas - Fixed to not require GUID format for parent_id
 const createConfigSchema = Joi.object({
   name: Joi.string().min(3).max(100).required(),
   type: Joi.string().valid("PRODUCT", "INSTANCE", "USER").required(),
-  parent_id: Joi.string().allow("", null).optional(), // Allow any string, empty string, or null
+  parent_id: Joi.alternatives()
+    .try(
+      Joi.string().min(1), // Accept any non-empty string
+      Joi.allow(null, ""), // Allow null or empty string
+    )
+    .optional(),
   data: Joi.object().required(),
-  description: Joi.string().max(500).allow("").optional(), // Allow empty string
+  description: Joi.alternatives()
+    .try(Joi.string().max(500), Joi.allow("", null))
+    .optional(),
 });
 
 const updateConfigSchema = Joi.object({
   data: Joi.object().optional(),
-  description: Joi.string().max(500).allow("").optional(), // Allow empty string
+  description: Joi.alternatives()
+    .try(Joi.string().max(500), Joi.allow("", null))
+    .optional(),
 }).min(1);
 
 const renameConfigSchema = Joi.object({
@@ -135,7 +144,7 @@ router.post("/", authenticateToken, async (req, res) => {
       parentId: cleanParentId,
       data,
       createdBy: req.user.id,
-      description,
+      description: description || "",
     });
 
     res.status(201).json({
