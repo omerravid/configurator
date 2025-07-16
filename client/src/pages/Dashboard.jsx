@@ -18,6 +18,7 @@ import {
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
+  const { showToast } = useToast();
   const [selectedConfig, setSelectedConfig] = useState(null);
   const [resolvedData, setResolvedData] = useState(null);
   const [allConfigurations, setAllConfigurations] = useState([]);
@@ -28,7 +29,6 @@ const Dashboard = () => {
   const [showCreateProduct, setShowCreateProduct] = useState(false);
   const [showCreateChild, setShowCreateChild] = useState(false);
   const [showRename, setShowRename] = useState(false);
-  const [toast, setToast] = useState(null);
 
   const loadAllConfigurations = async () => {
     try {
