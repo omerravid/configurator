@@ -100,6 +100,7 @@ const TreeNode = ({
   isEditable = false,
   onValueChange,
 }) => {
+  const { showToast } = useToast();
   const [isExpanded, setIsExpanded] = useState(depth < 2);
   const [editValue, setEditValue] = useState("");
   const [isEditing, setIsEditing] = useState(false);
