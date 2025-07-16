@@ -37,7 +37,7 @@ const Dashboard = () => {
   const loadAllConfigurations = async () => {
     try {
       const response = await configAPI.getAll();
-      setAllConfigurations(response.data.configurations || []);
+      setAllConfigurations(response.data.configs || []);
     } catch (err) {
       console.error("Failed to load all configurations:", err);
     }
