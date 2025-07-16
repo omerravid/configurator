@@ -505,6 +505,7 @@ const ConfigurationEditor = ({
                     >
                       Configuration Data (JSON)
                       {!isCreating &&
+                        !isCreatingChild &&
                         !isCreatingProduct &&
                         formData.type !== "PRODUCT" &&
                         " - Level-Specific Overrides Only"}
