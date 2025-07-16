@@ -230,6 +230,8 @@ const TreeNode = ({
   };
 
   // Check if the original value is a provenance wrapper that shouldn't be expanded as an object
+  // Provenance wrappers have the structure {value: actualValue, source: sourceInfo}
+  // These should be treated as leaf nodes, not as expandable objects
   const isProvenanceWrapper =
     value &&
     typeof value === "object" &&
