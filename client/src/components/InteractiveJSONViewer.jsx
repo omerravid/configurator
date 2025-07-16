@@ -167,6 +167,60 @@ const TreeNode = ({
     setEditValue(safeToString(actualValue));
   };
 
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    const fullPath = isRoot ? "" : currentPath;
+
+    const menuItems = [
+      {
+        label: "Copy Value",
+        icon: ClipboardIcon,
+        onClick: () => copyToClipboard(JSON.stringify(actualValue)),
+      },
+      {
+        label: "Copy Path",
+        icon: MapIcon,
+        onClick: () => copyToClipboard(fullPath),
+        disabled: isRoot,
+      },
+      {
+        label: "Copy Full Object",
+        icon: DocumentDuplicateIcon,
+        onClick: () => copyToClipboard(JSON.stringify(actualValue, null, 2)),
+      },
+    ];
+
+    if (isEditable && isPrimitive) {
+      menuItems.unshift({
+        label: "Edit Value",
+        icon: PencilIcon,
+        onClick: handleEditStart,
+      });
+    }
+
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      items: menuItems,
+    });
+  };
+
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      // Could add a toast notification here
+    } catch (err) {
+      console.error("Failed to copy to clipboard:", err);
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+    }
+  };
+
   const isObject =
     actualValue &&
     typeof actualValue === "object" &&
