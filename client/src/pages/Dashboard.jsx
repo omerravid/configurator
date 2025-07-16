@@ -121,6 +121,7 @@ const Dashboard = () => {
   const handleEditorClose = (success) => {
     setShowEditor(false);
     setShowCreateProduct(false);
+    setShowCreateChild(false);
     setShowRename(false);
     if (success) {
       setRefreshTrigger((prev) => prev + 1);
