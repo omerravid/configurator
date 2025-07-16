@@ -360,6 +360,13 @@ const ConfigurationTree = ({
           onSelect={onConfigSelect}
           level={0}
           showInheritance={showInheritance}
+          onEdit={onEdit}
+          onRename={onRename}
+          onDuplicate={onDuplicate}
+          onCreateChild={onCreateChild}
+          onCommit={onCommit}
+          onDelete={onDelete}
+          user={user}
         />
       ))}
     </div>
