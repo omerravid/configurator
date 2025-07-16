@@ -416,6 +416,16 @@ const TreeNode = ({
       {isExpanded && (isObject || isArray) && (
         <div>{isArray ? renderArrayItems() : renderObjectProperties()}</div>
       )}
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={contextMenu.items}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </div>
   );
 };
