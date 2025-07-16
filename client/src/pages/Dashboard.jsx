@@ -141,6 +141,11 @@ const Dashboard = () => {
         description: safeDescription,
       };
 
+      // USER configurations should always be created as DRAFT when copied
+      if (selectedConfig.type === "USER") {
+        newConfig.status = "DRAFT";
+      }
+
       await configAPI.create(newConfig);
 
       // Refresh the tree and configurations list
