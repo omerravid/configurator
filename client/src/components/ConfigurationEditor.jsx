@@ -594,7 +594,7 @@ const ConfigurationEditor = ({
                     placeholder={
                       isCreatingProduct
                         ? "Define your product configuration schema..."
-                        : isCreating
+                        : isCreating || isCreatingChild
                           ? "{}\n\n# Start with empty object to inherit everything from parent,\n# or add specific properties to override"
                           : '{\n  "property": "value"\n}'
                     }
