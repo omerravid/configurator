@@ -148,6 +148,44 @@ const Dashboard = () => {
     }
   };
 
+  const handleDataChange = async (path, newValue) => {
+    if (!selectedConfig || !canEdit()) return;
+
+    try {
+      // Create a new data object with the updated value
+      const currentData = resolvedData?.levelData || {};
+      const pathParts = path.split(".");
+      const newData = { ...currentData };
+
+      // Navigate to the parent of the target property
+      let current = newData;
+      for (let i = 0; i < pathParts.length - 1; i++) {
+        if (!current[pathParts[i]]) {
+          current[pathParts[i]] = {};
+        }
+        current = current[pathParts[i]];
+      }
+
+      // Set the new value
+      current[pathParts[pathParts.length - 1]] = newValue;
+
+      // Update the configuration
+      await configAPI.update(selectedConfig.id, { data: newData });
+
+      // Reload the configuration data
+      await loadConfigurationData(selectedConfig);
+
+      // Refresh the tree
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (err) {
+      console.error("Failed to update configuration:", err);
+      setError(
+        "Failed to update configuration: " +
+          (err.response?.data?.error || err.message),
+      );
+    }
+  };
+
   const canEdit = () => {
     if (!selectedConfig) return false;
     if (user.role === "ADMIN") return true;
