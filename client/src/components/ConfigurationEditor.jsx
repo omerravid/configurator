@@ -570,12 +570,14 @@ const ConfigurationEditor = ({
                           everything from parent.
                         </>
                       )}
-                    {!isCreating && formData.type === "PRODUCT" && (
-                      <>
-                        🔧 This is the base Product configuration. Changes here
-                        affect all derived configurations.
-                      </>
-                    )}
+                    {!isCreating &&
+                      !isCreatingChild &&
+                      formData.type === "PRODUCT" && (
+                        <>
+                          🔧 This is the base Product configuration. Changes
+                          here affect all derived configurations.
+                        </>
+                      )}
                     {isCreating && formData.parent_id && !isCreatingProduct && (
                       <>
                         ⚠️ Only properties that exist in the parent
