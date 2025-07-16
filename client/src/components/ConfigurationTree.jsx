@@ -4,8 +4,15 @@ import {
   ChevronDownIcon,
   EyeIcon,
   EyeSlashIcon,
+  PencilIcon,
+  DocumentTextIcon,
+  DocumentDuplicateIcon,
+  PlusIcon,
+  CheckIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { configAPI } from "../services/api";
+import ContextMenu from "./ContextMenu";
 
 const ConfigTypeIcon = ({ type, status }) => {
   const getIcon = () => {
