@@ -49,13 +49,15 @@ const AppRoutes = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-gray-50">
-          <AppRoutes />
-        </div>
-      </Router>
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-gray-50">
+            <AppRoutes />
+          </div>
+        </Router>
+      </AuthProvider>
+    </ToastProvider>
   );
 }
 
