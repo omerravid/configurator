@@ -47,10 +47,10 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
       };
 
       if (!queryPath.trim()) {
-        // Get complete configuration
-        const response = await configAPI.getById(selectedConfigId, true);
+        // Get complete configuration using the data endpoint with empty path
+        const response = await configAPI.getByPath(selectedConfigId, "");
         setQueryResult({
-          data: response.data.resolved,
+          data: response.data.data,
           metadata: response.data.metadata,
           query: queryInfo,
         });
@@ -58,7 +58,7 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
         // Get specific path
         const response = await configAPI.getByPath(selectedConfigId, queryPath);
         setQueryResult({
-          data: response.data,
+          data: response.data.data,
           query: queryInfo,
         });
       }
