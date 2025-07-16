@@ -199,7 +199,7 @@ const ConfigurationEditor = ({
   const getTitle = () => {
     if (showRename) return `Rename ${config.name}`;
     if (isCreatingProduct) return "Create New Product Configuration";
-    if (isCreating) {
+    if (isCreating || isCreatingChild) {
       return config
         ? `Create Child Configuration for ${config.name}`
         : "Create New Configuration";
