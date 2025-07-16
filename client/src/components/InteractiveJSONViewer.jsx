@@ -229,13 +229,13 @@ const TreeNode = ({
     }
   };
 
-  // Check if this is a provenance-wrapped primitive value that should not be expanded
+  // Check if the original value is a provenance wrapper that shouldn't be expanded as an object
   const isProvenanceWrapper =
     value &&
     typeof value === "object" &&
     value.hasOwnProperty("value") &&
     value.hasOwnProperty("source") &&
-    typeof value.value !== "object";
+    Object.keys(value).length === 2; // Only has 'value' and 'source' properties
 
   const isObject =
     actualValue &&
