@@ -242,6 +242,45 @@ const Dashboard = () => {
       const rawResponse = await configAPI.getRawById(selectedConfig.id);
       const currentData = rawResponse.data.resolved || {};
 
+      // For child configurations, we need to validate the path exists in parent
+      if (selectedConfig.type !== "PRODUCT" && selectedConfig.parent_id) {
+        try {
+          // Check if the path exists in the resolved parent configuration
+          const resolvedParent = await configAPI.getById(
+            selectedConfig.parent_id,
+            true,
+          );
+          const parentResolved = resolvedParent.data.resolved || {};
+
+          // Check if path exists in parent by traversing the path
+          const pathParts = path.split(".");
+          let checkCurrent = parentResolved;
+          let pathExists = true;
+
+          for (const part of pathParts) {
+            if (
+              checkCurrent &&
+              typeof checkCurrent === "object" &&
+              checkCurrent.hasOwnProperty(part)
+            ) {
+              checkCurrent = checkCurrent[part];
+            } else {
+              pathExists = false;
+              break;
+            }
+          }
+
+          if (!pathExists) {
+            throw new Error(
+              `Property '${path}' cannot be added. It doesn't exist in the parent configuration. Child configurations can only override existing properties.`,
+            );
+          }
+        } catch (pathCheckError) {
+          console.error("Path validation error:", pathCheckError);
+          throw pathCheckError;
+        }
+      }
+
       const pathParts = path.split(".");
       const newData = JSON.parse(JSON.stringify(currentData)); // Deep clone
 
@@ -270,11 +309,12 @@ const Dashboard = () => {
       showToast(`Updated ${path} successfully`);
     } catch (err) {
       console.error("Failed to update configuration:", err);
-      setError(
-        "Failed to update configuration: " +
-          (err.response?.data?.error || err.message),
-      );
-      showToast("Failed to update configuration", "error");
+      const errorMessage =
+        err.response?.data?.error ||
+        err.message ||
+        "Failed to update configuration";
+      setError(`Failed to update configuration: ${errorMessage}`);
+      showToast(`Failed to update: ${errorMessage}`, "error");
     }
   };
 
