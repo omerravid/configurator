@@ -50,11 +50,9 @@ const checkConfigPermissions = async (req, res, next) => {
 
     // For non-admin users
     if (config.type === "PRODUCT" || config.type === "INSTANCE") {
-      return res
-        .status(403)
-        .json({
-          error: "Only admins can modify Product/Instance configurations",
-        });
+      return res.status(403).json({
+        error: "Only admins can modify Product/Instance configurations",
+      });
     }
 
     // For USER configs, check ownership and draft status
@@ -126,11 +124,9 @@ router.post("/", authenticateToken, async (req, res) => {
       (type === "PRODUCT" || type === "INSTANCE") &&
       req.user.role !== "ADMIN"
     ) {
-      return res
-        .status(403)
-        .json({
-          error: "Only admins can create Product/Instance configurations",
-        });
+      return res.status(403).json({
+        error: "Only admins can create Product/Instance configurations",
+      });
     }
 
     // Clean up parent_id - convert empty string to null
@@ -308,8 +304,13 @@ router.get("/:id/data", authenticateToken, async (req, res) => {
   try {
     const { path } = req.query;
 
-    if (!path) {
-      return res.status(400).json({ error: "Path parameter is required" });
+    if (!path || path.trim() === "") {
+      // If no path provided, return the complete resolved configuration
+      const result = await ConfigurationService.resolveConfiguration(
+        req.params.id,
+        true,
+      );
+      return res.json({ data: result.resolved, metadata: result.metadata });
     }
 
     const result = await ConfigurationService.getValueAtPath(
@@ -317,7 +318,7 @@ router.get("/:id/data", authenticateToken, async (req, res) => {
       path,
     );
 
-    res.json(result);
+    res.json({ data: result });
   } catch (error) {
     console.error("Get configuration path error:", error);
 
