@@ -275,6 +275,13 @@ const ConfigurationTree = ({
   selectedConfig,
   onConfigSelect,
   refreshTrigger,
+  onEdit,
+  onRename,
+  onDuplicate,
+  onCreateChild,
+  onCommit,
+  onDelete,
+  user,
 }) => {
   const [rootConfigs, setRootConfigs] = useState([]);
   const [loading, setLoading] = useState(true);
