@@ -182,7 +182,13 @@ const TreeNode = ({
       {
         label: "Copy Path",
         icon: MapIcon,
-        onClick: () => copyToClipboard(fullPath, "Path"),
+        onClick: () => {
+          // Strip "root." prefix from path
+          const cleanPath = fullPath.startsWith("root.")
+            ? fullPath.substring(5)
+            : fullPath;
+          copyToClipboard(cleanPath, "Path");
+        },
         disabled: isRoot,
       },
       {
@@ -209,23 +215,26 @@ const TreeNode = ({
   };
 
   const copyToClipboard = async (text, label = "Value") => {
+    // Always use fallback since Clipboard API is blocked in iframes
     try {
-      await navigator.clipboard.writeText(text);
-      showToast(`${label} copied to clipboard!`);
-    } catch (err) {
-      console.error("Failed to copy to clipboard:", err);
-      // Fallback for older browsers
-      try {
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+      textArea.select();
+      textArea.setSelectionRange(0, 99999); // For mobile
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+
+      if (successful) {
         showToast(`${label} copied to clipboard!`);
-      } catch (fallbackErr) {
+      } else {
         showToast("Failed to copy to clipboard", "error");
       }
+    } catch (err) {
+      console.error("Failed to copy to clipboard:", err);
+      showToast("Failed to copy to clipboard", "error");
     }
   };
 
