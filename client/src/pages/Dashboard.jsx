@@ -58,6 +58,7 @@ const Dashboard = () => {
 
   const handleCreateProduct = () => {
     setShowCreateProduct(true);
+    setShowCreateChild(false);
     setShowRename(false);
   };
 
