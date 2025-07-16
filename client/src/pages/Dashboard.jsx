@@ -37,7 +37,7 @@ const Dashboard = () => {
   const loadAllConfigurations = async () => {
     try {
       const response = await configAPI.getAll();
-      setAllConfigurations(response.data.configs || []);
+      setAllConfigurations(response.data.configurations || []);
     } catch (err) {
       console.error("Failed to load all configurations:", err);
     }
@@ -143,33 +143,11 @@ const Dashboard = () => {
 
       // Note: USER configurations are automatically created as DRAFT by the backend
 
-      const createdConfig = await configAPI.create(newConfig);
+      await configAPI.create(newConfig);
 
       // Refresh the tree and configurations list
       setRefreshTrigger((prev) => prev + 1);
-      await loadAllConfigurations();
-
-      // Select the newly created configuration
-      if (createdConfig.data.config) {
-        setSelectedConfig(createdConfig.data.config);
-        loadConfigurationData(createdConfig.data.config);
-      } else {
-        // Fallback: find the configuration by name
-        setTimeout(async () => {
-          try {
-            const response = await configAPI.getAll();
-            const newConfig = response.data.configs.find(
-              (c) => c.name === copyName,
-            );
-            if (newConfig) {
-              setSelectedConfig(newConfig);
-              loadConfigurationData(newConfig);
-            }
-          } catch (err) {
-            console.error("Failed to select newly created configuration:", err);
-          }
-        }, 100);
-      }
+      loadAllConfigurations();
 
       showToast(`Configuration duplicated as "${copyName}"`);
     } catch (err) {
@@ -506,34 +484,33 @@ const Dashboard = () => {
         </div>
       </header>
 
-            <div className="flex flex-col h-screen pt-16">
-        <div className="flex flex-1 min-h-0">
-          {/* Left Panel - Configuration Tree */}
-          <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-            <div className="p-4 border-b border-gray-200">
-              <h2 className="text-lg font-medium text-gray-900">
-                Configurations
-              </h2>
-            </div>
-
-            <div className="flex-1 overflow-auto">
-              <ConfigurationTree
-                selectedConfig={selectedConfig}
-                onConfigSelect={handleConfigSelect}
-                refreshTrigger={refreshTrigger}
-                onEdit={handleTreeEdit}
-                onRename={handleTreeRename}
-                onDuplicate={handleTreeDuplicate}
-                onCreateChild={handleTreeCreateChild}
-                onCommit={handleTreeCommit}
-                onDelete={handleTreeDelete}
-                user={user}
-              />
-            </div>
+      <div className="flex h-screen pt-16">
+        {/* Left Panel - Configuration Tree */}
+        <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+          <div className="p-4 border-b border-gray-200">
+            <h2 className="text-lg font-medium text-gray-900">
+              Configurations
+            </h2>
           </div>
 
-          {/* Main Content */}
-          <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex-1 overflow-auto">
+            <ConfigurationTree
+              selectedConfig={selectedConfig}
+              onConfigSelect={handleConfigSelect}
+              refreshTrigger={refreshTrigger}
+              onEdit={handleTreeEdit}
+              onRename={handleTreeRename}
+              onDuplicate={handleTreeDuplicate}
+              onCreateChild={handleTreeCreateChild}
+              onCommit={handleTreeCommit}
+              onDelete={handleTreeDelete}
+              user={user}
+            />
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col">
           {selectedConfig ? (
             <>
               {/* Configuration Header */}
@@ -688,15 +665,15 @@ const Dashboard = () => {
                 </p>
               </div>
             </div>
-                    )}
+          )}
         </div>
-
-        {/* Path Query Panel */}
-        <PathQueryPanel
-          configurations={allConfigurations}
-          selectedConfig={selectedConfig}
-        />
       </div>
+
+      {/* Path Query Panel */}
+      <PathQueryPanel
+        configurations={allConfigurations}
+        selectedConfig={selectedConfig}
+      />
 
       {/* Configuration Editor Modal */}
       {(showEditor || showCreateProduct || showCreateChild || showRename) && (
