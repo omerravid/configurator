@@ -554,20 +554,21 @@ const ConfigurationEditor = ({
                   />
                 </div>
 
-                {/* JSON Data */}
-                <div>
-                  <div className="flex items-center justify-between">
-                    <label
-                      htmlFor="data"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Configuration Data (JSON)
-                      {!isCreating &&
-                        !isCreatingChild &&
-                        !isCreatingProduct &&
-                        formData.type !== "PRODUCT" &&
-                        " - Level-Specific Overrides Only"}
-                    </label>
+                                {/* JSON Data - Hide for child creation */}
+                {!isCreatingChild && (
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <label
+                        htmlFor="data"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Configuration Data (JSON)
+                        {!isCreating &&
+                          !isCreatingChild &&
+                          !isCreatingProduct &&
+                          formData.type !== "PRODUCT" &&
+                          " - Level-Specific Overrides Only"}
+                      </label>
                     <div className="flex space-x-2">
                       {isCreatingProduct && (
                         <button
