@@ -4,7 +4,7 @@ import ConfigurationTree from "../components/ConfigurationTree";
 import InteractiveJSONViewer from "../components/InteractiveJSONViewer";
 import ConfigurationEditor from "../components/ConfigurationEditor";
 import PathQueryPanel from "../components/PathQueryPanel";
-import Toast from "../components/Toast";
+import { useToast } from "../context/ToastContext";
 import { configAPI } from "../services/api";
 import {
   PlusIcon,
