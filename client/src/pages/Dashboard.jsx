@@ -75,6 +75,7 @@ const Dashboard = () => {
 
     setShowRename(true);
     setShowEditor(false);
+    setShowCreateChild(false);
   };
 
   const handleCommit = async () => {
