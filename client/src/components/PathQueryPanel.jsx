@@ -1,0 +1,293 @@
+import React, { useState, useEffect } from "react";
+import { configAPI } from "../services/api";
+import {
+  PlayIcon,
+  ClipboardIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+  ExclamationTriangleIcon,
+  CheckCircleIcon,
+} from "@heroicons/react/24/outline";
+
+const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedConfigId, setSelectedConfigId] = useState("");
+  const [queryPath, setQueryPath] = useState("");
+  const [queryResult, setQueryResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [lastQuery, setLastQuery] = useState(null);
+
+  // Update selected config when prop changes
+  useEffect(() => {
+    if (selectedConfig) {
+      setSelectedConfigId(selectedConfig.id);
+    }
+  }, [selectedConfig]);
+
+  const executeQuery = async () => {
+    if (!selectedConfigId) {
+      setError("Please select a configuration");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setQueryResult(null);
+
+    try {
+      const configName =
+        configurations.find((c) => c.id === selectedConfigId)?.name ||
+        selectedConfigId;
+      const queryInfo = {
+        configId: selectedConfigId,
+        configName,
+        path: queryPath || "(root)",
+        timestamp: new Date().toISOString(),
+      };
+
+      if (!queryPath.trim()) {
+        // Get complete configuration
+        const response = await configAPI.getById(selectedConfigId, true);
+        setQueryResult({
+          data: response.data.resolved,
+          metadata: response.data.metadata,
+          query: queryInfo,
+        });
+      } else {
+        // Get specific path
+        const response = await configAPI.getByPath(selectedConfigId, queryPath);
+        setQueryResult({
+          data: response.data,
+          query: queryInfo,
+        });
+      }
+
+      setLastQuery(queryInfo);
+    } catch (err) {
+      console.error("Query failed:", err);
+      setError(err.response?.data?.error || err.message || "Query failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      setQueryPath(text);
+    } catch (err) {
+      console.error("Failed to paste:", err);
+    }
+  };
+
+  const copyResult = async () => {
+    if (!queryResult) return;
+
+    try {
+      await navigator.clipboard.writeText(
+        JSON.stringify(queryResult.data, null, 2),
+      );
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  const formatResult = (data) => {
+    if (data === null || data === undefined) {
+      return <span className="text-gray-400 italic">null</span>;
+    }
+
+    if (typeof data === "string") {
+      return <span className="text-green-600">"{data}"</span>;
+    }
+
+    if (typeof data === "number") {
+      return <span className="text-blue-600">{data}</span>;
+    }
+
+    if (typeof data === "boolean") {
+      return <span className="text-purple-600">{String(data)}</span>;
+    }
+
+    if (typeof data === "object") {
+      return (
+        <pre className="text-sm text-gray-700 bg-gray-50 p-3 rounded border overflow-auto max-h-64">
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      );
+    }
+
+    return <span className="text-gray-600">{String(data)}</span>;
+  };
+
+  return (
+    <div className="border-t border-gray-200 bg-white">
+      {/* Panel Header */}
+      <div className="px-4 py-3 border-b border-gray-100">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+        >
+          {isExpanded ? (
+            <ChevronDownIcon className="w-4 h-4" />
+          ) : (
+            <ChevronUpIcon className="w-4 h-4" />
+          )}
+          <span>REST API Query Panel</span>
+          {lastQuery && (
+            <span className="text-xs text-gray-500">
+              Last: {lastQuery.configName} → {lastQuery.path}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Panel Content */}
+      {isExpanded && (
+        <div className="p-4 space-y-4">
+          {/* Query Form */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Configuration Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Configuration
+              </label>
+              <select
+                value={selectedConfigId}
+                onChange={(e) => setSelectedConfigId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+              >
+                <option value="">Select configuration...</option>
+                {configurations.map((config) => (
+                  <option key={config.id} value={config.id}>
+                    {config.type}: {config.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Path Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Path (empty for complete config)
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={queryPath}
+                  onChange={(e) => setQueryPath(e.target.value)}
+                  placeholder="e.g., system.logging.level"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") executeQuery();
+                  }}
+                />
+                <button
+                  onClick={handlePaste}
+                  className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+                  title="Paste from clipboard"
+                >
+                  <ClipboardIcon className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Execute Button */}
+            <div className="flex items-end">
+              <button
+                onClick={executeQuery}
+                disabled={loading || !selectedConfigId}
+                className="w-full px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center space-x-2"
+              >
+                {loading ? (
+                  <div className="w-4 h-4 animate-spin border-2 border-white border-t-transparent rounded-full"></div>
+                ) : (
+                  <PlayIcon className="w-4 h-4" />
+                )}
+                <span>{loading ? "Querying..." : "Execute Query"}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* API Info */}
+          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded border">
+            <strong>API Endpoint:</strong> GET /api/configs/
+            {selectedConfigId || "{id}"}
+            {queryPath && <span>/path/{encodeURIComponent(queryPath)}</span>}
+            <br />
+            <strong>Example:</strong> GET
+            /api/configs/prod_ecommerce/path/system.logging.level
+          </div>
+
+          {/* Error Display */}
+          {error && (
+            <div className="flex items-center space-x-2 text-red-700 bg-red-50 border border-red-200 rounded-md p-3">
+              <ExclamationTriangleIcon className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm">{error}</span>
+            </div>
+          )}
+
+          {/* Result Display */}
+          {queryResult && (
+            <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-2">
+                  <CheckCircleIcon className="w-5 h-5 text-green-600" />
+                  <span className="text-sm font-medium text-gray-900">
+                    Query Result
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {queryResult.query.configName} → {queryResult.query.path}
+                  </span>
+                </div>
+                <button
+                  onClick={copyResult}
+                  className="px-2 py-1 text-xs text-gray-600 hover:text-gray-800 border border-gray-300 rounded hover:bg-white"
+                >
+                  Copy Result
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-xs text-gray-500">
+                  Type: {typeof queryResult.data} | Size:{" "}
+                  {JSON.stringify(queryResult.data).length} chars | Time:{" "}
+                  {new Date(queryResult.query.timestamp).toLocaleTimeString()}
+                </div>
+                {formatResult(queryResult.data)}
+              </div>
+
+              {/* Metadata if available */}
+              {queryResult.metadata && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <div className="text-xs text-gray-500 mb-2">
+                    Inheritance Chain:
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {queryResult.metadata.map((meta, index) => (
+                      <div
+                        key={index}
+                        className={`px-2 py-1 rounded text-xs ${
+                          meta.type === "PRODUCT"
+                            ? "bg-blue-100 text-blue-800"
+                            : meta.type === "INSTANCE"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-purple-100 text-purple-800"
+                        }`}
+                      >
+                        {meta.type}: {meta.name}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default PathQueryPanel;
