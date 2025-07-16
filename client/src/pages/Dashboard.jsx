@@ -28,6 +28,15 @@ const Dashboard = () => {
   const [showCreateChild, setShowCreateChild] = useState(false);
   const [showRename, setShowRename] = useState(false);
 
+  const loadAllConfigurations = async () => {
+    try {
+      const response = await configAPI.getAll();
+      setAllConfigurations(response.data.configurations || []);
+    } catch (err) {
+      console.error("Failed to load all configurations:", err);
+    }
+  };
+
   const loadConfigurationData = async (config) => {
     if (!config) return;
 
@@ -43,6 +52,11 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
+
+  // Load all configurations on component mount
+  useEffect(() => {
+    loadAllConfigurations();
+  }, [refreshTrigger]);
 
   const handleConfigSelect = (config) => {
     setSelectedConfig(config);
