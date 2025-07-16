@@ -266,24 +266,24 @@ const Dashboard = () => {
 
     const menuItems = [
       {
-        label: "Edit Configuration",
+        label: `Edit ${selectedConfig.type.toLowerCase()} configuration`,
         icon: PencilIcon,
         onClick: handleEdit,
         disabled: !canEdit(),
       },
       {
-        label: "Rename Configuration",
+        label: `Rename "${selectedConfig.name}"`,
         icon: DocumentTextIcon,
         onClick: handleRename,
         disabled: !canRename(),
       },
       {
-        label: "Duplicate Configuration",
+        label: `Duplicate as sibling`,
         icon: DocumentDuplicateIcon,
         onClick: handleDuplicate,
       },
       {
-        label: "Create Child Configuration",
+        label: `Create child configuration`,
         icon: PlusIcon,
         onClick: handleCreateChild,
         disabled: !canCreateChild(),
@@ -292,7 +292,7 @@ const Dashboard = () => {
 
     if (canCommit()) {
       menuItems.push({
-        label: "Commit Configuration",
+        label: "Commit configuration",
         icon: CheckIcon,
         onClick: handleCommit,
       });
@@ -300,7 +300,7 @@ const Dashboard = () => {
 
     if (canDelete()) {
       menuItems.push({
-        label: "Delete Configuration",
+        label: `Delete "${selectedConfig.name}"`,
         icon: TrashIcon,
         onClick: handleDelete,
       });
