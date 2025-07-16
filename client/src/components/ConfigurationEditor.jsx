@@ -441,7 +441,7 @@ const ConfigurationEditor = ({
                       </option>
                     ))}
                   </select>
-                  {!isCreating && (
+                  {!isCreating && !isCreatingChild && (
                     <p className="mt-1 text-xs text-gray-500">
                       Configuration type cannot be changed when editing.
                     </p>
