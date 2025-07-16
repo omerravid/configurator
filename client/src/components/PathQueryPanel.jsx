@@ -55,8 +55,11 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
           query: queryInfo,
         });
       } else {
-        // Get specific path
-        const response = await configAPI.getByPath(selectedConfigId, queryPath);
+        // Get specific path - strip "root." prefix if present
+        const cleanPath = queryPath.startsWith("root.")
+          ? queryPath.substring(5)
+          : queryPath;
+        const response = await configAPI.getByPath(selectedConfigId, cleanPath);
         setQueryResult({
           data: response.data.data,
           query: queryInfo,
