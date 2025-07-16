@@ -28,6 +28,7 @@ const Dashboard = () => {
   const [showCreateProduct, setShowCreateProduct] = useState(false);
   const [showCreateChild, setShowCreateChild] = useState(false);
   const [showRename, setShowRename] = useState(false);
+  const [toast, setToast] = useState(null);
 
   const loadAllConfigurations = async () => {
     try {
