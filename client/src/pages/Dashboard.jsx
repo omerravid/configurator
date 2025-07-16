@@ -432,6 +432,12 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Path Query Panel */}
+      <PathQueryPanel
+        configurations={allConfigurations}
+        selectedConfig={selectedConfig}
+      />
+
       {/* Configuration Editor Modal */}
       {(showEditor || showCreateProduct || showCreateChild || showRename) && (
         <ConfigurationEditor
