@@ -244,21 +244,9 @@ class ConfigurationService {
     const allowedPaths = this.getAllPaths(parentResolved.resolved);
     const providedPaths = this.getAllPaths(data);
 
-    console.log("Schema validation debug:");
-    console.log(
-      "Parent data:",
-      JSON.stringify(parentResolved.resolved, null, 2),
-    );
-    console.log("Allowed paths:", allowedPaths);
-    console.log("Child data:", JSON.stringify(data, null, 2));
-    console.log("Provided paths:", providedPaths);
-
     // Check if all provided paths exist in parent
     for (const providedPath of providedPaths) {
       if (!allowedPaths.includes(providedPath)) {
-        console.log(
-          `VALIDATION ERROR: Path '${providedPath}' not found in allowed paths`,
-        );
         throw new Error(
           `Property '${providedPath}' not allowed. Parent configuration does not define this property. Available properties: ${allowedPaths.join(", ")}`,
         );
