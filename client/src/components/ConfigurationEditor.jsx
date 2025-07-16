@@ -296,13 +296,18 @@ const ConfigurationEditor = ({
   };
 
   const getParentDisplayInfo = () => {
-    if (isCreating && config && !isCreatingProduct) {
+    if ((isCreating || isCreatingChild) && config && !isCreatingProduct) {
       // Creating child - show the parent (which is the selected config)
       return {
         name: config.name,
         type: config.type,
       };
-    } else if (!isCreating && config && config.parent_name) {
+    } else if (
+      !isCreating &&
+      !isCreatingChild &&
+      config &&
+      config.parent_name
+    ) {
       // Editing existing - show the actual parent
       return {
         name: config.parent_name,
