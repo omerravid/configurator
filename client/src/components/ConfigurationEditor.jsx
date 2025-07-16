@@ -339,14 +339,18 @@ const ConfigurationEditor = ({
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">{getTitle()}</h2>
           <div className="flex items-center space-x-2">
-            {config && !isCreating && user.role === "ADMIN" && !showRename && (
-              <button
-                onClick={() => setShowRename(true)}
-                className="text-sm text-primary-600 hover:text-primary-700"
-              >
-                Rename
-              </button>
-            )}
+            {config &&
+              !isCreating &&
+              !isCreatingChild &&
+              user.role === "ADMIN" &&
+              !showRename && (
+                <button
+                  onClick={() => setShowRename(true)}
+                  className="text-sm text-primary-600 hover:text-primary-700"
+                >
+                  Rename
+                </button>
+              )}
             {showRename && (
               <button
                 onClick={() => setShowRename(false)}
