@@ -26,6 +26,17 @@ const ConfigurationEditor = ({
       return true;
     if (!config) return true;
     if (user.role === "ADMIN") return true;
+
+    console.log("canEdit check:", {
+      config: config,
+      user: user,
+      configType: config.type,
+      configCreatedBy: config.created_by,
+      configStatus: config.status,
+      userId: user.id,
+      userRole: user.role,
+    });
+
     return (
       config.type === "USER" &&
       config.created_by === user.id &&
