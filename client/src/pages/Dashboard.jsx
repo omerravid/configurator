@@ -66,6 +66,7 @@ const Dashboard = () => {
     if (!selectedConfig) return;
 
     setShowEditor(true);
+    setShowCreateChild(false);
     setShowRename(false);
   };
 
