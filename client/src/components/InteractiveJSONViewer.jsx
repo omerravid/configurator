@@ -229,10 +229,19 @@ const TreeNode = ({
     }
   };
 
+  // Check if this is a provenance-wrapped primitive value that should not be expanded
+  const isProvenanceWrapper =
+    value &&
+    typeof value === "object" &&
+    value.hasOwnProperty("value") &&
+    value.hasOwnProperty("source") &&
+    typeof value.value !== "object";
+
   const isObject =
     actualValue &&
     typeof actualValue === "object" &&
-    !Array.isArray(actualValue);
+    !Array.isArray(actualValue) &&
+    !isProvenanceWrapper;
   const isArray = Array.isArray(actualValue);
   const isPrimitive = !isObject && !isArray;
 
