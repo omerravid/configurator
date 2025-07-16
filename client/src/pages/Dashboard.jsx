@@ -60,6 +60,10 @@ const Dashboard = () => {
     loadAllConfigurations();
   }, [refreshTrigger]);
 
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+  };
+
   const handleConfigSelect = (config) => {
     setSelectedConfig(config);
     setShowEditor(false);
