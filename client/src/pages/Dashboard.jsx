@@ -147,12 +147,28 @@ const Dashboard = () => {
 
       // Refresh the tree and configurations list
       setRefreshTrigger((prev) => prev + 1);
-      loadAllConfigurations();
+      await loadAllConfigurations();
 
       // Select the newly created configuration
       if (createdConfig.data.config) {
         setSelectedConfig(createdConfig.data.config);
         loadConfigurationData(createdConfig.data.config);
+      } else {
+        // Fallback: find the configuration by name
+        setTimeout(async () => {
+          try {
+            const response = await configAPI.getAll();
+            const newConfig = response.data.configs.find(
+              (c) => c.name === copyName,
+            );
+            if (newConfig) {
+              setSelectedConfig(newConfig);
+              loadConfigurationData(newConfig);
+            }
+          } catch (err) {
+            console.error("Failed to select newly created configuration:", err);
+          }
+        }, 100);
       }
 
       showToast(`Configuration duplicated as "${copyName}"`);
