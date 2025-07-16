@@ -164,7 +164,7 @@ const Dashboard = () => {
     try {
       // Get all configurations to check for name conflicts
       const response = await configAPI.getAll();
-      const existingNames = response.data.configurations.map((c) => c.name);
+      const existingNames = response.data.configs.map((c) => c.name);
 
       let copyName = `${baseName}_copy`;
       let counter = 1;
