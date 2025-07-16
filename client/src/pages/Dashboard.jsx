@@ -143,11 +143,33 @@ const Dashboard = () => {
 
       // Note: USER configurations are automatically created as DRAFT by the backend
 
-      await configAPI.create(newConfig);
+      const createResponse = await configAPI.create(newConfig);
 
       // Refresh the tree and configurations list
       setRefreshTrigger((prev) => prev + 1);
-      loadAllConfigurations();
+      await loadAllConfigurations();
+
+      // Try to select the newly created configuration
+      if (createResponse.data.config) {
+        setSelectedConfig(createResponse.data.config);
+        loadConfigurationData(createResponse.data.config);
+      } else {
+        // Fallback: find the configuration by name after a short delay
+        setTimeout(async () => {
+          try {
+            const response = await configAPI.getAll();
+            const newConfig = response.data.configs.find(
+              (c) => c.name === copyName,
+            );
+            if (newConfig) {
+              setSelectedConfig(newConfig);
+              loadConfigurationData(newConfig);
+            }
+          } catch (err) {
+            console.error("Failed to select newly created configuration:", err);
+          }
+        }, 500);
+      }
 
       showToast(`Configuration duplicated as "${copyName}"`);
     } catch (err) {
