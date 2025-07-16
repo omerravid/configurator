@@ -8,6 +8,7 @@ const ConfigurationEditor = ({
   onClose,
   isCreatingProduct = false,
   isRenaming = false,
+  isCreatingChild = false,
 }) => {
   const { user } = useAuth();
   // Determine if we're creating a new config or editing an existing one
