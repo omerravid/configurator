@@ -578,13 +578,15 @@ const ConfigurationEditor = ({
                           here affect all derived configurations.
                         </>
                       )}
-                    {isCreating && formData.parent_id && !isCreatingProduct && (
-                      <>
-                        ⚠️ Only properties that exist in the parent
-                        configuration are allowed. Use {} to inherit everything,
-                        or specify overrides.
-                      </>
-                    )}
+                    {(isCreating || isCreatingChild) &&
+                      formData.parent_id &&
+                      !isCreatingProduct && (
+                        <>
+                          ⚠️ Only properties that exist in the parent
+                          configuration are allowed. Use {} to inherit
+                          everything, or specify overrides.
+                        </>
+                      )}
                     {isCreatingProduct && (
                       <>
                         ✅ As a Product configuration, you can define any new
