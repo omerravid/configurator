@@ -108,6 +108,15 @@ const Dashboard = () => {
       const rawResponse = await configAPI.getRawById(selectedConfig.id);
       const sourceData = rawResponse.data.resolved || {};
 
+      // Validate that we have valid data to duplicate
+      if (
+        !sourceData ||
+        (typeof sourceData === "object" && Object.keys(sourceData).length === 0)
+      ) {
+        // For empty configurations, use an empty object
+        console.log("Source configuration has no data, using empty object");
+      }
+
       // Generate unique name with _copy suffix
       const baseName = selectedConfig.name;
       const copyName = await generateUniqueCopyName(baseName);
