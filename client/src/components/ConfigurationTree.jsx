@@ -185,6 +185,93 @@ const TreeNode = ({
     setShowInheritanceView(!showInheritanceView);
   };
 
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Helper functions to check permissions
+    const canEdit = () => {
+      if (user?.role === "ADMIN") return true;
+      return (
+        config.type === "USER" &&
+        config.created_by === user?.id &&
+        config.status === "DRAFT"
+      );
+    };
+
+    const canRename = () => user?.role === "ADMIN";
+
+    const canCreateChild = () => {
+      if (config.type === "USER") return false;
+      return user?.role === "ADMIN" || config.type === "PRODUCT";
+    };
+
+    const canCommit = () => {
+      return (
+        config.type === "USER" &&
+        config.status === "DRAFT" &&
+        (user?.role === "ADMIN" || config.created_by === user?.id)
+      );
+    };
+
+    const canDelete = () => {
+      if (user?.role === "ADMIN") return true;
+      return (
+        config.type === "USER" &&
+        config.created_by === user?.id &&
+        config.status === "DRAFT"
+      );
+    };
+
+    const menuItems = [
+      {
+        label: `Edit ${config.type.toLowerCase()} configuration`,
+        icon: PencilIcon,
+        onClick: () => onEdit(config),
+        disabled: !canEdit(),
+      },
+      {
+        label: `Rename "${config.name}"`,
+        icon: DocumentTextIcon,
+        onClick: () => onRename(config),
+        disabled: !canRename(),
+      },
+      {
+        label: `Duplicate as sibling`,
+        icon: DocumentDuplicateIcon,
+        onClick: () => onDuplicate(config),
+      },
+      {
+        label: `Create child configuration`,
+        icon: PlusIcon,
+        onClick: () => onCreateChild(config),
+        disabled: !canCreateChild(),
+      },
+    ];
+
+    if (canCommit()) {
+      menuItems.push({
+        label: "Commit configuration",
+        icon: CheckIcon,
+        onClick: () => onCommit(config),
+      });
+    }
+
+    if (canDelete()) {
+      menuItems.push({
+        label: `Delete "${config.name}"`,
+        icon: TrashIcon,
+        onClick: () => onDelete(config),
+      });
+    }
+
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      items: menuItems,
+    });
+  };
+
   const isSelected = selectedId === config.id;
   const hasChildren = children.length > 0 || !hasLoadedChildren;
 
