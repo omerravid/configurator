@@ -406,6 +406,8 @@ const Dashboard = () => {
                     metadata={resolvedData.metadata}
                     title="Configuration Data"
                     className="max-w-none"
+                    isEditable={canEdit()}
+                    onDataChange={handleDataChange}
                   />
                 ) : (
                   <div className="text-center text-gray-500 p-8">
