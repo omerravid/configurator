@@ -377,11 +377,12 @@ const Dashboard = () => {
       </div>
 
       {/* Configuration Editor Modal */}
-      {(showEditor || showCreateProduct || showRename) && (
+      {(showEditor || showCreateProduct || showCreateChild || showRename) && (
         <ConfigurationEditor
           config={showCreateProduct ? null : selectedConfig}
           onClose={handleEditorClose}
           isCreatingProduct={showCreateProduct}
+          isCreatingChild={showCreateChild}
           isRenaming={showRename}
         />
       )}
