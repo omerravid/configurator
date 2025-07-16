@@ -323,6 +323,37 @@ const Dashboard = () => {
     }
   };
 
+  // Context menu handlers for tree items
+  const handleTreeEdit = (config) => {
+    setSelectedConfig(config);
+    handleEdit();
+  };
+
+  const handleTreeRename = (config) => {
+    setSelectedConfig(config);
+    handleRename();
+  };
+
+  const handleTreeDuplicate = (config) => {
+    setSelectedConfig(config);
+    handleDuplicate();
+  };
+
+  const handleTreeCreateChild = (config) => {
+    setSelectedConfig(config);
+    handleCreateChild();
+  };
+
+  const handleTreeCommit = (config) => {
+    setSelectedConfig(config);
+    handleCommit();
+  };
+
+  const handleTreeDelete = (config) => {
+    setSelectedConfig(config);
+    handleDelete();
+  };
+
   const handleContextMenuShow = (e) => {
     e.preventDefault();
     if (!selectedConfig) return;
