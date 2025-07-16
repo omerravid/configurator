@@ -506,33 +506,34 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <div className="flex h-screen pt-16">
-        {/* Left Panel - Configuration Tree */}
-        <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-          <div className="p-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">
-              Configurations
-            </h2>
+            <div className="flex flex-col h-screen pt-16">
+        <div className="flex flex-1 min-h-0">
+          {/* Left Panel - Configuration Tree */}
+          <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+            <div className="p-4 border-b border-gray-200">
+              <h2 className="text-lg font-medium text-gray-900">
+                Configurations
+              </h2>
+            </div>
+
+            <div className="flex-1 overflow-auto">
+              <ConfigurationTree
+                selectedConfig={selectedConfig}
+                onConfigSelect={handleConfigSelect}
+                refreshTrigger={refreshTrigger}
+                onEdit={handleTreeEdit}
+                onRename={handleTreeRename}
+                onDuplicate={handleTreeDuplicate}
+                onCreateChild={handleTreeCreateChild}
+                onCommit={handleTreeCommit}
+                onDelete={handleTreeDelete}
+                user={user}
+              />
+            </div>
           </div>
 
-          <div className="flex-1 overflow-auto">
-            <ConfigurationTree
-              selectedConfig={selectedConfig}
-              onConfigSelect={handleConfigSelect}
-              refreshTrigger={refreshTrigger}
-              onEdit={handleTreeEdit}
-              onRename={handleTreeRename}
-              onDuplicate={handleTreeDuplicate}
-              onCreateChild={handleTreeCreateChild}
-              onCommit={handleTreeCommit}
-              onDelete={handleTreeDelete}
-              user={user}
-            />
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+          {/* Main Content */}
+          <div className="flex-1 flex flex-col min-w-0">
           {selectedConfig ? (
             <>
               {/* Configuration Header */}
