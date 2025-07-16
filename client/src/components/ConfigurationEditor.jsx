@@ -423,7 +423,10 @@ const ConfigurationEditor = ({
                   <select
                     id="type"
                     name="type"
-                    disabled={!isCreating || typeOptions.length === 1}
+                    disabled={
+                      (!isCreating && !isCreatingChild) ||
+                      typeOptions.length === 1
+                    }
                     className="mt-1 input-field w-full disabled:bg-gray-50"
                     value={formData.type}
                     onChange={handleInputChange}
