@@ -278,9 +278,10 @@ const TreeNode = ({
   return (
     <div className="select-none relative">
       <div
-        className={`tree-item ${isSelected ? "selected" : ""} group`}
+        className={`tree-item ${isSelected ? "selected" : ""} group cursor-context-menu`}
         style={{ paddingLeft: `${level * 20 + 12}px` }}
         onClick={handleSelect}
+        onContextMenu={handleContextMenu}
       >
         {hasChildren && (
           <button
