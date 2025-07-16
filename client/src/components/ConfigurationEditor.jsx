@@ -20,6 +20,19 @@ const ConfigurationEditor = ({
   const [showRename, setShowRename] = useState(isRenaming);
   const [loadingRawData, setLoadingRawData] = useState(false);
 
+  // Check if user can edit this configuration
+  const canEdit = () => {
+    if (isCreating || isCreatingChild || isCreatingProduct || showRename)
+      return true;
+    if (!config) return true;
+    if (user.role === "ADMIN") return true;
+    return (
+      config.type === "USER" &&
+      config.created_by === user.id &&
+      config.status === "DRAFT"
+    );
+  };
+
   const [formData, setFormData] = useState({
     name: "",
     type: isCreatingProduct ? "PRODUCT" : "USER",
