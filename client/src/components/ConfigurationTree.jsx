@@ -358,6 +358,13 @@ const TreeNode = ({
                 onSelect={onSelect}
                 level={level + 1}
                 showInheritance={showInheritance}
+                onEdit={onEdit}
+                onRename={onRename}
+                onDuplicate={onDuplicate}
+                onCreateChild={onCreateChild}
+                onCommit={onCommit}
+                onDelete={onDelete}
+                user={user}
               />
             ))
           )}
