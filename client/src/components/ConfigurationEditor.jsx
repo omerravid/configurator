@@ -561,6 +561,7 @@ const ConfigurationEditor = ({
                   />
                   <div className="mt-1 text-xs text-gray-500">
                     {!isCreating &&
+                      !isCreatingChild &&
                       !isCreatingProduct &&
                       formData.type !== "PRODUCT" && (
                         <>
