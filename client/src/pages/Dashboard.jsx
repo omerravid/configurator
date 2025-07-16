@@ -37,7 +37,7 @@ const Dashboard = () => {
   const loadAllConfigurations = async () => {
     try {
       const response = await configAPI.getAll();
-      setAllConfigurations(response.data.configs || []);
+      setAllConfigurations(response.data.configurations || []);
     } catch (err) {
       console.error("Failed to load all configurations:", err);
     }
@@ -484,8 +484,7 @@ const Dashboard = () => {
         </div>
       </header>
 
-            <div className="flex flex-col h-screen pt-16">
-        <div className="flex flex-1 min-h-0">
+      <div className="flex h-screen pt-16">
         {/* Left Panel - Configuration Tree */}
         <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
           <div className="p-4 border-b border-gray-200">
@@ -667,14 +666,14 @@ const Dashboard = () => {
               </div>
             </div>
           )}
-                </div>
-
-        {/* Path Query Panel */}
-        <PathQueryPanel
-          configurations={allConfigurations}
-          selectedConfig={selectedConfig}
-        />
+        </div>
       </div>
+
+      {/* Path Query Panel */}
+      <PathQueryPanel
+        configurations={allConfigurations}
+        selectedConfig={selectedConfig}
+      />
 
       {/* Configuration Editor Modal */}
       {(showEditor || showCreateProduct || showCreateChild || showRename) && (
