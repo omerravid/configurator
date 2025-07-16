@@ -332,6 +332,33 @@ const ConfigurationEditor = ({
 
   const parentInfo = getParentDisplayInfo();
 
+  if (!canEdit()) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+          <div className="p-6">
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+                <XMarkIcon className="w-8 h-8 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Cannot Edit Configuration
+              </h3>
+              <p className="text-gray-600 mb-4">
+                {config.status === "COMMITTED"
+                  ? "This user configuration has been committed and cannot be edited."
+                  : "You don't have permission to edit this configuration."}
+              </p>
+              <button onClick={() => onClose(false)} className="btn-primary">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (loadingRawData) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
