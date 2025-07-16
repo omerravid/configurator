@@ -667,14 +667,14 @@ const Dashboard = () => {
               </div>
             </div>
           )}
-        </div>
-      </div>
+                </div>
 
-      {/* Path Query Panel */}
-      <PathQueryPanel
-        configurations={allConfigurations}
-        selectedConfig={selectedConfig}
-      />
+        {/* Path Query Panel */}
+        <PathQueryPanel
+          configurations={allConfigurations}
+          selectedConfig={selectedConfig}
+        />
+      </div>
 
       {/* Configuration Editor Modal */}
       {(showEditor || showCreateProduct || showCreateChild || showRename) && (
