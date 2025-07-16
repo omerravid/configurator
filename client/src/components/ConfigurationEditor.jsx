@@ -525,20 +525,22 @@ const ConfigurationEditor = ({
                           Use Template
                         </button>
                       )}
-                      {isCreating && config && !isCreatingProduct && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              data: getChildTemplate(),
-                            }))
-                          }
-                          className="text-xs text-primary-600 hover:text-primary-700"
-                        >
-                          Use Example
-                        </button>
-                      )}
+                      {(isCreating || isCreatingChild) &&
+                        config &&
+                        !isCreatingProduct && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                data: getChildTemplate(),
+                              }))
+                            }
+                            className="text-xs text-primary-600 hover:text-primary-700"
+                          >
+                            Use Example
+                          </button>
+                        )}
                     </div>
                   </div>
                   <textarea
