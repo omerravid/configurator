@@ -100,6 +100,60 @@ const Dashboard = () => {
     setShowCreateChild(false);
   };
 
+  const handleDuplicate = async () => {
+    if (!selectedConfig) return;
+
+    try {
+      // Get the raw configuration data to duplicate
+      const rawResponse = await configAPI.getRawById(selectedConfig.id);
+      const sourceData = rawResponse.data.resolved || {};
+
+      // Generate unique name with _copy suffix
+      const baseName = selectedConfig.name;
+      const copyName = await generateUniqueCopyName(baseName);
+
+      // Create the duplicate configuration
+      await configAPI.create({
+        name: copyName,
+        type: selectedConfig.type,
+        parent_id: selectedConfig.parent_id || null,
+        data: sourceData,
+        description: selectedConfig.description
+          ? `Copy of ${selectedConfig.description}`
+          : `Copy of ${selectedConfig.name}`,
+      });
+
+      // Refresh the tree
+      setRefreshTrigger((prev) => prev + 1);
+      showToast(`Configuration duplicated as "${copyName}"`);
+    } catch (err) {
+      console.error("Failed to duplicate configuration:", err);
+      showToast("Failed to duplicate configuration", "error");
+    }
+  };
+
+  const generateUniqueCopyName = async (baseName) => {
+    try {
+      // Get all configurations to check for name conflicts
+      const response = await configAPI.getAll();
+      const existingNames = response.data.configurations.map((c) => c.name);
+
+      let copyName = `${baseName}_copy`;
+      let counter = 1;
+
+      // Keep incrementing until we find a unique name
+      while (existingNames.includes(copyName)) {
+        counter++;
+        copyName = `${baseName}_copy_${counter}`;
+      }
+
+      return copyName;
+    } catch (err) {
+      // Fallback if we can't check existing names
+      return `${baseName}_copy_${Date.now()}`;
+    }
+  };
+
   const handleCommit = async () => {
     if (
       !selectedConfig ||
