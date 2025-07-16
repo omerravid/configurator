@@ -153,11 +153,7 @@ const ConfigurationEditor = ({
           description: formData.description,
         };
 
-        // USER configurations should always be created as DRAFT
-        if (formData.type === "USER") {
-          createPayload.status = "DRAFT";
-        }
-
+        // Note: USER configurations are automatically created as DRAFT by the backend
         await configAPI.create(createPayload);
       } else {
         // Handle update
