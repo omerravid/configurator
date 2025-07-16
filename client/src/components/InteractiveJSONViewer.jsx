@@ -207,19 +207,24 @@ const TreeNode = ({
     });
   };
 
-  const copyToClipboard = async (text) => {
+  const copyToClipboard = async (text, label = "Value") => {
     try {
       await navigator.clipboard.writeText(text);
-      // Could add a toast notification here
+      showToast(`${label} copied to clipboard!`);
     } catch (err) {
       console.error("Failed to copy to clipboard:", err);
       // Fallback for older browsers
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        showToast(`${label} copied to clipboard!`);
+      } catch (fallbackErr) {
+        showToast("Failed to copy to clipboard", "error");
+      }
     }
   };
 
