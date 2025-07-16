@@ -72,6 +72,9 @@ export const configAPI = {
   getValueAtPath: (id, path) =>
     api.get(`/configs/${id}/data`, { params: { path } }),
 
+  // Get by path (alias for getValueAtPath)
+  getByPath: (id, path) => api.get(`/configs/${id}/data`, { params: { path } }),
+
   // Commit user configuration
   commit: (id) => api.post(`/configs/${id}/commit`),
 
