@@ -52,7 +52,7 @@ const Dashboard = () => {
   const handleCreateChild = () => {
     if (!selectedConfig) return;
 
-    setShowEditor(true);
+    setShowCreateChild(true);
     setShowRename(false);
   };
 
