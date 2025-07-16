@@ -409,7 +409,10 @@ const Dashboard = () => {
             <>
               {/* Configuration Header */}
               <div className="bg-white border-b border-gray-200 p-6">
-                <div className="flex items-center justify-between">
+                <div
+                  className="flex items-center justify-between"
+                  onContextMenu={handleContextMenuShow}
+                >
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">
                       {selectedConfig.name}
