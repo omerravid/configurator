@@ -143,11 +143,17 @@ const Dashboard = () => {
 
       // Note: USER configurations are automatically created as DRAFT by the backend
 
-      await configAPI.create(newConfig);
+      const createdConfig = await configAPI.create(newConfig);
 
       // Refresh the tree and configurations list
       setRefreshTrigger((prev) => prev + 1);
       loadAllConfigurations();
+
+      // Select the newly created configuration
+      if (createdConfig.data.config) {
+        setSelectedConfig(createdConfig.data.config);
+        loadConfigurationData(createdConfig.data.config);
+      }
 
       showToast(`Configuration duplicated as "${copyName}"`);
     } catch (err) {
