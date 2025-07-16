@@ -113,7 +113,7 @@ const Dashboard = () => {
       const copyName = await generateUniqueCopyName(baseName);
 
       // Create the duplicate configuration
-      await configAPI.create({
+      const newConfig = {
         name: copyName,
         type: selectedConfig.type,
         parent_id: selectedConfig.parent_id || null,
@@ -121,14 +121,22 @@ const Dashboard = () => {
         description: selectedConfig.description
           ? `Copy of ${selectedConfig.description}`
           : `Copy of ${selectedConfig.name}`,
-      });
+      };
 
-      // Refresh the tree
+      await configAPI.create(newConfig);
+
+      // Refresh the tree and configurations list
       setRefreshTrigger((prev) => prev + 1);
+      loadAllConfigurations();
+
       showToast(`Configuration duplicated as "${copyName}"`);
     } catch (err) {
       console.error("Failed to duplicate configuration:", err);
-      showToast("Failed to duplicate configuration", "error");
+      const errorMessage =
+        err.response?.data?.error ||
+        err.message ||
+        "Failed to duplicate configuration";
+      showToast(`Failed to duplicate: ${errorMessage}`, "error");
     }
   };
 
