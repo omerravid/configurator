@@ -3,7 +3,12 @@ import {
   ChevronRightIcon,
   ChevronDownIcon,
   InformationCircleIcon,
+  PencilIcon,
+  ClipboardIcon,
+  MapIcon,
+  DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
+import ContextMenu from "./ContextMenu";
 
 // Helper function to safely extract actual values from provenance-wrapped objects
 const extractActualValue = (val) => {
