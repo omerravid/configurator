@@ -32,10 +32,17 @@ const ConfigTypeIcon = ({ type, status }) => {
         );
       case "USER":
         return (
-          <div
-            className={`w-6 h-6 ${status === "DRAFT" ? "bg-orange-500" : "bg-purple-500"} text-white rounded-full flex items-center justify-center text-xs font-bold`}
-          >
-            U
+          <div className="relative">
+            <div
+              className={`w-6 h-6 ${status === "DRAFT" ? "bg-orange-500" : "bg-purple-500"} text-white rounded-full flex items-center justify-center text-xs font-bold`}
+            >
+              U
+            </div>
+            {status === "COMMITTED" && (
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-gray-700 rounded-full flex items-center justify-center">
+                <LockClosedIcon className="w-2 h-2 text-white" />
+              </div>
+            )}
           </div>
         );
       default:
