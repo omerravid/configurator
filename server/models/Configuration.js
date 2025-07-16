@@ -10,7 +10,7 @@ class Configuration {
     description,
     status,
   }) {
-    // For USER configs, default to DRAFT, otherwise COMMITTED
+    // Set status: USER configs default to DRAFT (unless explicitly set), others are COMMITTED
     const finalStatus = type === "USER" ? status || "DRAFT" : "COMMITTED";
     const id = this.generateId();
 
