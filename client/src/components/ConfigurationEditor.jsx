@@ -59,7 +59,11 @@ const ConfigurationEditor = ({
         } finally {
           setLoadingRawData(false);
         }
-      } else if (config && isCreating && !isCreatingProduct) {
+      } else if (
+        config &&
+        (isCreating || isCreatingChild) &&
+        !isCreatingProduct
+      ) {
         // CREATING a child configuration (config is the parent)
         // Start with empty data, not the parent's data
         setFormData((prev) => ({
