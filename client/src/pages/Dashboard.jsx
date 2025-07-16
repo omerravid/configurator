@@ -501,6 +501,13 @@ const Dashboard = () => {
               selectedConfig={selectedConfig}
               onConfigSelect={handleConfigSelect}
               refreshTrigger={refreshTrigger}
+              onEdit={handleTreeEdit}
+              onRename={handleTreeRename}
+              onDuplicate={handleTreeDuplicate}
+              onCreateChild={handleTreeCreateChild}
+              onCommit={handleTreeCommit}
+              onDelete={handleTreeDelete}
+              user={user}
             />
           </div>
         </div>
