@@ -484,7 +484,7 @@ const Dashboard = () => {
         </div>
       </header>
 
-      <div className="flex h-screen pt-16">
+      <div className="flex h-[calc(100vh-4rem)]">
         {/* Left Panel - Configuration Tree */}
         <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
           <div className="p-4 border-b border-gray-200">
