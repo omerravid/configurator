@@ -155,18 +155,18 @@ const ConfigurationEditor = ({
       return [{ value: "PRODUCT", label: "Product Configuration" }];
     }
 
-    if (!isCreating) {
+    if (!isCreating && !isCreatingChild) {
       // When editing, type cannot be changed
       return [
         { value: formData.type, label: `${formData.type} Configuration` },
       ];
     }
 
-    if (user.role !== "ADMIN") {
+    if (user.role !== "ADMIN" && !isCreatingChild && !config) {
       return [{ value: "USER", label: "User Configuration" }];
     }
 
-    if (!config) {
+    if (!config && !isCreatingChild) {
       // Creating standalone config
       return [
         { value: "PRODUCT", label: "Product Configuration" },
@@ -176,16 +176,22 @@ const ConfigurationEditor = ({
     }
 
     // Creating child config
-    switch (config.type) {
-      case "PRODUCT":
-        return [{ value: "INSTANCE", label: "Instance Configuration" }];
-      case "INSTANCE":
-        return [{ value: "USER", label: "User Configuration" }];
-      case "USER":
-        return [{ value: "USER", label: "User Configuration" }];
-      default:
-        return [{ value: "USER", label: "User Configuration" }];
+    if (isCreatingChild || (isCreating && config)) {
+      switch (config.type) {
+        case "PRODUCT":
+          return [
+            { value: "INSTANCE", label: "Instance Configuration" },
+            { value: "USER", label: "User Configuration" },
+          ];
+        case "INSTANCE":
+        case "USER":
+          return [{ value: "USER", label: "User Configuration" }];
+        default:
+          return [{ value: "USER", label: "User Configuration" }];
+      }
     }
+
+    return [{ value: "USER", label: "User Configuration" }];
   };
 
   const typeOptions = getTypeOptions();
