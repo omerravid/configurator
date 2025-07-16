@@ -12,7 +12,9 @@ const ConfigurationEditor = ({
 }) => {
   const { user } = useAuth();
   // Determine if we're creating a new config or editing an existing one
-  const [isCreating, setIsCreating] = useState(isCreatingProduct || !config);
+  const [isCreating, setIsCreating] = useState(
+    isCreatingProduct || isCreatingChild || !config,
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showRename, setShowRename] = useState(isRenaming);
