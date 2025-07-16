@@ -144,14 +144,21 @@ const ConfigurationEditor = ({
         await configAPI.rename(config.id, formData.name);
       } else if (isCreating) {
         // Handle create
-        const data = JSON.parse(formData.data);
-        await configAPI.create({
+        const data = isCreatingChild ? {} : JSON.parse(formData.data);
+        const createPayload = {
           name: formData.name,
           type: formData.type,
           parent_id: formData.parent_id || null,
           data,
           description: formData.description,
-        });
+        };
+
+        // USER configurations should always be created as DRAFT
+        if (formData.type === "USER") {
+          createPayload.status = "DRAFT";
+        }
+
+        await configAPI.create(createPayload);
       } else {
         // Handle update
         const data = JSON.parse(formData.data);
