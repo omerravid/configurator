@@ -469,7 +469,9 @@ const InteractiveJSONViewer = ({
   };
 
   const handleValueChange = (path, newValue) => {
-    onDataChange?.(path, newValue);
+    // Strip "root." prefix from path since root is just a container
+    const cleanPath = path.startsWith("root.") ? path.substring(5) : path;
+    onDataChange?.(cleanPath, newValue);
   };
 
   if (!data) {
