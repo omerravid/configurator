@@ -264,7 +264,7 @@ const ConfigurationEditor = ({
       return "As a Product configuration, you can define any new properties.";
     }
 
-    if (!isCreating && config) {
+    if (!isCreating && !isCreatingChild && config) {
       // EDITING existing configuration
       switch (config.type) {
         case "PRODUCT":
@@ -278,7 +278,7 @@ const ConfigurationEditor = ({
       }
     }
 
-    if (isCreating && config) {
+    if ((isCreating || isCreatingChild) && config) {
       // CREATING child configuration
       switch (config.type) {
         case "PRODUCT":
