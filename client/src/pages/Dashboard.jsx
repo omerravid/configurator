@@ -19,6 +19,7 @@ const Dashboard = () => {
   const { user, logout } = useAuth();
   const [selectedConfig, setSelectedConfig] = useState(null);
   const [resolvedData, setResolvedData] = useState(null);
+  const [allConfigurations, setAllConfigurations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showEditor, setShowEditor] = useState(false);
