@@ -393,7 +393,7 @@ const ConfigurationEditor = ({
                 id="name"
                 name="name"
                 required
-                disabled={!isCreating && !showRename}
+                disabled={!isCreating && !isCreatingChild && !showRename}
                 className="mt-1 input-field w-full disabled:bg-gray-50"
                 value={formData.name}
                 onChange={handleInputChange}
