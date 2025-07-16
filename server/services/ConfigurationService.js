@@ -260,7 +260,7 @@ class ConfigurationService {
           `VALIDATION ERROR: Path '${providedPath}' not found in allowed paths`,
         );
         throw new Error(
-          `Property '${providedPath}' not allowed. Parent configuration does not define this property.`,
+          `Property '${providedPath}' not allowed. Parent configuration does not define this property. Available properties: ${allowedPaths.join(", ")}`,
         );
       }
     }
