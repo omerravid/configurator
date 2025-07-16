@@ -154,10 +154,12 @@ const Dashboard = () => {
     if (!selectedConfig || !canEdit()) return;
 
     try {
-      // Create a new data object with the updated value
-      const currentData = resolvedData?.levelData || {};
+      // Get the raw configuration data (only this level's overrides)
+      const rawResponse = await configAPI.getRawById(selectedConfig.id);
+      const currentData = rawResponse.data.resolved || {};
+
       const pathParts = path.split(".");
-      const newData = { ...currentData };
+      const newData = JSON.parse(JSON.stringify(currentData)); // Deep clone
 
       // Navigate to the parent of the target property
       let current = newData;
@@ -171,7 +173,7 @@ const Dashboard = () => {
       // Set the new value
       current[pathParts[pathParts.length - 1]] = newValue;
 
-      // Update the configuration
+      // Update the configuration with only the modified data
       await configAPI.update(selectedConfig.id, { data: newData });
 
       // Reload the configuration data
@@ -188,6 +190,7 @@ const Dashboard = () => {
         "Failed to update configuration: " +
           (err.response?.data?.error || err.message),
       );
+      showToast("Failed to update configuration", "error");
     }
   };
 
