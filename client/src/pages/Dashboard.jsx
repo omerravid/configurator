@@ -23,6 +23,7 @@ const Dashboard = () => {
   const [showEditor, setShowEditor] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [showCreateProduct, setShowCreateProduct] = useState(false);
+  const [showCreateChild, setShowCreateChild] = useState(false);
   const [showRename, setShowRename] = useState(false);
 
   const loadConfigurationData = async (config) => {
