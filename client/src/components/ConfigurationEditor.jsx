@@ -123,6 +123,12 @@ const ConfigurationEditor = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Double-check edit permissions before submitting
+    if (!canEdit()) {
+      setError("You don't have permission to edit this configuration");
+      return;
+    }
+
     if (!showRename && !validateJSON(formData.data)) {
       setError("Invalid JSON data");
       return;
