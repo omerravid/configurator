@@ -296,7 +296,7 @@ const TreeNode = ({
   };
 
   const renderArrayItems = () => {
-    if (!isArray) return null;
+    if (!isArray || depth > 10) return null; // Prevent infinite recursion
 
     return actualValue.map((item, index) => (
       <TreeNode
@@ -314,7 +314,7 @@ const TreeNode = ({
   };
 
   const renderObjectProperties = () => {
-    if (!isObject) return null;
+    if (!isObject || depth > 10) return null; // Prevent infinite recursion
 
     return Object.entries(actualValue).map(([key, val]) => (
       <TreeNode
