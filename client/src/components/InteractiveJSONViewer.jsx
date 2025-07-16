@@ -177,18 +177,19 @@ const TreeNode = ({
       {
         label: "Copy Value",
         icon: ClipboardIcon,
-        onClick: () => copyToClipboard(JSON.stringify(actualValue)),
+        onClick: () => copyToClipboard(JSON.stringify(actualValue), "Value"),
       },
       {
         label: "Copy Path",
         icon: MapIcon,
-        onClick: () => copyToClipboard(fullPath),
+        onClick: () => copyToClipboard(fullPath, "Path"),
         disabled: isRoot,
       },
       {
-        label: "Copy Full Object",
+        label: "Copy as JSON",
         icon: DocumentDuplicateIcon,
-        onClick: () => copyToClipboard(JSON.stringify(actualValue, null, 2)),
+        onClick: () =>
+          copyToClipboard(JSON.stringify(actualValue, null, 2), "JSON"),
       },
     ];
 
