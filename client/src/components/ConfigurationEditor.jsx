@@ -163,7 +163,11 @@ const ConfigurationEditor = ({
       onClose(true);
     } catch (err) {
       console.error("Failed to save configuration:", err);
-      setError(err.response?.data?.error || "Failed to save configuration");
+      const errorMessage =
+        err.response?.data?.error ||
+        err.message ||
+        "Failed to save configuration";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
