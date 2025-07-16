@@ -139,12 +139,20 @@ const TreeNode = ({
   onSelect,
   level = 0,
   showInheritance = false,
+  onEdit,
+  onRename,
+  onDuplicate,
+  onCreateChild,
+  onCommit,
+  onDelete,
+  user,
 }) => {
   const [isExpanded, setIsExpanded] = useState(level < 2); // Auto-expand first 2 levels
   const [children, setChildren] = useState([]);
   const [loadingChildren, setLoadingChildren] = useState(false);
   const [hasLoadedChildren, setHasLoadedChildren] = useState(false);
   const [showInheritanceView, setShowInheritanceView] = useState(false);
+  const [contextMenu, setContextMenu] = useState(null);
 
   const loadChildren = async () => {
     if (hasLoadedChildren) return;
