@@ -252,6 +252,59 @@ const Dashboard = () => {
     }
   };
 
+  const handleContextMenuShow = (e) => {
+    e.preventDefault();
+    if (!selectedConfig) return;
+
+    const menuItems = [
+      {
+        label: "Edit Configuration",
+        icon: PencilIcon,
+        onClick: handleEdit,
+        disabled: !canEdit(),
+      },
+      {
+        label: "Rename Configuration",
+        icon: DocumentTextIcon,
+        onClick: handleRename,
+        disabled: !canRename(),
+      },
+      {
+        label: "Duplicate Configuration",
+        icon: DocumentDuplicateIcon,
+        onClick: handleDuplicate,
+      },
+      {
+        label: "Create Child Configuration",
+        icon: PlusIcon,
+        onClick: handleCreateChild,
+        disabled: !canCreateChild(),
+      },
+    ];
+
+    if (canCommit()) {
+      menuItems.push({
+        label: "Commit Configuration",
+        icon: CheckIcon,
+        onClick: handleCommit,
+      });
+    }
+
+    if (canDelete()) {
+      menuItems.push({
+        label: "Delete Configuration",
+        icon: TrashIcon,
+        onClick: handleDelete,
+      });
+    }
+
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      items: menuItems,
+    });
+  };
+
   const canEdit = () => {
     if (!selectedConfig) return false;
     if (user.role === "ADMIN") return true;
