@@ -234,6 +234,11 @@ class ConfigurationService {
       return true;
     }
 
+    // If data is empty object, it's always valid (inherits everything from parent)
+    if (!data || Object.keys(data).length === 0) {
+      return true;
+    }
+
     // Get resolved parent configuration
     const parentResolved = await this.resolveConfiguration(parentId, false);
     const allowedPaths = this.getAllPaths(parentResolved.resolved);
