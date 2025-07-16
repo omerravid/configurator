@@ -183,6 +183,9 @@ const Dashboard = () => {
 
       // Refresh the tree
       setRefreshTrigger((prev) => prev + 1);
+
+      // Show success toast
+      showToast(`Updated ${path} successfully`);
     } catch (err) {
       console.error("Failed to update configuration:", err);
       setError(
