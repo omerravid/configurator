@@ -554,7 +554,7 @@ const ConfigurationEditor = ({
                   />
                 </div>
 
-                                {/* JSON Data - Hide for child creation */}
+                {/* JSON Data - Hide for child creation */}
                 {!isCreatingChild && (
                   <div>
                     <div className="flex items-center justify-between">
@@ -569,91 +569,101 @@ const ConfigurationEditor = ({
                           formData.type !== "PRODUCT" &&
                           " - Level-Specific Overrides Only"}
                       </label>
-                    <div className="flex space-x-2">
-                      {isCreatingProduct && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              data: getProductTemplate(),
-                            }))
-                          }
-                          className="text-xs text-primary-600 hover:text-primary-700"
-                        >
-                          Use Template
-                        </button>
-                      )}
-                      {(isCreating || isCreatingChild) &&
-                        config &&
-                        !isCreatingProduct && (
+                      <div className="flex space-x-2">
+                        {isCreatingProduct && (
                           <button
                             type="button"
                             onClick={() =>
                               setFormData((prev) => ({
                                 ...prev,
-                                data: getChildTemplate(),
+                                data: getProductTemplate(),
                               }))
                             }
                             className="text-xs text-primary-600 hover:text-primary-700"
                           >
-                            Use Example
+                            Use Template
                           </button>
                         )}
+                        {(isCreating || isCreatingChild) &&
+                          config &&
+                          !isCreatingProduct && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  data: getChildTemplate(),
+                                }))
+                              }
+                              className="text-xs text-primary-600 hover:text-primary-700"
+                            >
+                              Use Example
+                            </button>
+                          )}
+                      </div>
+                    </div>
+                    <textarea
+                      id="data"
+                      name="data"
+                      rows={16}
+                      required
+                      className="mt-1 input-field w-full font-mono text-sm"
+                      value={formData.data}
+                      onChange={handleInputChange}
+                      placeholder={
+                        isCreatingProduct
+                          ? "Define your product configuration schema..."
+                          : isCreating || isCreatingChild
+                            ? "{}\n\n# Start with empty object to inherit everything from parent,\n# or add specific properties to override"
+                            : '{\n  "property": "value"\n}'
+                      }
+                    />
+                    <div className="mt-1 text-xs text-gray-500">
+                      {!isCreating &&
+                        !isCreatingChild &&
+                        !isCreatingProduct &&
+                        formData.type !== "PRODUCT" && (
+                          <>
+                            📝 This shows only the properties defined at this
+                            configuration level. Empty object {} means inherit
+                            everything from parent.
+                          </>
+                        )}
+                      {!isCreating &&
+                        !isCreatingChild &&
+                        formData.type === "PRODUCT" && (
+                          <>
+                            🔧 This is the base Product configuration. Changes
+                            here affect all derived configurations.
+                          </>
+                        )}
+                      {(isCreating || isCreatingChild) &&
+                        formData.parent_id &&
+                        !isCreatingProduct && (
+                          <>
+                            ⚠️ Only properties that exist in the parent
+                            configuration are allowed. Use {} to inherit
+                            everything, or specify overrides.
+                          </>
+                        )}
+                      {isCreatingProduct && (
+                        <>
+                          ✅ As a Product configuration, you can define any new
+                          properties.
+                        </>
+                      )}
                     </div>
                   </div>
-                  <textarea
-                    id="data"
-                    name="data"
-                    rows={16}
-                    required
-                    className="mt-1 input-field w-full font-mono text-sm"
-                    value={formData.data}
-                    onChange={handleInputChange}
-                    placeholder={
-                      isCreatingProduct
-                        ? "Define your product configuration schema..."
-                        : isCreating || isCreatingChild
-                          ? "{}\n\n# Start with empty object to inherit everything from parent,\n# or add specific properties to override"
-                          : '{\n  "property": "value"\n}'
-                    }
-                  />
-                  <div className="mt-1 text-xs text-gray-500">
-                    {!isCreating &&
-                      !isCreatingChild &&
-                      !isCreatingProduct &&
-                      formData.type !== "PRODUCT" && (
-                        <>
-                          📝 This shows only the properties defined at this
-                          configuration level. Empty object {} means inherit
-                          everything from parent.
-                        </>
-                      )}
-                    {!isCreating &&
-                      !isCreatingChild &&
-                      formData.type === "PRODUCT" && (
-                        <>
-                          🔧 This is the base Product configuration. Changes
-                          here affect all derived configurations.
-                        </>
-                      )}
-                    {(isCreating || isCreatingChild) &&
-                      formData.parent_id &&
-                      !isCreatingProduct && (
-                        <>
-                          ⚠️ Only properties that exist in the parent
-                          configuration are allowed. Use {} to inherit
-                          everything, or specify overrides.
-                        </>
-                      )}
-                    {isCreatingProduct && (
-                      <>
-                        ✅ As a Product configuration, you can define any new
-                        properties.
-                      </>
-                    )}
+                )}
+
+                {/* Child creation message */}
+                {isCreatingChild && (
+                  <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded text-sm">
+                    📝 The child configuration will inherit all data from the
+                    parent. You can customize it using inline editing after
+                    creation.
                   </div>
-                </div>
+                )}
               </>
             )}
           </div>
