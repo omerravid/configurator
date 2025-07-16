@@ -8,7 +8,7 @@ class Configuration {
     data,
     createdBy,
     description,
-    status = "COMMITTED",
+    status,
   }) {
     // For USER configs, default to DRAFT, otherwise COMMITTED
     const finalStatus = type === "USER" ? status || "DRAFT" : "COMMITTED";
