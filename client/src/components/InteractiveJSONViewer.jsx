@@ -285,9 +285,10 @@ const TreeNode = ({
         {isEditable && (
           <button
             onClick={handleEditStart}
-            className="opacity-0 group-hover:opacity-100 px-1 py-0.5 text-xs text-gray-500 hover:text-gray-700"
+            className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded transition-all"
+            title="Edit value"
           >
-            ✏️
+            <PencilIcon className="w-3 h-3" />
           </button>
         )}
       </div>
