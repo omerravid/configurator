@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import ConfigurationTree from "../components/ConfigurationTree";
 import InteractiveJSONViewer from "../components/InteractiveJSONViewer";
 import ConfigurationEditor from "../components/ConfigurationEditor";
+import PathQueryPanel from "../components/PathQueryPanel";
 import { configAPI } from "../services/api";
 import {
   PlusIcon,
