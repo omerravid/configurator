@@ -9,6 +9,7 @@ import {
   DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
 import ContextMenu from "./ContextMenu";
+import { useToast } from "../context/ToastContext";
 
 // Helper function to safely extract actual values from provenance-wrapped objects
 const extractActualValue = (val) => {
