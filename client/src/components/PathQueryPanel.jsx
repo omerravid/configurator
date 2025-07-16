@@ -259,7 +259,7 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
               </div>
 
               {/* Metadata if available */}
-              {queryResult.metadata && (
+              {queryResult.metadata && Array.isArray(queryResult.metadata) && (
                 <div className="mt-3 pt-3 border-t border-gray-200">
                   <div className="text-xs text-gray-500 mb-2">
                     Inheritance Chain:
