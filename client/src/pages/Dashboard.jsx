@@ -112,15 +112,24 @@ const Dashboard = () => {
       const baseName = selectedConfig.name;
       const copyName = await generateUniqueCopyName(baseName);
 
+      // Create a safe description
+      let safeDescription = `Copy of ${selectedConfig.name}`;
+      if (
+        selectedConfig.description &&
+        typeof selectedConfig.description === "string" &&
+        selectedConfig.description.length < 200 &&
+        !selectedConfig.description.includes("{")
+      ) {
+        safeDescription = `Copy of ${selectedConfig.description}`;
+      }
+
       // Create the duplicate configuration
       const newConfig = {
         name: copyName,
         type: selectedConfig.type,
         parent_id: selectedConfig.parent_id || null,
         data: sourceData,
-        description: selectedConfig.description
-          ? `Copy of ${selectedConfig.description}`
-          : `Copy of ${selectedConfig.name}`,
+        description: safeDescription,
       };
 
       await configAPI.create(newConfig);
