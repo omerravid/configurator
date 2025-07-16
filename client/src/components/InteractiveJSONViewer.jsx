@@ -102,6 +102,7 @@ const TreeNode = ({
   const [isExpanded, setIsExpanded] = useState(depth < 2);
   const [editValue, setEditValue] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [contextMenu, setContextMenu] = useState(null);
 
   const currentPath = path ? `${path}.${keyName}` : keyName;
 
