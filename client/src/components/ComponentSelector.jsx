@@ -85,10 +85,10 @@ const ComponentSelector = ({
 
   // Expose the data through a callback
   React.useEffect(() => {
-    if (onComponentsChange.getComputedData) {
-      onComponentsChange.getComputedData(getSelectedComponentData());
+    if (onDataChange) {
+      onDataChange(getSelectedComponentData());
     }
-  }, [selectedComponents, availableComponents]);
+  }, [selectedComponents, availableComponents, onDataChange]);
 
   if (loading) {
     return <div className="text-center py-4">Loading components...</div>;
