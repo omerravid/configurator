@@ -485,11 +485,11 @@ const Dashboard = () => {
                   <span>New Product</span>
                 </button>
                 <button
-                  onClick={() => setShowEditor(true)}
+                  onClick={handleCreateComponent}
                   className="btn-secondary flex items-center space-x-1"
                 >
                   <PlusIcon className="w-4 h-4" />
-                  <span>New Configuration</span>
+                  <span>New Component</span>
                 </button>
               </div>
             )}
