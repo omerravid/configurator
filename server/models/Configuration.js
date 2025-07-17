@@ -210,7 +210,7 @@ class Configuration {
     await db.query(
       `UPDATE configurations 
        SET status = 'COMMITTED', updated_at = CURRENT_TIMESTAMP
-       WHERE id = ? AND type = 'USER' AND status = 'DRAFT'`,
+              WHERE id = ? AND (type = 'USER' OR type = 'VERSION') AND status = 'DRAFT'`,
       [id],
     );
 
