@@ -231,13 +231,14 @@ const TreeNode = ({
     const canRename = () => user?.role === "ADMIN";
 
     const canCreateChild = () => {
-      if (config.type === "USER") return false;
+      if (config.type === "USER" || config.type === "VERSION") return false;
+      if (config.type === "COMPONENT") return user?.role === "ADMIN";
       return user?.role === "ADMIN" || config.type === "PRODUCT";
     };
 
     const canCommit = () => {
       return (
-        config.type === "USER" &&
+        (config.type === "USER" || config.type === "VERSION") &&
         config.status === "DRAFT" &&
         (user?.role === "ADMIN" || config.created_by === user?.id)
       );
