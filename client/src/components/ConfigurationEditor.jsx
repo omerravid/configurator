@@ -161,9 +161,16 @@ const ConfigurationEditor = ({
       return;
     }
 
-    if (!showRename && !validateJSON(formData.data)) {
-      setError("Invalid JSON data");
-      return;
+    // Skip JSON validation for product creation (uses component selector) or child creation (starts empty)
+    if (
+      !showRename &&
+      !isCreatingChild &&
+      !(isCreatingProduct && formData.type === "PRODUCT")
+    ) {
+      if (!validateJSON(formData.data)) {
+        setError("Invalid JSON data");
+        return;
+      }
     }
 
     setLoading(true);
