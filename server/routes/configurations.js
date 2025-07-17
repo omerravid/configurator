@@ -51,14 +51,19 @@ const checkConfigPermissions = async (req, res, next) => {
     }
 
     // For non-admin users
-    if (config.type === "PRODUCT" || config.type === "INSTANCE") {
+    if (
+      config.type === "PRODUCT" ||
+      config.type === "INSTANCE" ||
+      config.type === "COMPONENT"
+    ) {
       return res.status(403).json({
-        error: "Only admins can modify Product/Instance configurations",
+        error:
+          "Only admins can modify Product/Instance/Component configurations",
       });
     }
 
-    // For USER configs, check ownership and draft status
-    if (config.type === "USER") {
+    // For USER and VERSION configs, check ownership and draft status
+    if (config.type === "USER" || config.type === "VERSION") {
       if (config.created_by !== req.user.id) {
         return res
           .status(403)
