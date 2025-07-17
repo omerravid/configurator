@@ -597,13 +597,8 @@ const ConfigurationEditor = ({
                 {isCreatingProduct && formData.type === "PRODUCT" && (
                   <ComponentSelector
                     selectedComponents={selectedComponents}
-                    onComponentsChange={(components) => {
-                      setSelectedComponents(components);
-                      // Set up callback to get computed data
-                      if (components.getComputedData) {
-                        components.getComputedData = setComputedComponentData;
-                      }
-                    }}
+                    onComponentsChange={setSelectedComponents}
+                    onDataChange={setComputedComponentData}
                   />
                 )}
 
