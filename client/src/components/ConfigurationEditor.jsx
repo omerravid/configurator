@@ -200,11 +200,18 @@ const ConfigurationEditor = ({
 
     if (!config && !isCreatingChild) {
       // Creating standalone config
-      return [
+      const options = [
         { value: "PRODUCT", label: "Product Configuration" },
         { value: "INSTANCE", label: "Instance Configuration" },
         { value: "USER", label: "User Configuration" },
       ];
+
+      // Only admins can create components
+      if (user.role === "ADMIN") {
+        options.push({ value: "COMPONENT", label: "Component Configuration" });
+      }
+
+      return options;
     }
 
     // Creating child config
