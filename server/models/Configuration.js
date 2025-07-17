@@ -11,7 +11,8 @@ class Configuration {
     status,
   }) {
     // Set status: USER configs default to DRAFT (unless explicitly set), others are COMMITTED
-    const finalStatus = type === "USER" ? status || "DRAFT" : "COMMITTED";
+    const finalStatus =
+      type === "USER" || type === "VERSION" ? status || "DRAFT" : "COMMITTED";
     const id = this.generateId();
 
     const result = await db.query(
@@ -22,12 +23,25 @@ class Configuration {
         name,
         type,
         parentId || null,
-        JSON.stringify(data),
+        JSON.stringify(data || {}),
         createdBy,
         description,
         finalStatus,
       ],
     );
+
+    // If creating a COMPONENT, automatically create a root version
+    if (type === "COMPONENT") {
+      await this.create({
+        name: `${name}_root`,
+        type: "VERSION",
+        parentId: id,
+        data: data || {},
+        createdBy,
+        description: `Root version of ${name}`,
+        status: "DRAFT",
+      });
+    }
 
     return await this.findById(id);
   }
