@@ -20,6 +20,8 @@ const ConfigurationEditor = ({
   const [error, setError] = useState(null);
   const [showRename, setShowRename] = useState(isRenaming);
   const [loadingRawData, setLoadingRawData] = useState(false);
+  const [selectedComponents, setSelectedComponents] = useState([]);
+  const [computedComponentData, setComputedComponentData] = useState({});
 
   // Check if user can edit this configuration
   const canEdit = () => {
