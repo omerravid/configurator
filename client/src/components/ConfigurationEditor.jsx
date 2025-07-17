@@ -113,6 +113,16 @@ const ConfigurationEditor = ({
           description: "",
           data: "{\n  \n}", // Empty template for product
         }));
+      } else if (isCreatingComponent) {
+        // CREATING a new component configuration
+        setFormData((prev) => ({
+          ...prev,
+          name: "",
+          type: "COMPONENT",
+          parent_id: "", // Components have no parent
+          description: "",
+          data: "{\n  \n}", // Empty template for component
+        }));
       }
     };
 
