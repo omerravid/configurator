@@ -128,11 +128,12 @@ router.post("/", authenticateToken, async (req, res) => {
 
     // Check permissions
     if (
-      (type === "PRODUCT" || type === "INSTANCE") &&
+      (type === "PRODUCT" || type === "INSTANCE" || type === "COMPONENT") &&
       req.user.role !== "ADMIN"
     ) {
       return res.status(403).json({
-        error: "Only admins can create Product/Instance configurations",
+        error:
+          "Only admins can create Product/Instance/Component configurations",
       });
     }
 
