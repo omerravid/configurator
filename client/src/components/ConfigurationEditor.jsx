@@ -200,6 +200,8 @@ const ConfigurationEditor = ({
           description: formData.description,
         };
 
+        console.log("Creating configuration with payload:", createPayload);
+
         // Note: USER configurations are automatically created as DRAFT by the backend
         await configAPI.create(createPayload);
       } else {
