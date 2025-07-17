@@ -295,6 +295,17 @@ const ConfigurationEditor = ({
     }
   }
 }`;
+      case "COMPONENT":
+        return `{
+  "version": "1.0.0",
+  "api": {
+    "endpoint": "/api/component",
+    "timeout": 5000
+  },
+  "settings": {
+    "enabled": true
+  }
+}`;
       default:
         return "{}";
     }
