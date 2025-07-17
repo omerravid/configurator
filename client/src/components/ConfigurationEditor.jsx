@@ -15,7 +15,7 @@ const ConfigurationEditor = ({
   const { user } = useAuth();
   // Determine if we're creating a new config or editing an existing one
   const [isCreating, setIsCreating] = useState(
-    isCreatingProduct || isCreatingChild || !config,
+    isCreatingProduct || isCreatingComponent || isCreatingChild || !config,
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
