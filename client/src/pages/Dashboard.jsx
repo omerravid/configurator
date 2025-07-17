@@ -476,13 +476,22 @@ const Dashboard = () => {
 
           <div className="flex items-center space-x-4">
             {user.role === "ADMIN" && (
-              <button
-                onClick={handleCreateProduct}
-                className="btn-primary flex items-center space-x-1"
-              >
-                <PlusIcon className="w-4 h-4" />
-                <span>New Product</span>
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handleCreateProduct}
+                  className="btn-primary flex items-center space-x-1"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  <span>New Product</span>
+                </button>
+                <button
+                  onClick={() => setShowEditor(true)}
+                  className="btn-secondary flex items-center space-x-1"
+                >
+                  <PlusIcon className="w-4 h-4" />
+                  <span>New Configuration</span>
+                </button>
+              </div>
             )}
 
             <div className="flex items-center space-x-2 text-sm text-gray-600">
