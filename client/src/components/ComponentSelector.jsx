@@ -2,7 +2,11 @@ import React, { useState, useEffect } from "react";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { configAPI } from "../services/api";
 
-const ComponentSelector = ({ selectedComponents, onComponentsChange }) => {
+const ComponentSelector = ({
+  selectedComponents,
+  onComponentsChange,
+  onDataChange,
+}) => {
   const [availableComponents, setAvailableComponents] = useState([]);
   const [loading, setLoading] = useState(true);
 
