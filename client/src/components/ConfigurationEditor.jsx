@@ -152,7 +152,16 @@ const ConfigurationEditor = ({
         await configAPI.rename(config.id, formData.name);
       } else if (isCreating) {
         // Handle create
-        const data = isCreatingChild ? {} : JSON.parse(formData.data);
+        let data;
+        if (isCreatingChild) {
+          data = {};
+        } else if (isCreatingProduct && formData.type === "PRODUCT") {
+          // For products, use component data instead of manual JSON
+          data = computedComponentData;
+        } else {
+          data = JSON.parse(formData.data);
+        }
+
         const createPayload = {
           name: formData.name,
           type: formData.type,
