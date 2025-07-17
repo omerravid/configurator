@@ -9,7 +9,9 @@ const router = express.Router();
 // Validation schemas - Fixed to not require GUID format for parent_id
 const createConfigSchema = Joi.object({
   name: Joi.string().min(3).max(100).required(),
-  type: Joi.string().valid("PRODUCT", "INSTANCE", "USER").required(),
+  type: Joi.string()
+    .valid("PRODUCT", "INSTANCE", "USER", "COMPONENT", "VERSION")
+    .required(),
   parent_id: Joi.alternatives()
     .try(
       Joi.string().min(1), // Accept any non-empty string
