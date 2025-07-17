@@ -84,7 +84,12 @@ const ConfigurationEditor = ({
           ...prev,
           name: "", // Empty name for new config
           parent_id: config.id, // The selected config becomes the parent
-          type: config.type === "PRODUCT" ? "INSTANCE" : "USER", // Determine child type
+          type:
+            config.type === "PRODUCT"
+              ? "INSTANCE"
+              : config.type === "COMPONENT"
+                ? "VERSION"
+                : "USER", // Determine child type
           description: "", // Empty description
           data: "{}", // Start with empty JSON object
         }));
