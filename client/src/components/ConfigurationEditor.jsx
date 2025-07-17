@@ -127,7 +127,13 @@ const ConfigurationEditor = ({
     };
 
     loadRawConfigData();
-  }, [config, isCreating, isCreatingProduct, isCreatingChild]);
+  }, [
+    config,
+    isCreating,
+    isCreatingProduct,
+    isCreatingComponent,
+    isCreatingChild,
+  ]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
