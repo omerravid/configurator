@@ -115,6 +115,29 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 });
 
+// GET /api/configs/components - Get all components with their versions
+router.get("/components", authenticateToken, async (req, res) => {
+  try {
+    const components = await Configuration.findByType("COMPONENT");
+
+    // Get versions for each component
+    const componentsWithVersions = await Promise.all(
+      components.map(async (component) => {
+        const versions = await Configuration.findByParentId(component.id);
+        return {
+          ...component,
+          versions: versions.filter((v) => v.type === "VERSION"),
+        };
+      }),
+    );
+
+    res.json({ components: componentsWithVersions });
+  } catch (error) {
+    console.error("List components error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // POST /api/configs - Create new configuration
 router.post("/", authenticateToken, async (req, res) => {
   try {
