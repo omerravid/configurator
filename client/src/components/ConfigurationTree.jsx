@@ -45,6 +45,27 @@ const ConfigTypeIcon = ({ type, status }) => {
             )}
           </div>
         );
+      case "COMPONENT":
+        return (
+          <div className="w-6 h-6 bg-teal-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+            C
+          </div>
+        );
+      case "VERSION":
+        return (
+          <div className="relative">
+            <div
+              className={`w-6 h-6 ${status === "DRAFT" ? "bg-amber-500" : "bg-indigo-500"} text-white rounded-full flex items-center justify-center text-xs font-bold`}
+            >
+              V
+            </div>
+            {status === "COMMITTED" && (
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-gray-700 rounded-full flex items-center justify-center">
+                <LockClosedIcon className="w-2 h-2 text-white" />
+              </div>
+            )}
+          </div>
+        );
       default:
         return null;
     }
