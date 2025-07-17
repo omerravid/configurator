@@ -255,6 +255,7 @@ const Dashboard = () => {
   const handleEditorClose = (success) => {
     setShowEditor(false);
     setShowCreateProduct(false);
+    setShowCreateComponent(false);
     setShowCreateChild(false);
     setShowRename(false);
     if (success) {
