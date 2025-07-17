@@ -343,6 +343,8 @@ const ConfigurationEditor = ({
           return "Creating a User configuration. Define personal overrides for the selected Instance configuration. Start with {} to inherit everything, or add specific overrides.";
         case "USER":
           return "Creating a User configuration. Define personal overrides for the selected User configuration. Start with {} to inherit everything, or add specific overrides.";
+        case "COMPONENT":
+          return "Creating a Version configuration. Define the configuration for this version of the component.";
         default:
           return "";
       }
