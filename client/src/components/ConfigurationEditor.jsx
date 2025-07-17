@@ -161,6 +161,17 @@ const ConfigurationEditor = ({
       return;
     }
 
+    // Validate required fields
+    if (!formData.name || !formData.name.trim()) {
+      setError("Configuration name is required");
+      return;
+    }
+
+    if (!formData.type) {
+      setError("Configuration type is required");
+      return;
+    }
+
     // Skip JSON validation for product creation (uses component selector) or child creation (starts empty)
     if (
       !showRename &&
