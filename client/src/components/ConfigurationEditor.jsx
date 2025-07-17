@@ -199,15 +199,16 @@ const ConfigurationEditor = ({
         } else if (isCreatingProduct && formData.type === "PRODUCT") {
           // For products, use component data instead of manual JSON
           data = computedComponentData;
-        } else if (isCreatingComponent && formData.type === "COMPONENT") {
-          // For components, parse the JSON data
+        } else {
+          // Parse JSON data for all other cases
           try {
             data = JSON.parse(formData.data);
           } catch (e) {
-            data = {}; // Fallback to empty object if JSON is invalid
+            console.error("JSON parse error:", e, "Data:", formData.data);
+            setError("Invalid JSON data: " + e.message);
+            setLoading(false);
+            return;
           }
-        } else {
-          data = JSON.parse(formData.data);
         }
 
         const createPayload = {
