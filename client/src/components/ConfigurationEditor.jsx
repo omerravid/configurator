@@ -222,6 +222,10 @@ const ConfigurationEditor = ({
       return [{ value: "PRODUCT", label: "Product Configuration" }];
     }
 
+    if (isCreatingComponent) {
+      return [{ value: "COMPONENT", label: "Component Configuration" }];
+    }
+
     if (!isCreating && !isCreatingChild) {
       // When editing, type cannot be changed
       return [
