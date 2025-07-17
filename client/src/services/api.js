@@ -78,6 +78,9 @@ export const configAPI = {
   // Commit user configuration
   commit: (id) => api.post(`/configs/${id}/commit`),
 
+  // Get components with their versions
+  getComponents: () => api.get("/configs/components"),
+
   // Get child configurations
   getChildren: (id) => api.get(`/configs/${id}/children`),
 };
