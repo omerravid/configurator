@@ -8,6 +8,7 @@ const ConfigurationEditor = ({
   config,
   onClose,
   isCreatingProduct = false,
+  isCreatingComponent = false,
   isRenaming = false,
   isCreatingChild = false,
 }) => {
