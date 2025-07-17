@@ -26,7 +26,13 @@ const ConfigurationEditor = ({
 
   // Check if user can edit this configuration
   const canEdit = () => {
-    if (isCreating || isCreatingChild || isCreatingProduct || showRename)
+    if (
+      isCreating ||
+      isCreatingChild ||
+      isCreatingProduct ||
+      isCreatingComponent ||
+      showRename
+    )
       return true;
     if (!config) return true;
     if (user.role === "ADMIN") return true;
