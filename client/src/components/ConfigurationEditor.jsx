@@ -356,6 +356,10 @@ const ConfigurationEditor = ({
       return "As a Product configuration, you can define any new properties.";
     }
 
+    if (isCreatingComponent) {
+      return "As a Component configuration, you can define reusable properties that can be added to Products.";
+    }
+
     if (!isCreating && !isCreatingChild && config) {
       // EDITING existing configuration
       switch (config.type) {
