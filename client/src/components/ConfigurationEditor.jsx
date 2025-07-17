@@ -225,6 +225,8 @@ const ConfigurationEditor = ({
         case "INSTANCE":
         case "USER":
           return [{ value: "USER", label: "User Configuration" }];
+        case "COMPONENT":
+          return [{ value: "VERSION", label: "Version Configuration" }];
         default:
           return [{ value: "USER", label: "User Configuration" }];
       }
