@@ -84,6 +84,13 @@ const Dashboard = () => {
     setShowRename(false);
   };
 
+  const handleCreateComponent = () => {
+    setShowCreateComponent(true);
+    setShowCreateProduct(false);
+    setShowCreateChild(false);
+    setShowRename(false);
+  };
+
   const handleEdit = () => {
     if (!selectedConfig) return;
 
