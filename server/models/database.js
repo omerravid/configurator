@@ -49,6 +49,7 @@ class Database {
           reject(err);
         } else {
           console.log("Database tables created successfully");
+          await this.migrateTypeConstraint();
           await this.createDefaultData();
           resolve();
         }
