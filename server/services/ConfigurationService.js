@@ -303,8 +303,8 @@ class ConfigurationService {
       throw new Error("Product configurations cannot have a parent");
     }
 
-    if (type !== "PRODUCT" && !parentId) {
-      throw new Error("Instance and User configurations must have a parent");
+    if (type !== "PRODUCT" && type !== "COMPONENT" && !parentId) {
+      throw new Error("Instance, User, and Version configurations must have a parent");
     }
 
     // Validate parent exists and is correct type
