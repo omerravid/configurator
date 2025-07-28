@@ -31,7 +31,7 @@ class Database {
       CREATE TABLE IF NOT EXISTS configurations (
           id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
           name TEXT UNIQUE NOT NULL,
-          type TEXT NOT NULL CHECK (type IN ('PRODUCT', 'INSTANCE', 'USER')),
+          type TEXT NOT NULL CHECK (type IN ('PRODUCT', 'INSTANCE', 'USER', 'COMPONENT', 'VERSION')),
           parent_id TEXT REFERENCES configurations(id) ON DELETE CASCADE,
           data TEXT NOT NULL DEFAULT '{}',
           status TEXT NOT NULL DEFAULT 'COMMITTED' CHECK (status IN ('DRAFT', 'COMMITTED')),
