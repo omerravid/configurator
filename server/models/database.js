@@ -171,6 +171,59 @@ class Database {
     }
   }
 
+  async migrateTypeConstraint() {
+    try {
+      // Check if migration is needed by testing if COMPONENT type can be inserted
+      const testResult = await this.query("PRAGMA table_info(configurations)");
+
+      // Get current table schema to see if we need to migrate
+      try {
+        await this.query("INSERT INTO configurations (id, name, type, data, created_by, description) VALUES ('test-id', 'test', 'COMPONENT', '{}', 'test-user', 'test')", []);
+        // If this succeeds, we already have the new schema
+        await this.query("DELETE FROM configurations WHERE id = 'test-id'");
+        console.log("Type constraint already updated");
+        return;
+      } catch (e) {
+        if (e.code === 'SQLITE_CONSTRAINT') {
+          console.log("Migrating type constraint to include COMPONENT and VERSION...");
+
+          // Create new table with updated constraint
+          await this.query(`
+            CREATE TABLE configurations_new (
+              id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+              name TEXT UNIQUE NOT NULL,
+              type TEXT NOT NULL CHECK (type IN ('PRODUCT', 'INSTANCE', 'USER', 'COMPONENT', 'VERSION')),
+              parent_id TEXT REFERENCES configurations_new(id) ON DELETE CASCADE,
+              data TEXT NOT NULL DEFAULT '{}',
+              status TEXT NOT NULL DEFAULT 'COMMITTED' CHECK (status IN ('DRAFT', 'COMMITTED')),
+              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+              updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+              created_by TEXT NOT NULL REFERENCES users(id),
+              description TEXT
+            );
+          `);
+
+          // Copy data from old table
+          await this.query(`
+            INSERT INTO configurations_new
+            SELECT * FROM configurations;
+          `);
+
+          // Drop old table and rename new one
+          await this.query("DROP TABLE configurations;");
+          await this.query("ALTER TABLE configurations_new RENAME TO configurations;");
+
+          console.log("Type constraint migration completed successfully");
+        } else {
+          throw e;
+        }
+      }
+    } catch (error) {
+      console.error("Error during type constraint migration:", error);
+      throw error;
+    }
+  }
+
   query(sql, params = []) {
     return new Promise((resolve, reject) => {
       if (
