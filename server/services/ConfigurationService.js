@@ -166,7 +166,7 @@ class ConfigurationService {
 
       // If this is a PRODUCT configuration, expand component references
       if (level.type === "PRODUCT") {
-        levelData = await this.expandComponentReferences(levelData);
+        levelData = await this.expandComponentReferences(levelData, includeProvenance);
       }
 
       // For the first level (root), there's no previous source
