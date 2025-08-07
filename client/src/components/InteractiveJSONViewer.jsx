@@ -64,7 +64,7 @@ const ProvenanceTooltip = ({ source, isVisible, position, path }) => {
     }
   };
 
-  const getInheritanceLabel = (type) => {
+  const getInheritanceLabel = (type, source) => {
     switch (type) {
       case "PRODUCT":
         return "Defined in Product";
