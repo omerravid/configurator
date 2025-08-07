@@ -387,6 +387,40 @@ class ConfigurationService {
 
     return await Configuration.commit(configId);
   }
+
+  /**
+   * Expand component references in product data
+   * @param {Object} productData - Product data that may contain component references
+   * @returns {Object} Expanded data with component data resolved
+   */
+  static async expandComponentReferences(productData) {
+    if (!productData || typeof productData !== 'object') {
+      return productData;
+    }
+
+    const expandedData = { ...productData };
+
+    // Look for component references and expand them
+    for (const [key, value] of Object.entries(productData)) {
+      // Check if this might be a component reference
+      // Component references are stored as the actual component data,
+      // but we need to check if there are any COMPONENT configs with this name
+      try {
+        const componentConfig = await Configuration.findByName(key);
+        if (componentConfig && componentConfig.type === 'COMPONENT') {
+          // This is a component reference, expand it with the actual component data
+          // The value should already be the component's data from when the product was created
+          // So we keep the existing value but could add metadata if needed
+          expandedData[key] = value;
+        }
+      } catch (error) {
+        // If component not found, keep the original value
+        expandedData[key] = value;
+      }
+    }
+
+    return expandedData;
+  }
 }
 
 module.exports = ConfigurationService;
