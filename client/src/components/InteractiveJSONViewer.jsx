@@ -71,7 +71,12 @@ const ProvenanceTooltip = ({ source, isVisible, position, path }) => {
       case "COMPONENT":
         return "Defined in Component";
       case "VERSION":
-        return "Defined in Version";
+        // Show component name with version in parentheses for better context
+        if (source.parentName && source.name) {
+          return `Defined in ${source.parentName} (${source.name})`;
+        } else {
+          return "Defined in Version";
+        }
       case "INSTANCE":
         return "Overridden in Instance";
       case "USER":
