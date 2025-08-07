@@ -391,9 +391,10 @@ class ConfigurationService {
   /**
    * Expand component references in product data
    * @param {Object} productData - Product data containing component references
+   * @param {boolean} includeProvenance - Whether to include provenance tracking
    * @returns {Object} Expanded data with resolved component/version data
    */
-  static async expandComponentReferences(productData) {
+  static async expandComponentReferences(productData, includeProvenance = false) {
     if (!productData || typeof productData !== 'object') {
       return productData;
     }
@@ -408,8 +409,8 @@ class ConfigurationService {
           // This is a new-style component reference
           const version = await Configuration.findById(reference.versionId);
           if (version && version.type === 'VERSION') {
-            // Resolve the version with its full inheritance chain INCLUDING provenance
-            const resolvedVersion = await this.resolveConfiguration(version.id, true);
+            // Resolve the version with its full inheritance chain
+            const resolvedVersion = await this.resolveConfiguration(version.id, includeProvenance);
             expandedData[componentName] = resolvedVersion.resolved;
           } else {
             console.warn(`Version not found for reference:`, reference);
