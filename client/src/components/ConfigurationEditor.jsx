@@ -24,6 +24,44 @@ const ConfigurationEditor = ({
   const [selectedComponents, setSelectedComponents] = useState([]);
   const [computedComponentData, setComputedComponentData] = useState({});
 
+  // Initialize component selections from existing product data
+  const initializeComponentSelections = async (productData) => {
+    try {
+      // Get all available components
+      const response = await configAPI.getComponents();
+      const availableComponents = response.data.components;
+
+      const selections = [];
+      let selectionId = 1;
+
+      // For each property in the product data, check if it matches a component
+      for (const [key, value] of Object.entries(productData)) {
+        const component = availableComponents.find(c => c.name === key);
+        if (component) {
+          // Find the version that matches the data
+          const version = component.versions.find(v =>
+            JSON.stringify(v.data) === JSON.stringify(value)
+          ) || component.versions[0]; // Fallback to first version
+
+          if (version) {
+            selections.push({
+              id: selectionId++,
+              componentId: component.id,
+              versionId: version.id,
+              componentName: component.name,
+              versionName: version.name,
+            });
+          }
+        }
+      }
+
+      setSelectedComponents(selections);
+      setComputedComponentData(productData);
+    } catch (error) {
+      console.error("Failed to initialize component selections:", error);
+    }
+  };
+
   // Check if user can edit this configuration
   const canEdit = () => {
     if (
