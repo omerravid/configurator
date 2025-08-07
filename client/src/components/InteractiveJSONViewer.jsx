@@ -383,6 +383,14 @@ const TreeNode = ({
         color = "text-blue-400";
         title = "From Product";
         break;
+      case "COMPONENT":
+        color = "text-teal-400";
+        title = "From Component";
+        break;
+      case "VERSION":
+        color = "text-amber-400";
+        title = "From Version";
+        break;
       case "INSTANCE":
         color = "text-green-400";
         title = "From Instance";
