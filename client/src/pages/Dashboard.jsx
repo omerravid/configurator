@@ -757,6 +757,12 @@ const Dashboard = () => {
           onClose={() => setContextMenu(null)}
         />
       )}
+
+      {/* Help Modal */}
+      <HelpModal
+        isOpen={showHelp}
+        onClose={() => setShowHelp(false)}
+      />
     </div>
   );
 };
