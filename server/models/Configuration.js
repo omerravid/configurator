@@ -30,18 +30,8 @@ class Configuration {
       ],
     );
 
-    // If creating a COMPONENT, automatically create a root version
-    if (type === "COMPONENT") {
-      await this.create({
-        name: `${name}_root`,
-        type: "VERSION",
-        parentId: id,
-        data: data || {},
-        createdBy,
-        description: `Root version of ${name}`,
-        status: "DRAFT",
-      });
-    }
+    // Components now act as their own root version
+    // No need to create separate root versions
 
     return await this.findById(id);
   }
