@@ -653,8 +653,8 @@ const ConfigurationEditor = ({
                   />
                 </div>
 
-                {/* Component Selector for Product Creation */}
-                {isCreatingProduct && formData.type === "PRODUCT" && (
+                {/* Component Selector for Product Creation and Editing */}
+                {(isCreatingProduct || (!isCreatingChild && config?.type === "PRODUCT")) && formData.type === "PRODUCT" && (
                   <ComponentSelector
                     selectedComponents={selectedComponents}
                     onComponentsChange={setSelectedComponents}
