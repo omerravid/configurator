@@ -36,6 +36,7 @@ const Dashboard = () => {
   const [showCreateChild, setShowCreateChild] = useState(false);
   const [showRename, setShowRename] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   const loadAllConfigurations = async () => {
     try {
