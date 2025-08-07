@@ -226,6 +226,30 @@ class Database {
     }
   }
 
+  async cleanupRootVersions() {
+    try {
+      console.log("Cleaning up automatically created root versions...");
+
+      // Find and delete root versions (versions whose names end with "_root")
+      const rootVersionsResult = await this.query(`
+        SELECT id, name FROM configurations
+        WHERE type = 'VERSION' AND name LIKE '%_root'
+      `);
+
+      if (rootVersionsResult.rows && rootVersionsResult.rows.length > 0) {
+        for (const rootVersion of rootVersionsResult.rows) {
+          await this.query("DELETE FROM configurations WHERE id = ?", [rootVersion.id]);
+          console.log(`Removed root version: ${rootVersion.name}`);
+        }
+        console.log(`Cleaned up ${rootVersionsResult.rows.length} root versions`);
+      } else {
+        console.log("No root versions to clean up");
+      }
+    } catch (error) {
+      console.error("Error during root versions cleanup:", error);
+    }
+  }
+
   query(sql, params = []) {
     return new Promise((resolve, reject) => {
       if (
