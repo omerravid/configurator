@@ -53,8 +53,8 @@ class ConfigurationService {
       } else if (baseValue !== undefined) {
         // Only base value exists - this is an inherited value
         if (isPlainObject(baseValue)) {
-          // For inherited objects, recursively add provenance
-          finalValue = this.addProvenanceToObject(
+          // For inherited objects, preserve existing provenance if it exists
+          finalValue = this.preserveOriginalProvenance(
             baseValue,
             baseSource,
             includeProvenance,
@@ -62,7 +62,8 @@ class ConfigurationService {
         } else {
           finalValue = cloneDeep(baseValue);
         }
-        finalSource = baseSource;
+        // For inherited values, preserve the original source if it already has provenance
+        finalSource = this.extractOriginalSource(baseValue) || baseSource;
       }
 
       if (includeProvenance && finalValue !== undefined) {
