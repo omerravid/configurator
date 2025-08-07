@@ -70,6 +70,16 @@ const ConfigurationEditor = ({
             description: config.description || "",
             data: JSON.stringify(response.data.resolved || {}, null, 2),
           });
+
+          // If this is a PRODUCT, try to parse component selections from the raw data
+          if (config.type === "PRODUCT") {
+            try {
+              const rawData = response.data.resolved || {};
+              await initializeComponentSelections(rawData);
+            } catch (err) {
+              console.error("Failed to initialize component selections:", err);
+            }
+          }
         } catch (err) {
           console.error("Failed to load raw config data:", err);
           // Fallback to using the passed config data
