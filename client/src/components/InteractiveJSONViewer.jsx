@@ -110,20 +110,25 @@ const TreeNode = ({
 
   // Safely extract actual value and source from provenance-wrapped values
   const getActualValueAndSource = (val) => {
-    if (
-      val &&
-      typeof val === "object" &&
-      val.hasOwnProperty("value") &&
-      val.hasOwnProperty("source")
+    // Handle nested provenance wrappers
+    let currentVal = val;
+    let source = null;
+
+    // Keep unwrapping until we get to the actual value
+    while (
+      currentVal &&
+      typeof currentVal === "object" &&
+      currentVal.hasOwnProperty("value") &&
+      currentVal.hasOwnProperty("source") &&
+      Object.keys(currentVal).length === 2
     ) {
-      return {
-        actualValue: val.value,
-        source: val.source,
-      };
+      source = currentVal.source; // Keep the deepest source
+      currentVal = currentVal.value;
     }
+
     return {
-      actualValue: val,
-      source: null,
+      actualValue: currentVal,
+      source: source,
     };
   };
 
