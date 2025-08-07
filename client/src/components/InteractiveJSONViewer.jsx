@@ -68,6 +68,10 @@ const ProvenanceTooltip = ({ source, isVisible, position, path }) => {
     switch (type) {
       case "PRODUCT":
         return "Defined in Product";
+      case "COMPONENT":
+        return "Defined in Component";
+      case "VERSION":
+        return "Defined in Version";
       case "INSTANCE":
         return "Overridden in Instance";
       case "USER":
