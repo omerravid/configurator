@@ -199,11 +199,14 @@ const ComponentSelector = ({
       {selectedComponents.length > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h4 className="font-medium text-blue-900 mb-2">
-            Computed Product Structure
+            Product Component References
           </h4>
           <pre className="text-sm text-blue-700 overflow-auto max-h-32">
             {JSON.stringify(getSelectedComponentData(), null, 2)}
           </pre>
+          <div className="mt-2 text-xs text-blue-600">
+            💡 Product stores references only. Actual data will be computed during resolution.
+          </div>
         </div>
       )}
     </div>
