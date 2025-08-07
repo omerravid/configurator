@@ -120,13 +120,24 @@ router.get("/components", authenticateToken, async (req, res) => {
   try {
     const components = await Configuration.findByType("COMPONENT");
 
-    // Get versions for each component
+    // Get versions for each component (including component as root version)
     const componentsWithVersions = await Promise.all(
       components.map(async (component) => {
-        const versions = await Configuration.findByParentId(component.id);
+        const childVersions = await Configuration.findByParentId(component.id);
+
+        // Include the component itself as the root version, plus any child versions
+        const allVersions = [
+          {
+            ...component,
+            name: `${component.name} (root)`,
+            isRoot: true,
+          },
+          ...childVersions.filter((v) => v.type === "VERSION"),
+        ];
+
         return {
           ...component,
-          versions: versions.filter((v) => v.type === "VERSION"),
+          versions: allVersions,
         };
       }),
     );
