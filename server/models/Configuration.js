@@ -139,7 +139,11 @@ class Configuration {
 
     while (currentId) {
       const result = await db.query(
-        "SELECT id, name, type, parent_id, data, status FROM configurations WHERE id = ?",
+        `SELECT c.id, c.name, c.type, c.parent_id, c.data, c.status,
+                pc.name as parent_name, pc.type as parent_type
+         FROM configurations c
+         LEFT JOIN configurations pc ON c.parent_id = pc.id
+         WHERE c.id = ?`,
         [currentId],
       );
 
