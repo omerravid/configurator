@@ -472,12 +472,12 @@ class ConfigurationService {
         if (reference && typeof reference === 'object' && reference.versionId) {
           // This is a new-style component reference
           const version = await Configuration.findById(reference.versionId);
-          if (version && version.type === 'VERSION') {
-            // Resolve the version with its full inheritance chain
+          if (version && (version.type === 'VERSION' || version.type === 'COMPONENT')) {
+            // Resolve the version/component with its full inheritance chain
             const resolvedVersion = await this.resolveConfiguration(version.id, includeProvenance);
             expandedData[componentName] = resolvedVersion.resolved;
           } else {
-            console.warn(`Version not found for reference:`, reference);
+            console.warn(`Version/Component not found for reference:`, reference);
             expandedData[componentName] = {};
           }
         } else {
