@@ -34,23 +34,35 @@ const ConfigurationEditor = ({
       const selections = [];
       let selectionId = 1;
 
-      // For each property in the product data, check if it matches a component
+      // For each property in the product data, check if it's a component reference
       for (const [key, value] of Object.entries(productData)) {
-        const component = availableComponents.find(c => c.name === key);
-        if (component) {
-          // Find the version that matches the data
-          const version = component.versions.find(v =>
-            JSON.stringify(v.data) === JSON.stringify(value)
-          ) || component.versions[0]; // Fallback to first version
+        if (value && typeof value === 'object' && value.versionId) {
+          // New-style component reference
+          selections.push({
+            id: selectionId++,
+            componentId: value.componentId,
+            versionId: value.versionId,
+            componentName: value.componentName,
+            versionName: value.versionName,
+          });
+        } else {
+          // Old-style or backwards compatibility - try to match by component name
+          const component = availableComponents.find(c => c.name === key);
+          if (component) {
+            // Find the version that matches the data
+            const version = component.versions.find(v =>
+              JSON.stringify(v.data) === JSON.stringify(value)
+            ) || component.versions[0]; // Fallback to first version
 
-          if (version) {
-            selections.push({
-              id: selectionId++,
-              componentId: component.id,
-              versionId: version.id,
-              componentName: component.name,
-              versionName: version.name,
-            });
+            if (version) {
+              selections.push({
+                id: selectionId++,
+                componentId: component.id,
+                versionId: version.id,
+                componentName: component.name,
+                versionName: version.name,
+              });
+            }
           }
         }
       }
