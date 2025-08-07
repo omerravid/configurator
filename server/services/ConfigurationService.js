@@ -390,32 +390,40 @@ class ConfigurationService {
 
   /**
    * Expand component references in product data
-   * @param {Object} productData - Product data that may contain component references
-   * @returns {Object} Expanded data with component data resolved
+   * @param {Object} productData - Product data containing component references
+   * @returns {Object} Expanded data with resolved component/version data
    */
   static async expandComponentReferences(productData) {
     if (!productData || typeof productData !== 'object') {
       return productData;
     }
 
-    const expandedData = { ...productData };
+    const expandedData = {};
 
-    // Look for component references and expand them
-    for (const [key, value] of Object.entries(productData)) {
-      // Check if this might be a component reference
-      // Component references are stored as the actual component data,
-      // but we need to check if there are any COMPONENT configs with this name
+    // Process each component reference
+    for (const [componentName, reference] of Object.entries(productData)) {
       try {
-        const componentConfig = await Configuration.findByName(key);
-        if (componentConfig && componentConfig.type === 'COMPONENT') {
-          // This is a component reference, expand it with the actual component data
-          // The value should already be the component's data from when the product was created
-          // So we keep the existing value but could add metadata if needed
-          expandedData[key] = value;
+        // Check if this is a component reference object
+        if (reference && typeof reference === 'object' && reference.versionId) {
+          // This is a new-style component reference
+          const version = await Configuration.findById(reference.versionId);
+          if (version && version.type === 'VERSION') {
+            // Resolve the version with its full inheritance chain
+            const resolvedVersion = await this.resolveConfiguration(version.id, false);
+            expandedData[componentName] = resolvedVersion.resolved;
+          } else {
+            console.warn(`Version not found for reference:`, reference);
+            expandedData[componentName] = {};
+          }
+        } else {
+          // This might be old-style data (actual component data) or other data
+          // For backwards compatibility, keep as-is
+          expandedData[componentName] = reference;
         }
       } catch (error) {
-        // If component not found, keep the original value
-        expandedData[key] = value;
+        console.error(`Error expanding component reference ${componentName}:`, error);
+        // Fallback: keep the original value
+        expandedData[componentName] = reference;
       }
     }
 
