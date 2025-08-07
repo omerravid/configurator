@@ -63,7 +63,7 @@ const ComponentSelector = ({
   };
 
   const getSelectedComponentData = () => {
-    const componentData = {};
+    const componentReferences = {};
 
     selectedComponents.forEach((item) => {
       if (item.componentId && item.versionId) {
@@ -75,12 +75,18 @@ const ComponentSelector = ({
         );
 
         if (component && version) {
-          componentData[component.name] = version.data || {};
+          // Store reference to component/version, not the actual data
+          componentReferences[component.name] = {
+            componentId: component.id,
+            versionId: version.id,
+            componentName: component.name,
+            versionName: version.name,
+          };
         }
       }
     });
 
-    return componentData;
+    return componentReferences;
   };
 
   // Expose the data through a callback
