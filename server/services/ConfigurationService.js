@@ -161,8 +161,13 @@ class ConfigurationService {
         type: level.type,
       };
 
-      const levelData =
+      let levelData =
         typeof level.data === "string" ? JSON.parse(level.data) : level.data;
+
+      // If this is a PRODUCT configuration, expand component references
+      if (level.type === "PRODUCT") {
+        levelData = await this.expandComponentReferences(levelData);
+      }
 
       // For the first level (root), there's no previous source
       const previousSource = Object.keys(resolved).length === 0 ? null : source;
