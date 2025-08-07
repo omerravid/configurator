@@ -397,7 +397,12 @@ const TreeNode = ({
         break;
       case "VERSION":
         color = "text-amber-400";
-        title = "From Version";
+        // Show component name with version in parentheses
+        if (source.parentName && source.name) {
+          title = `From ${source.parentName} (${source.name})`;
+        } else {
+          title = "From Version";
+        }
         break;
       case "INSTANCE":
         color = "text-green-400";
