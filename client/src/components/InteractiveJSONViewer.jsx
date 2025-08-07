@@ -51,6 +51,10 @@ const ProvenanceTooltip = ({ source, isVisible, position, path }) => {
     switch (type) {
       case "PRODUCT":
         return "text-blue-600 bg-blue-50 border-blue-200";
+      case "COMPONENT":
+        return "text-teal-600 bg-teal-50 border-teal-200";
+      case "VERSION":
+        return "text-amber-600 bg-amber-50 border-amber-200";
       case "INSTANCE":
         return "text-green-600 bg-green-50 border-green-200";
       case "USER":
