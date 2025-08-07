@@ -435,8 +435,10 @@ const ConfigurationTree = ({
     setLoading(true);
     setError(null);
     try {
-      const response = await configAPI.getAll({ type: "PRODUCT" });
-      setRootConfigs(response.data.configs || []);
+      const response = await configAPI.getAll();
+      // Filter to show root-level configs (no parent) - includes PRODUCT and COMPONENT
+      const rootConfigs = (response.data.configs || []).filter(config => !config.parent_id);
+      setRootConfigs(rootConfigs);
     } catch (err) {
       console.error("Failed to load configurations:", err);
       setError("Failed to load configurations");
