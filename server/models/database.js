@@ -50,6 +50,7 @@ class Database {
         } else {
           console.log("Database tables created successfully");
           await this.migrateTypeConstraint();
+          await this.cleanupRootVersions();
           await this.createDefaultData();
           resolve();
         }
