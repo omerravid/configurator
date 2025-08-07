@@ -455,7 +455,7 @@ const Dashboard = () => {
 
   const canCommit = () => {
     if (!selectedConfig) return false;
-    if (selectedConfig.type !== "USER") return false;
+    if (selectedConfig.type !== "USER" && selectedConfig.type !== "VERSION") return false;
     if (selectedConfig.status !== "DRAFT") return false;
     return user.role === "ADMIN" || selectedConfig.created_by === user.id;
   };
