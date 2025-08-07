@@ -121,6 +121,69 @@ class ConfigurationService {
   }
 
   /**
+   * Extract the original source from a value that might already have provenance
+   * @param {any} value - Value that might have provenance wrapper
+   * @returns {Object|null} Original source or null
+   */
+  static extractOriginalSource(value) {
+    // Check if this is a provenance wrapper
+    if (
+      value &&
+      typeof value === "object" &&
+      value.hasOwnProperty("value") &&
+      value.hasOwnProperty("source")
+    ) {
+      return value.source;
+    }
+    return null;
+  }
+
+  /**
+   * Preserve existing provenance when inheriting values
+   * @param {Object} obj - Object that might contain provenance-wrapped values
+   * @param {Object} fallbackSource - Source to use if no provenance exists
+   * @param {boolean} includeProvenance - Whether to include provenance
+   * @returns {Object} Object with preserved provenance
+   */
+  static preserveOriginalProvenance(obj, fallbackSource, includeProvenance) {
+    if (!isPlainObject(obj) || !includeProvenance) {
+      return cloneDeep(obj);
+    }
+
+    const result = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (isPlainObject(value) && !Array.isArray(value)) {
+        // Check if this is already a provenance wrapper
+        if (value.hasOwnProperty("value") && value.hasOwnProperty("source")) {
+          // This is a provenance wrapper, keep it as-is to preserve original source
+          result[key] = cloneDeep(value);
+        } else {
+          // Regular object, recursively process
+          result[key] = this.preserveOriginalProvenance(
+            value,
+            fallbackSource,
+            includeProvenance,
+          );
+        }
+      } else {
+        // For primitives and arrays, wrap with fallback source only if not already wrapped
+        const existingSource = this.extractOriginalSource(value);
+        if (existingSource) {
+          // Already has provenance, keep it
+          result[key] = cloneDeep(value);
+        } else {
+          // No provenance, add fallback source
+          result[key] = {
+            value: cloneDeep(value),
+            source: fallbackSource,
+          };
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
    * Resolve a configuration by merging inheritance chain
    * @param {string} configIdOrName - Configuration ID or name
    * @param {boolean} includeProvenance - Whether to include provenance data
