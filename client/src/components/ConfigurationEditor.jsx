@@ -273,7 +273,14 @@ const ConfigurationEditor = ({
         await configAPI.create(createPayload);
       } else {
         // Handle update
-        const data = JSON.parse(formData.data);
+        let data;
+        if (config.type === "PRODUCT" && computedComponentData && Object.keys(computedComponentData).length > 0) {
+          // For products, use component data if available
+          data = computedComponentData;
+        } else {
+          data = JSON.parse(formData.data);
+        }
+
         await configAPI.update(config.id, {
           data,
           description: formData.description,
