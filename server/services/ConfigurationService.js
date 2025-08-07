@@ -223,6 +223,9 @@ class ConfigurationService {
         id: level.id,
         name: level.name,
         type: level.type,
+        // Include parent information for VERSION types
+        parentName: level.parent_name,
+        parentType: level.parent_type,
       };
 
       let levelData =
