@@ -95,7 +95,7 @@ const ProvenanceTooltip = ({ source, isVisible, position, path }) => {
       }}
     >
       <div className="text-xs font-medium text-gray-700 mb-1">
-        {getInheritanceLabel(sourceType)}:
+        {getInheritanceLabel(sourceType, source)}:
       </div>
       <div
         className={`text-sm font-medium px-2 py-1 rounded border ${getTypeColor(sourceType)}`}
