@@ -13,15 +13,21 @@ import { useToast } from "../context/ToastContext";
 
 // Helper function to safely extract actual values from provenance-wrapped objects
 const extractActualValue = (val) => {
-  if (
-    val &&
-    typeof val === "object" &&
-    val.hasOwnProperty("value") &&
-    val.hasOwnProperty("source")
+  // Handle nested provenance wrappers
+  let currentVal = val;
+
+  // Keep unwrapping until we get to the actual value
+  while (
+    currentVal &&
+    typeof currentVal === "object" &&
+    currentVal.hasOwnProperty("value") &&
+    currentVal.hasOwnProperty("source") &&
+    Object.keys(currentVal).length === 2
   ) {
-    return val.value;
+    currentVal = currentVal.value;
   }
-  return val;
+
+  return currentVal;
 };
 
 // Helper function to safely convert any value to string for rendering
