@@ -777,6 +777,12 @@ const Dashboard = () => {
         isOpen={showHelp}
         onClose={() => setShowHelp(false)}
       />
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
     </div>
   );
 };
