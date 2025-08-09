@@ -246,4 +246,68 @@ router.post("/data/backup", authenticateToken, requireAdmin, async (req, res) =>
   }
 });
 
+// Migrate to embedded MongoDB (SAFEST OPTION)
+router.post("/mongodb/migrate-embedded", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    console.log('Starting safe migration to embedded MongoDB...');
+
+    // Create backup before migration
+    const BackupRestore = require("../backup-restore");
+    const br = new BackupRestore();
+    const backupResult = await br.createBackup(`pre-embedded-migration-${Date.now()}`);
+
+    if (!backupResult.success) {
+      return res.status(500).json({
+        success: false,
+        error: `Backup failed: ${backupResult.error}. Migration aborted for safety.`
+      });
+    }
+
+    console.log(`✅ Backup created: ${backupResult.file}`);
+
+    // Start embedded MongoDB and migrate
+    const embeddedMongo = require("../models/embedded-mongodb");
+
+    // Start embedded MongoDB
+    await embeddedMongo.start();
+    const connectionString = embeddedMongo.getConnectionString();
+    console.log(`✅ Embedded MongoDB started at: ${connectionString}`);
+
+    // Run migration to embedded instance
+    const DataMigration = require("../scripts/migrate-to-mongodb");
+    const migration = new DataMigration();
+    const result = await migration.migrate(connectionString);
+
+    if (result.success) {
+      // Update environment to use MongoDB
+      process.env.USE_MONGODB = 'true';
+
+      res.json({
+        success: true,
+        message: `Migration to embedded MongoDB completed successfully! Restart the server to use MongoDB. Backup saved at: ${backupResult.file}`,
+        stats: result.stats,
+        backup: backupResult.file,
+        connectionString: connectionString,
+        nextSteps: [
+          "Restart the server to switch to MongoDB",
+          "Your SQLite backup is preserved for safety",
+          "Embedded MongoDB will start automatically with the server"
+        ]
+      });
+    } else {
+      await embeddedMongo.stop();
+      res.status(500).json({
+        success: false,
+        error: `Migration failed: ${result.message}. Your SQLite data is safe and backup: ${backupResult.file}`
+      });
+    }
+  } catch (error) {
+    console.error("Embedded MongoDB migration failed:", error);
+    res.status(500).json({
+      success: false,
+      error: `Migration failed: ${error.message}`
+    });
+  }
+});
+
 module.exports = router;
