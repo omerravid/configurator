@@ -422,7 +422,20 @@ const SettingsModal = ({ isOpen, onClose }) => {
               ) : (
                 <ArrowPathIcon className="w-4 h-4" />
               )}
-              <span>Migrate from SQLite</span>
+              <span>Migrate to External MongoDB</span>
+            </button>
+
+            <button
+              onClick={migrateToEmbedded}
+              disabled={isMigrating}
+              className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
+            >
+              {isMigrating ? (
+                <ArrowPathIcon className="w-4 h-4 animate-spin" />
+              ) : (
+                <ServerIcon className="w-4 h-4" />
+              )}
+              <span>Migrate to Embedded MongoDB</span>
             </button>
           </div>
 
