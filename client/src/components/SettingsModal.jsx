@@ -475,13 +475,30 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
           {/* Information */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-medium text-blue-900 mb-2">Migration Information</h4>
-            <ul className="text-sm text-blue-700 space-y-1">
-              <li>• Migration will copy all users and configurations from SQLite to MongoDB</li>
-              <li>• Existing MongoDB data will be cleared before migration</li>
-              <li>• This operation cannot be undone</li>
-              <li>• Make sure to test the connection before migrating</li>
-            </ul>
+            <h4 className="font-medium text-blue-900 mb-2">Migration Options</h4>
+            <div className="space-y-3 text-sm text-blue-700">
+              <div>
+                <strong>Embedded MongoDB (Recommended):</strong>
+                <ul className="ml-4 mt-1 space-y-1">
+                  <li>• Automatic setup - no external MongoDB needed</li>
+                  <li>• Embedded server starts/stops with the application</li>
+                  <li>• Perfect for development and single-server deployments</li>
+                  <li>• Creates automatic backup before migration</li>
+                </ul>
+              </div>
+              <div>
+                <strong>External MongoDB:</strong>
+                <ul className="ml-4 mt-1 space-y-1">
+                  <li>• Connect to your own MongoDB server</li>
+                  <li>• Suitable for production and cluster deployments</li>
+                  <li>• Test connection before migrating</li>
+                  <li>• Existing MongoDB data will be cleared before migration</li>
+                </ul>
+              </div>
+              <div className="pt-2 border-t border-blue-200">
+                <strong>⚠️ Important:</strong> All migrations create backups for safety
+              </div>
+            </div>
           </div>
         </div>
       </div>
