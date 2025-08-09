@@ -30,6 +30,7 @@ app.locals.db = db;
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/configs", require("./routes/configurations"));
 app.use("/api/users", require("./routes/users"));
+app.use("/api/settings", require("./routes/settings"));
 
 // Health check
 app.get("/api/health", (req, res) => {
