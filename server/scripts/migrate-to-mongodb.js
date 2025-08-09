@@ -162,6 +162,25 @@ class DataMigration {
       
       // Clear existing MongoDB data (be careful!)
       console.log('Clearing existing MongoDB data...');
+
+      // Create backup before clearing
+      console.log('Creating backup of existing MongoDB data...');
+      const existingUsers = await mongoose.model('User').find({});
+      const existingConfigs = await mongoose.model('Configuration').find({});
+
+      if (existingUsers.length > 0 || existingConfigs.length > 0) {
+        const backupData = {
+          timestamp: new Date().toISOString(),
+          users: existingUsers,
+          configurations: existingConfigs
+        };
+
+        const fs = require('fs').promises;
+        const backupFile = `mongodb-backup-${Date.now()}.json`;
+        await fs.writeFile(backupFile, JSON.stringify(backupData, null, 2));
+        console.log(`Backup saved to: ${backupFile}`);
+      }
+
       await mongoose.model('User').deleteMany({});
       await mongoose.model('Configuration').deleteMany({});
       
