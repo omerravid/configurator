@@ -89,32 +89,12 @@ router.post("/mongodb/test", authenticateToken, requireAdmin, async (req, res) =
   }
 });
 
-// Connect to MongoDB
+// Connect to MongoDB (TEMPORARILY DISABLED)
 router.post("/mongodb/connect", authenticateToken, requireAdmin, async (req, res) => {
-  try {
-    const { error, value } = mongoSettingsSchema.validate(req.body);
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        error: error.details[0].message
-      });
-    }
-
-    await mongodb.connect(value);
-    const status = mongodb.getConnectionStatus();
-    
-    res.json({
-      success: true,
-      message: "Connected to MongoDB successfully",
-      status
-    });
-  } catch (error) {
-    console.error("Failed to connect to MongoDB:", error);
-    res.status(500).json({
-      success: false,
-      error: `Failed to connect to MongoDB: ${error.message}`
-    });
-  }
+  res.status(503).json({
+    success: false,
+    error: "MongoDB connection temporarily disabled. System is using SQLite."
+  });
 });
 
 // Disconnect from MongoDB
