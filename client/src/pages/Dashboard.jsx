@@ -19,6 +19,7 @@ import {
   DocumentDuplicateIcon,
   EllipsisVerticalIcon,
   QuestionMarkCircleIcon,
+  AdjustmentsHorizontalIcon,
 } from "@heroicons/react/24/outline";
 
 const Dashboard = () => {
