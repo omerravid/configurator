@@ -19,7 +19,7 @@ class EmbeddedMongoDB {
           port: 27017, // Try to use standard port, will fallback if unavailable
         },
         binary: {
-          version: 'latest' // Use latest compatible version
+          version: '7.0.3' // Use Debian 12 compatible version
         }
       });
 
