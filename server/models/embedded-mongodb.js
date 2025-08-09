@@ -19,7 +19,7 @@ class EmbeddedMongoDB {
           port: 27017, // Try to use standard port, will fallback if unavailable
         },
         binary: {
-          version: '7.0.0'
+          version: 'latest' // Use latest compatible version
         }
       });
 
