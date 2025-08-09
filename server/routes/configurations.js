@@ -1,6 +1,6 @@
 const express = require("express");
 const Joi = require("joi");
-const Configuration = require("../models/Configuration");
+const { Configuration } = require("../models");
 const ConfigurationService = require("../services/ConfigurationService");
 const { authenticateToken, requireAdmin } = require("../middleware/auth");
 
