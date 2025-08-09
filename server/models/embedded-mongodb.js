@@ -27,6 +27,12 @@ class EmbeddedMongoDB {
       console.log(`Embedded MongoDB started at: ${this.connectionString}`);
 
       // Connect mongoose to the embedded instance
+      // Close existing connection if any
+      if (mongoose.connection.readyState !== 0) {
+        console.log('Closing existing MongoDB connection...');
+        await mongoose.disconnect();
+      }
+
       this.connection = await mongoose.connect(this.connectionString, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
