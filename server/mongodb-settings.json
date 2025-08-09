@@ -1,0 +1,7 @@
+{
+  "connectionString": "mongodb://localhost:27017/config_manager",
+  "options": {
+    "useNewUrlParser": true,
+    "useUnifiedTopology": true
+  }
+}
