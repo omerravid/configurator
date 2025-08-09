@@ -117,12 +117,58 @@ router.post("/mongodb/disconnect", authenticateToken, requireAdmin, async (req, 
   }
 });
 
-// Migrate data from SQLite to MongoDB (TEMPORARILY DISABLED)
+// Migrate data from SQLite to MongoDB (WITH SAFETY MEASURES)
 router.post("/mongodb/migrate", authenticateToken, requireAdmin, async (req, res) => {
-  res.status(503).json({
-    success: false,
-    error: "Migration temporarily disabled to prevent data loss. Please contact administrator."
-  });
+  try {
+    const { connectionString } = req.body;
+
+    if (!connectionString) {
+      return res.status(400).json({
+        success: false,
+        error: "Connection string is required"
+      });
+    }
+
+    // Create backup before migration
+    console.log('Creating SQLite backup before migration...');
+    const BackupRestore = require("../backup-restore");
+    const br = new BackupRestore();
+    const backupResult = await br.createBackup(`pre-migration-${Date.now()}`);
+
+    if (!backupResult.success) {
+      return res.status(500).json({
+        success: false,
+        error: `Backup failed: ${backupResult.error}. Migration aborted for safety.`
+      });
+    }
+
+    console.log(`✅ Backup created: ${backupResult.file}`);
+
+    // Proceed with migration
+    const DataMigration = require("../scripts/migrate-to-mongodb");
+    const migration = new DataMigration();
+    const result = await migration.migrate(connectionString);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        message: `Migration completed successfully. Backup saved at: ${backupResult.file}`,
+        stats: result.stats,
+        backup: backupResult.file
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: `Migration failed: ${result.message}. Your data is safe in SQLite and backup: ${backupResult.file}`
+      });
+    }
+  } catch (error) {
+    console.error("Migration failed:", error);
+    res.status(500).json({
+      success: false,
+      error: `Migration failed: ${error.message}`
+    });
+  }
 });
 
 // Get MongoDB connection status
