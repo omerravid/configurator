@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "test": "jest"
+    "test": "jest",
+    "test-mongodb": "node test-mongodb.js",
+    "migrate": "node scripts/migrate-to-mongodb.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -17,7 +19,7 @@
     "joi": "^17.11.0",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
-    "mongoose": "^8.17.1",
+    "mongoose": "^8.8.4",
     "sqlite3": "^5.1.7",
     "uuid": "^9.0.1"
   },
