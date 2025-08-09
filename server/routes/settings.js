@@ -89,12 +89,39 @@ router.post("/mongodb/test", authenticateToken, requireAdmin, async (req, res) =
   }
 });
 
-// Connect to MongoDB (TEMPORARILY DISABLED)
+// Connect to MongoDB (SAFE MODE)
 router.post("/mongodb/connect", authenticateToken, requireAdmin, async (req, res) => {
-  res.status(503).json({
-    success: false,
-    error: "MongoDB connection temporarily disabled. System is using SQLite."
-  });
+  try {
+    const { error, value } = mongoSettingsSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.details[0].message
+      });
+    }
+
+    // Only test connection, don't actually switch to MongoDB
+    const testResult = await mongodb.testConnection(value.connectionString, value.options);
+
+    if (testResult.success) {
+      res.json({
+        success: true,
+        message: "MongoDB connection test successful. Use migration to switch to MongoDB.",
+        connectionTest: testResult
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: `Connection test failed: ${testResult.message}`
+      });
+    }
+  } catch (error) {
+    console.error("Failed to test MongoDB connection:", error);
+    res.status(500).json({
+      success: false,
+      error: `Failed to test MongoDB connection: ${error.message}`
+    });
+  }
 });
 
 // Disconnect from MongoDB
