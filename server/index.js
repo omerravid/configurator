@@ -11,12 +11,32 @@ const db = require("./models/database");
 
 // Initialize MongoDB if enabled
 if (process.env.USE_MONGODB === 'true') {
-  const mongodb = require("./models/mongodb");
+  const embeddedMongo = require("./models/embedded-mongodb");
 
-  // Try to connect to MongoDB on startup
-  mongodb.connect().catch(error => {
-    console.warn('MongoDB connection failed on startup:', error.message);
-    console.log('You can configure MongoDB connection through the admin settings panel');
+  // Start embedded MongoDB on startup
+  embeddedMongo.start()
+    .then(() => {
+      console.log('Embedded MongoDB initialized successfully');
+      // Initialize default data
+      return embeddedMongo.initializeData();
+    })
+    .catch(error => {
+      console.error('Failed to start embedded MongoDB:', error.message);
+      console.log('Falling back to SQLite...');
+      process.env.USE_MONGODB = 'false';
+    });
+
+  // Graceful shutdown
+  process.on('SIGINT', async () => {
+    console.log('Shutting down embedded MongoDB...');
+    await embeddedMongo.stop();
+    process.exit(0);
+  });
+
+  process.on('SIGTERM', async () => {
+    console.log('Shutting down embedded MongoDB...');
+    await embeddedMongo.stop();
+    process.exit(0);
   });
 }
 
