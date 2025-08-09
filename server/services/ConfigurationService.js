@@ -1,7 +1,4 @@
-// Use MongoDB model - will be switched by environment variable
-const Configuration = process.env.USE_MONGODB === 'true'
-  ? require("../models/Configuration.mongo")
-  : require("../models/Configuration");
+const { Configuration } = require("../models");
 const { isPlainObject, cloneDeep } = require("lodash");
 
 class ConfigurationService {
