@@ -509,6 +509,17 @@ const Dashboard = () => {
               </div>
             )}
 
+            {user.role === "ADMIN" && (
+              <button
+                onClick={() => setShowSettings(true)}
+                className="btn-secondary flex items-center space-x-1"
+                title="Database Settings"
+              >
+                <AdjustmentsHorizontalIcon className="w-4 h-4" />
+                <span>Settings</span>
+              </button>
+            )}
+
             <button
               onClick={() => setShowHelp(true)}
               className="btn-secondary flex items-center space-x-1"
