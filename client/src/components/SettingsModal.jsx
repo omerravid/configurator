@@ -252,6 +252,39 @@ const SettingsModal = ({ isOpen, onClose }) => {
     }
   };
 
+  const migrateToEmbedded = async () => {
+    if (!window.confirm('This will migrate all data from SQLite to embedded MongoDB and switch the system to use MongoDB. This operation creates a backup. Continue?')) {
+      return;
+    }
+
+    setIsMigrating(true);
+    setMigrationStatus(null);
+
+    try {
+      const response = await fetch('/api/settings/mongodb/migrate-embedded', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      const data = await response.json();
+      setMigrationStatus(data);
+
+      if (data.success) {
+        showToast(`Migration to embedded MongoDB completed! ${data.stats?.users || 0} users and ${data.stats?.configurations || 0} configurations migrated. Please restart the server.`, 'success');
+      } else {
+        showToast(`Migration failed: ${data.error}`, 'error');
+      }
+    } catch (error) {
+      setMigrationStatus({ success: false, error: error.message });
+      showToast('Migration failed', 'error');
+    } finally {
+      setIsMigrating(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   const getStatusColor = (status) => {
