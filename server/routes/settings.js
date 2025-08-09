@@ -137,40 +137,12 @@ router.post("/mongodb/disconnect", authenticateToken, requireAdmin, async (req, 
   }
 });
 
-// Migrate data from SQLite to MongoDB
+// Migrate data from SQLite to MongoDB (TEMPORARILY DISABLED)
 router.post("/mongodb/migrate", authenticateToken, requireAdmin, async (req, res) => {
-  try {
-    const { connectionString } = req.body;
-    
-    if (!connectionString) {
-      return res.status(400).json({
-        success: false,
-        error: "Connection string is required"
-      });
-    }
-
-    const migration = new DataMigration();
-    const result = await migration.migrate(connectionString);
-    
-    if (result.success) {
-      res.json({
-        success: true,
-        message: "Data migration completed successfully",
-        stats: result.stats
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: result.message
-      });
-    }
-  } catch (error) {
-    console.error("Migration failed:", error);
-    res.status(500).json({
-      success: false,
-      error: `Migration failed: ${error.message}`
-    });
-  }
+  res.status(503).json({
+    success: false,
+    error: "Migration temporarily disabled to prevent data loss. Please contact administrator."
+  });
 });
 
 // Get MongoDB connection status
