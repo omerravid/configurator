@@ -1,7 +1,6 @@
 const express = require("express");
 const Joi = require("joi");
-const User = require("../models/User");
-const Configuration = require("../models/Configuration");
+const { User, Configuration } = require("../models");
 const { authenticateToken, requireAdmin } = require("../middleware/auth");
 
 const router = express.Router();
