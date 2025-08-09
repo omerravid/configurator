@@ -9,6 +9,17 @@ const PORT = process.env.PORT || 3002;
 // Initialize database
 const db = require("./models/database");
 
+// Initialize MongoDB if enabled
+if (process.env.USE_MONGODB === 'true') {
+  const mongodb = require("./models/mongodb");
+
+  // Try to connect to MongoDB on startup
+  mongodb.connect().catch(error => {
+    console.warn('MongoDB connection failed on startup:', error.message);
+    console.log('You can configure MongoDB connection through the admin settings panel');
+  });
+}
+
 // Middleware
 app.use(helmet());
 app.use(
