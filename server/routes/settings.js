@@ -3,6 +3,7 @@ const Joi = require("joi");
 const mongodb = require("../models/mongodb");
 const { authenticateToken, requireAdmin } = require("../middleware/auth");
 const DataMigration = require("../scripts/migrate-to-mongodb");
+const BackupRestore = require("../backup-restore");
 
 const router = express.Router();
 
