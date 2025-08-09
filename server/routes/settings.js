@@ -190,4 +190,35 @@ router.get("/mongodb/status", authenticateToken, requireAdmin, async (req, res) 
   }
 });
 
+// Get current data status
+router.get("/data/status", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const br = new BackupRestore();
+    const result = await br.getCurrentStats();
+    res.json(result);
+  } catch (error) {
+    console.error("Failed to get data status:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to get data status"
+    });
+  }
+});
+
+// Create backup
+router.post("/data/backup", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { name } = req.body;
+    const br = new BackupRestore();
+    const result = await br.createBackup(name);
+    res.json(result);
+  } catch (error) {
+    console.error("Failed to create backup:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to create backup"
+    });
+  }
+});
+
 module.exports = router;
