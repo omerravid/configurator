@@ -499,10 +499,7 @@ const ConfigurationTree = ({
     if (expandedNodes.has(configId)) {
       return true;
     }
-    // Default expansion for root level (level 0) only
-    if (level === 0) {
-      return true;
-    }
+    // Start with all items collapsed so expansion can be tested
     return false;
   };
 
