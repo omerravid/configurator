@@ -350,7 +350,7 @@ node backup-restore.js backup my-backup-name
 │   │   ├── components/    # React components
 │   │   │   ├── ComponentSelector.jsx   # Component selection UI
 │   │   │   ├── SettingsModal.jsx       # Admin settings panel
-│   │   │   ├── HelpModal.jsx           # User manual
+│   │   ��   ├── HelpModal.jsx           # User manual
 │   │   │   └── DeleteConfirmDialog.jsx # Smart delete confirmation
 │   │   ├── pages/         # Page components
 │   │   ├── context/       # React context (auth, toast)
@@ -388,6 +388,44 @@ cd server && npm run test-mongodb
 # Create data backup
 cd server && node backup-restore.js backup
 ```
+
+## Troubleshooting
+
+### Common Issues
+
+#### **Embedded MongoDB Won't Start**
+- Ensure you have enough disk space (100MB+)
+- Check Node.js version (18+ required)
+- Try deleting `node_modules` and reinstalling
+
+#### **Migration Issues**
+- Use the admin settings panel for guided migration
+- Check server logs for detailed error messages
+- Backup data before attempting migration
+
+#### **Port Conflicts**
+- Backend runs on port 3002 (configurable via PORT env var)
+- Frontend runs on port 5173
+- Ensure these ports are available
+
+#### **Permission Errors**
+- Admin users can manage all configurations
+- Regular users can only edit their own drafts
+- Check user role in the header
+
+### Getting Help
+
+1. **Check the User Manual**: Access via the Help button in the application
+2. **Review server logs**: Look for detailed error messages in the console
+3. **Admin Settings Panel**: Use the settings panel for database management
+4. **API Query Panel**: Test API endpoints at the bottom of the application
+
+### Performance Tips
+
+1. **Use Components**: Create reusable components instead of duplicating configuration data
+2. **Commit Configurations**: Commit stable configurations to make them read-only
+3. **Regular Cleanup**: Remove unused configurations and versions
+4. **Backup Regularly**: Use the backup functionality before major changes
 
 ## License
 
