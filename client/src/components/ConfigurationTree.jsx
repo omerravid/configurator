@@ -443,6 +443,7 @@ const TreeNode = ({
                 isExpanded={isNodeExpanded(child.id, level + 1, parentPath ? `${parentPath}.${config.id}` : config.id)}
                 onExpansionChange={onExpansionChange}
                 focusedConfigId={focusedConfigId}
+                isNodeExpanded={isNodeExpanded}
               />
             ))
           )}
