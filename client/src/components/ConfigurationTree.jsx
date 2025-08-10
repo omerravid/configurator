@@ -426,7 +426,6 @@ const TreeNode = ({
                 selectedId={selectedId}
                 onSelect={onSelect}
                 level={level + 1}
-                parentPath={parentPath ? `${parentPath}.${config.id}` : config.id}
                 showInheritance={showInheritance}
                 onEdit={onEdit}
                 onRename={onRename}
@@ -437,10 +436,8 @@ const TreeNode = ({
                 onArchive={onArchive}
                 onRestore={onRestore}
                 user={user}
-                isExpanded={isNodeExpanded(child.id, level + 1, parentPath ? `${parentPath}.${config.id}` : config.id)}
+                isExpanded={isNodeExpanded(child.id, level + 1)}
                 onExpansionChange={onExpansionChange}
-                focusedConfigId={focusedConfigId}
-                isNodeExpanded={isNodeExpanded}
               />
             ))
           )}
