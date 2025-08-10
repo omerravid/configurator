@@ -498,6 +498,19 @@ const ConfigurationTree = ({
     setExpandedNodes(getStoredExpansionState());
   }, [activeTab]);
 
+  // Expose tree update functions to parent
+  useEffect(() => {
+    if (onTreeUpdate) {
+      onTreeUpdate({
+        updateConfig: updateConfigInTree,
+        removeConfig: removeConfigFromTree,
+        addConfig: addConfigToTree,
+        moveConfigBetweenStates,
+        forceRefresh: loadRootConfigurations
+      });
+    }
+  }, [onTreeUpdate]);
+
   // Handle expansion state changes
   const handleExpansionChange = (configId, isExpanded) => {
     setExpandedNodes(prev => {
