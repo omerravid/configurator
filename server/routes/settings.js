@@ -326,4 +326,51 @@ router.post("/mongodb/migrate-embedded", authenticateToken, requireAdmin, async 
   }
 });
 
+// Revert to SQLite database
+router.post("/mongodb/revert-to-sqlite", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    console.log('Reverting to SQLite database...');
+
+    // Update .env file to use SQLite
+    const fs = require('fs');
+    const path = require('path');
+    const envPath = path.join(__dirname, '../.env');
+
+    try {
+      let envContent = fs.readFileSync(envPath, 'utf8');
+      envContent = envContent.replace(/USE_MONGODB=true/g, 'USE_MONGODB=false');
+      envContent = envContent.replace(/# MongoDB Configuration.*/, '# MongoDB Configuration - reverted to SQLite');
+      fs.writeFileSync(envPath, envContent);
+      console.log('✅ Updated .env file to use SQLite');
+    } catch (error) {
+      console.warn('⚠️ Could not update .env file:', error.message);
+      return res.status(500).json({
+        success: false,
+        error: `Failed to update .env file: ${error.message}`
+      });
+    }
+
+    // Update runtime environment
+    process.env.USE_MONGODB = 'false';
+
+    res.json({
+      success: true,
+      message: "Successfully reverted to SQLite database. Restart the server to activate.",
+      nextSteps: [
+        "✅ SQLite is now set as the default database",
+        "🔄 Restart the server to activate SQLite",
+        "🗄️ Your MongoDB data is preserved",
+        "📝 You can migrate back to MongoDB anytime"
+      ]
+    });
+
+  } catch (error) {
+    console.error("Failed to revert to SQLite:", error);
+    res.status(500).json({
+      success: false,
+      error: `Failed to revert to SQLite: ${error.message}`
+    });
+  }
+});
+
 module.exports = router;
