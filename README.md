@@ -261,25 +261,72 @@ The final merged configuration would be:
 }
 ```
 
+## Database Migration & Management
+
+### Automatic Migration Tools
+
+The application includes built-in migration tools accessible through the admin settings panel:
+
+#### **SQLite to MongoDB Migration**
+1. Login as admin
+2. Go to Settings → "Migrate to Embedded MongoDB"
+3. Creates automatic backup before migration
+4. Migrates all users and configurations
+5. Switches system to use MongoDB permanently
+
+#### **MongoDB to SQLite Migration**
+1. Login as admin
+2. Go to Settings → "Revert to SQLite (with Migration)"
+3. Migrates all MongoDB changes back to SQLite
+4. Preserves all recent work
+5. Switches system back to SQLite
+
+### Command Line Migration
+
+For advanced users or automation:
+
+```bash
+# Migrate from SQLite to embedded MongoDB
+cd server
+npm run migrate-embedded
+
+# Migrate from SQLite to external MongoDB
+cd server
+npm run migrate mongodb://your-connection-string
+
+# Create backup of current data
+cd server
+node backup-restore.js backup my-backup-name
+```
+
 ## Architecture
 
-### Database Schema
+### Component-Based Design
 
-- `users` table for authentication and authorization
-- `configurations` table with JSONB data column and inheritance relationships
-- Recursive queries for inheritance chain resolution
+- **Components**: Reusable configuration modules (database, API, cache settings)
+- **Versions**: Specific versions of components with modifications
+- **Products**: Built by selecting components and versions
+- **Inheritance Chain**: Component → Version → Product → Instance → User
+
+### Database Architecture
+
+- **Embedded MongoDB**: Zero-configuration setup with mongodb-memory-server
+- **Document-based**: Native JSON storage with Mongoose schemas
+- **Dynamic Models**: Automatically switches between SQLite and MongoDB models
+- **Migration Support**: Seamless data migration between database types
 
 ### Deep Merge Algorithm
 
 - Recursive merging of nested objects
 - Array replacement (not merging)
 - Provenance tracking for each value
+- Component reference expansion
 - Support for null values and type changes
 
 ### Permission Model
 
-- **Admin**: Can create/edit Product and Instance configurations, manage users
-- **User**: Can create/edit their own Draft User configurations
+- **Admin**: Can create/edit all configuration types, manage users, access settings
+- **User**: Can create/edit their own Draft User configurations, view all configs
 
 ## Development
 
@@ -287,25 +334,60 @@ The final merged configuration would be:
 
 ```
 ├── server/                 # Backend API
-│   ├── models/            # Database models and schema
+│   ├── models/            # Database models (SQLite + MongoDB)
+│   │   ├── database.js    # SQLite setup
+│   │   ├── mongodb.js     # MongoDB connection management
+│   │   ├── embedded-mongodb.js # Embedded MongoDB server
+│   │   ├── *.mongo.js     # MongoDB models
+│   │   └── index.js       # Dynamic model loader
 │   ├── services/          # Business logic (ConfigurationService)
 │   ├── routes/            # API routes
+│   │   └── settings.js    # MongoDB management endpoints
+│   ├── scripts/           # Migration scripts
 │   └── middleware/        # Authentication middleware
 ├── client/                # React frontend
 │   ├── src/
 │   │   ├── components/    # React components
+│   │   │   ├── ComponentSelector.jsx   # Component selection UI
+│   │   │   ├── SettingsModal.jsx       # Admin settings panel
+│   │   │   ├── HelpModal.jsx           # User manual
+│   │   │   └── DeleteConfirmDialog.jsx # Smart delete confirmation
 │   │   ├── pages/         # Page components
-│   │   ├── context/       # React context (auth)
+│   │   ├── context/       # React context (auth, toast)
 │   │   └── services/      # API service layer
-└── README.md
+└── USER_MANUAL.md         # Comprehensive user guide
 ```
 
 ### Key Components
 
-- **ConfigurationService**: Handles deep merge and provenance logic
-- **ConfigurationTree**: Tree navigation component
-- **JSONViewer**: JSON display with hover provenance
-- **ConfigurationEditor**: Create/edit modal with validation
+- **ConfigurationService**: Handles deep merge, provenance, and component resolution
+- **ComponentSelector**: UI for selecting components and versions for products
+- **SettingsModal**: Admin panel for database management and migration
+- **InteractiveJSONViewer**: JSON display with hover provenance and editing
+- **ConfigurationTree**: Tree navigation with expand state preservation
+- **DeleteConfirmDialog**: Smart deletion with child configuration warnings
+
+### Development Scripts
+
+```bash
+# Start development server (embedded MongoDB)
+npm run dev
+
+# Install all dependencies
+npm install
+
+# Server-only development
+cd server && npm run dev
+
+# Client-only development
+cd client && npm run dev
+
+# Test MongoDB functionality
+cd server && npm run test-mongodb
+
+# Create data backup
+cd server && node backup-restore.js backup
+```
 
 ## License
 
