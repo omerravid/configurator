@@ -89,6 +89,22 @@ const ProvenanceTooltip = ({ source, isVisible, position, path }) => {
     }
   };
 
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return null;
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (e) {
+      return timestamp;
+    }
+  };
+
   return (
     <div
       className="fixed z-50 px-3 py-2 bg-white border-2 rounded-lg shadow-lg max-w-xs"
