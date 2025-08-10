@@ -255,46 +255,74 @@ const TreeNode = ({
       );
     };
 
-    const menuItems = [
-      {
-        label: `Edit ${config.type.toLowerCase()} configuration`,
-        icon: PencilIcon,
-        onClick: () => onEdit(config),
-        disabled: !canEdit(),
-      },
-      {
-        label: `Rename "${config.name}"`,
-        icon: DocumentTextIcon,
-        onClick: () => onRename(config),
-        disabled: !canRename(),
-      },
-      {
-        label: `Duplicate as sibling`,
-        icon: DocumentDuplicateIcon,
-        onClick: () => onDuplicate(config),
-      },
-      {
-        label: `Create child configuration`,
-        icon: PlusIcon,
-        onClick: () => onCreateChild(config),
-        disabled: !canCreateChild(),
-      },
-    ];
+    const canArchive = () => {
+      return user?.role === "ADMIN" && !config.archived;
+    };
 
-    if (canCommit()) {
-      menuItems.push({
-        label: "Commit configuration",
-        icon: CheckIcon,
-        onClick: () => onCommit(config),
-      });
-    }
+    const canRestore = () => {
+      return user?.role === "ADMIN" && config.archived;
+    };
 
-    if (canDelete()) {
-      menuItems.push({
-        label: `Delete "${config.name}"`,
-        icon: TrashIcon,
-        onClick: () => onDelete(config),
-      });
+    const menuItems = [];
+
+    if (!config.archived) {
+      // Items for active configurations
+      menuItems.push(
+        {
+          label: `Edit ${config.type.toLowerCase()} configuration`,
+          icon: PencilIcon,
+          onClick: () => onEdit(config),
+          disabled: !canEdit(),
+        },
+        {
+          label: `Rename "${config.name}"`,
+          icon: DocumentTextIcon,
+          onClick: () => onRename(config),
+          disabled: !canRename(),
+        },
+        {
+          label: `Duplicate as sibling`,
+          icon: DocumentDuplicateIcon,
+          onClick: () => onDuplicate(config),
+        },
+        {
+          label: `Create child configuration`,
+          icon: PlusIcon,
+          onClick: () => onCreateChild(config),
+          disabled: !canCreateChild(),
+        }
+      );
+
+      if (canCommit()) {
+        menuItems.push({
+          label: "Commit configuration",
+          icon: CheckIcon,
+          onClick: () => onCommit(config),
+        });
+      }
+
+      if (canArchive()) {
+        menuItems.push({
+          label: `Archive "${config.name}"`,
+          icon: TrashIcon,
+          onClick: () => onArchive(config),
+        });
+      } else if (canDelete()) {
+        menuItems.push({
+          label: `Delete "${config.name}"`,
+          icon: TrashIcon,
+          onClick: () => onDelete(config),
+        });
+      }
+    } else {
+      // Items for archived configurations (view only + restore)
+      if (canRestore()) {
+        menuItems.push({
+          label: `Restore "${config.name}"`,
+          icon: CheckIcon,
+          onClick: () => onRestore(config),
+        });
+      }
     }
 
     setContextMenu({
