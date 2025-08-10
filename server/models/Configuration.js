@@ -78,13 +78,15 @@ class Configuration {
     return config;
   }
 
-  static async findAll() {
+  static async findAll(includeArchived = false) {
+    const archivedFilter = includeArchived ? '' : 'WHERE c.archived = 0';
     const result = await db.query(
       `SELECT c.*, u.username as created_by_username,
               pc.name as parent_name, pc.type as parent_type
        FROM configurations c
        LEFT JOIN users u ON c.created_by = u.id
        LEFT JOIN configurations pc ON c.parent_id = pc.id
+       ${archivedFilter}
        ORDER BY c.type, c.created_at DESC`,
     );
 
