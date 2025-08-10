@@ -534,6 +534,18 @@ const InteractiveJSONViewer = ({
     onDataChange?.(cleanPath, newValue);
   };
 
+  const handleExpandToggle = (path, isExpanded) => {
+    setExpandedPaths(prev => {
+      const newSet = new Set(prev);
+      if (isExpanded) {
+        newSet.add(path);
+      } else {
+        newSet.delete(path);
+      }
+      return newSet;
+    });
+  };
+
   if (!data) {
     return (
       <div className={`p-4 text-center text-gray-500 ${className}`}>
