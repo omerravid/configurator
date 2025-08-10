@@ -479,10 +479,11 @@ const ConfigurationTree = ({
   const [showInheritance, setShowInheritance] = useState(false);
   const [activeTab, setActiveTab] = useState('active'); // 'active' or 'archived'
 
-  // Global expansion state management - persist across refreshes
+  // Global expansion state management - persist across refreshes and per tab
   const getStoredExpansionState = () => {
     try {
-      const stored = localStorage.getItem('configTree-expandedNodes');
+      const storageKey = `configTree-expandedNodes-${activeTab}`;
+      const stored = localStorage.getItem(storageKey);
       return stored ? new Set(JSON.parse(stored)) : new Set();
     } catch {
       return new Set();
@@ -490,6 +491,11 @@ const ConfigurationTree = ({
   };
 
   const [expandedNodes, setExpandedNodes] = useState(getStoredExpansionState);
+
+  // Update expansion state when tab changes
+  useEffect(() => {
+    setExpandedNodes(getStoredExpansionState());
+  }, [activeTab]);
 
   // Handle expansion state changes
   const handleExpansionChange = (configId, isExpanded) => {
