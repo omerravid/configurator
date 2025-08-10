@@ -430,6 +430,7 @@ const ConfigurationTree = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showInheritance, setShowInheritance] = useState(false);
+  const [activeTab, setActiveTab] = useState('active'); // 'active' or 'archived'
 
   const loadRootConfigurations = async () => {
     setLoading(true);
