@@ -304,13 +304,20 @@ const Dashboard = () => {
       const response = await configAPI.restore(config.id);
       setSelectedConfig(null);
       setResolvedData(null);
-      setRefreshTrigger((prev) => prev + 1);
+
+      // Use selective tree update instead of full refresh
+      if (treeUpdateFunctions) {
+        treeUpdateFunctions.moveConfigBetweenStates(config.id, false);
+      } else {
+        // Fallback to full refresh if selective updates not available
+        setRefreshTrigger((prev) => prev + 1);
+      }
+
       showToast(`Configuration "${config.name}" restored successfully`);
     } catch (err) {
       console.error("Failed to restore configuration:", err);
       const errorMessage = err.response?.data?.error || err.message || "Failed to restore configuration";
-      setError(`Failed to restore configuration: ${errorMessage}`);
-      showToast(`Failed to restore: ${errorMessage}`, "error");
+      setError(`Failed to restore configuration: ${errorMessage}`, "error");
     }
   };
 
