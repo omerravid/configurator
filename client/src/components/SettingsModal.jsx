@@ -532,7 +532,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
               ) : (
                 <ExclamationCircleIcon className="w-4 h-4" />
               )}
-              <span>Revert to SQLite</span>
+              <span>Revert to SQLite (with Migration)</span>
             </button>
           </div>
 
