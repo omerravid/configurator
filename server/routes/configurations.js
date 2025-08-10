@@ -438,4 +438,18 @@ router.get("/:id/children", authenticateToken, async (req, res) => {
   }
 });
 
+// GET /api/configs/:id/children - Get child configurations
+router.get("/:id/children", authenticateToken, async (req, res) => {
+  try {
+    const children = await Configuration.findByParentId(req.params.id);
+    res.json({
+      children,
+      count: children.length
+    });
+  } catch (error) {
+    console.error("Get children error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;
