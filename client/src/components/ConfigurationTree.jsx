@@ -571,22 +571,22 @@ const ConfigurationTree = ({
     loadRootConfigurations();
   }, [refreshTrigger, activeTab]);
 
-  // Selective update functions to avoid full tree refreshes
-  const updateConfigInTree = (updatedConfig) => {
+  // Selective update functions to avoid full tree refreshes - memoized to prevent infinite loops
+  const updateConfigInTree = useCallback((updatedConfig) => {
     setRootConfigs(prevConfigs =>
       prevConfigs.map(config =>
         config.id === updatedConfig.id ? { ...config, ...updatedConfig } : config
       )
     );
-  };
+  }, []);
 
-  const removeConfigFromTree = (configId) => {
+  const removeConfigFromTree = useCallback((configId) => {
     setRootConfigs(prevConfigs =>
       prevConfigs.filter(config => config.id !== configId)
     );
-  };
+  }, []);
 
-  const addConfigToTree = (newConfig) => {
+  const addConfigToTree = useCallback((newConfig) => {
     // Add to root level if it has no parent, otherwise trigger parent refresh
     if (!newConfig.parent_id) {
       setRootConfigs(prevConfigs => [...prevConfigs, newConfig]);
@@ -595,9 +595,9 @@ const ConfigurationTree = ({
       // This is more complex and might need a partial refresh
       loadRootConfigurations();
     }
-  };
+  }, []);
 
-  const moveConfigBetweenStates = (configId, newArchivedState) => {
+  const moveConfigBetweenStates = useCallback((configId, newArchivedState) => {
     // When archiving/restoring, handle visibility based on current tab
     if (activeTab === 'active') {
       if (newArchivedState) {
@@ -618,7 +618,7 @@ const ConfigurationTree = ({
         loadRootConfigurations();
       }
     }
-  };
+  }, [activeTab, removeConfigFromTree]);
 
   if (loading) {
     return (
