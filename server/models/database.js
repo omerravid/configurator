@@ -228,6 +228,25 @@ class Database {
     }
   }
 
+  async migrateArchivedField() {
+    try {
+      // Check if archived column exists
+      const tableInfo = await this.query("PRAGMA table_info(configurations)");
+      const hasArchivedColumn = tableInfo.rows.some(column => column.name === 'archived');
+
+      if (!hasArchivedColumn) {
+        console.log("Adding archived field to configurations table...");
+        await this.query("ALTER TABLE configurations ADD COLUMN archived BOOLEAN NOT NULL DEFAULT 0");
+        console.log("Archived field migration completed successfully");
+      } else {
+        console.log("Archived field already exists");
+      }
+    } catch (error) {
+      console.error("Error during archived field migration:", error);
+      throw error;
+    }
+  }
+
   async cleanupRootVersions() {
     try {
       console.log("Cleaning up automatically created root versions...");
