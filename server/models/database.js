@@ -242,6 +242,10 @@ class Database {
         console.log("Archived field already exists");
       }
     } catch (error) {
+      if (error.code === 'SQLITE_ERROR' && error.message.includes('duplicate column name: archived')) {
+        console.log("Archived field already exists (caught duplicate column error)");
+        return;
+      }
       console.error("Error during archived field migration:", error);
       throw error;
     }
