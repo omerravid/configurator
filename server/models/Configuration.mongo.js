@@ -189,8 +189,12 @@ class Configuration {
     });
   }
 
-  static async findByParentId(parentId) {
-    const configs = await ConfigurationModel.find({ parent_id: parentId })
+  static async findByParentId(parentId, includeArchived = false) {
+    const filter = { parent_id: parentId };
+    if (!includeArchived) {
+      filter.archived = { $ne: true };
+    }
+    const configs = await ConfigurationModel.find(filter)
       .populate('created_by', 'username')
       .sort({ type: 1, createdAt: -1 });
 
