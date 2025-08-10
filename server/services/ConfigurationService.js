@@ -226,6 +226,10 @@ class ConfigurationService {
         // Include parent information for VERSION types
         parentName: level.parent_name,
         parentType: level.parent_type,
+        // Include user and timestamp information
+        createdBy: level.created_by_username || level.created_by,
+        createdAt: level.created_at,
+        updatedAt: level.updated_at,
       };
 
       let levelData =
