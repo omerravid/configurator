@@ -485,9 +485,9 @@ const ConfigurationTree = ({
 
       // Filter by archived status based on active tab
       if (activeTab === 'archived') {
-        rootConfigs = rootConfigs.filter(config => config.archived);
+        rootConfigs = rootConfigs.filter(config => Boolean(config.archived));
       } else {
-        rootConfigs = rootConfigs.filter(config => !config.archived);
+        rootConfigs = rootConfigs.filter(config => !Boolean(config.archived));
       }
 
       setRootConfigs(rootConfigs);
