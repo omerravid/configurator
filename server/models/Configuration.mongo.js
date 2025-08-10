@@ -90,7 +90,8 @@ class Configuration {
       data: data || {},
       created_by: createdBy,
       description: description || '',
-      status: finalStatus
+      status: finalStatus,
+      archived: archived
     });
 
     const savedConfig = await configuration.save();
