@@ -638,6 +638,7 @@ const ConfigurationTree = ({
           isExpanded={isNodeExpanded(config.id, 0, '')}
           onExpansionChange={handleExpansionChange}
           focusedConfigId={focusedConfigId}
+          isNodeExpanded={isNodeExpanded}
         />
       ))}
     </div>
