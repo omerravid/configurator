@@ -439,7 +439,7 @@ const TreeNode = ({
                 onArchive={onArchive}
                 onRestore={onRestore}
                 user={user}
-                isExpanded={isExpanded}
+                isExpanded={isNodeExpanded(child.id, level + 1, parentPath ? `${parentPath}.${config.id}` : config.id)}
                 onExpansionChange={onExpansionChange}
                 focusedConfigId={focusedConfigId}
               />
