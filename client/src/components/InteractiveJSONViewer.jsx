@@ -169,7 +169,7 @@ const TreeNode = ({
       if (onGetActiveTooltipPath && onGetActiveTooltipPath() === currentPath) {
         onHoverEnd?.();
       } else {
-        onHover?.(currentPath, source, currentPath);
+        onHover?.(currentPath, source, currentPath, e);
       }
     }
   };
