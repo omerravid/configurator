@@ -50,7 +50,7 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
         // Get complete configuration using minimal response
         const response = await configAPI.getByPath(selectedConfigId, "", true);
         setQueryResult({
-          data: response.data,
+          data: response.data, // This is the raw value/object with minimal=true
           query: queryInfo,
           isMinimal: true,
         });
@@ -61,7 +61,7 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
           : queryPath;
         const response = await configAPI.getByPath(selectedConfigId, cleanPath, true);
         setQueryResult({
-          data: response.data,
+          data: response.data, // This is the raw value with minimal=true
           query: queryInfo,
           isMinimal: true,
         });
