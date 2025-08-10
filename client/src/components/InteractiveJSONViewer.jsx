@@ -629,6 +629,8 @@ const InteractiveJSONViewer = ({
           isRoot={true}
           isEditable={isEditable}
           onValueChange={handleValueChange}
+          expandedPaths={expandedPaths}
+          onExpandToggle={handleExpandToggle}
         />
       </div>
 
