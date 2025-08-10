@@ -338,14 +338,30 @@ const Dashboard = () => {
       // Update the configuration with only the modified data
       await configAPI.update(selectedConfig.id, { data: newData });
 
-      // Reload the configuration data
-      await loadConfigurationData(selectedConfig);
+      // Optimized update: only reload data without refreshing the tree
+      // This preserves expand/collapse states and focus
+      try {
+        const response = await configAPI.getById(selectedConfig.id, true);
+        setResolvedData(response.data);
 
-      // Refresh the tree
-      setRefreshTrigger((prev) => prev + 1);
+        // Only update the tree if the configuration name or type changed
+        // For simple value updates, we don't need to refresh the entire tree
+        const updatedConfig = await configAPI.getById(selectedConfig.id, false);
+        if (updatedConfig.data &&
+            (updatedConfig.data.name !== selectedConfig.name ||
+             updatedConfig.data.type !== selectedConfig.type)) {
+          setRefreshTrigger((prev) => prev + 1);
+        }
 
-      // Show success toast
-      showToast(`Updated ${path} successfully`);
+        // Show success toast
+        showToast(`Updated ${path} successfully`);
+      } catch (reloadError) {
+        console.warn("Failed to reload configuration data:", reloadError);
+        // Fallback to full reload if optimized update fails
+        await loadConfigurationData(selectedConfig);
+        setRefreshTrigger((prev) => prev + 1);
+        showToast(`Updated ${path} successfully`);
+      }
     } catch (err) {
       console.error("Failed to update configuration:", err);
       const errorMessage =
