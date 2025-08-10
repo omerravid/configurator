@@ -216,6 +216,58 @@ class Configuration {
     return await this.findById(id);
   }
 
+  static async archive(id, archiveChildren = false) {
+    const config = await this.findById(id);
+    if (!config) {
+      throw new Error("Configuration not found");
+    }
+
+    if (archiveChildren) {
+      // Recursively archive all children
+      await this.archiveWithChildren(id);
+    } else {
+      // Just archive this configuration
+      await db.query(
+        "UPDATE configurations SET archived = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+        [id]
+      );
+    }
+
+    return await this.findById(id);
+  }
+
+  static async archiveWithChildren(id) {
+    // Archive the configuration
+    await db.query(
+      "UPDATE configurations SET archived = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+      [id]
+    );
+
+    // Find and archive all children recursively
+    const children = await db.query(
+      "SELECT id FROM configurations WHERE parent_id = ? AND archived = 0",
+      [id]
+    );
+
+    for (const child of children.rows) {
+      await this.archiveWithChildren(child.id);
+    }
+  }
+
+  static async restore(id) {
+    const config = await this.findById(id);
+    if (!config) {
+      throw new Error("Configuration not found");
+    }
+
+    await db.query(
+      "UPDATE configurations SET archived = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+      [id]
+    );
+
+    return await this.findById(id);
+  }
+
   static async delete(id) {
     // Check if configuration has children and get their names
     const childrenResult = await db.query(
