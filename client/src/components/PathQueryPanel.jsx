@@ -89,9 +89,23 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
     if (!queryResult) return;
 
     try {
-      await navigator.clipboard.writeText(
-        JSON.stringify(queryResult.data, null, 2),
-      );
+      let textToCopy;
+      if (queryResult.isMinimal) {
+        // For minimal responses, copy the raw value
+        if (typeof queryResult.data === 'string') {
+          textToCopy = queryResult.data;
+        } else if (typeof queryResult.data === 'number' || typeof queryResult.data === 'boolean') {
+          textToCopy = String(queryResult.data);
+        } else if (queryResult.data === null) {
+          textToCopy = 'null';
+        } else {
+          textToCopy = JSON.stringify(queryResult.data, null, 2);
+        }
+      } else {
+        textToCopy = JSON.stringify(queryResult.data, null, 2);
+      }
+
+      await navigator.clipboard.writeText(textToCopy);
     } catch (err) {
       console.error("Failed to copy:", err);
     }
