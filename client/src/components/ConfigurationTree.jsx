@@ -256,16 +256,16 @@ const TreeNode = ({
     };
 
     const canArchive = () => {
-      return user?.role === "ADMIN" && !config.archived;
+      return user?.role === "ADMIN" && !Boolean(config.archived);
     };
 
     const canRestore = () => {
-      return user?.role === "ADMIN" && config.archived;
+      return user?.role === "ADMIN" && Boolean(config.archived);
     };
 
     const menuItems = [];
 
-    if (!config.archived) {
+    if (!Boolean(config.archived)) {
       // Items for active configurations
       menuItems.push(
         {
