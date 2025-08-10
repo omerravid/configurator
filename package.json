@@ -1,19 +1,31 @@
 {
   "name": "configuration-manager",
-  "version": "1.0.0",
-  "description": "Layered Configuration Manager with Deep Merge and Provenance Tracking",
-  "main": "server/index.js",
+  "version": "2.0.0",
+  "description": "Component-based Configuration Manager with Embedded MongoDB, Deep Merge and Provenance Tracking",
+  "main": "run-both.js",
   "scripts": {
-    "dev": "node server/index.js",
+    "dev": "node run-both.js",
+    "start": "node run-both.js",
     "server:dev": "cd server && npm run dev",
     "client:dev": "cd client && npm run dev",
     "server:install": "cd server && npm install",
     "client:install": "cd client && npm install",
     "install:all": "npm run server:install && npm run client:install",
     "build": "cd client && npm run build",
-    "start": "node server/index.js",
-    "serve": "node server/index.js"
+    "migrate:embedded": "cd server && npm run migrate-embedded",
+    "migrate:mongodb": "cd server && npm run migrate",
+    "backup": "cd server && node backup-restore.js backup",
+    "test:mongodb": "cd server && npm run test-mongodb"
   },
+  "keywords": [
+    "configuration",
+    "management",
+    "mongodb",
+    "components",
+    "inheritance",
+    "provenance",
+    "versioning"
+  ],
   "devDependencies": {
     "concurrently": "^8.2.2"
   }
