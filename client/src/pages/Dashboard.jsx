@@ -41,6 +41,7 @@ const Dashboard = () => {
   const [contextMenu, setContextMenu] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const loadAllConfigurations = async () => {
     try {
