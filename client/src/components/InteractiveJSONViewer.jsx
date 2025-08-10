@@ -482,7 +482,13 @@ const TreeNode = ({
 
         {/* Provenance indicator */}
         {source && (
-          <InformationCircleIcon className="w-4 h-4 text-gray-400 ml-1" />
+          <button
+            onClick={handleInfoClick}
+            className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded ml-1"
+            title="Show source information"
+          >
+            <InformationCircleIcon className="w-4 h-4" />
+          </button>
         )}
       </div>
 
