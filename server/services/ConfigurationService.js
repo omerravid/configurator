@@ -466,6 +466,76 @@ class ConfigurationService {
   }
 
   /**
+   * Archive a configuration with its children
+   */
+  static async archiveConfiguration(configId, archiveChildren = true) {
+    const config = await Configuration.findById(configId);
+    if (!config) {
+      throw new Error("Configuration not found");
+    }
+
+    // Check if this is a component or version used by non-archived products
+    if (config.type === "COMPONENT" || config.type === "VERSION") {
+      await this.validateCanArchive(configId);
+    }
+
+    return await Configuration.archive(configId, archiveChildren);
+  }
+
+  /**
+   * Restore an archived configuration
+   */
+  static async restoreConfiguration(configId) {
+    const config = await Configuration.findById(configId);
+    if (!config) {
+      throw new Error("Configuration not found");
+    }
+
+    if (!config.archived) {
+      throw new Error("Configuration is not archived");
+    }
+
+    return await Configuration.restore(configId);
+  }
+
+  /**
+   * Validate that a component/version can be archived
+   */
+  static async validateCanArchive(configId) {
+    // Find all product configurations that might use this component/version
+    const products = await Configuration.findByType("PRODUCT");
+
+    for (const product of products) {
+      if (product.archived) continue; // Skip archived products
+
+      // Check if this product references the component/version
+      if (this.productReferencesConfig(product.data, configId)) {
+        const config = await Configuration.findById(configId);
+        throw new Error(
+          `Cannot archive ${config.type.toLowerCase()} "${config.name}" because it is used by non-archived product "${product.name}"`
+        );
+      }
+    }
+  }
+
+  /**
+   * Check if product data references a specific configuration
+   */
+  static productReferencesConfig(productData, configId) {
+    if (!productData || typeof productData !== 'object') {
+      return false;
+    }
+
+    for (const [componentName, reference] of Object.entries(productData)) {
+      if (reference && typeof reference === 'object' && reference.versionId === configId) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Expand component references in product data
    * @param {Object} productData - Product data containing component references
    * @param {boolean} includeProvenance - Whether to include provenance tracking
