@@ -530,6 +530,28 @@ const ConfigurationTree = ({
     return false;
   };
 
+  // Focus management for operations
+  const setFocusAfterOperation = (targetConfigId) => {
+    setFocusedConfigId(targetConfigId);
+    // Clear focus after a short delay
+    setTimeout(() => setFocusedConfigId(null), 100);
+  };
+
+  // Find the next logical item to focus after deletion
+  const findNextFocusAfterDeletion = (deletedConfigId, configs) => {
+    const configList = configs.flat(); // Flatten if nested
+    const index = configList.findIndex(c => c.id === deletedConfigId);
+    if (index === -1) return null;
+
+    // Try the next item, then the previous item
+    if (index < configList.length - 1) {
+      return configList[index + 1].id;
+    } else if (index > 0) {
+      return configList[index - 1].id;
+    }
+    return null;
+  };
+
   const loadRootConfigurations = async () => {
     setLoading(true);
     setError(null);
