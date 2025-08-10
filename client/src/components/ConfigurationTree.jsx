@@ -482,7 +482,6 @@ const ConfigurationTree = ({
 
   // Handle expansion state changes
   const handleExpansionChange = (configId, isExpanded) => {
-    console.log(`Expansion change for ${configId}:`, isExpanded);
     setExpandedNodes(prev => {
       const newSet = new Set(prev);
       if (isExpanded) {
@@ -490,7 +489,6 @@ const ConfigurationTree = ({
       } else {
         newSet.delete(configId);
       }
-      console.log('New expanded nodes:', Array.from(newSet));
       return newSet;
     });
   };
