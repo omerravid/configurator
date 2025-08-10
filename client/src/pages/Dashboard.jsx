@@ -395,7 +395,6 @@ const Dashboard = () => {
         console.warn("Failed to reload configuration data:", reloadError);
         // Fallback to full reload if optimized update fails
         await loadConfigurationData(selectedConfig);
-        setRefreshTrigger((prev) => prev + 1);
         showToast(`Updated ${path} successfully`);
       }
     } catch (err) {
