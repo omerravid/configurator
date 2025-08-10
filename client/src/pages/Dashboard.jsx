@@ -787,6 +787,18 @@ const Dashboard = () => {
                 </div>
               </div>
 
+              {/* Archived Configuration Notice */}
+              {Boolean(selectedConfig.archived) && (
+                <div className="bg-amber-50 border-b border-amber-200 p-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                    <span className="text-amber-800 text-sm font-medium">
+                      This configuration is archived and cannot be edited. Use the "Restore" button to make it editable again.
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {/* Configuration Content */}
               <div className="flex-1 p-6 overflow-auto">
                 {loading ? (
