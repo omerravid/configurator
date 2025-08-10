@@ -77,6 +77,7 @@ class Configuration {
     createdBy,
     description,
     status,
+    archived = false,
   }) {
     // Set status: USER configs default to DRAFT (unless explicitly set), others are COMMITTED
     const finalStatus =
