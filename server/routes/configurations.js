@@ -474,9 +474,11 @@ router.post("/:id/archive", authenticateToken, requireAdmin, async (req, res) =>
 
 // POST /api/configs/:id/restore - Restore archived configuration
 router.post("/:id/restore", authenticateToken, requireAdmin, async (req, res) => {
+  console.log(`[RESTORE] Received restore request for config ID: ${req.params.id}`);
   try {
     const config = await ConfigurationService.restoreConfiguration(req.params.id);
 
+    console.log(`[RESTORE] Successfully restored config: ${config.name}`);
     res.json({
       message: "Configuration restored successfully",
       config,
