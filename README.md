@@ -1,28 +1,37 @@
 # Configuration Manager
 
-A comprehensive layered configuration management system with deep merge capabilities, provenance tracking, and hierarchical inheritance.
+A comprehensive component-based configuration management system with deep merge capabilities, provenance tracking, and hierarchical inheritance. Features embedded MongoDB for zero-configuration database setup.
 
 ## Features
 
 ### Core Functionality
 
+- **Component-Version Architecture**: Reusable configuration components with versioning support
 - **Layered Inheritance**: Configurations inherit from parent configurations with deep merge support
 - **Provenance Tracking**: Track which configuration level provides each specific value
-- **Schema Enforcement**: Only Product configurations can define new properties; Instance and User configs can only override existing ones
-- **Immutable Committed Configs**: Once committed, User configurations become read-only
-- **Unique Naming**: All configurations must have unique names across the system
+- **Immutable Committed Configs**: Once committed, configurations become read-only
+- **Embedded Database**: No external database setup required - uses embedded MongoDB
 
 ### Configuration Types
 
-- **Product**: Top-level configurations that define the base schema and properties
-- **Instance**: Override configurations for specific environments or instances
+- **Component**: Reusable configuration modules (e.g., database settings, API configurations)
+- **Version**: Specific versions of components with modifications or updates
+- **Product**: Top-level configurations built from components
+- **Instance**: Environment-specific deployments of products (staging, production)
 - **User**: Personal configurations for individual users, can be Draft or Committed
+
+### Database Options
+
+- **Embedded MongoDB** (Default): Zero-configuration, starts automatically with the application
+- **External MongoDB**: Connect to your own MongoDB server for production deployments
+- **SQLite**: Legacy support with migration tools available
 
 ### User Interface
 
 - **Tree Navigation**: Browse configurations in a hierarchical tree structure
 - **JSON Viewer with Provenance**: Hover over any value to see which configuration provided it
-- **Configuration Editor**: Create and edit configurations with JSON validation
+- **Component Selector**: Easy component selection and version management for products
+- **Admin Settings Panel**: Configure MongoDB connections and migrate data
 - **Role-based Access**: Admin and User roles with appropriate permissions
 
 ## Technology Stack
@@ -30,7 +39,8 @@ A comprehensive layered configuration management system with deep merge capabili
 ### Backend
 
 - **Node.js** with Express.js
-- **PostgreSQL** with JSONB for configuration data storage
+- **Embedded MongoDB** with automatic startup (mongodb-memory-server)
+- **Mongoose** for MongoDB object modeling
 - **JWT** authentication
 - **Deep merge** algorithm with provenance tracking
 
@@ -45,33 +55,75 @@ A comprehensive layered configuration management system with deep merge capabili
 
 ### Prerequisites
 
-- Node.js 18+ and npm
-- PostgreSQL 12+ (or use Docker)
+- **Node.js 18+** and npm
+- **No external database required** - uses embedded MongoDB
 
-### Quick Start
+### Quick Start with Embedded MongoDB
 
 1. **Install Dependencies**
 
    ```bash
-   npm run install:all
+   npm install
    ```
 
-2. **Set up Database**
-   - Create a PostgreSQL database named `config_manager`
-   - Update the `DATABASE_URL` in `server/.env` if needed
-   - Run the initialization script:
-
-   ```bash
-   cd server
-   psql -d config_manager -f models/init.sql
-   ```
-
-3. **Start the Application**
+2. **Start the Application**
    ```bash
    npm run dev
    ```
 
-This will start both the backend (port 3001) and frontend (port 5173).
+That's it! The embedded MongoDB will start automatically and the application will be ready to use.
+
+This will start:
+- **Backend** on port 3002 with embedded MongoDB
+- **Frontend** on port 5173
+
+### First-Time Setup
+
+When you first start the application:
+
+1. **Access the application** at `http://localhost:5173`
+2. **Login with default admin credentials**:
+   - Username: `admin`
+   - Password: `admin123`
+3. **The embedded MongoDB** starts automatically - no configuration needed
+
+### Advanced Setup Options
+
+#### Option 1: Migrate from Existing SQLite Data
+
+If you have existing SQLite data:
+
+1. **Start with SQLite** (default on first run)
+2. **Login as admin** and go to Settings
+3. **Click "Migrate to Embedded MongoDB"**
+4. **Restart the application** - it will now use MongoDB
+
+#### Option 2: Use External MongoDB
+
+For production or if you prefer external MongoDB:
+
+1. **Setup your MongoDB server**
+2. **Login as admin** and go to Settings
+3. **Enter your MongoDB connection string**
+4. **Test the connection** and migrate data
+5. **Restart the application**
+
+### Environment Configuration
+
+Create `server/.env` file for custom settings:
+
+```bash
+# Database type (true = MongoDB, false = SQLite)
+USE_MONGODB=true
+
+# MongoDB connection (only used if USE_MONGODB=true)
+MONGODB_URI=mongodb://localhost:27017/config_manager
+
+# Server settings
+PORT=3002
+NODE_ENV=development
+JWT_SECRET=your-super-secret-jwt-key-change-in-production
+```
 
 ### Demo Credentials
 
