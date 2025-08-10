@@ -473,7 +473,6 @@ const ConfigurationTree = ({
   onArchive,
   onRestore,
   user,
-  onTreeUpdate, // Callback to notify parent of tree changes
 }) => {
   const [rootConfigs, setRootConfigs] = useState([]);
   const [loading, setLoading] = useState(true);
