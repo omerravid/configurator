@@ -303,24 +303,14 @@ const Dashboard = () => {
     }
   };
 
-  const handleEditorClose = (success, newConfig) => {
+  const handleEditorClose = (success) => {
     setShowEditor(false);
     setShowCreateProduct(false);
     setShowCreateComponent(false);
     setShowCreateChild(false);
     setShowRename(false);
     if (success) {
-      if (newConfig && treeUpdateFunctions) {
-        // If a new config was created, add it to the tree selectively
-        treeUpdateFunctions.addConfig(newConfig);
-      } else if (selectedConfig && treeUpdateFunctions) {
-        // If existing config was updated, update it in the tree
-        treeUpdateFunctions.updateConfig(selectedConfig);
-      } else {
-        // Fallback to full refresh
-        setRefreshTrigger((prev) => prev + 1);
-      }
-
+      setRefreshTrigger((prev) => prev + 1);
       // Reload current config if it was edited
       if (selectedConfig) {
         loadConfigurationData(selectedConfig);
