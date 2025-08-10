@@ -144,8 +144,9 @@ class Configuration {
     return result;
   }
 
-  static async findAll() {
-    const configs = await ConfigurationModel.find({})
+  static async findAll(includeArchived = false) {
+    const filter = includeArchived ? {} : { archived: { $ne: true } };
+    const configs = await ConfigurationModel.find(filter)
       .populate('created_by', 'username')
       .populate('parent_id', 'name type')
       .sort({ type: 1, createdAt: -1 });
