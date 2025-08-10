@@ -479,8 +479,17 @@ const ConfigurationTree = ({
   const [showInheritance, setShowInheritance] = useState(false);
   const [activeTab, setActiveTab] = useState('active'); // 'active' or 'archived'
 
-  // Global expansion state management
-  const [expandedNodes, setExpandedNodes] = useState(new Set());
+  // Global expansion state management - persist across refreshes
+  const getStoredExpansionState = () => {
+    try {
+      const stored = localStorage.getItem('configTree-expandedNodes');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  };
+
+  const [expandedNodes, setExpandedNodes] = useState(getStoredExpansionState);
 
   // Handle expansion state changes
   const handleExpansionChange = (configId, isExpanded) => {
