@@ -202,6 +202,13 @@ const TreeNode = ({
   };
 
   const handleToggle = () => {
+    console.log(`Toggle clicked for ${config.name}:`, {
+      configId: config.id,
+      currentExpanded: isExpanded,
+      hasLoadedChildren,
+      childrenCount: children.length
+    });
+
     if (!isExpanded && !hasLoadedChildren) {
       loadChildren();
     }
