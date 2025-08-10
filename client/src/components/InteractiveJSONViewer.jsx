@@ -120,6 +120,7 @@ const TreeNode = ({
   onValueChange,
   expandedPaths = new Set(),
   onExpandToggle = () => {},
+  onGetActiveTooltipPath,
 }) => {
   const { showToast } = useToast();
   const [editValue, setEditValue] = useState("");
