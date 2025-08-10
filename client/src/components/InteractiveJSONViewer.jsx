@@ -509,6 +509,8 @@ const InteractiveJSONViewer = ({
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
   const [showInheritanceChain, setShowInheritanceChain] = useState(false);
+  // Global state to preserve expand/collapse states across data updates
+  const [expandedPaths, setExpandedPaths] = useState(new Set());
 
   const handleHover = (path, source, fullPath) => {
     setHoveredSource(source);
