@@ -486,11 +486,19 @@ const Dashboard = () => {
       });
     }
 
-    if (canDelete()) {
+    if (canArchive()) {
       menuItems.push({
-        label: `Delete "${selectedConfig.name}"`,
+        label: `Archive "${selectedConfig.name}"`,
         icon: TrashIcon,
-        onClick: handleDelete,
+        onClick: () => handleTreeArchive(selectedConfig),
+      });
+    }
+
+    if (canRestore()) {
+      menuItems.push({
+        label: `Restore "${selectedConfig.name}"`,
+        icon: CheckIcon,
+        onClick: () => handleTreeRestore(selectedConfig),
       });
     }
 
