@@ -264,11 +264,12 @@ class Configuration {
   }
 
   static async delete(id) {
-    // Check if configuration has children
-    const childCount = await ConfigurationModel.countDocuments({ parent_id: id });
+    // Check if configuration has children and get their names
+    const children = await ConfigurationModel.find({ parent_id: id }, 'name type');
 
-    if (childCount > 0) {
-      throw new Error("Cannot delete configuration with children");
+    if (children.length > 0) {
+      const childNames = children.map(child => `${child.name} (${child.type})`).join(", ");
+      throw new Error(`Cannot delete configuration with children. Child configurations: ${childNames}`);
     }
 
     const config = await this.findById(id);
