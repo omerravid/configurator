@@ -279,19 +279,35 @@ router.post("/mongodb/migrate-embedded", authenticateToken, requireAdmin, async 
     const result = await migration.migrate(connectionString);
 
     if (result.success) {
-      // Update environment to use MongoDB
+      // Update environment to use MongoDB (both runtime and persistent)
       process.env.USE_MONGODB = 'true';
+
+      // Update .env file to persist the change
+      const fs = require('fs');
+      const path = require('path');
+      const envPath = path.join(__dirname, '../.env');
+
+      try {
+        let envContent = fs.readFileSync(envPath, 'utf8');
+        envContent = envContent.replace(/USE_MONGODB=false/g, 'USE_MONGODB=true');
+        envContent = envContent.replace(/# MongoDB Configuration.*/, '# MongoDB Configuration - using embedded MongoDB server');
+        fs.writeFileSync(envPath, envContent);
+        console.log('✅ Updated .env file to use MongoDB permanently');
+      } catch (error) {
+        console.warn('⚠️ Could not update .env file:', error.message);
+      }
 
       res.json({
         success: true,
-        message: `Migration to embedded MongoDB completed successfully! Restart the server to use MongoDB. Backup saved at: ${backupResult.file}`,
+        message: `Migration to embedded MongoDB completed successfully! MongoDB is now the default database. Restart the server to activate. Backup saved at: ${backupResult.file}`,
         stats: result.stats,
         backup: backupResult.file,
         connectionString: connectionString,
         nextSteps: [
-          "Restart the server to switch to MongoDB",
-          "Your SQLite backup is preserved for safety",
-          "Embedded MongoDB will start automatically with the server"
+          "✅ MongoDB is now set as the default database",
+          "🔄 Restart the server to activate embedded MongoDB",
+          "🗄️ Your SQLite backup is preserved for safety",
+          "🚀 Embedded MongoDB will start automatically with the server"
         ]
       });
     } else {
