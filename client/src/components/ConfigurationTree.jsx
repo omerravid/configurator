@@ -339,12 +339,10 @@ const TreeNode = ({
   return (
     <div className="select-none relative">
       <div
-        ref={nodeRef}
-        className={`tree-item ${isSelected ? "selected" : ""} group cursor-context-menu focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 rounded`}
+        className={`tree-item ${isSelected ? "selected" : ""} group cursor-context-menu`}
         style={{ paddingLeft: `${level * 20 + 12}px` }}
         onClick={handleSelect}
         onContextMenu={handleContextMenu}
-        tabIndex={0}
       >
         {hasChildren && (
           <button
