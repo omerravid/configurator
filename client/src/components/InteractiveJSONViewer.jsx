@@ -396,6 +396,7 @@ const TreeNode = ({
         onValueChange={onValueChange}
         expandedPaths={expandedPaths}
         onExpandToggle={onExpandToggle}
+        onGetActiveTooltipPath={onGetActiveTooltipPath}
       />
     ));
   };
