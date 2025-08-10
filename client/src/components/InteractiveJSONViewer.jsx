@@ -449,7 +449,7 @@ const TreeNode = ({
         {/* Expand/Collapse button */}
         {(isObject || isArray) && (
           <button
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={toggleExpanded}
             className="flex-shrink-0 p-1 hover:bg-gray-200 rounded mr-1"
           >
             {isExpanded ? (
