@@ -805,6 +805,14 @@ const Dashboard = () => {
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        config={selectedConfig}
+        isOpen={showDeleteConfirm}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </div>
   );
 };
