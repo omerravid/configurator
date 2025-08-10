@@ -240,10 +240,12 @@ const Dashboard = () => {
   };
 
   const handleDelete = async () => {
-    if (
-      !selectedConfig ||
-      !window.confirm("Are you sure you want to delete this configuration?")
-    ) {
+    if (!selectedConfig) {
+      return;
+    }
+
+    // First confirmation
+    if (!window.confirm(`Are you sure you want to delete "${selectedConfig.name}"?`)) {
       return;
     }
 
@@ -256,8 +258,21 @@ const Dashboard = () => {
     } catch (err) {
       console.error("Failed to delete configuration:", err);
       const errorMessage = err.response?.data?.error || err.message || "Failed to delete configuration";
-      setError(`Failed to delete configuration: ${errorMessage}`);
-      showToast(`Failed to delete: ${errorMessage}`, "error");
+
+      // Check if error is about children
+      if (errorMessage.includes("Cannot delete configuration with children")) {
+        const childInfo = errorMessage.replace("Cannot delete configuration with children. Child configurations: ", "");
+        const detailedMessage = `Cannot delete "${selectedConfig.name}" because it has child configurations:\n\n${childInfo}\n\nTo delete this configuration, you must first delete or move its children.`;
+
+        showToast("Cannot delete configuration with children", "error");
+        setError(detailedMessage);
+
+        // Show a more detailed dialog
+        window.alert(detailedMessage);
+      } else {
+        setError(`Failed to delete configuration: ${errorMessage}`);
+        showToast(`Failed to delete: ${errorMessage}`, "error");
+      }
     }
   };
 
