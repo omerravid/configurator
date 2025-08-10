@@ -47,22 +47,23 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
       };
 
       if (!queryPath.trim()) {
-        // Get complete configuration using the data endpoint with empty path
-        const response = await configAPI.getByPath(selectedConfigId, "");
+        // Get complete configuration using minimal response
+        const response = await configAPI.getByPath(selectedConfigId, "", true);
         setQueryResult({
-          data: response.data.data,
-          metadata: response.data.metadata,
+          data: response.data,
           query: queryInfo,
+          isMinimal: true,
         });
       } else {
         // Get specific path - strip "root." prefix if present
         const cleanPath = queryPath.startsWith("root.")
           ? queryPath.substring(5)
           : queryPath;
-        const response = await configAPI.getByPath(selectedConfigId, cleanPath);
+        const response = await configAPI.getByPath(selectedConfigId, cleanPath, true);
         setQueryResult({
-          data: response.data.data,
+          data: response.data,
           query: queryInfo,
+          isMinimal: true,
         });
       }
 
