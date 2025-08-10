@@ -269,6 +269,36 @@ const Dashboard = () => {
     setShowDeleteConfirm(false);
   };
 
+  const handleArchive = async (config, archiveChildren = true) => {
+    try {
+      const response = await configAPI.archive(config.id, archiveChildren);
+      setSelectedConfig(null);
+      setResolvedData(null);
+      setRefreshTrigger((prev) => prev + 1);
+      showToast(`Configuration "${config.name}" archived successfully`);
+    } catch (err) {
+      console.error("Failed to archive configuration:", err);
+      const errorMessage = err.response?.data?.error || err.message || "Failed to archive configuration";
+      setError(`Failed to archive configuration: ${errorMessage}`);
+      showToast(`Failed to archive: ${errorMessage}`, "error");
+    }
+  };
+
+  const handleRestore = async (config) => {
+    try {
+      const response = await configAPI.restore(config.id);
+      setSelectedConfig(null);
+      setResolvedData(null);
+      setRefreshTrigger((prev) => prev + 1);
+      showToast(`Configuration "${config.name}" restored successfully`);
+    } catch (err) {
+      console.error("Failed to restore configuration:", err);
+      const errorMessage = err.response?.data?.error || err.message || "Failed to restore configuration";
+      setError(`Failed to restore configuration: ${errorMessage}`);
+      showToast(`Failed to restore: ${errorMessage}`, "error");
+    }
+  };
+
   const handleEditorClose = (success) => {
     setShowEditor(false);
     setShowCreateProduct(false);
