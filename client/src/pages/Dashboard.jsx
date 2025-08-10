@@ -502,7 +502,7 @@ const Dashboard = () => {
   };
 
   const canEdit = () => {
-    if (!selectedConfig) return false;
+    if (!selectedConfig || Boolean(selectedConfig.archived)) return false;
     if (user.role === "ADMIN") return true;
     return (
       selectedConfig.type === "USER" &&
@@ -512,11 +512,19 @@ const Dashboard = () => {
   };
 
   const canRename = () => {
-    return selectedConfig && user.role === "ADMIN";
+    return selectedConfig && !Boolean(selectedConfig.archived) && user.role === "ADMIN";
   };
 
   const canDelete = () => {
-    return selectedConfig && user.role === "ADMIN";
+    return selectedConfig && !Boolean(selectedConfig.archived) && user.role === "ADMIN";
+  };
+
+  const canArchive = () => {
+    return selectedConfig && !Boolean(selectedConfig.archived) && user.role === "ADMIN";
+  };
+
+  const canRestore = () => {
+    return selectedConfig && Boolean(selectedConfig.archived) && user.role === "ADMIN";
   };
 
   const canCommit = () => {
