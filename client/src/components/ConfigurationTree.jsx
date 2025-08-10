@@ -622,6 +622,7 @@ const ConfigurationTree = ({
           selectedId={selectedConfig?.id}
           onSelect={onConfigSelect}
           level={0}
+          parentPath=""
           showInheritance={showInheritance}
           onEdit={onEdit}
           onRename={onRename}
@@ -632,6 +633,9 @@ const ConfigurationTree = ({
           onArchive={onArchive}
           onRestore={onRestore}
           user={user}
+          isExpanded={isNodeExpanded(config.id, 0, '')}
+          onExpansionChange={handleExpansionChange}
+          focusedConfigId={focusedConfigId}
         />
       ))}
     </div>
