@@ -248,13 +248,16 @@ const Dashboard = () => {
     }
 
     try {
-      await configAPI.delete(selectedConfig.id);
+      const response = await configAPI.delete(selectedConfig.id);
       setSelectedConfig(null);
       setResolvedData(null);
       setRefreshTrigger((prev) => prev + 1);
+      showToast(`Configuration "${selectedConfig.name}" deleted successfully`);
     } catch (err) {
       console.error("Failed to delete configuration:", err);
-      setError("Failed to delete configuration");
+      const errorMessage = err.response?.data?.error || err.message || "Failed to delete configuration";
+      setError(`Failed to delete configuration: ${errorMessage}`);
+      showToast(`Failed to delete: ${errorMessage}`, "error");
     }
   };
 
