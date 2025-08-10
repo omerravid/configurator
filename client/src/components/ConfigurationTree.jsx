@@ -510,7 +510,7 @@ const ConfigurationTree = ({
         forceRefresh: loadRootConfigurations
       });
     }
-  }, [onTreeUpdate]);
+  }, [onTreeUpdate, updateConfigInTree, removeConfigFromTree, addConfigToTree, moveConfigBetweenStates]);
 
   // Handle expansion state changes
   const handleExpansionChange = (configId, isExpanded) => {
