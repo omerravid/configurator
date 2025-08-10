@@ -658,7 +658,7 @@ const InteractiveJSONViewer = ({
 
       {/* Help text */}
       <div className="mt-2 text-xs text-gray-500">
-        💡 Hover over values to see their source configuration • Colored dots
+        💡 Click ℹ️ to see source configuration • Colored dots
         indicate inheritance level
         {isEditable && " • Click ✏️ to edit values"}
       </div>
