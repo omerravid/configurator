@@ -162,14 +162,11 @@ const TreeNode = ({
 
   const { actualValue, source } = getActualValueAndSource(value);
 
-  const handleMouseEnter = (e) => {
+  const handleInfoClick = (e) => {
+    e.stopPropagation();
     if (source) {
       onHover?.(currentPath, source, currentPath);
     }
-  };
-
-  const handleMouseLeave = () => {
-    onHoverEnd?.();
   };
 
   const handleEditStart = () => {
