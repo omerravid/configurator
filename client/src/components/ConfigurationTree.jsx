@@ -496,60 +496,31 @@ const ConfigurationTree = ({
 
   // Global expansion state management
   const [expandedNodes, setExpandedNodes] = useState(new Set());
-  const [focusedConfigId, setFocusedConfigId] = useState(null);
-
-  // Helper function to get node path for expansion tracking
-  const getNodePath = (configId, parentPath = '') => {
-    return parentPath ? `${parentPath}.${configId}` : configId;
-  };
 
   // Handle expansion state changes
-  const handleExpansionChange = (configId, isExpanded, parentPath = '') => {
-    const nodePath = getNodePath(configId, parentPath);
+  const handleExpansionChange = (configId, isExpanded) => {
     setExpandedNodes(prev => {
       const newSet = new Set(prev);
       if (isExpanded) {
-        newSet.add(nodePath);
+        newSet.add(configId);
       } else {
-        newSet.delete(nodePath);
+        newSet.delete(configId);
       }
       return newSet;
     });
   };
 
   // Check if a node should be expanded
-  const isNodeExpanded = (configId, level = 0, parentPath = '') => {
-    const nodePath = getNodePath(configId, parentPath);
-    // Default expansion for first 2 levels if not explicitly set
-    if (expandedNodes.has(nodePath)) {
+  const isNodeExpanded = (configId, level = 0) => {
+    // If explicitly set in state, use that
+    if (expandedNodes.has(configId)) {
       return true;
     }
+    // For initial load, expand first 2 levels
     if (expandedNodes.size === 0 && level < 2) {
       return true;
     }
     return false;
-  };
-
-  // Focus management for operations
-  const setFocusAfterOperation = (targetConfigId) => {
-    setFocusedConfigId(targetConfigId);
-    // Clear focus after a short delay
-    setTimeout(() => setFocusedConfigId(null), 100);
-  };
-
-  // Find the next logical item to focus after deletion
-  const findNextFocusAfterDeletion = (deletedConfigId, configs) => {
-    const configList = configs.flat(); // Flatten if nested
-    const index = configList.findIndex(c => c.id === deletedConfigId);
-    if (index === -1) return null;
-
-    // Try the next item, then the previous item
-    if (index < configList.length - 1) {
-      return configList[index + 1].id;
-    } else if (index > 0) {
-      return configList[index - 1].id;
-    }
-    return null;
   };
 
   const loadRootConfigurations = async () => {
