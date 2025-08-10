@@ -174,6 +174,8 @@ const TreeNode = ({
   onCreateChild,
   onCommit,
   onDelete,
+  onArchive,
+  onRestore,
   user,
 }) => {
   const [isExpanded, setIsExpanded] = useState(level < 2); // Auto-expand first 2 levels
