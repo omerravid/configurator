@@ -125,7 +125,7 @@ NODE_ENV=development
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
 ```
 
-### Demo Credentials
+### Default Credentials
 
 - **Username**: `admin`
 - **Password**: `admin123`
@@ -146,9 +146,10 @@ JWT_SECRET=your-super-secret-jwt-key-change-in-production
 - `GET /api/configs/:id` - Get resolved configuration (with provenance)
 - `PUT /api/configs/:id` - Update configuration
 - `DELETE /api/configs/:id` - Delete configuration
-- `GET /api/configs/:id/data?path=x.y.z` - Get specific path value
+- `GET /api/configs/:id/data?path=x.y.z&minimal=true` - Get specific path value (minimal response)
 - `POST /api/configs/:id/commit` - Commit user configuration
 - `GET /api/configs/:id/children` - Get child configurations
+- `GET /api/configs/components` - Get all components with versions
 
 ### Users
 
@@ -156,48 +157,82 @@ JWT_SECRET=your-super-secret-jwt-key-change-in-production
 - `GET /api/users/:id` - Get user details
 - `PUT /api/users/:id/role` - Update user role (admin only)
 
+### Settings (Admin Only)
+
+- `GET /api/settings/mongodb` - Get MongoDB settings and status
+- `PUT /api/settings/mongodb` - Update MongoDB settings
+- `POST /api/settings/mongodb/test` - Test MongoDB connection
+- `POST /api/settings/mongodb/migrate-embedded` - Migrate to embedded MongoDB
+- `POST /api/settings/mongodb/revert-to-sqlite` - Revert to SQLite with data migration
+
 ## Configuration Examples
 
-### Product Configuration
+### Component Configuration (Database)
 
 ```json
 {
-  "system": {
-    "logging": {
-      "level": "INFO",
-      "retention_days": 30
-    },
-    "api_keys": ["key1", "key2"]
-  },
-  "feature_flags": {
-    "new_ui": false,
-    "beta_feature": false
+  "host": "localhost",
+  "port": 5432,
+  "database": "myapp",
+  "ssl": false,
+  "pool": {
+    "min": 2,
+    "max": 10
   }
 }
 ```
 
-### Instance Configuration (inherits from Product)
+### Version Configuration (Database v2 - inherits from Database component)
 
 ```json
 {
-  "system": {
-    "logging": {
-      "level": "DEBUG"
-    }
-  },
-  "feature_flags": {
-    "new_ui": true
+  "ssl": true,
+  "pool": {
+    "max": 20
   }
 }
 ```
 
-### User Configuration (inherits from Instance)
+### Product Configuration (Built from components)
 
 ```json
 {
-  "system": {
-    "logging": {
-      "retention_days": 7
+  "database": {
+    "componentId": "comp_db_123",
+    "versionId": "ver_db_v2_456",
+    "componentName": "Database",
+    "versionName": "Database_v2"
+  },
+  "api": {
+    "componentId": "comp_api_789",
+    "versionId": "comp_api_789",
+    "componentName": "API",
+    "versionName": "API (root)"
+  }
+}
+```
+
+### Instance Configuration (Production - inherits from Product)
+
+```json
+{
+  "database": {
+    "host": "prod-db.company.com",
+    "database": "myapp_production"
+  },
+  "api": {
+    "rate_limit": 1000
+  }
+}
+```
+
+### User Configuration (Personal overrides)
+
+```json
+{
+  "database": {
+    "pool": {
+      "max": 5
     }
   }
 }
@@ -209,16 +244,19 @@ The final merged configuration would be:
 
 ```json
 {
-  "system": {
-    "logging": {
-      "level": "DEBUG", // from Instance
-      "retention_days": 7 // from User
-    },
-    "api_keys": ["key1", "key2"] // from Product
+  "database": {
+    "host": "prod-db.company.com", // from Instance
+    "port": 5432, // from Database component
+    "database": "myapp_production", // from Instance
+    "ssl": true, // from Database v2 version
+    "pool": {
+      "min": 2, // from Database component
+      "max": 5 // from User config
+    }
   },
-  "feature_flags": {
-    "new_ui": true, // from Instance
-    "beta_feature": false // from Product
+  "api": {
+    "rate_limit": 1000 // from Instance
+    // ... other API settings from component
   }
 }
 ```
