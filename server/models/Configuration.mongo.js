@@ -274,6 +274,45 @@ class Configuration {
     return await this.findById(id);
   }
 
+  static async archive(id, archiveChildren = false) {
+    const config = await this.findById(id);
+    if (!config) {
+      throw new Error("Configuration not found");
+    }
+
+    if (archiveChildren) {
+      // Recursively archive all children
+      await this.archiveWithChildren(id);
+    } else {
+      // Just archive this configuration
+      await ConfigurationModel.findByIdAndUpdate(id, { archived: true }, { new: true });
+    }
+
+    return await this.findById(id);
+  }
+
+  static async archiveWithChildren(id) {
+    // Archive the configuration
+    await ConfigurationModel.findByIdAndUpdate(id, { archived: true }, { new: true });
+
+    // Find and archive all children recursively
+    const children = await ConfigurationModel.find({ parent_id: id, archived: { $ne: true } }, '_id');
+
+    for (const child of children) {
+      await this.archiveWithChildren(child._id);
+    }
+  }
+
+  static async restore(id) {
+    const config = await this.findById(id);
+    if (!config) {
+      throw new Error("Configuration not found");
+    }
+
+    await ConfigurationModel.findByIdAndUpdate(id, { archived: false }, { new: true });
+    return await this.findById(id);
+  }
+
   static async delete(id) {
     // Check if configuration has children and get their names
     const children = await ConfigurationModel.find({ parent_id: id }, 'name type');
