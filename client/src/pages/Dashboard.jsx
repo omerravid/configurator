@@ -738,13 +738,23 @@ const Dashboard = () => {
                       </button>
                     )}
 
-                    {canDelete() && (
+                    {canArchive() && (
                       <button
-                        onClick={handleDelete}
-                        className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center space-x-1"
+                        onClick={() => handleTreeArchive(selectedConfig)}
+                        className="bg-amber-600 hover:bg-amber-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center space-x-1"
                       >
                         <TrashIcon className="w-4 h-4" />
-                        <span>Delete</span>
+                        <span>Archive</span>
+                      </button>
+                    )}
+
+                    {canRestore() && (
+                      <button
+                        onClick={() => handleTreeRestore(selectedConfig)}
+                        className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center space-x-1"
+                      >
+                        <CheckIcon className="w-4 h-4" />
+                        <span>Restore</span>
                       </button>
                     )}
 
