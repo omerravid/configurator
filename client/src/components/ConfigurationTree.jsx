@@ -598,20 +598,25 @@ const ConfigurationTree = ({
   };
 
   const moveConfigBetweenStates = (configId, newArchivedState) => {
-    // When archiving/restoring, move config between active/archived lists
-    if (activeTab === 'active' && newArchivedState) {
-      // Config was archived, remove from active list
-      removeConfigFromTree(configId);
-    } else if (activeTab === 'archived' && !newArchivedState) {
-      // Config was restored, remove from archived list
-      removeConfigFromTree(configId);
-    } else if (activeTab === 'active' && !newArchivedState) {
-      // Config was restored and we're viewing active, need to add it
-      // We'll need to reload to get the fresh data
-      loadRootConfigurations();
-    } else if (activeTab === 'archived' && newArchivedState) {
-      // Config was archived and we're viewing archived, need to add it
-      loadRootConfigurations();
+    // When archiving/restoring, handle visibility based on current tab
+    if (activeTab === 'active') {
+      if (newArchivedState) {
+        // Config was archived, remove from active view
+        removeConfigFromTree(configId);
+      } else {
+        // Config was restored, it should appear in active view
+        // But we need fresh data, so reload
+        loadRootConfigurations();
+      }
+    } else if (activeTab === 'archived') {
+      if (!newArchivedState) {
+        // Config was restored, remove from archived view
+        removeConfigFromTree(configId);
+      } else {
+        // Config was archived, it should appear in archived view
+        // But we need fresh data, so reload
+        loadRootConfigurations();
+      }
     }
   };
 
