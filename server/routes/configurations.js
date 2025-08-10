@@ -421,7 +421,8 @@ router.post(
 // GET /api/configs/:id/children - Get child configurations
 router.get("/:id/children", authenticateToken, async (req, res) => {
   try {
-    const children = await Configuration.findByParentId(req.params.id);
+    const { includeArchived } = req.query;
+    const children = await Configuration.findByParentId(req.params.id, includeArchived === 'true');
 
     // Filter user configs for non-admin users
     const filteredChildren =
@@ -432,23 +433,57 @@ router.get("/:id/children", authenticateToken, async (req, res) => {
               child.type !== "USER" || child.created_by === req.user.id,
           );
 
-    res.json({ children: filteredChildren });
+    res.json({
+      children: filteredChildren,
+      count: filteredChildren.length
+    });
   } catch (error) {
     console.error("Get children error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// GET /api/configs/:id/children - Get child configurations
-router.get("/:id/children", authenticateToken, async (req, res) => {
+// POST /api/configs/:id/archive - Archive configuration
+router.post("/:id/archive", authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const children = await Configuration.findByParentId(req.params.id);
+    const { archiveChildren = true } = req.body;
+
+    const config = await ConfigurationService.archiveConfiguration(
+      req.params.id,
+      archiveChildren
+    );
+
     res.json({
-      children,
-      count: children.length
+      message: "Configuration archived successfully",
+      config,
     });
   } catch (error) {
-    console.error("Get children error:", error);
+    console.error("Archive configuration error:", error);
+
+    if (error.message.includes("not found") || error.message.includes("Cannot archive")) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /api/configs/:id/restore - Restore archived configuration
+router.post("/:id/restore", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const config = await ConfigurationService.restoreConfiguration(req.params.id);
+
+    res.json({
+      message: "Configuration restored successfully",
+      config,
+    });
+  } catch (error) {
+    console.error("Restore configuration error:", error);
+
+    if (error.message.includes("not found") || error.message.includes("not archived")) {
+      return res.status(400).json({ error: error.message });
+    }
+
     res.status(500).json({ error: "Internal server error" });
   }
 });
