@@ -107,9 +107,9 @@ const ProvenanceTooltip = ({ source, isVisible, position, path }) => {
 
   return (
     <div
-      className="fixed z-50 px-3 py-2 bg-white border-2 rounded-lg shadow-lg max-w-xs"
+      className="fixed z-50 px-3 py-2 bg-white border-2 rounded-lg shadow-lg max-w-sm"
       style={{
-        left: Math.min(position.x + 10, window.innerWidth - 250),
+        left: Math.min(position.x + 10, window.innerWidth - 280),
         top: Math.max(position.y - 10, 10),
       }}
     >
@@ -123,6 +123,25 @@ const ProvenanceTooltip = ({ source, isVisible, position, path }) => {
       </div>
       {path && <div className="text-xs text-gray-500 mt-1">Path: {path}</div>}
       <div className="text-xs text-gray-500 mt-1">ID: {sourceId}</div>
+
+      {/* User and timestamp information */}
+      <div className="border-t border-gray-200 mt-2 pt-2">
+        {createdBy && (
+          <div className="text-xs text-gray-600">
+            <span className="font-medium">Created by:</span> {createdBy}
+          </div>
+        )}
+        {createdAt && (
+          <div className="text-xs text-gray-600">
+            <span className="font-medium">Created:</span> {formatTimestamp(createdAt)}
+          </div>
+        )}
+        {updatedAt && updatedAt !== createdAt && (
+          <div className="text-xs text-gray-600">
+            <span className="font-medium">Updated:</span> {formatTimestamp(updatedAt)}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
