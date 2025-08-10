@@ -440,6 +440,14 @@ const Dashboard = () => {
     handleDelete();
   };
 
+  const handleTreeArchive = (config) => {
+    handleArchive(config);
+  };
+
+  const handleTreeRestore = (config) => {
+    handleRestore(config);
+  };
+
   const handleContextMenuShow = (e) => {
     e.preventDefault();
     if (!selectedConfig) return;
