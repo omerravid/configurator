@@ -244,6 +244,11 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
                   <span className="text-sm font-medium text-gray-900">
                     Query Result
                   </span>
+                  {queryResult.isMinimal && (
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                      Minimal Response
+                    </span>
+                  )}
                   <span className="text-xs text-gray-500">
                     {queryResult.query.configName} → {queryResult.query.path}
                   </span>
