@@ -651,7 +651,6 @@ const Dashboard = () => {
               onArchive={handleTreeArchive}
               onRestore={handleTreeRestore}
               user={user}
-              onFocusConfig={(configId) => {/* Focus management from parent */}}
             />
           </div>
         </div>
