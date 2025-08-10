@@ -179,6 +179,7 @@ const TreeNode = ({
   user,
   isExpanded,
   onExpansionChange,
+  isNodeExpanded,
 }) => {
   const [children, setChildren] = useState([]);
   const [loadingChildren, setLoadingChildren] = useState(false);
