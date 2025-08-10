@@ -464,6 +464,8 @@ const ConfigurationTree = ({
   onCreateChild,
   onCommit,
   onDelete,
+  onArchive,
+  onRestore,
   user,
 }) => {
   const [rootConfigs, setRootConfigs] = useState([]);
