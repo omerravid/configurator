@@ -118,6 +118,8 @@ const TreeNode = ({
   isRoot = false,
   isEditable = false,
   onValueChange,
+  expandedPaths = new Set(),
+  onExpandToggle = () => {},
 }) => {
   const { showToast } = useToast();
   const [isExpanded, setIsExpanded] = useState(depth < 2);
