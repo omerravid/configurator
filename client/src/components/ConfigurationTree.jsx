@@ -167,7 +167,6 @@ const TreeNode = ({
   selectedId,
   onSelect,
   level = 0,
-  parentPath = '',
   showInheritance = false,
   onEdit,
   onRename,
@@ -180,23 +179,12 @@ const TreeNode = ({
   user,
   isExpanded,
   onExpansionChange,
-  focusedConfigId,
-  isNodeExpanded,
 }) => {
   const [children, setChildren] = useState([]);
   const [loadingChildren, setLoadingChildren] = useState(false);
   const [hasLoadedChildren, setHasLoadedChildren] = useState(false);
   const [showInheritanceView, setShowInheritanceView] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
-  const nodeRef = useRef(null);
-
-  // Focus management
-  useEffect(() => {
-    if (focusedConfigId === config.id && nodeRef.current) {
-      nodeRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      nodeRef.current.focus();
-    }
-  }, [focusedConfigId, config.id]);
 
   const loadChildren = async () => {
     if (hasLoadedChildren) return;
