@@ -167,6 +167,7 @@ const TreeNode = ({
   selectedId,
   onSelect,
   level = 0,
+  parentPath = '',
   showInheritance = false,
   onEdit,
   onRename,
@@ -177,8 +178,10 @@ const TreeNode = ({
   onArchive,
   onRestore,
   user,
+  isExpanded,
+  onExpansionChange,
+  focusedConfigId,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(level < 2); // Auto-expand first 2 levels
   const [children, setChildren] = useState([]);
   const [loadingChildren, setLoadingChildren] = useState(false);
   const [hasLoadedChildren, setHasLoadedChildren] = useState(false);
