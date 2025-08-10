@@ -188,6 +188,15 @@ const TreeNode = ({
   const [hasLoadedChildren, setHasLoadedChildren] = useState(false);
   const [showInheritanceView, setShowInheritanceView] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
+  const nodeRef = useRef(null);
+
+  // Focus management
+  useEffect(() => {
+    if (focusedConfigId === config.id && nodeRef.current) {
+      nodeRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      nodeRef.current.focus();
+    }
+  }, [focusedConfigId, config.id]);
 
   const loadChildren = async () => {
     if (hasLoadedChildren) return;
