@@ -47,7 +47,10 @@ export const authAPI = {
 // Configurations API
 export const configAPI = {
   // Get all configurations
-  getAll: (params = {}) => api.get("/configs", { params }),
+  getAll: (includeArchived = false) => {
+    const params = includeArchived ? { includeArchived: 'true' } : {};
+    return api.get("/configs", { params });
+  },
 
   // Get resolved configuration
   getById: (id, includeProvenance = false) =>
@@ -68,6 +71,13 @@ export const configAPI = {
   // Delete configuration
   delete: (id) => api.delete(`/configs/${id}`),
 
+  // Archive configuration
+  archive: (id, archiveChildren = true) =>
+    api.post(`/configs/${id}/archive`, { archiveChildren }),
+
+  // Restore archived configuration
+  restore: (id) => api.post(`/configs/${id}/restore`),
+
   // Get value at specific path
   getValueAtPath: (id, path, minimal = false) =>
     api.get(`/configs/${id}/data`, { params: { path, minimal } }),
@@ -83,7 +93,10 @@ export const configAPI = {
   getComponents: () => api.get("/configs/components"),
 
   // Get child configurations
-  getChildren: (id) => api.get(`/configs/${id}/children`),
+  getChildren: (id, includeArchived = false) => {
+    const params = includeArchived ? { includeArchived: 'true' } : {};
+    return api.get(`/configs/${id}/children`, { params });
+  },
 };
 
 // Users API
