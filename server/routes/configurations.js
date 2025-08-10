@@ -446,17 +446,14 @@ router.get("/:id/children", authenticateToken, async (req, res) => {
 
 // POST /api/configs/:id/archive - Archive configuration
 router.post("/:id/archive", authenticateToken, requireAdmin, async (req, res) => {
-  console.log(`[ARCHIVE] Received archive request for config ID: ${req.params.id}`);
   try {
     const { archiveChildren = true } = req.body;
-    console.log(`[ARCHIVE] Archive children: ${archiveChildren}`);
 
     const config = await ConfigurationService.archiveConfiguration(
       req.params.id,
       archiveChildren
     );
 
-    console.log(`[ARCHIVE] Successfully archived config: ${config.name}`);
     res.json({
       message: "Configuration archived successfully",
       config,
