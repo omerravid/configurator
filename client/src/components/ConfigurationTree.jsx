@@ -586,6 +586,8 @@ const ConfigurationTree = ({
           onCreateChild={onCreateChild}
           onCommit={onCommit}
           onDelete={onDelete}
+          onArchive={onArchive}
+          onRestore={onRestore}
           user={user}
         />
       ))}
