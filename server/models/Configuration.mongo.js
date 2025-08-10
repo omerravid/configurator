@@ -33,6 +33,10 @@ const configurationSchema = new mongoose.Schema({
     type: String,
     enum: ['DRAFT', 'COMMITTED'],
     default: 'COMMITTED'
+  },
+  archived: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true,
