@@ -344,14 +344,9 @@ const Dashboard = () => {
         const response = await configAPI.getById(selectedConfig.id, true);
         setResolvedData(response.data);
 
-        // Only update the tree if the configuration name or type changed
-        // For simple value updates, we don't need to refresh the entire tree
-        const updatedConfig = await configAPI.getById(selectedConfig.id, false);
-        if (updatedConfig.data &&
-            (updatedConfig.data.name !== selectedConfig.name ||
-             updatedConfig.data.type !== selectedConfig.type)) {
-          setRefreshTrigger((prev) => prev + 1);
-        }
+        // Don't refresh tree for simple value updates
+        // Tree refresh is only needed for structural changes (name, type, parent changes)
+        // Since we're only updating data values here, no tree refresh needed
 
         // Show success toast
         showToast(`Updated ${path} successfully`);
