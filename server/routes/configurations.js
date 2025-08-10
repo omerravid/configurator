@@ -87,13 +87,14 @@ const checkConfigPermissions = async (req, res, next) => {
 // GET /api/configs - List all configurations
 router.get("/", authenticateToken, async (req, res) => {
   try {
-    const { type, status } = req.query;
+    const { type, status, includeArchived } = req.query;
+    const showArchived = includeArchived === 'true';
 
     let configs;
     if (type) {
       configs = await Configuration.findByType(type);
     } else {
-      configs = await Configuration.findAll();
+      configs = await Configuration.findAll(showArchived);
     }
 
     // Filter by status if specified
