@@ -46,6 +46,10 @@ const Dashboard = () => {
   // Tree update functions (set by ConfigurationTree component)
   const [treeUpdateFunctions, setTreeUpdateFunctions] = useState(null);
 
+  const handleTreeUpdate = (updateFunctions) => {
+    setTreeUpdateFunctions(updateFunctions);
+  };
+
   const loadAllConfigurations = async () => {
     try {
       const response = await configAPI.getAll();
