@@ -241,41 +241,32 @@ const Dashboard = () => {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!selectedConfig) {
       return;
     }
+    setShowDeleteConfirm(true);
+  };
 
-    // First confirmation
-    if (!window.confirm(`Are you sure you want to delete "${selectedConfig.name}"?`)) {
-      return;
-    }
+  const handleDeleteConfirm = async (config) => {
+    setShowDeleteConfirm(false);
 
     try {
-      const response = await configAPI.delete(selectedConfig.id);
+      const response = await configAPI.delete(config.id);
       setSelectedConfig(null);
       setResolvedData(null);
       setRefreshTrigger((prev) => prev + 1);
-      showToast(`Configuration "${selectedConfig.name}" deleted successfully`);
+      showToast(`Configuration "${config.name}" deleted successfully`);
     } catch (err) {
       console.error("Failed to delete configuration:", err);
       const errorMessage = err.response?.data?.error || err.message || "Failed to delete configuration";
-
-      // Check if error is about children
-      if (errorMessage.includes("Cannot delete configuration with children")) {
-        const childInfo = errorMessage.replace("Cannot delete configuration with children. Child configurations: ", "");
-        const detailedMessage = `Cannot delete "${selectedConfig.name}" because it has child configurations:\n\n${childInfo}\n\nTo delete this configuration, you must first delete or move its children.`;
-
-        showToast("Cannot delete configuration with children", "error");
-        setError(detailedMessage);
-
-        // Show a more detailed dialog
-        window.alert(detailedMessage);
-      } else {
-        setError(`Failed to delete configuration: ${errorMessage}`);
-        showToast(`Failed to delete: ${errorMessage}`, "error");
-      }
+      setError(`Failed to delete configuration: ${errorMessage}`);
+      showToast(`Failed to delete: ${errorMessage}`, "error");
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
   };
 
   const handleEditorClose = (success) => {
