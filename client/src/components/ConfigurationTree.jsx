@@ -559,54 +559,6 @@ const ConfigurationTree = ({
     loadRootConfigurations();
   }, [refreshTrigger, activeTab]);
 
-  // Selective update functions to avoid full tree refreshes - memoized to prevent infinite loops
-  const updateConfigInTree = useCallback((updatedConfig) => {
-    setRootConfigs(prevConfigs =>
-      prevConfigs.map(config =>
-        config.id === updatedConfig.id ? { ...config, ...updatedConfig } : config
-      )
-    );
-  }, []);
-
-  const removeConfigFromTree = useCallback((configId) => {
-    setRootConfigs(prevConfigs =>
-      prevConfigs.filter(config => config.id !== configId)
-    );
-  }, []);
-
-  const addConfigToTree = useCallback((newConfig) => {
-    // Add to root level if it has no parent, otherwise trigger parent refresh
-    if (!newConfig.parent_id) {
-      setRootConfigs(prevConfigs => [...prevConfigs, newConfig]);
-    } else {
-      // For child additions, we need to refresh the parent's children
-      // This is more complex and might need a partial refresh
-      loadRootConfigurations();
-    }
-  }, []);
-
-  const moveConfigBetweenStates = useCallback((configId, newArchivedState) => {
-    // When archiving/restoring, handle visibility based on current tab
-    if (activeTab === 'active') {
-      if (newArchivedState) {
-        // Config was archived, remove from active view
-        removeConfigFromTree(configId);
-      } else {
-        // Config was restored, it should appear in active view
-        // But we need fresh data, so reload
-        loadRootConfigurations();
-      }
-    } else if (activeTab === 'archived') {
-      if (!newArchivedState) {
-        // Config was restored, remove from archived view
-        removeConfigFromTree(configId);
-      } else {
-        // Config was archived, it should appear in archived view
-        // But we need fresh data, so reload
-        loadRootConfigurations();
-      }
-    }
-  }, [activeTab, removeConfigFromTree]);
 
   if (loading) {
     return (
