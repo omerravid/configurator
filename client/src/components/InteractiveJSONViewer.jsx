@@ -46,6 +46,9 @@ const ProvenanceTooltip = ({ source, isVisible, position, path }) => {
   const sourceType = safeToString(source.type);
   const sourceName = safeToString(source.name);
   const sourceId = safeToString(source.id);
+  const createdBy = safeToString(source.createdBy);
+  const createdAt = source.createdAt;
+  const updatedAt = source.updatedAt;
 
   const getTypeColor = (type) => {
     switch (type) {
