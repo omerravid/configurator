@@ -281,7 +281,15 @@ const Dashboard = () => {
       const response = await configAPI.archive(config.id, archiveChildren);
       setSelectedConfig(null);
       setResolvedData(null);
-      setRefreshTrigger((prev) => prev + 1);
+
+      // Use selective tree update instead of full refresh
+      if (treeUpdateFunctions) {
+        treeUpdateFunctions.moveConfigBetweenStates(config.id, true);
+      } else {
+        // Fallback to full refresh if selective updates not available
+        setRefreshTrigger((prev) => prev + 1);
+      }
+
       showToast(`Configuration "${config.name}" archived successfully`);
     } catch (err) {
       console.error("Failed to archive configuration:", err);
