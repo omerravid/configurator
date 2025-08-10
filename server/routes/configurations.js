@@ -346,15 +346,22 @@ router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
 // GET /api/configs/:id/data - Get specific path from resolved configuration
 router.get("/:id/data", authenticateToken, async (req, res) => {
   try {
-    const { path } = req.query;
+    const { path, minimal } = req.query;
+    const isMinimal = minimal === "true";
 
     if (!path || path.trim() === "") {
       // If no path provided, return the complete resolved configuration
       const result = await ConfigurationService.resolveConfiguration(
         req.params.id,
-        true,
+        !isMinimal, // Include provenance only if not minimal
       );
-      return res.json({ data: result.resolved, metadata: result.metadata });
+
+      if (isMinimal) {
+        // Return just the resolved data with no metadata
+        return res.json(result.resolved);
+      } else {
+        return res.json({ data: result.resolved, metadata: result.metadata });
+      }
     }
 
     const result = await ConfigurationService.getValueAtPath(
@@ -362,7 +369,12 @@ router.get("/:id/data", authenticateToken, async (req, res) => {
       path,
     );
 
-    res.json({ data: result });
+    if (isMinimal) {
+      // Return just the value
+      res.json(result);
+    } else {
+      res.json({ data: result });
+    }
   } catch (error) {
     console.error("Get configuration path error:", error);
 
