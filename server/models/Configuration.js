@@ -212,14 +212,15 @@ class Configuration {
   }
 
   static async delete(id) {
-    // Check if configuration has children
+    // Check if configuration has children and get their names
     const childrenResult = await db.query(
-      "SELECT COUNT(*) as child_count FROM configurations WHERE parent_id = ?",
+      "SELECT name, type FROM configurations WHERE parent_id = ?",
       [id],
     );
 
-    if (parseInt(childrenResult.rows[0].child_count) > 0) {
-      throw new Error("Cannot delete configuration with children");
+    if (childrenResult.rows.length > 0) {
+      const childNames = childrenResult.rows.map(child => `${child.name} (${child.type})`).join(", ");
+      throw new Error(`Cannot delete configuration with children. Child configurations: ${childNames}`);
     }
 
     const config = await this.findById(id);
