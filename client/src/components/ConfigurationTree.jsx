@@ -364,14 +364,22 @@ const TreeNode = ({
         <ConfigTypeIcon type={config.type} status={config.status} />
 
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium text-gray-900 truncate">
+          <div className={`text-sm font-medium truncate ${config.archived ? 'text-gray-500' : 'text-gray-900'}`}>
             {config.name}
+            {config.archived && (
+              <span className="ml-1 text-xs text-gray-400">(archived)</span>
+            )}
           </div>
           <div className="text-xs text-gray-500 truncate">
             {config.type}
             {config.status === "DRAFT" && (
               <span className="ml-1 px-1.5 py-0.5 bg-orange-100 text-orange-800 rounded-full text-xs">
                 DRAFT
+              </span>
+            )}
+            {config.archived && (
+              <span className="ml-1 px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                ARCHIVED
               </span>
             )}
           </div>
