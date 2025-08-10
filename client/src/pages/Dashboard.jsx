@@ -7,6 +7,7 @@ import PathQueryPanel from "../components/PathQueryPanel";
 import ContextMenu from "../components/ContextMenu";
 import HelpModal from "../components/HelpModal";
 import SettingsModal from "../components/SettingsModal";
+import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
 import { useToast } from "../context/ToastContext";
 import { configAPI } from "../services/api";
 import {
