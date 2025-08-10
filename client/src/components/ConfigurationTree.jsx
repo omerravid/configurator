@@ -187,6 +187,21 @@ const TreeNode = ({
   const [showInheritanceView, setShowInheritanceView] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
 
+  // Function to update children when operations happen
+  const updateChild = (childId, updatedChild) => {
+    setChildren(prev =>
+      prev.map(child => child.id === childId ? { ...child, ...updatedChild } : child)
+    );
+  };
+
+  const removeChild = (childId) => {
+    setChildren(prev => prev.filter(child => child.id !== childId));
+  };
+
+  const addChild = (newChild) => {
+    setChildren(prev => [...prev, newChild]);
+  };
+
   const loadChildren = async () => {
     if (hasLoadedChildren) return;
 
