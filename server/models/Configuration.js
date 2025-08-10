@@ -118,12 +118,13 @@ class Configuration {
     });
   }
 
-  static async findByParentId(parentId) {
+  static async findByParentId(parentId, includeArchived = false) {
+    const archivedFilter = includeArchived ? '' : 'AND c.archived = 0';
     const result = await db.query(
       `SELECT c.*, u.username as created_by_username
        FROM configurations c
        LEFT JOIN users u ON c.created_by = u.id
-       WHERE c.parent_id = ?
+       WHERE c.parent_id = ? ${archivedFilter}
        ORDER BY c.type, c.created_at DESC`,
       [parentId],
     );
