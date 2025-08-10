@@ -583,8 +583,17 @@ const InteractiveJSONViewer = ({
     );
   }
 
+  const handleContainerClick = (e) => {
+    // Close tooltip when clicking outside of info icons
+    if (showTooltip && !e.target.closest('[data-info-icon]')) {
+      setShowTooltip(false);
+      setHoveredSource(null);
+      setHoveredPath(null);
+    }
+  };
+
   return (
-    <div className={`relative ${className}`} onMouseMove={handleMouseMove}>
+    <div className={`relative ${className}`} onMouseMove={handleMouseMove} onClick={handleContainerClick}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         {title && (
