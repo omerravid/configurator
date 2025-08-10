@@ -35,6 +35,7 @@ class Database {
           parent_id TEXT REFERENCES configurations(id) ON DELETE CASCADE,
           data TEXT NOT NULL DEFAULT '{}',
           status TEXT NOT NULL DEFAULT 'COMMITTED' CHECK (status IN ('DRAFT', 'COMMITTED')),
+          archived BOOLEAN NOT NULL DEFAULT 0,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           created_by TEXT NOT NULL REFERENCES users(id),
