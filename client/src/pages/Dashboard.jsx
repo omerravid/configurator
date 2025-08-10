@@ -43,6 +43,9 @@ const Dashboard = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // Tree update functions (set by ConfigurationTree component)
+  const [treeUpdateFunctions, setTreeUpdateFunctions] = useState(null);
+
   const loadAllConfigurations = async () => {
     try {
       const response = await configAPI.getAll();
