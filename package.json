@@ -15,7 +15,8 @@
     "migrate:embedded": "cd server && npm run migrate-embedded",
     "migrate:mongodb": "cd server && npm run migrate",
     "backup": "cd server && node backup-restore.js backup",
-    "test:mongodb": "cd server && npm run test-mongodb"
+    "test:mongodb": "cd server && npm run test-mongodb",
+    "verify": "node verify-installation.js"
   },
   "keywords": [
     "configuration",
