@@ -494,8 +494,31 @@ const ConfigurationTree = ({
 
   return (
     <div className="space-y-1">
-      {/* Header with inheritance toggle */}
+      {/* Tab Header */}
       <div className="px-4 py-2 border-b border-gray-200">
+        <div className="flex space-x-1 mb-3">
+          <button
+            onClick={() => setActiveTab('active')}
+            className={`px-3 py-1 text-sm font-medium rounded ${
+              activeTab === 'active'
+                ? 'bg-primary-100 text-primary-700 border border-primary-200'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            }`}
+          >
+            Active
+          </button>
+          <button
+            onClick={() => setActiveTab('archived')}
+            className={`px-3 py-1 text-sm font-medium rounded ${
+              activeTab === 'archived'
+                ? 'bg-amber-100 text-amber-700 border border-amber-200'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            }`}
+          >
+            Archived
+          </button>
+        </div>
+
         <label className="flex items-center space-x-2 text-xs text-gray-600">
           <input
             type="checkbox"
