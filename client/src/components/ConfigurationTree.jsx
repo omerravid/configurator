@@ -436,9 +436,18 @@ const ConfigurationTree = ({
     setLoading(true);
     setError(null);
     try {
-      const response = await configAPI.getAll();
+      const includeArchived = activeTab === 'archived';
+      const response = await configAPI.getAll(includeArchived);
       // Filter to show root-level configs (no parent) - includes PRODUCT and COMPONENT
-      const rootConfigs = (response.data.configs || []).filter(config => !config.parent_id);
+      let rootConfigs = (response.data.configs || []).filter(config => !config.parent_id);
+
+      // Filter by archived status based on active tab
+      if (activeTab === 'archived') {
+        rootConfigs = rootConfigs.filter(config => config.archived);
+      } else {
+        rootConfigs = rootConfigs.filter(config => !config.archived);
+      }
+
       setRootConfigs(rootConfigs);
     } catch (err) {
       console.error("Failed to load configurations:", err);
