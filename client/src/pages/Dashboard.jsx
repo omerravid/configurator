@@ -691,6 +691,7 @@ const Dashboard = () => {
               onArchive={handleTreeArchive}
               onRestore={handleTreeRestore}
               user={user}
+              onTreeUpdate={handleTreeUpdate}
             />
           </div>
         </div>
