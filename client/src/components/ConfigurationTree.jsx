@@ -474,6 +474,42 @@ const ConfigurationTree = ({
   const [showInheritance, setShowInheritance] = useState(false);
   const [activeTab, setActiveTab] = useState('active'); // 'active' or 'archived'
 
+  // Global expansion state management
+  const [expandedNodes, setExpandedNodes] = useState(new Set());
+  const [focusedConfigId, setFocusedConfigId] = useState(null);
+
+  // Helper function to get node path for expansion tracking
+  const getNodePath = (configId, parentPath = '') => {
+    return parentPath ? `${parentPath}.${configId}` : configId;
+  };
+
+  // Handle expansion state changes
+  const handleExpansionChange = (configId, isExpanded, parentPath = '') => {
+    const nodePath = getNodePath(configId, parentPath);
+    setExpandedNodes(prev => {
+      const newSet = new Set(prev);
+      if (isExpanded) {
+        newSet.add(nodePath);
+      } else {
+        newSet.delete(nodePath);
+      }
+      return newSet;
+    });
+  };
+
+  // Check if a node should be expanded
+  const isNodeExpanded = (configId, level = 0, parentPath = '') => {
+    const nodePath = getNodePath(configId, parentPath);
+    // Default expansion for first 2 levels if not explicitly set
+    if (expandedNodes.has(nodePath)) {
+      return true;
+    }
+    if (expandedNodes.size === 0 && level < 2) {
+      return true;
+    }
+    return false;
+  };
+
   const loadRootConfigurations = async () => {
     setLoading(true);
     setError(null);
