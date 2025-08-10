@@ -17,8 +17,8 @@ class Configuration {
     const id = this.generateId();
 
     const result = await db.query(
-      `INSERT INTO configurations (id, name, type, parent_id, data, created_by, description, status) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO configurations (id, name, type, parent_id, data, created_by, description, status, archived)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         id,
         name,
@@ -28,6 +28,7 @@ class Configuration {
         createdBy,
         description,
         finalStatus,
+        archived ? 1 : 0,
       ],
     );
 
