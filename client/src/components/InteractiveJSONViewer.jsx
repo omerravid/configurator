@@ -370,6 +370,8 @@ const TreeNode = ({
         onHoverEnd={onHoverEnd}
         isEditable={isEditable}
         onValueChange={onValueChange}
+        expandedPaths={expandedPaths}
+        onExpandToggle={onExpandToggle}
       />
     ));
   };
