@@ -535,6 +535,18 @@ const ConfigurationTree = ({
     loadRootConfigurations();
   }, [refreshTrigger, activeTab]);
 
+  // Initialize expansion state for first load
+  useEffect(() => {
+    if (rootConfigs.length > 0 && expandedNodes.size === 0) {
+      const newExpanded = new Set();
+      // Auto-expand root level configs
+      rootConfigs.forEach(config => {
+        newExpanded.add(config.id);
+      });
+      setExpandedNodes(newExpanded);
+    }
+  }, [rootConfigs, expandedNodes.size]);
+
   if (loading) {
     return (
       <div className="p-4 text-center">
