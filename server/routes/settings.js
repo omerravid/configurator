@@ -326,10 +326,45 @@ router.post("/mongodb/migrate-embedded", authenticateToken, requireAdmin, async 
   }
 });
 
-// Revert to SQLite database
+// Revert to SQLite database (with data migration)
 router.post("/mongodb/revert-to-sqlite", authenticateToken, requireAdmin, async (req, res) => {
   try {
+    const { migrateData = true } = req.body;
+
     console.log('Reverting to SQLite database...');
+
+    if (migrateData) {
+      // Create backup of current SQLite before overwriting
+      const BackupRestore = require("../backup-restore");
+      const br = new BackupRestore();
+      const backupResult = await br.createBackup(`pre-mongo-revert-${Date.now()}`);
+
+      if (!backupResult.success) {
+        return res.status(500).json({
+          success: false,
+          error: `SQLite backup failed: ${backupResult.error}. Revert aborted for safety.`
+        });
+      }
+
+      console.log(`✅ SQLite backup created: ${backupResult.file}`);
+
+      // Migrate data from MongoDB to SQLite
+      const embeddedMongo = require("../models/embedded-mongodb");
+      const connectionString = embeddedMongo.getConnectionString() || 'mongodb://localhost:27017/config_manager';
+
+      const MongoToSQLiteMigration = require("../scripts/migrate-from-mongodb");
+      const migration = new MongoToSQLiteMigration();
+      const migrationResult = await migration.migrate(connectionString);
+
+      if (!migrationResult.success) {
+        return res.status(500).json({
+          success: false,
+          error: `Migration from MongoDB to SQLite failed: ${migrationResult.message}. SQLite backup preserved at: ${backupResult.file}`
+        });
+      }
+
+      console.log(`✅ Migrated ${migrationResult.stats.users} users and ${migrationResult.stats.configurations} configurations from MongoDB to SQLite`);
+    }
 
     // Update .env file to use SQLite
     const fs = require('fs');
@@ -339,7 +374,7 @@ router.post("/mongodb/revert-to-sqlite", authenticateToken, requireAdmin, async 
     try {
       let envContent = fs.readFileSync(envPath, 'utf8');
       envContent = envContent.replace(/USE_MONGODB=true/g, 'USE_MONGODB=false');
-      envContent = envContent.replace(/# MongoDB Configuration.*/, '# MongoDB Configuration - reverted to SQLite');
+      envContent = envContent.replace(/# MongoDB Configuration.*/, '# MongoDB Configuration - reverted to SQLite with data migration');
       fs.writeFileSync(envPath, envContent);
       console.log('✅ Updated .env file to use SQLite');
     } catch (error) {
@@ -353,15 +388,28 @@ router.post("/mongodb/revert-to-sqlite", authenticateToken, requireAdmin, async 
     // Update runtime environment
     process.env.USE_MONGODB = 'false';
 
+    const message = migrateData
+      ? "Successfully migrated MongoDB changes to SQLite and reverted to SQLite database."
+      : "Successfully reverted to SQLite database (no data migration).";
+
+    const nextSteps = migrateData
+      ? [
+          "✅ All MongoDB changes have been migrated to SQLite",
+          "✅ SQLite is now set as the default database",
+          "🔄 Restart the server to activate SQLite",
+          "🗄️ Your MongoDB data is preserved for future use"
+        ]
+      : [
+          "✅ SQLite is now set as the default database",
+          "🔄 Restart the server to activate SQLite",
+          "⚠️ MongoDB changes were NOT migrated",
+          "🗄️ Your MongoDB data is preserved but not in SQLite"
+        ];
+
     res.json({
       success: true,
-      message: "Successfully reverted to SQLite database. Restart the server to activate.",
-      nextSteps: [
-        "✅ SQLite is now set as the default database",
-        "🔄 Restart the server to activate SQLite",
-        "🗄️ Your MongoDB data is preserved",
-        "📝 You can migrate back to MongoDB anytime"
-      ]
+      message,
+      nextSteps
     });
 
   } catch (error) {
