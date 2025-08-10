@@ -689,6 +689,12 @@ const Dashboard = () => {
                         </span>
                       )}
 
+                      {Boolean(selectedConfig.archived) && (
+                        <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                          ARCHIVED
+                        </span>
+                      )}
+
                       {selectedConfig.parent_name && (
                         <span>Parent: {selectedConfig.parent_name}</span>
                       )}
