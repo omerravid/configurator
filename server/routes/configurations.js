@@ -6,6 +6,12 @@ const { authenticateToken, requireAdmin } = require("../middleware/auth");
 
 const router = express.Router();
 
+// Debug middleware
+router.use((req, res, next) => {
+  console.log(`[CONFIGS] ${req.method} ${req.originalUrl} - ${req.path}`);
+  next();
+});
+
 // Validation schemas - Fixed to not require GUID format for parent_id
 const createConfigSchema = Joi.object({
   name: Joi.string().min(3).max(100).required(),
