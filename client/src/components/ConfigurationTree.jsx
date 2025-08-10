@@ -500,6 +500,12 @@ const ConfigurationTree = ({
       } else {
         newSet.delete(configId);
       }
+      // Persist to localStorage
+      try {
+        localStorage.setItem('configTree-expandedNodes', JSON.stringify([...newSet]));
+      } catch (err) {
+        console.warn('Failed to save expansion state to localStorage:', err);
+      }
       return newSet;
     });
   };
