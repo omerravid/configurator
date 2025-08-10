@@ -266,7 +266,7 @@ class ConfigurationService {
    * @param {string} path - Dot-separated path (e.g., "system.logging.level")
    * @returns {Object} Value with provenance
    */
-  static async getValueAtPath(configIdOrName, path) {
+  static async getValueAtPath(configIdOrName, path, minimal = false) {
     const resolved = await this.resolveConfiguration(configIdOrName, true);
 
     const pathParts = path.split(".");
@@ -287,6 +287,12 @@ class ConfigurationService {
       current = current[part];
     }
 
+    if (minimal) {
+      // Return just the raw value
+      return current;
+    }
+
+    // Return with metadata (legacy format)
     return {
       path,
       ...current,
