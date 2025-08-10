@@ -238,7 +238,7 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
             <strong>Example:</strong> GET /api/configs/{selectedConfigId || "prod_ecommerce"}/data
             {queryPath ? `?path=${encodeURIComponent(queryPath)}&minimal=true` : "?minimal=true"}
             <br />
-            <strong>Response:</strong> Returns only the value/object (no metadata)
+            <strong>Response:</strong> Returns the raw value only (string, number, boolean, object, or array)
           </div>
 
           {/* Error Display */}
