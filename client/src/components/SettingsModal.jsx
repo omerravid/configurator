@@ -284,6 +284,39 @@ const SettingsModal = ({ isOpen, onClose }) => {
     }
   };
 
+  const revertToSQLite = async () => {
+    if (!window.confirm('This will revert the system to use SQLite database. MongoDB data will be preserved but not used. Continue?')) {
+      return;
+    }
+
+    setIsMigrating(true);
+    setMigrationStatus(null);
+
+    try {
+      const response = await fetch('/api/settings/mongodb/revert-to-sqlite', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      const data = await response.json();
+      setMigrationStatus(data);
+
+      if (data.success) {
+        showToast('Successfully reverted to SQLite database. Please restart the server.', 'success');
+      } else {
+        showToast(`Revert failed: ${data.error}`, 'error');
+      }
+    } catch (error) {
+      setMigrationStatus({ success: false, error: error.message });
+      showToast('Revert failed', 'error');
+    } finally {
+      setIsMigrating(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   const getStatusColor = (status) => {
