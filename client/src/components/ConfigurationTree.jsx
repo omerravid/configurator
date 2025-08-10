@@ -499,8 +499,8 @@ const ConfigurationTree = ({
     if (expandedNodes.has(configId)) {
       return true;
     }
-    // For initial load, expand first 2 levels
-    if (expandedNodes.size === 0 && level < 2) {
+    // Default expansion for root level (level 0) only
+    if (level === 0) {
       return true;
     }
     return false;
