@@ -205,7 +205,7 @@ const TreeNode = ({
     if (!isExpanded && !hasLoadedChildren) {
       loadChildren();
     }
-    onExpansionChange(config.id, !isExpanded, parentPath);
+    onExpansionChange(config.id, !isExpanded);
   };
 
   const handleSelect = () => {
