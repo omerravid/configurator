@@ -459,7 +459,7 @@ const ConfigurationTree = ({
 
   useEffect(() => {
     loadRootConfigurations();
-  }, [refreshTrigger]);
+  }, [refreshTrigger, activeTab]);
 
   if (loading) {
     return (
