@@ -509,10 +509,13 @@ const ConfigurationTree = ({
       return true;
     }
     // Default expansion for root level (level 0) only
-    if (level === 0) {
-      return true;
-    }
-    return false;
+    const defaultExpanded = level === 0;
+    console.log(`Expansion check for ${configId} (level ${level}):`, {
+      inExpandedNodes: expandedNodes.has(configId),
+      defaultExpanded,
+      result: defaultExpanded
+    });
+    return defaultExpanded;
   };
 
   const loadRootConfigurations = async () => {
