@@ -285,7 +285,19 @@ const SettingsModal = ({ isOpen, onClose }) => {
   };
 
   const revertToSQLite = async () => {
-    if (!window.confirm('This will revert the system to use SQLite database. MongoDB data will be preserved but not used. Continue?')) {
+    const shouldMigrateData = window.confirm(
+      'Do you want to migrate your MongoDB changes back to SQLite?\n\n' +
+      '• Click "OK" to migrate MongoDB data to SQLite (recommended)\n' +
+      '• Click "Cancel" to revert without migrating (you might lose recent changes)'
+    );
+
+    const confirmRevert = window.confirm(
+      `This will revert the system to use SQLite database.\n\n` +
+      `${shouldMigrateData ? '✅ MongoDB changes WILL be migrated to SQLite' : '⚠️ MongoDB changes will NOT be migrated'}\n\n` +
+      'Continue?'
+    );
+
+    if (!confirmRevert) {
       return;
     }
 
@@ -298,14 +310,20 @@ const SettingsModal = ({ isOpen, onClose }) => {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        },
+        body: JSON.stringify({
+          migrateData: shouldMigrateData
+        })
       });
 
       const data = await response.json();
       setMigrationStatus(data);
 
       if (data.success) {
-        showToast('Successfully reverted to SQLite database. Please restart the server.', 'success');
+        const message = shouldMigrateData
+          ? 'Successfully migrated MongoDB changes to SQLite and reverted to SQLite. Please restart the server.'
+          : 'Successfully reverted to SQLite (no data migration). Please restart the server.';
+        showToast(message, 'success');
       } else {
         showToast(`Revert failed: ${data.error}`, 'error');
       }
