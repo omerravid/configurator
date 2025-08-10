@@ -528,14 +528,14 @@ const Dashboard = () => {
   };
 
   const canCommit = () => {
-    if (!selectedConfig) return false;
+    if (!selectedConfig || Boolean(selectedConfig.archived)) return false;
     if (selectedConfig.type !== "USER" && selectedConfig.type !== "VERSION") return false;
     if (selectedConfig.status !== "DRAFT") return false;
     return user.role === "ADMIN" || selectedConfig.created_by === user.id;
   };
 
   const canCreateChild = () => {
-    if (!selectedConfig) return false;
+    if (!selectedConfig || Boolean(selectedConfig.archived)) return false;
     if (selectedConfig.type === "PRODUCT" && user.role === "ADMIN") return true;
     if (selectedConfig.type === "INSTANCE") return true;
     if (selectedConfig.type === "USER") return false; // USER configs cannot have children
