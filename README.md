@@ -66,7 +66,13 @@ A comprehensive component-based configuration management system with deep merge 
    npm install
    ```
 
-2. **Start the Application**
+2. **Verify Installation** (Optional but recommended)
+
+   ```bash
+   npm run verify
+   ```
+
+3. **Start the Application**
    ```bash
    npm run dev
    ```
@@ -350,7 +356,7 @@ node backup-restore.js backup my-backup-name
 │   │   ├── components/    # React components
 │   │   │   ├── ComponentSelector.jsx   # Component selection UI
 │   │   │   ├── SettingsModal.jsx       # Admin settings panel
-│   │   ��   ├── HelpModal.jsx           # User manual
+│   │   │   ├── HelpModal.jsx           # User manual
 │   │   │   └── DeleteConfirmDialog.jsx # Smart delete confirmation
 │   │   ├── pages/         # Page components
 │   │   ├── context/       # React context (auth, toast)
