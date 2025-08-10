@@ -1,0 +1,834 @@
+{
+  "timestamp": "2025-08-10T05:57:39.899Z",
+  "version": "1.0",
+  "data": {
+    "users": [
+      {
+        "id": "j39a5t19plpmd5smm5q",
+        "username": "hana",
+        "role": "USER",
+        "created_at": "2025-07-16 10:03:15",
+        "updated_at": "2025-07-16 10:03:15"
+      },
+      {
+        "id": "mp9szb61ma7md5rlxx9",
+        "username": "omer",
+        "role": "USER",
+        "created_at": "2025-07-16 09:34:44",
+        "updated_at": "2025-07-16 09:34:44"
+      },
+      {
+        "id": "admin-id-123",
+        "username": "admin",
+        "role": "ADMIN",
+        "created_at": "2025-07-15 13:34:29",
+        "updated_at": "2025-07-15 13:34:29"
+      }
+    ],
+    "configurations": [
+      {
+        "id": "42qnvidotwyme1da6qz",
+        "name": "Tops",
+        "type": "COMPONENT",
+        "parent_id": null,
+        "data": {
+          "Glaze": "wow2",
+          "Stars": "True"
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-08-07 12:22:19",
+        "updated_at": "2025-08-09 18:56:29",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": null,
+        "parent_type": null
+      },
+      {
+        "id": "1037q0uxzzdlme1c3lp6",
+        "name": "Wets",
+        "type": "COMPONENT",
+        "parent_id": null,
+        "data": {
+          "Water": "1 cup",
+          "Oil": "0.5 cup",
+          "Rom": "0.5 Tea Spoon"
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-08-07 11:49:12",
+        "updated_at": "2025-08-07 11:49:12",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": null,
+        "parent_type": null
+      },
+      {
+        "id": "ex13fpj3zzfmdn29qz6",
+        "name": "Dries",
+        "type": "COMPONENT",
+        "parent_id": null,
+        "data": {
+          "Flour": "1.5 Cup",
+          "Salt": "kurt",
+          "BakingPouder": "1 Tea Spoon",
+          "Sugar": "0.5 Cup"
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-07-28 12:05:16",
+        "updated_at": "2025-08-07 11:50:57",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": null,
+        "parent_type": null
+      },
+      {
+        "id": "5gz112olsdomdn2hkfq",
+        "name": "myCake",
+        "type": "INSTANCE",
+        "parent_id": "v9wmq463a69mdn2eyiz",
+        "data": {
+          "Dries": {
+            "Flour": "1 Cup",
+            "BakingPouder": "2 Tea Spoon"
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-07-28 12:11:21",
+        "updated_at": "2025-08-07 12:10:55",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": "Cake",
+        "parent_type": "PRODUCT"
+      },
+      {
+        "id": "63k0p79m98vmd5r3g0s",
+        "name": "instance_1",
+        "type": "INSTANCE",
+        "parent_id": "a5njbo2cvumd5r2kx0",
+        "data": {
+          "systemConfiguration": {
+            "network": {
+              "subnet1": {
+                "address": "192.168.1.0/44"
+              }
+            }
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-07-16 09:20:21",
+        "updated_at": "2025-07-16 09:20:40",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": "Generic System",
+        "parent_type": "PRODUCT"
+      },
+      {
+        "id": "b45w9civbzsmd5oyilq",
+        "name": "summerTime",
+        "type": "INSTANCE",
+        "parent_id": "kalt5z786d8md5mv6vu",
+        "data": {},
+        "status": "COMMITTED",
+        "created_at": "2025-07-16 08:20:32",
+        "updated_at": "2025-07-16 08:20:47",
+        "created_by": "admin-id-123",
+        "description": "Copy of schoolTime",
+        "created_by_username": "admin",
+        "parent_name": "einav",
+        "parent_type": "PRODUCT"
+      },
+      {
+        "id": "5vzldcmozhmd5mwcm0",
+        "name": "schoolTime",
+        "type": "INSTANCE",
+        "parent_id": "kalt5z786d8md5mv6vu",
+        "data": {
+          "makefood": {
+            "time": "15:00"
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-07-16 07:22:52",
+        "updated_at": "2025-07-16 08:23:27",
+        "created_by": "admin-id-123",
+        "description": "{\n   \"drive\" : {\n   \"to\" : \"school\",\n   \"time\" : \"07:50\"\n}\n}",
+        "created_by_username": "admin",
+        "parent_name": "einav",
+        "parent_type": "PRODUCT"
+      },
+      {
+        "id": "inst-staging-eu-123",
+        "name": "inst_staging_eu",
+        "type": "INSTANCE",
+        "parent_id": "prod-ecommerce-123",
+        "data": {
+          "system": {
+            "logging": {
+              "level": "DEBUG",
+              "retention_days": 30
+            },
+            "api_keys": [
+              "key1",
+              "key2"
+            ],
+            "database": {
+              "connection_pool_size": 5,
+              "timeout": 5000
+            }
+          },
+          "feature_flags": {
+            "new_ui": true,
+            "beta_feature": true,
+            "analytics": true
+          },
+          "business": {
+            "tax_rate": 0.08,
+            "shipping_cost": 9.99
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-07-15 13:34:29",
+        "updated_at": "2025-07-15 13:57:04",
+        "created_by": "admin-id-123",
+        "description": "Staging environment for EU region",
+        "created_by_username": "admin",
+        "parent_name": "prod_ecommerce",
+        "parent_type": "PRODUCT"
+      },
+      {
+        "id": "v9wmq463a69mdn2eyiz",
+        "name": "Cake",
+        "type": "PRODUCT",
+        "parent_id": null,
+        "data": {
+          "Dries": {
+            "componentId": "ex13fpj3zzfmdn29qz6",
+            "versionId": "c2a6csn11neme1broja",
+            "componentName": "Dries",
+            "versionName": "Dries2"
+          },
+          "Wets": {
+            "componentId": "1037q0uxzzdlme1c3lp6",
+            "versionId": "4ly6852ovbme1c3lp8",
+            "componentName": "Wets",
+            "versionName": "Wets_root"
+          },
+          "Tops": {
+            "componentId": "42qnvidotwyme1da6qz",
+            "versionId": "b2931pq4iz6me1db004",
+            "componentName": "Tops",
+            "versionName": "2.0.3"
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-07-28 12:09:19",
+        "updated_at": "2025-08-07 12:24:04",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": null,
+        "parent_type": null
+      },
+      {
+        "id": "a5njbo2cvumd5r2kx0",
+        "name": "Generic System",
+        "type": "PRODUCT",
+        "parent_id": null,
+        "data": {
+          "systemConfiguration": {
+            "network": {
+              "subnet1": {
+                "address": "192.168.1.0/24",
+                "devices": {
+                  "router": {
+                    "ip": "192.168.1.1",
+                    "type": "gateway",
+                    "status": "active"
+                  },
+                  "switch": {
+                    "ip": "192.168.1.2",
+                    "type": "L2",
+                    "status": "active"
+                  }
+                }
+              },
+              "subnet2": {
+                "address": "10.0.0.0/24",
+                "devices": {
+                  "firewall": {
+                    "ip": "10.0.0.1",
+                    "type": "security",
+                    "status": "active"
+                  },
+                  "server": {
+                    "ip": "10.0.0.10",
+                    "type": "application",
+                    "status": "active",
+                    "services": {
+                      "webServer": {
+                        "port": 80,
+                        "status": "running"
+                      },
+                      "database": {
+                        "port": 5432,
+                        "status": "running",
+                        "data": {
+                          "dbName": "mainDB",
+                          "tables": [
+                            "users",
+                            "transactions",
+                            "logs"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "security": {
+              "firewallRules": {
+                "rule1": {
+                  "source": "192.168.1.0/24",
+                  "destination": "10.0.0.0/24",
+                  "action": "allow"
+                },
+                "rule2": {
+                  "source": "0.0.0.0/0",
+                  "destination": "10.0.0.10",
+                  "action": "deny"
+                }
+              },
+              "encryption": {
+                "type": "AES-256",
+                "status": "enabled",
+                "keyManagement": {
+                  "method": "KMS",
+                  "region": "us-east-1"
+                }
+              }
+            },
+            "monitoring": {
+              "logs": {
+                "systemLogs": {
+                  "location": "/var/log/system_2.log",
+                  "retention": "30 days"
+                },
+                "applicationLogs": {
+                  "location": "/var/log/app.log",
+                  "retention": "15 days"
+                }
+              },
+              "alerts": {
+                "email": {
+                  "enabled": true,
+                  "recipients": [
+                    "admin@example.com",
+                    "security@example.com"
+                  ]
+                },
+                "sms": {
+                  "enabled": false,
+                  "recipients": []
+                }
+              }
+            }
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-07-16 09:19:41",
+        "updated_at": "2025-07-16 09:59:46",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": null,
+        "parent_type": null
+      },
+      {
+        "id": "kalt5z786d8md5mv6vu",
+        "name": "einav",
+        "type": "PRODUCT",
+        "parent_id": null,
+        "data": {
+          "makefood": {
+            "type": "lunch",
+            "time": "12:00",
+            "tableFor": 3
+          },
+          "drive": {
+            "from": "home",
+            "to": "friend",
+            "time": "16:00"
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-07-16 07:21:58",
+        "updated_at": "2025-07-16 07:21:58",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": null,
+        "parent_type": null
+      },
+      {
+        "id": "prod-ecommerce-123",
+        "name": "prod_ecommerce",
+        "type": "PRODUCT",
+        "parent_id": null,
+        "data": {
+          "system": {
+            "logging": {
+              "level": "INFO",
+              "retention_days": 30
+            },
+            "api_keys": [
+              "key1",
+              "key2"
+            ],
+            "database": {
+              "connection_pool_size": 10,
+              "timeout": 5000
+            }
+          },
+          "feature_flags": {
+            "new_ui": false,
+            "beta_feature": false,
+            "analytics": true
+          },
+          "business": {
+            "tax_rate": 0.08,
+            "shipping_cost": 9.99
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-07-15 13:34:29",
+        "updated_at": "2025-07-15 13:34:29",
+        "created_by": "admin-id-123",
+        "description": "Main ecommerce product configuration",
+        "created_by_username": "admin",
+        "parent_name": null,
+        "parent_type": null
+      },
+      {
+        "id": "ukudymlewime1bz1ts",
+        "name": "omer's cake",
+        "type": "USER",
+        "parent_id": "5gz112olsdomdn2hkfq",
+        "data": {
+          "Dries": {
+            "Flour": "2 Cup"
+          }
+        },
+        "status": "DRAFT",
+        "created_at": "2025-08-07 11:45:40",
+        "updated_at": "2025-08-07 11:47:10",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": "myCake",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "x9kytno8u5emd6zsas1",
+        "name": "eli_child",
+        "type": "USER",
+        "parent_id": "cbft3j5x1kqmd6zlg4q",
+        "data": {},
+        "status": "DRAFT",
+        "created_at": "2025-07-17 06:11:24",
+        "updated_at": "2025-07-17 06:11:24",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": "eli",
+        "parent_type": "USER"
+      },
+      {
+        "id": "tilraip2v3gmd6zo8f3",
+        "name": "eli_copy",
+        "type": "USER",
+        "parent_id": "63k0p79m98vmd5r3g0s",
+        "data": {
+          "systemConfiguration": {
+            "monitoring": {
+              "alerts": {
+                "email": {
+                  "enabled": false,
+                  "recipients": "some_value"
+                }
+              }
+            }
+          }
+        },
+        "status": "DRAFT",
+        "created_at": "2025-07-17 06:08:14",
+        "updated_at": "2025-07-17 06:08:14",
+        "created_by": "admin-id-123",
+        "description": "Copy of eli",
+        "created_by_username": "admin",
+        "parent_name": "instance_1",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "cbft3j5x1kqmd6zlg4q",
+        "name": "eli",
+        "type": "USER",
+        "parent_id": "63k0p79m98vmd5r3g0s",
+        "data": {
+          "systemConfiguration": {
+            "monitoring": {
+              "alerts": {
+                "email": {
+                  "enabled": false,
+                  "recipients": "some_value"
+                }
+              }
+            }
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-07-17 06:06:04",
+        "updated_at": "2025-07-17 06:07:48",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": "instance_1",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "9d5r0cshm9rmd5sp6oy",
+        "name": "hana_test",
+        "type": "USER",
+        "parent_id": "3wljisjhyhsmd5sncib",
+        "data": {},
+        "status": "DRAFT",
+        "created_at": "2025-07-16 10:05:15",
+        "updated_at": "2025-07-16 10:05:15",
+        "created_by": "j39a5t19plpmd5smm5q",
+        "description": "",
+        "created_by_username": "hana",
+        "parent_name": "hana_new",
+        "parent_type": "USER"
+      },
+      {
+        "id": "3wljisjhyhsmd5sncib",
+        "name": "hana_new",
+        "type": "USER",
+        "parent_id": "63k0p79m98vmd5r3g0s",
+        "data": {
+          "systemConfiguration": {
+            "network": {
+              "subnet1": {
+                "address": "192.168.1.0/88"
+              }
+            }
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-07-16 10:03:49",
+        "updated_at": "2025-07-16 10:04:53",
+        "created_by": "j39a5t19plpmd5smm5q",
+        "description": "",
+        "created_by_username": "hana",
+        "parent_name": "instance_1",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "ls0zeey4dpimd5skquj",
+        "name": "hana_copy",
+        "type": "USER",
+        "parent_id": "63k0p79m98vmd5r3g0s",
+        "data": {},
+        "status": "DRAFT",
+        "created_at": "2025-07-16 10:01:48",
+        "updated_at": "2025-07-16 10:01:48",
+        "created_by": "admin-id-123",
+        "description": "Copy of hana",
+        "created_by_username": "admin",
+        "parent_name": "instance_1",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "zxuofwxs22imd5skg95",
+        "name": "hana",
+        "type": "USER",
+        "parent_id": "63k0p79m98vmd5r3g0s",
+        "data": {},
+        "status": "DRAFT",
+        "created_at": "2025-07-16 10:01:34",
+        "updated_at": "2025-07-16 10:01:34",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": "instance_1",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "po5l92ulshkmd5rpfgl",
+        "name": "omers",
+        "type": "USER",
+        "parent_id": "63k0p79m98vmd5r3g0s",
+        "data": {},
+        "status": "DRAFT",
+        "created_at": "2025-07-16 09:37:27",
+        "updated_at": "2025-07-16 09:37:27",
+        "created_by": "mp9szb61ma7md5rlxx9",
+        "description": "",
+        "created_by_username": "omer",
+        "parent_name": "instance_1",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "winwztwboomd5rafin",
+        "name": "user1_copy",
+        "type": "USER",
+        "parent_id": "63k0p79m98vmd5r3g0s",
+        "data": {
+          "systemConfiguration": {
+            "monitoring": {
+              "alerts": {
+                "email": {
+                  "recipients": "user1@example.com,security@example.com"
+                }
+              }
+            },
+            "security": {
+              "encryption": {
+                "type": "AES-256_a"
+              }
+            }
+          }
+        },
+        "status": "DRAFT",
+        "created_at": "2025-07-16 09:25:47",
+        "updated_at": "2025-07-16 10:00:29",
+        "created_by": "admin-id-123",
+        "description": "Copy of user1",
+        "created_by_username": "admin",
+        "parent_name": "instance_1",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "dxv2l5qz4immd5r4axf",
+        "name": "user1",
+        "type": "USER",
+        "parent_id": "63k0p79m98vmd5r3g0s",
+        "data": {
+          "systemConfiguration": {
+            "monitoring": {
+              "alerts": {
+                "email": {
+                  "recipients": "user1@example.com,security@example.com"
+                }
+              }
+            }
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-07-16 09:21:01",
+        "updated_at": "2025-07-16 09:21:55",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": "instance_1",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "pdu3uzxatpmd5qhzc4",
+        "name": "schoolWhat_copy",
+        "type": "USER",
+        "parent_id": "5vzldcmozhmd5mwcm0",
+        "data": {},
+        "status": "DRAFT",
+        "created_at": "2025-07-16 09:03:40",
+        "updated_at": "2025-07-16 09:03:40",
+        "created_by": "admin-id-123",
+        "description": "Copy of schoolWhat",
+        "created_by_username": "admin",
+        "parent_name": "schoolTime",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "srzgb99p7kdmd5q8px8",
+        "name": "joy",
+        "type": "USER",
+        "parent_id": "b45w9civbzsmd5oyilq",
+        "data": {
+          "makefood": {
+            "time": "12:05"
+          }
+        },
+        "status": "DRAFT",
+        "created_at": "2025-07-16 08:56:28",
+        "updated_at": "2025-07-16 08:57:03",
+        "created_by": "admin-id-123",
+        "description": "Copy of fun",
+        "created_by_username": "admin",
+        "parent_name": "summerTime",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "c1ktmynu72md5pmbqw",
+        "name": "fun",
+        "type": "USER",
+        "parent_id": "b45w9civbzsmd5oyilq",
+        "data": {},
+        "status": "DRAFT",
+        "created_at": "2025-07-16 08:39:03",
+        "updated_at": "2025-07-16 08:39:03",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": "summerTime",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "ijcpkd568mmd5pk10o",
+        "name": "schoolWhat",
+        "type": "USER",
+        "parent_id": "5vzldcmozhmd5mwcm0",
+        "data": {},
+        "status": "COMMITTED",
+        "created_at": "2025-07-16 08:37:16",
+        "updated_at": "2025-07-16 08:37:16",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": "schoolTime",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "ok0n6pvu7cmd5piu4a",
+        "name": "summerEnd",
+        "type": "USER",
+        "parent_id": "5vzldcmozhmd5mwcm0",
+        "data": {},
+        "status": "COMMITTED",
+        "created_at": "2025-07-16 08:36:20",
+        "updated_at": "2025-07-16 08:36:43",
+        "created_by": "admin-id-123",
+        "description": "Copy of agam",
+        "created_by_username": "admin",
+        "parent_name": "schoolTime",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "mjtg2si27qsmd5n307z",
+        "name": "agam",
+        "type": "USER",
+        "parent_id": "5vzldcmozhmd5mwcm0",
+        "data": {},
+        "status": "COMMITTED",
+        "created_at": "2025-07-16 07:28:02",
+        "updated_at": "2025-07-16 07:28:02",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": "schoolTime",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "user-dev-john-123",
+        "name": "user_dev_john_v1",
+        "type": "USER",
+        "parent_id": "inst-staging-eu-123",
+        "data": {
+          "system": {
+            "logging": {
+              "retention_days": 7
+            }
+          },
+          "business": {
+            "tax_rate": 0
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-07-15 13:34:29",
+        "updated_at": "2025-07-15 13:42:00",
+        "created_by": "admin-id-123",
+        "description": "John developer personal configuration",
+        "created_by_username": "admin",
+        "parent_name": "inst_staging_eu",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "b2931pq4iz6me1db004",
+        "name": "2.0.3",
+        "type": "VERSION",
+        "parent_id": "42qnvidotwyme1da6qz",
+        "data": {
+          "Glaze": "Pink"
+        },
+        "status": "DRAFT",
+        "created_at": "2025-08-07 12:22:57",
+        "updated_at": "2025-08-09 18:57:08",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": "Tops",
+        "parent_type": "COMPONENT"
+      },
+      {
+        "id": "4ly6852ovbme1c3lp8",
+        "name": "Wets_root",
+        "type": "VERSION",
+        "parent_id": "1037q0uxzzdlme1c3lp6",
+        "data": {
+          "Water": "1 cup",
+          "Oil": "0.5 cup",
+          "Rom": "0.5 Tea Spoon"
+        },
+        "status": "DRAFT",
+        "created_at": "2025-08-07 11:49:12",
+        "updated_at": "2025-08-07 11:49:12",
+        "created_by": "admin-id-123",
+        "description": "Root version of Wets",
+        "created_by_username": "admin",
+        "parent_name": "Wets",
+        "parent_type": "COMPONENT"
+      },
+      {
+        "id": "c2a6csn11neme1broja",
+        "name": "Dries2",
+        "type": "VERSION",
+        "parent_id": "ex13fpj3zzfmdn29qz6",
+        "data": {
+          "Flour": "2 Cup",
+          "Salt": "courtney"
+        },
+        "status": "DRAFT",
+        "created_at": "2025-08-07 11:39:56",
+        "updated_at": "2025-08-07 12:03:31",
+        "created_by": "admin-id-123",
+        "description": "",
+        "created_by_username": "admin",
+        "parent_name": "Dries",
+        "parent_type": "COMPONENT"
+      },
+      {
+        "id": "ga81qzv3f6cmdn29qz8",
+        "name": "Dries_root",
+        "type": "VERSION",
+        "parent_id": "ex13fpj3zzfmdn29qz6",
+        "data": {
+          "Flour": "1 Cup",
+          "Salt": "kurt",
+          "BakingPouder": "1 Tea Spoon",
+          "Sugar": "0.5 Cup"
+        },
+        "status": "DRAFT",
+        "created_at": "2025-07-28 12:05:16",
+        "updated_at": "2025-07-28 12:05:16",
+        "created_by": "admin-id-123",
+        "description": "Root version of Dries",
+        "created_by_username": "admin",
+        "parent_name": "Dries",
+        "parent_type": "COMPONENT"
+      }
+    ]
+  }
+}
