@@ -181,6 +181,7 @@ const TreeNode = ({
   isExpanded,
   onExpansionChange,
   focusedConfigId,
+  isNodeExpanded,
 }) => {
   const [children, setChildren] = useState([]);
   const [loadingChildren, setLoadingChildren] = useState(false);
