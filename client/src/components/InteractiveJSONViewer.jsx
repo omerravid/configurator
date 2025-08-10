@@ -165,7 +165,12 @@ const TreeNode = ({
   const handleInfoClick = (e) => {
     e.stopPropagation();
     if (source) {
-      onHover?.(currentPath, source, currentPath);
+      // Toggle tooltip - if same path is clicked, close it, otherwise show new one
+      if (onGetActiveTooltipPath && onGetActiveTooltipPath() === currentPath) {
+        onHoverEnd?.();
+      } else {
+        onHover?.(currentPath, source, currentPath);
+      }
     }
   };
 
