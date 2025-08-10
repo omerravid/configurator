@@ -439,6 +439,7 @@ const TreeNode = ({
                 user={user}
                 isExpanded={isNodeExpanded(child.id, level + 1)}
                 onExpansionChange={onExpansionChange}
+                isNodeExpanded={isNodeExpanded}
               />
             ))
           )}
