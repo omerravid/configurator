@@ -660,6 +660,7 @@ const InteractiveJSONViewer = ({
           onValueChange={handleValueChange}
           expandedPaths={expandedPaths}
           onExpandToggle={handleExpandToggle}
+          onGetActiveTooltipPath={getActiveTooltipPath}
         />
       </div>
 
