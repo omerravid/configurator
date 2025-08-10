@@ -506,9 +506,10 @@ const ConfigurationTree = ({
       } else {
         newSet.delete(configId);
       }
-      // Persist to localStorage
+      // Persist to localStorage with tab-specific key
       try {
-        localStorage.setItem('configTree-expandedNodes', JSON.stringify([...newSet]));
+        const storageKey = `configTree-expandedNodes-${activeTab}`;
+        localStorage.setItem(storageKey, JSON.stringify([...newSet]));
       } catch (err) {
         console.warn('Failed to save expansion state to localStorage:', err);
       }
