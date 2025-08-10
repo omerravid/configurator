@@ -69,11 +69,12 @@ export const configAPI = {
   delete: (id) => api.delete(`/configs/${id}`),
 
   // Get value at specific path
-  getValueAtPath: (id, path) =>
-    api.get(`/configs/${id}/data`, { params: { path } }),
+  getValueAtPath: (id, path, minimal = false) =>
+    api.get(`/configs/${id}/data`, { params: { path, minimal } }),
 
   // Get by path (alias for getValueAtPath)
-  getByPath: (id, path) => api.get(`/configs/${id}/data`, { params: { path } }),
+  getByPath: (id, path, minimal = false) =>
+    api.get(`/configs/${id}/data`, { params: { path, minimal } }),
 
   // Commit user configuration
   commit: (id) => api.post(`/configs/${id}/commit`),
