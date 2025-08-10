@@ -531,10 +531,17 @@ const InteractiveJSONViewer = ({
   // Global state to preserve expand/collapse states across data updates
   const [expandedPaths, setExpandedPaths] = useState(new Set());
 
-  const handleHover = (path, source, fullPath) => {
+  const handleHover = (path, source, fullPath, clickEvent) => {
     setHoveredSource(source);
     setHoveredPath(fullPath);
     setShowTooltip(true);
+    if (clickEvent) {
+      setTooltipPosition({ x: clickEvent.clientX, y: clickEvent.clientY });
+    }
+  };
+
+  const getActiveTooltipPath = () => {
+    return showTooltip ? hoveredPath : null;
   };
 
   const handleHoverEnd = () => {
