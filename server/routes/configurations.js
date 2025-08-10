@@ -367,10 +367,11 @@ router.get("/:id/data", authenticateToken, async (req, res) => {
     const result = await ConfigurationService.getValueAtPath(
       req.params.id,
       path,
+      isMinimal
     );
 
     if (isMinimal) {
-      // Return just the value
+      // Return just the value (already minimal from service)
       res.json(result);
     } else {
       res.json({ data: result });
