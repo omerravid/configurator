@@ -557,6 +557,50 @@ const ConfigurationTree = ({
     loadRootConfigurations();
   }, [refreshTrigger, activeTab]);
 
+  // Selective update functions to avoid full tree refreshes
+  const updateConfigInTree = (updatedConfig) => {
+    setRootConfigs(prevConfigs =>
+      prevConfigs.map(config =>
+        config.id === updatedConfig.id ? { ...config, ...updatedConfig } : config
+      )
+    );
+  };
+
+  const removeConfigFromTree = (configId) => {
+    setRootConfigs(prevConfigs =>
+      prevConfigs.filter(config => config.id !== configId)
+    );
+  };
+
+  const addConfigToTree = (newConfig) => {
+    // Add to root level if it has no parent, otherwise trigger parent refresh
+    if (!newConfig.parent_id) {
+      setRootConfigs(prevConfigs => [...prevConfigs, newConfig]);
+    } else {
+      // For child additions, we need to refresh the parent's children
+      // This is more complex and might need a partial refresh
+      loadRootConfigurations();
+    }
+  };
+
+  const moveConfigBetweenStates = (configId, newArchivedState) => {
+    // When archiving/restoring, move config between active/archived lists
+    if (activeTab === 'active' && newArchivedState) {
+      // Config was archived, remove from active list
+      removeConfigFromTree(configId);
+    } else if (activeTab === 'archived' && !newArchivedState) {
+      // Config was restored, remove from archived list
+      removeConfigFromTree(configId);
+    } else if (activeTab === 'active' && !newArchivedState) {
+      // Config was restored and we're viewing active, need to add it
+      // We'll need to reload to get the fresh data
+      loadRootConfigurations();
+    } else if (activeTab === 'archived' && newArchivedState) {
+      // Config was archived and we're viewing archived, need to add it
+      loadRootConfigurations();
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-4 text-center">
