@@ -217,11 +217,14 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
           {/* API Info */}
           <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded border">
             <strong>API Endpoint:</strong> GET /api/configs/
-            {selectedConfigId || "{id}"}
-            {queryPath && <span>/path/{encodeURIComponent(queryPath)}</span>}
+            {selectedConfigId || "{id}"}/data
+            {queryPath && <span>?path={encodeURIComponent(queryPath)}</span>}
+            <span className="text-green-600">&minimal=true</span>
             <br />
-            <strong>Example:</strong> GET
-            /api/configs/prod_ecommerce/path/system.logging.level
+            <strong>Example:</strong> GET /api/configs/{selectedConfigId || "prod_ecommerce"}/data
+            {queryPath ? `?path=${encodeURIComponent(queryPath)}&minimal=true` : "?minimal=true"}
+            <br />
+            <strong>Response:</strong> Returns only the value/object (no metadata)
           </div>
 
           {/* Error Display */}
