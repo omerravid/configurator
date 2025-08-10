@@ -633,6 +633,8 @@ const Dashboard = () => {
               onCreateChild={handleTreeCreateChild}
               onCommit={handleTreeCommit}
               onDelete={handleTreeDelete}
+              onArchive={handleTreeArchive}
+              onRestore={handleTreeRestore}
               user={user}
             />
           </div>
