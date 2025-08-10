@@ -257,13 +257,7 @@ const Dashboard = () => {
       setSelectedConfig(null);
       setResolvedData(null);
 
-      // Use selective tree update instead of full refresh
-      if (treeUpdateFunctions) {
-        treeUpdateFunctions.removeConfig(config.id);
-      } else {
-        // Fallback to full refresh if selective updates not available
-        setRefreshTrigger((prev) => prev + 1);
-      }
+      setRefreshTrigger((prev) => prev + 1);
 
       showToast(`Configuration "${config.name}" deleted successfully`);
     } catch (err) {
