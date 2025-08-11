@@ -540,6 +540,7 @@ const ConfigurationTree = ({
   onDelete,
   onArchive,
   onRestore,
+  onAddComponent,
   user,
 }) => {
   const [rootConfigs, setRootConfigs] = useState([]);
