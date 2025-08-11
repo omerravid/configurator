@@ -437,9 +437,11 @@ const TreeNode = ({
         onDrop={handleDrop}
         title={
           isDraggable
-            ? `Drag ${config.type.toLowerCase()} to add to a product`
+            ? config.type === "COMPONENT"
+              ? `Drag component to add with its root version to a product`
+              : `Drag version to add this specific version to a product`
             : isDroppable
-              ? "Drop components here to add them to this product"
+              ? "Drop components/versions here to add them to this product"
               : undefined
         }
       >
