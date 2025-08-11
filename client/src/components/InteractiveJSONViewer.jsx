@@ -750,7 +750,9 @@ const InteractiveJSONViewer = ({
           // Clear selection if the removed item was selected
           if (selectedStructuralPath === path) {
             setSelectedStructuralPath("root");
-            setSelectedStructuralValue(data);
+            // Update selected value to the new root data after deletion
+            const newRootData = parentPath ? data : newParentValue;
+            setSelectedStructuralValue(newRootData);
           }
         }
         break;
