@@ -640,6 +640,13 @@ const InteractiveJSONViewer = ({
   const handleValueChange = (path, newValue) => {
     // Strip "root." prefix from path since root is just a container
     const cleanPath = path.startsWith("root.") ? path.substring(5) : path;
+
+    // Ensure we don't pass empty path for root level changes
+    if (!cleanPath) {
+      console.warn("Attempting to update root level, which is not allowed");
+      return;
+    }
+
     onDataChange?.(cleanPath, newValue);
   };
 
