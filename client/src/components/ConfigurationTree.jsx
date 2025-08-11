@@ -713,6 +713,7 @@ const ConfigurationTree = ({
           onDelete={onDelete}
           onArchive={onArchive}
           onRestore={onRestore}
+          onAddComponent={onAddComponent}
           user={user}
           isExpanded={isNodeExpanded(config.id, 0)}
           onExpansionChange={handleExpansionChange}
