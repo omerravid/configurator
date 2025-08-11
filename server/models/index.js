@@ -1,5 +1,5 @@
-// Dynamic model loader based on database type
-const useMongoDB = process.env.USE_MONGODB === 'true';
+// Dynamic model loader based on database type (MongoDB by default)
+const useMongoDB = process.env.USE_MONGODB !== 'false';
 
 let User, Configuration;
 
