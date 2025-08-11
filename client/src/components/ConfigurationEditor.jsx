@@ -898,7 +898,7 @@ const ConfigurationEditor = ({
                             " - Level-Specific Overrides Only"}
                         </label>
                         <div className="flex space-x-2">
-                          {isCreatingComponent && isEmptyComponent() && (
+                          {(isCreatingComponent || (!isCreating && !isCreatingChild && formData.type === "COMPONENT")) && isEmptyComponent() && (
                             <button
                               type="button"
                               onClick={handleFolderImport}
