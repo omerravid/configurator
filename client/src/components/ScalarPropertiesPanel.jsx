@@ -140,10 +140,11 @@ const ScalarPropertiesPanel = ({
 
   const copyToClipboard = async (text, label = "Value") => {
     try {
-      if (navigator.clipboard) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(text);
+        showToast(`${label} copied to clipboard!`);
       } else {
-        // Fallback for iframes
+        // Fallback for iframes and older browsers
         const textArea = document.createElement("textarea");
         textArea.value = text;
         textArea.style.position = "fixed";
@@ -151,10 +152,15 @@ const ScalarPropertiesPanel = ({
         document.body.appendChild(textArea);
         textArea.select();
         textArea.setSelectionRange(0, 99999);
-        document.execCommand("copy");
+        const successful = document.execCommand("copy");
         document.body.removeChild(textArea);
+
+        if (successful) {
+          showToast(`${label} copied to clipboard!`);
+        } else {
+          showToast("Failed to copy to clipboard", "error");
+        }
       }
-      showToast(`${label} copied to clipboard!`);
     } catch (err) {
       showToast("Failed to copy to clipboard", "error");
     }
