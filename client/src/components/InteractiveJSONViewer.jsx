@@ -760,20 +760,34 @@ const InteractiveJSONViewer = ({
     if (!onDataChange) return;
     const cleanPath = path.replace(/^root\./, "");
     const propertyPath = cleanPath ? `${cleanPath}.${propertyName}` : propertyName;
+
+    console.log("Adding property:", { path, propertyName, value, cleanPath, propertyPath });
+
+    if (!propertyPath) {
+      console.warn("Cannot add property to root level");
+      return;
+    }
+
     onDataChange(propertyPath, value);
   };
 
   const handlePropertyDelete = (path, propertyName) => {
     if (!onDataChange) return;
     const cleanPath = path.replace(/^root\./, "");
-    const propertyPath = cleanPath ? `${cleanPath}.${propertyName}` : propertyName;
 
-    // Get the parent object and remove the property
-    const parentValue = selectedStructuralValue;
-    if (parentValue && typeof parentValue === "object") {
-      const newParentValue = { ...parentValue };
-      delete newParentValue[propertyName];
-      onDataChange(cleanPath, newParentValue);
+    console.log("Deleting property:", { path, propertyName, cleanPath });
+
+    if (!cleanPath && propertyName) {
+      // Deleting from root level
+      onDataChange(propertyName, undefined);
+    } else {
+      // Get the parent object and remove the property
+      const parentValue = selectedStructuralValue;
+      if (parentValue && typeof parentValue === "object") {
+        const newParentValue = { ...parentValue };
+        delete newParentValue[propertyName];
+        onDataChange(cleanPath, newParentValue);
+      }
     }
   };
 
