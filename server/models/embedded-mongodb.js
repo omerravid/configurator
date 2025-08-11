@@ -33,10 +33,7 @@ class EmbeddedMongoDB {
         await mongoose.disconnect();
       }
 
-      this.connection = await mongoose.connect(this.connectionString, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
+      this.connection = await mongoose.connect(this.connectionString);
 
       console.log('Connected to embedded MongoDB successfully');
       return this.connection;
