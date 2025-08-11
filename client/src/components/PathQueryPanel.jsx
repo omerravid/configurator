@@ -293,12 +293,27 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
               </div>
 
               <div className="space-y-2">
-                <div className="text-xs text-gray-500">
-                  Type: {typeof queryResult.data} | Size:{" "}
-                  {JSON.stringify(queryResult.data).length} chars | Time:{" "}
-                  {new Date(queryResult.query.timestamp).toLocaleTimeString()}
-                </div>
-                {formatResult(queryResult.data)}
+                {queryResult.notFound ? (
+                  <div>
+                    <div className="text-xs text-gray-500 mb-2">
+                      Path not found | Time:{" "}
+                      {new Date(queryResult.query.timestamp).toLocaleTimeString()}
+                    </div>
+                    <div className="flex items-center space-x-2 text-amber-600 bg-amber-50 p-3 rounded border">
+                      <ExclamationTriangleIcon className="w-5 h-5" />
+                      <span>The specified path does not exist in this configuration.</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="text-xs text-gray-500">
+                      Type: {typeof queryResult.data} | Size:{" "}
+                      {JSON.stringify(queryResult.data).length} chars | Time:{" "}
+                      {new Date(queryResult.query.timestamp).toLocaleTimeString()}
+                    </div>
+                    {formatResult(queryResult.data)}
+                  </div>
+                )}
               </div>
 
               {/* Metadata if available */}
