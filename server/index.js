@@ -9,8 +9,8 @@ const PORT = process.env.PORT || 3002;
 // Initialize database
 const db = require("./models/database");
 
-// Initialize MongoDB if enabled
-if (process.env.USE_MONGODB === 'true') {
+// Initialize MongoDB by default (can be disabled with USE_MONGODB='false')
+if (process.env.USE_MONGODB !== 'false') {
   const embeddedMongo = require("./models/embedded-mongodb");
 
   // Start embedded MongoDB on startup
