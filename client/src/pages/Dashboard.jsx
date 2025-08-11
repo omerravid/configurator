@@ -736,6 +736,7 @@ const Dashboard = () => {
               onDelete={handleTreeDelete}
               onArchive={handleTreeArchive}
               onRestore={handleTreeRestore}
+              onAddComponent={handleAddComponent}
               user={user}
             />
           </div>
