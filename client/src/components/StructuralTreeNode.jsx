@@ -194,38 +194,52 @@ const StructuralTreeNode = ({
     if (!hasChildren || !isExpanded) return null;
 
     if (isArray) {
-      return actualValue.map((item, index) => (
-        <StructuralTreeNode
-          key={index}
-          keyName={index.toString()}
-          value={item}
-          path={currentPath}
-          depth={depth + 1}
-          isEditable={isEditable}
-          expandedPaths={expandedPaths}
-          onExpandToggle={onExpandToggle}
-          onNodeSelect={onNodeSelect}
-          selectedPath={selectedPath}
-          onStructuralChange={onStructuralChange}
-        />
-      ));
+      return actualValue.map((item, index) => {
+        const itemActualValue = getActualValue(item);
+        // Only show arrays and objects in structure view
+        if (itemActualValue && (typeof itemActualValue === "object" || Array.isArray(itemActualValue))) {
+          return (
+            <StructuralTreeNode
+              key={index}
+              keyName={index.toString()}
+              value={item}
+              path={currentPath}
+              depth={depth + 1}
+              isEditable={isEditable}
+              expandedPaths={expandedPaths}
+              onExpandToggle={onExpandToggle}
+              onNodeSelect={onNodeSelect}
+              selectedPath={selectedPath}
+              onStructuralChange={onStructuralChange}
+            />
+          );
+        }
+        return null;
+      }).filter(Boolean);
     }
 
-    return Object.entries(actualValue).map(([key, val]) => (
-      <StructuralTreeNode
-        key={key}
-        keyName={key}
-        value={val}
-        path={currentPath}
-        depth={depth + 1}
-        isEditable={isEditable}
-        expandedPaths={expandedPaths}
-        onExpandToggle={onExpandToggle}
-        onNodeSelect={onNodeSelect}
-        selectedPath={selectedPath}
-        onStructuralChange={onStructuralChange}
-      />
-    ));
+    return Object.entries(actualValue).map(([key, val]) => {
+      const valActualValue = getActualValue(val);
+      // Only show arrays and objects in structure view
+      if (valActualValue && (typeof valActualValue === "object" || Array.isArray(valActualValue))) {
+        return (
+          <StructuralTreeNode
+            key={key}
+            keyName={key}
+            value={val}
+            path={currentPath}
+            depth={depth + 1}
+            isEditable={isEditable}
+            expandedPaths={expandedPaths}
+            onExpandToggle={onExpandToggle}
+            onNodeSelect={onNodeSelect}
+            selectedPath={selectedPath}
+            onStructuralChange={onStructuralChange}
+          />
+        );
+      }
+      return null;
+    }).filter(Boolean);
   };
 
   const getItemCount = () => {
