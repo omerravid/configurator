@@ -82,18 +82,23 @@ const StructuralTreeNode = ({
     onNodeSelect(currentPath, actualValue);
   };
 
-  const generateUniqueName = (parentValue, baseName = "newItem") => {
+  const generateUniqueName = (parentValue, baseName = "newObject") => {
     if (!parentValue || typeof parentValue !== "object") return baseName;
-    
+
+    // Ensure baseName is valid
+    if (!baseName || typeof baseName !== "string" || baseName.trim() === "") {
+      baseName = "newObject";
+    }
+
     const existingKeys = Object.keys(parentValue);
     let counter = 1;
     let newName = baseName;
-    
+
     while (existingKeys.includes(newName)) {
       newName = `${baseName}${counter}`;
       counter++;
     }
-    
+
     return newName;
   };
 
