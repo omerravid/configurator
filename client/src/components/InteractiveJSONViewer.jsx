@@ -7,8 +7,12 @@ import {
   ClipboardIcon,
   MapIcon,
   DocumentDuplicateIcon,
+  ViewColumnsIcon,
+  RectangleStackIcon,
 } from "@heroicons/react/24/outline";
 import ContextMenu from "./ContextMenu";
+import StructuralTreeNode from "./StructuralTreeNode";
+import ScalarPropertiesPanel from "./ScalarPropertiesPanel";
 import { useToast } from "../context/ToastContext";
 
 // Helper function to safely extract actual values from provenance-wrapped objects
@@ -572,6 +576,11 @@ const InteractiveJSONViewer = ({
   const [showInheritanceChain, setShowInheritanceChain] = useState(false);
   // Global state to preserve expand/collapse states across data updates
   const [expandedPaths, setExpandedPaths] = useState(new Set());
+  // Mode toggle between Flat and Structural view
+  const [viewMode, setViewMode] = useState("flat");
+  // Structural mode state
+  const [selectedStructuralPath, setSelectedStructuralPath] = useState("");
+  const [selectedStructuralValue, setSelectedStructuralValue] = useState(null);
 
   const handleHover = (path, source, fullPath, clickEvent) => {
     setHoveredSource(source);
@@ -614,6 +623,119 @@ const InteractiveJSONViewer = ({
     });
   };
 
+  const handleStructuralNodeSelect = (path, value) => {
+    setSelectedStructuralPath(path);
+    setSelectedStructuralValue(value);
+  };
+
+  const handleStructuralChange = (action, path, param1, param2) => {
+    if (!onDataChange) return;
+
+    const getValueAtPath = (obj, path) => {
+      if (!path || path === "root") return obj;
+      const keys = path.replace(/^root\./, "").split(".");
+      let current = obj;
+      for (const key of keys) {
+        if (current && typeof current === "object" && current.hasOwnProperty(key)) {
+          current = current[key];
+        } else {
+          return undefined;
+        }
+      }
+      return current;
+    };
+
+    const setValueAtPath = (obj, path, value) => {
+      if (!path || path === "root") return value;
+      const keys = path.replace(/^root\./, "").split(".");
+      const newObj = JSON.parse(JSON.stringify(obj));
+      let current = newObj;
+
+      for (let i = 0; i < keys.length - 1; i++) {
+        const key = keys[i];
+        if (!current[key] || typeof current[key] !== "object") {
+          current[key] = {};
+        }
+        current = current[key];
+      }
+
+      const lastKey = keys[keys.length - 1];
+      if (value === undefined) {
+        delete current[lastKey];
+      } else {
+        current[lastKey] = value;
+      }
+
+      return newObj;
+    };
+
+    switch (action) {
+      case "add": {
+        const parentPath = path.replace(/^root\./, "");
+        const newPath = parentPath ? `${parentPath}.${param1}` : param1;
+        onDataChange(newPath, param2);
+        break;
+      }
+      case "remove": {
+        const cleanPath = path.replace(/^root\./, "");
+        const pathParts = cleanPath.split(".");
+        const parentPath = pathParts.slice(0, -1).join(".");
+        const key = pathParts[pathParts.length - 1];
+
+        const parentValue = getValueAtPath(data, parentPath ? `root.${parentPath}` : "root");
+        if (parentValue && typeof parentValue === "object") {
+          const newParentValue = { ...parentValue };
+          delete newParentValue[key];
+          onDataChange(parentPath, newParentValue);
+        }
+        break;
+      }
+      case "rename": {
+        const cleanPath = path.replace(/^root\./, "");
+        const pathParts = cleanPath.split(".");
+        const parentPath = pathParts.slice(0, -1).join(".");
+        const oldKey = pathParts[pathParts.length - 1];
+        const newKey = param1;
+
+        const parentValue = getValueAtPath(data, parentPath ? `root.${parentPath}` : "root");
+        if (parentValue && typeof parentValue === "object" && parentValue.hasOwnProperty(oldKey)) {
+          const newParentValue = { ...parentValue };
+          newParentValue[newKey] = newParentValue[oldKey];
+          delete newParentValue[oldKey];
+          onDataChange(parentPath, newParentValue);
+
+          // Update selected path if it was the renamed item
+          if (selectedStructuralPath === path) {
+            const newPath = parentPath ? `root.${parentPath}.${newKey}` : `root.${newKey}`;
+            setSelectedStructuralPath(newPath);
+          }
+        }
+        break;
+      }
+    }
+  };
+
+  const handlePropertyAdd = (path, propertyName, value) => {
+    if (!onDataChange) return;
+    const cleanPath = path.replace(/^root\./, "");
+    const propertyPath = cleanPath ? `${cleanPath}.${propertyName}` : propertyName;
+    onDataChange(propertyPath, value);
+  };
+
+  const handlePropertyDelete = (path, propertyName) => {
+    if (!onDataChange) return;
+    const cleanPath = path.replace(/^root\./, "");
+    const propertyPath = cleanPath ? `${cleanPath}.${propertyName}` : propertyName;
+
+    // Get the parent object and remove the property
+    const parentValue = selectedStructuralValue;
+    if (parentValue && typeof parentValue === "object") {
+      const newParentValue = { ...parentValue };
+      delete newParentValue[propertyName];
+      onDataChange(cleanPath, newParentValue);
+    }
+  };
+
   if (!data) {
     return (
       <div className={`p-4 text-center text-gray-500 ${className}`}>
@@ -635,11 +757,39 @@ const InteractiveJSONViewer = ({
     <div className={`relative ${className}`} onMouseMove={handleMouseMove} onClick={handleContainerClick}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        {title && (
-          <h3 className="text-lg font-medium text-gray-900">{title}</h3>
-        )}
+        <div className="flex items-center space-x-4">
+          {title && (
+            <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+          )}
 
-        {metadata && (
+          {/* Mode Toggle */}
+          <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode("flat")}
+              className={`flex items-center space-x-1 px-3 py-1 rounded text-sm font-medium transition-colors ${
+                viewMode === "flat"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              <RectangleStackIcon className="w-4 h-4" />
+              <span>Flat</span>
+            </button>
+            <button
+              onClick={() => setViewMode("structural")}
+              className={`flex items-center space-x-1 px-3 py-1 rounded text-sm font-medium transition-colors ${
+                viewMode === "structural"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              <ViewColumnsIcon className="w-4 h-4" />
+              <span>Structural</span>
+            </button>
+          </div>
+        </div>
+
+        {metadata && viewMode === "flat" && (
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowInheritanceChain(!showInheritanceChain)}
@@ -651,24 +801,26 @@ const InteractiveJSONViewer = ({
         )}
       </div>
 
-      {/* Inheritance Legend */}
-      <div className="mb-3 flex items-center space-x-4 text-xs text-gray-600">
-        <div className="flex items-center space-x-1">
-          <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-          <span>Product</span>
+      {/* Inheritance Legend - only show in flat mode */}
+      {viewMode === "flat" && (
+        <div className="mb-3 flex items-center space-x-4 text-xs text-gray-600">
+          <div className="flex items-center space-x-1">
+            <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+            <span>Product</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <div className="w-2 h-2 rounded-full bg-green-400"></div>
+            <span>Instance</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <div className="w-2 h-2 rounded-full bg-purple-400"></div>
+            <span>User</span>
+          </div>
         </div>
-        <div className="flex items-center space-x-1">
-          <div className="w-2 h-2 rounded-full bg-green-400"></div>
-          <span>Instance</span>
-        </div>
-        <div className="flex items-center space-x-1">
-          <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-          <span>User</span>
-        </div>
-      </div>
+      )}
 
-      {/* Inheritance Chain */}
-      {showInheritanceChain && metadata && metadata.chain && (
+      {/* Inheritance Chain - only show in flat mode */}
+      {viewMode === "flat" && showInheritanceChain && metadata && metadata.chain && (
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <h4 className="text-sm font-medium text-blue-900 mb-2">
             Inheritance Chain ({metadata.chainLength} levels)
@@ -696,21 +848,65 @@ const InteractiveJSONViewer = ({
         </div>
       )}
 
-      {/* JSON Tree */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4 max-h-96 overflow-auto">
-        <TreeNode
-          keyName="root"
-          value={data}
-          onHover={handleHover}
-          onHoverEnd={handleHoverEnd}
-          isRoot={true}
-          isEditable={isEditable}
-          onValueChange={handleValueChange}
-          expandedPaths={expandedPaths}
-          onExpandToggle={handleExpandToggle}
-          onGetActiveTooltipPath={getActiveTooltipPath}
-        />
-      </div>
+      {/* Content based on view mode */}
+      {viewMode === "flat" ? (
+        /* Flat JSON Tree */
+        <div className="bg-white border border-gray-200 rounded-lg p-4 max-h-96 overflow-auto">
+          <TreeNode
+            keyName="root"
+            value={data}
+            onHover={handleHover}
+            onHoverEnd={handleHoverEnd}
+            isRoot={true}
+            isEditable={isEditable}
+            onValueChange={handleValueChange}
+            expandedPaths={expandedPaths}
+            onExpandToggle={handleExpandToggle}
+            onGetActiveTooltipPath={getActiveTooltipPath}
+          />
+        </div>
+      ) : (
+        /* Structural View - Split Panel */
+        <div className="flex gap-4 h-96">
+          {/* Left Panel - Structure Tree */}
+          <div className="w-1/2 bg-white border border-gray-200 rounded-lg overflow-auto">
+            <div className="p-2 border-b border-gray-200 bg-gray-50">
+              <h4 className="text-sm font-medium text-gray-700">Structure</h4>
+            </div>
+            <div className="p-2">
+              <StructuralTreeNode
+                keyName="root"
+                value={data}
+                isRoot={true}
+                isEditable={isEditable}
+                expandedPaths={expandedPaths}
+                onExpandToggle={handleExpandToggle}
+                onNodeSelect={handleStructuralNodeSelect}
+                selectedPath={selectedStructuralPath}
+                onStructuralChange={handleStructuralChange}
+              />
+            </div>
+          </div>
+
+          {/* Right Panel - Scalar Properties */}
+          <div className="w-1/2 bg-white border border-gray-200 rounded-lg overflow-auto">
+            <div className="p-2 border-b border-gray-200 bg-gray-50">
+              <h4 className="text-sm font-medium text-gray-700">Properties</h4>
+            </div>
+            <ScalarPropertiesPanel
+              selectedPath={selectedStructuralPath}
+              selectedValue={selectedStructuralValue}
+              onValueChange={handleValueChange}
+              onPropertyAdd={handlePropertyAdd}
+              onPropertyDelete={handlePropertyDelete}
+              isEditable={isEditable}
+              onHover={handleHover}
+              onHoverEnd={handleHoverEnd}
+              onGetActiveTooltipPath={getActiveTooltipPath}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Tooltip */}
       <ProvenanceTooltip
@@ -722,9 +918,11 @@ const InteractiveJSONViewer = ({
 
       {/* Help text */}
       <div className="mt-2 text-xs text-gray-500">
-        💡 Click ℹ️ to see source configuration • Colored dots
-        indicate inheritance level
-        {isEditable && " • Click ✏️ to edit values"}
+        {viewMode === "flat" ? (
+          <>💡 Click ℹ️ to see source configuration • Colored dots indicate inheritance level{isEditable && " • Click ✏️ to edit values"}</>
+        ) : (
+          <>💡 Select items in structure tree to view properties • {isEditable && "Right-click for structure editing • "} Click ℹ️ to see source configuration</>
+        )}
       </div>
     </div>
   );
