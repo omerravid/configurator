@@ -32,7 +32,7 @@ const StructuralTreeNode = ({
   const [renameValue, setRenameValue] = useState(keyName);
 
   const currentPath = path ? `${path}.${keyName}` : keyName;
-  const isExpanded = expandedPaths.has(currentPath) || (expandedPaths.size === 0 && depth < 2);
+  const isExpanded = expandedPaths.has(currentPath);
   const isSelected = currentPath === selectedPath;
 
   // Extract actual value from provenance wrapper
