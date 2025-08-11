@@ -368,6 +368,7 @@ const TreeNode = ({
   const handleDragEnd = (e) => {
     if (!isDraggable) return;
     e.target.style.opacity = "";
+    e.target.style.transform = "";
   };
 
   const handleDragOver = (e) => {
@@ -379,12 +380,18 @@ const TreeNode = ({
   const handleDragEnter = (e) => {
     if (!isDroppable) return;
     e.preventDefault();
-    e.target.classList.add("bg-blue-100", "border-blue-300");
+    e.currentTarget.classList.add("bg-blue-50", "border-blue-400", "border-dashed");
+    e.currentTarget.style.backgroundColor = "#eff6ff";
+    e.currentTarget.style.borderColor = "#60a5fa";
+    e.currentTarget.style.borderStyle = "dashed";
   };
 
   const handleDragLeave = (e) => {
     if (!isDroppable) return;
-    e.target.classList.remove("bg-blue-100", "border-blue-300");
+    e.currentTarget.classList.remove("bg-blue-50", "border-blue-400", "border-dashed");
+    e.currentTarget.style.backgroundColor = "";
+    e.currentTarget.style.borderColor = "";
+    e.currentTarget.style.borderStyle = "";
   };
 
   const handleDrop = async (e) => {
