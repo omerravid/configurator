@@ -326,6 +326,18 @@ const Dashboard = () => {
       const rawResponse = await configAPI.getRawById(selectedConfig.id);
       const currentData = rawResponse.data.resolved || {};
 
+      // Special case: if path is "_root_", replace the entire data object
+      if (path === "_root_") {
+        // Update the configuration with the new root data
+        await configAPI.update(selectedConfig.id, { data: newValue });
+
+        // Reload data
+        const response = await configAPI.getById(selectedConfig.id, true);
+        setResolvedData(response.data);
+        showToast("Configuration updated successfully");
+        return;
+      }
+
       // For child configurations, we need to validate the path exists in parent
       if (selectedConfig.type !== "PRODUCT" && selectedConfig.parent_id) {
         try {
