@@ -76,12 +76,21 @@ The Configuration Manager uses a hierarchical system with five main types:
 - Expandable tree shows parent-child relationships
 - Right-click for context menu with available actions
 - Lock icons 🔒 indicate committed (read-only) configurations
+- Drag-and-drop: Drag components/versions into products for quick addition
 
 **Center Panel - Configuration Details**
 - Header: Configuration name, type, and creator information
 - Action buttons: Edit, Create Child, Rename, Delete, Commit
+- View modes: Toggle between "Flat" and "Structural" JSON views
 - JSON viewer: Interactive display of configuration data
 - Provenance indicators: Colored dots showing value origins
+- Import button: Available for empty components to import folder structures
+
+**Structural View Mode**
+- Left tree: Shows only objects and arrays in hierarchical structure
+- Right panel: Displays scalar properties of selected structural items
+- Context menus: Right-click for copy, paste, add, rename, delete operations
+- Inline editing: Direct modification of property values
 
 **Bottom Panel - API Query Tool**
 - Configuration selector: Choose any configuration
@@ -100,15 +109,24 @@ The Configuration Manager uses a hierarchical system with five main types:
    - Select a component from the dropdown
    - Choose a specific version of that component
    - Repeat for additional components
-4. Click "Create Configuration"
-5. The product stores references to components, not copies of data
+4. Alternatively, drag components/versions from the tree directly into the product
+5. Click "Create Configuration"
+6. The product stores references to components, not copies of data
 
 **Creating a New Component**
 1. Click "New Component" in the header
 2. Enter a name and description
 3. Define the JSON structure for your component
-4. Click "Create Configuration"
-5. The component acts as its own root version
+4. For empty components, use the "Import" button to import folder structures
+5. Click "Create Configuration"
+6. The component acts as its own root version
+
+**Importing Component Structure**
+1. Click "Import" button (appears only for empty components)
+2. Select a folder from your local computer
+3. System will create JSON structure based on folder hierarchy
+4. JSON files in folders will be included in the structure
+5. Review and modify the imported structure as needed
 
 **Creating Child Configurations**
 1. Select a parent configuration in the tree
@@ -242,17 +260,37 @@ Values Not Updating
 - Refresh the page to reload data
 - Check if the configuration is committed (read-only)
 - Verify you have edit permissions
+- In structural view, ensure you're editing the correct property panel
 
 Component Resolution Issues
 - Ensure referenced components and versions exist
 - Check that component versions are accessible
 - Verify the component structure is valid
 
+Copy/Paste Issues
+- Copy functionality uses fallback methods in iframe environments
+- If clipboard operations fail, try using browser's native copy/paste
+- Ensure you have the correct selection before copying
+
+Drag-and-Drop Issues
+- Only components and versions can be dragged
+- Only products can receive dropped components
+- Ensure drag operation completes over a valid drop target
+- Check that the component/version exists and is accessible
+
+Import Issues
+- Import button only appears for empty components
+- Ensure folder contains valid JSON files
+- Check file permissions and accessibility
+- Verify folder structure is not too complex or deeply nested
+
 **Getting Help**
 1. Hover tooltips: Most UI elements have helpful tooltips
 2. Provenance tracking: Use colored dots to understand value origins
 3. API panel: Use the bottom panel to test queries and understand data flow
 4. Inheritance chain: Use the inheritance view to debug complex hierarchies
+5. View modes: Switch between Flat and Structural views for different perspectives
+6. Context menus: Right-click elements for additional options and operations
       `
     }
   };

@@ -1,0 +1,5587 @@
+{
+  "timestamp": "2025-08-11T11:53:55.035Z",
+  "version": "1.0",
+  "data": {
+    "users": [
+      {
+        "id": "j39a5t19plpmd5smm5q",
+        "username": "hana",
+        "role": "USER",
+        "created_at": "2025-07-16 10:03:15",
+        "updated_at": "2025-07-16 10:03:15"
+      },
+      {
+        "id": "mp9szb61ma7md5rlxx9",
+        "username": "omer",
+        "role": "USER",
+        "created_at": "2025-07-16 09:34:44",
+        "updated_at": "2025-07-16 09:34:44"
+      },
+      {
+        "id": "admin-id-123",
+        "username": "admin",
+        "role": "ADMIN",
+        "created_at": "2025-07-15 13:34:29",
+        "updated_at": "2025-07-15 13:34:29"
+      }
+    ],
+    "configurations": [
+      {
+        "id": "es5kuxghdhme6y49mq",
+        "name": "XrayScanParams",
+        "type": "COMPONENT",
+        "parent_id": null,
+        "data": {
+          "SourceRay": {
+            "ScanProtocolConfig": {
+              "LinearXrayScan": {
+                "Large": "LinearXrayScan/Large_Linear_XrayScan_Protocol.json",
+                "Medium": "LinearXrayScan/Medium_Linear_XrayScan_Protocol.json",
+                "Small": "LinearXrayScan/Small_Linear_XrayScan_Protocol.json",
+                "XS": "LinearXrayScan/XS_phantom_Linear_XrayScan_Protocol.json"
+              },
+              "Xray3dScan": {
+                "Large": "Xray3dScan/Large_3D_XrayScan_Protocol.json",
+                "Medium": "Xray3dScan/Medium_3D_XrayScan_Protocol.json",
+                "Small": "Xray3dScan/Small_3D_XrayScan_Protocol.json",
+                "XS": "Xray3dScan/XS_phantom_3D_XrayScan_Protocol.json"
+              },
+              "Xray3dDynamicScan": {
+                "Large": "Xray3dDynamicScan/Large_3D_XrayScan_Protocol.json",
+                "Medium": "Xray3dDynamicScan/Medium_3D_XrayScan_Protocol.json",
+                "Small": "Xray3dDynamicScan/Small_3D_XrayScan_Protocol.json",
+                "XS": "Xray3dDynamicScan/XS_phantom_3D_XrayScan_Protocol.json"
+              },
+              "Xray2dScan": {
+                "Large": "Xray2dScan/Large_2D_XrayScan_Protocol.json",
+                "Medium": "Xray2dScan/Medium_2D_XrayScan_Protocol.json",
+                "Small": "Xray2dScan/Small_2D_XrayScan_Protocol.json",
+                "XS": "Xray2dScan/XS_phantom_2D_XrayScan_Protocol.json"
+              },
+              "DoDynamicGainCalib2D": {
+                "Dark": "GainFiles/Dark_Calibration_2D_XrayScan_Protocol.json",
+                "Gain": "GainFiles/Gain_Calibration_2D_XrayScan_Protocol.json",
+                "BasePos": "GainFiles/Dynamic_Calibration_2D_Position.json"
+              },
+              "DoSourcePositionCalib": {
+                "Dark": "GainFiles/Dark_Calibration_2D_XrayScan_Protocol.json",
+                "Gain": "GainFiles/Source_Position_Calibration_2D_XrayScan_Protocol.json",
+                "BasePos": "GainFiles/Auto_Calibration_2D_Position.json"
+              },
+              "DoDefectCalib": {
+                "Dark": "GainFiles/Dark_Calibration_2D_XrayScan_Protocol.json",
+                "Gain": "GainFiles/Source_Position_Calibration_2D_XrayScan_Protocol.json",
+                "BasePos": "GainFiles/Defect_Calibration_2D_Position.json"
+              },
+              "DoAirValCalib": {
+                "Dark": "GainFiles/Dark_Calibration_2D_XrayScan_Protocol.json",
+                "Gain": "GainFiles/Source_Position_Calibration_2D_XrayScan_Protocol.json",
+                "BasePos": "GainFiles/AirVal_Calibration_2D_Position.json"
+              },
+              "DoPositionCompensationCalib2D": {
+                "Dark": "GainFiles/Dark_Calibration_2D_XrayScan_Protocol.json",
+                "Gain": "GainFiles/Gain_Calibration_2D_XrayScan_Protocol.json",
+                "BasePos": "GainFiles/Compensation_Calibration_2D_Position.json"
+              },
+              "DoPositionCompensationCalib3D": {
+                "Dark": "GainFiles/Dark_Calibration_3D_XrayScan_Protocol.json",
+                "Gain": "Xray3dDynamicScan/Small_3D_XrayScan_Protocol.json"
+              },
+              "DoDynamicGainCalib3D": {
+                "Dark": "GainFiles/Dark_Calibration_3D_XrayScan_Protocol.json",
+                "Gain": "Xray3dDynamicScan/DGC_calib_3D_XrayScan_Protocol.json"
+              }
+            },
+            "Xray3dDynamicScan": {
+              "DGC_calib_3D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "DGC",
+                "ProtocolDose": 180,
+                "TotalScanDuration_sec": 40,
+                "MaxVel": 40,
+                "MaxAcc": 20,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 3,
+                "GlobalPulsewidth_ms": 8,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 200,
+                "SeriesParameters": [
+                  {
+                    "MultiShotNum": 1,
+                    "ShotCount": 200,
+                    "AfterShotDelay_ms": 175,
+                    "AnodeCurrent_ma": 20
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              },
+              "Large_3D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "large",
+                "ProtocolDose": 619.1,
+                "TotalScanDuration_sec": 40,
+                "MaxVel": 40,
+                "MaxAcc": 20,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 200,
+                "SeriesParameters": [
+                  {
+                    "MultiShotNum": 1,
+                    "ShotCount": 200,
+                    "AfterShotDelay_ms": 180,
+                    "AnodeCurrent_ma": 43
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              },
+              "Medium_3D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "medium",
+                "ProtocolDose": 460.9,
+                "TotalScanDuration_sec": 40,
+                "MaxVel": 40,
+                "MaxAcc": 20,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 200,
+                "SeriesParameters": [
+                  {
+                    "MultiShotNum": 1,
+                    "ShotCount": 200,
+                    "AfterShotDelay_ms": 180,
+                    "AnodeCurrent_ma": 35
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              },
+              "Small_3D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "small",
+                "ProtocolDose": 313.9,
+                "TotalScanDuration_sec": 40,
+                "MaxVel": 40,
+                "MaxAcc": 20,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 2450,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 200,
+                "SeriesParameters": [
+                  {
+                    "MultiShotNum": 1,
+                    "ShotCount": 200,
+                    "AfterShotDelay_ms": 180,
+                    "AnodeCurrent_ma": 25
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              },
+              "XS_phantom_3D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "xsmall",
+                "ProtocolDose": 375,
+                "TotalScanDuration_sec": 40,
+                "MaxVel": 40,
+                "MaxAcc": 20,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 70,
+                "GlobalFocusVoltage_V": 1050,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 200,
+                "SeriesParameters": [
+                  {
+                    "MultiShotNum": 1,
+                    "ShotCount": 200,
+                    "AfterShotDelay_ms": 175,
+                    "AnodeCurrent_ma": 30
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              }
+            },
+            "Xray2dScan": {
+              "Large_2D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "large",
+                "ProtocolDose": 750,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 2,
+                "ScanData": [
+                  {
+                    "ScanLocation": "P_SCAN_LT",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 45
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_LT_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 45
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_AP",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 45
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_AP_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 45
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_DYNAMIC",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 45
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_DYNAMIC_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 45
+                      }
+                    ]
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              },
+              "Medium_2D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "medium",
+                "ProtocolDose": 600,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 2,
+                "ScanData": [
+                  {
+                    "ScanLocation": "P_SCAN_LT",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 35
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_LT_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 35
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_AP",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 35
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_AP_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 35
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_DYNAMIC",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 35
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_DYNAMIC_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 35
+                      }
+                    ]
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              },
+              "Small_2D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "small",
+                "ProtocolDose": 450,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 2450,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 2,
+                "ScanData": [
+                  {
+                    "ScanLocation": "P_SCAN_LT",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 25
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_LT_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 25
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_AP",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 25
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_AP_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 25
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_DYNAMIC",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 25
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_DYNAMIC_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 25
+                      }
+                    ]
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              },
+              "XS_phantom_2D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "xsmall",
+                "SplitPulse_ms": 0,
+                "ProtocolDose": 375,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 70,
+                "GlobalFocusVoltage_V": 1050,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 2,
+                "ScanData": [
+                  {
+                    "ScanLocation": "P_SCAN_LT",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 30
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_LT_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 30
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_AP",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 30
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_AP_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 30
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_DYNAMIC",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 30
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_DYNAMIC_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 30
+                      }
+                    ]
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              }
+            },
+            "LinearXrayScan": {
+              "Large_Linear_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "large",
+                "ProtocolDose": 750,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 4,
+                "LinearData": {
+                  "ScanData": [
+                    {
+                      "ScanLocation": "P_SCAN_LT",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 50
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_LT_SyncScan",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 50
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_AP",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 50
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_AP_SyncScan",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 50
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "StartPos": 300,
+                "EndPos": 850,
+                "BedSpeed": 50
+              },
+              "Medium_Linear_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "medium",
+                "ProtocolDose": 600,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 4,
+                "LinearData": {
+                  "ScanData": [
+                    {
+                      "ScanLocation": "P_SCAN_LT",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 40
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_LT_SyncScan",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 40
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_AP",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 40
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_AP_SyncScan",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 40
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "StartPos": 300,
+                "EndPos": 850,
+                "BedSpeed": 50
+              },
+              "Small_Linear_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "small",
+                "ProtocolDose": 450,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 4,
+                "LinearData": {
+                  "ScanData": [
+                    {
+                      "ScanLocation": "P_SCAN_LT",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 30
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_LT_SyncScan",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 30
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_AP",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 30
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_AP_SyncScan",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 30
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "StartPos": 300,
+                "EndPos": 850,
+                "BedSpeed": 50
+              },
+              "XS_phantom_Linear_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "xsmall",
+                "ProtocolDose": 160,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 8,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 4,
+                "LinearData": {
+                  "ScanData": [
+                    {
+                      "ScanLocation": "P_SCAN_LT",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 20
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_LT_SyncScan",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 20
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_AP",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 20
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_AP_SyncScan",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 20
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "StartPos": 300,
+                "EndPos": 850,
+                "BedSpeed": 50
+              }
+            },
+            "GainFiles": {
+              "AirVal_Calibration_2D_Position": {
+                "Locations": [
+                  "UltraFar",
+                  "AirRefVal_50",
+                  "AirRefVal_100",
+                  "AirRefVal_200",
+                  "AirRefVal_300",
+                  "AirRefVal_400",
+                  "AirRefVal_500",
+                  "AirRefVal_600"
+                ]
+              },
+              "Auto_Calibration_2D_Position": {
+                "Locations": [
+                  "P_SRC_POS_CAL_1",
+                  "P_SRC_POS_CAL_2",
+                  "P_SRC_POS_CAL_3",
+                  "P_SRC_POS_CAL_7",
+                  "P_SRC_POS_CAL_6",
+                  "P_SRC_POS_CAL_5",
+                  "P_SRC_POS_CAL_4"
+                ]
+              },
+              "Compensation_Calibration_2D_Position": {
+                "Locations": [
+                  "DGC_FAR_0"
+                ]
+              },
+              "Defect_Calibration_2D_Position": {
+                "Locations": [
+                  "DEFECT_POS_CAL"
+                ]
+              },
+              "Dynamic_Calibration_2D_Position": {
+                "Locations": [
+                  "DGC_FAR_0",
+                  "DGC_NEAR_0"
+                ],
+                "ARangeDeg": [
+                  1,
+                  1
+                ],
+                "DRangeMM": [
+                  {
+                    "CloserShift": -20,
+                    "FartherShift": 20
+                  },
+                  {
+                    "CloserShift": -20,
+                    "FartherShift": 20
+                  }
+                ]
+              }
+            }
+          },
+          "MicroX": {
+            "Xray3dDynamicScan": {
+              "DGC_calib_3D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "DGC",
+                "ProtocolDose": 180,
+                "TotalScanDuration_sec": 40,
+                "MaxVel": 40,
+                "MaxAcc": 20,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 25,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 150,
+                "SeriesParameters": [
+                  {
+                    "MultiShotNum": 1,
+                    "ShotCount": 150,
+                    "AfterShotDelay_ms": 175,
+                    "AnodeCurrent_ma": 25
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              },
+              "Large_3D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "large",
+                "ProtocolDose": 619.1,
+                "TotalScanDuration_sec": 40,
+                "MaxVel": 40,
+                "MaxAcc": 20,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 200,
+                "SeriesParameters": [
+                  {
+                    "MultiShotNum": 1,
+                    "ShotCount": 200,
+                    "AfterShotDelay_ms": 180,
+                    "AnodeCurrent_ma": 43
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              },
+              "Medium_3D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "medium",
+                "ProtocolDose": 460.9,
+                "TotalScanDuration_sec": 40,
+                "MaxVel": 40,
+                "MaxAcc": 20,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 200,
+                "SeriesParameters": [
+                  {
+                    "MultiShotNum": 1,
+                    "ShotCount": 200,
+                    "AfterShotDelay_ms": 180,
+                    "AnodeCurrent_ma": 35
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              },
+              "Small_3D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "small",
+                "ProtocolDose": 313.9,
+                "TotalScanDuration_sec": 40,
+                "MaxVel": 40,
+                "MaxAcc": 20,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 2450,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 200,
+                "SeriesParameters": [
+                  {
+                    "MultiShotNum": 1,
+                    "ShotCount": 200,
+                    "AfterShotDelay_ms": 180,
+                    "AnodeCurrent_ma": 25
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              },
+              "XS_phantom_3D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "xsmall",
+                "ProtocolDose": 375,
+                "TotalScanDuration_sec": 40,
+                "MaxVel": 40,
+                "MaxAcc": 20,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 70,
+                "GlobalFocusVoltage_V": 1050,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 200,
+                "SeriesParameters": [
+                  {
+                    "MultiShotNum": 1,
+                    "ShotCount": 200,
+                    "AfterShotDelay_ms": 175,
+                    "AnodeCurrent_ma": 30
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              }
+            },
+            "Xray2dScan": {
+              "Large_2D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "large",
+                "ProtocolDose": 750,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 2,
+                "ScanData": [
+                  {
+                    "ScanLocation": "P_SCAN_LT",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 45
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_LT_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 45
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_AP",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 45
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_AP_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 45
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_DYNAMIC",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 45
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_DYNAMIC_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 45
+                      }
+                    ]
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              },
+              "Medium_2D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "medium",
+                "ProtocolDose": 600,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 2,
+                "ScanData": [
+                  {
+                    "ScanLocation": "P_SCAN_LT",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 35
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_LT_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 35
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_AP",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 35
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_AP_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 35
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_DYNAMIC",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 35
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_DYNAMIC_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 35
+                      }
+                    ]
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              },
+              "Small_2D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "small",
+                "ProtocolDose": 450,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 2450,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 2,
+                "ScanData": [
+                  {
+                    "ScanLocation": "P_SCAN_LT",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 25
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_LT_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 25
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_AP",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 25
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_AP_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 25
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_DYNAMIC",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 25
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_DYNAMIC_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 25
+                      }
+                    ]
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              },
+              "XS_phantom_2D_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "xsmall",
+                "SplitPulse_ms": 0,
+                "ProtocolDose": 375,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 70,
+                "GlobalFocusVoltage_V": 1050,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 2,
+                "ScanData": [
+                  {
+                    "ScanLocation": "P_SCAN_LT",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 30
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_LT_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 30
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_AP",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 30
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_SCAN_AP_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 30
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_DYNAMIC",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 30
+                      }
+                    ]
+                  },
+                  {
+                    "ScanLocation": "P_DYNAMIC_SyncScan",
+                    "SeriesParameters": [
+                      {
+                        "MultiShotNum": 1,
+                        "ShotCount": 2,
+                        "AfterShotDelay_ms": 150,
+                        "AnodeCurrent_ma": 30
+                      }
+                    ]
+                  }
+                ],
+                "Comment": "important comment to be insert here"
+              }
+            },
+            "LinearXrayScan": {
+              "Large_Linear_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "large",
+                "ProtocolDose": 750,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 4,
+                "LinearData": {
+                  "ScanData": [
+                    {
+                      "ScanLocation": "P_SCAN_LT",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 50
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_LT_SyncScan",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 50
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_AP",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 50
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_AP_SyncScan",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 50
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "StartPos": 300,
+                "EndPos": 850,
+                "BedSpeed": 50
+              },
+              "Medium_Linear_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "medium",
+                "ProtocolDose": 600,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 4,
+                "LinearData": {
+                  "ScanData": [
+                    {
+                      "ScanLocation": "P_SCAN_LT",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 40
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_LT_SyncScan",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 40
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_AP",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 40
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_AP_SyncScan",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 40
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "StartPos": 300,
+                "EndPos": 850,
+                "BedSpeed": 50
+              },
+              "Small_Linear_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "small",
+                "ProtocolDose": 450,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 15,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 4,
+                "LinearData": {
+                  "ScanData": [
+                    {
+                      "ScanLocation": "P_SCAN_LT",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 30
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_LT_SyncScan",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 30
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_AP",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 30
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_AP_SyncScan",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 30
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "StartPos": 300,
+                "EndPos": 850,
+                "BedSpeed": 50
+              },
+              "XS_phantom_Linear_XrayScan_Protocol": {
+                "TubeManufacturer": "MX",
+                "ProtocolSize": "xsmall",
+                "ProtocolDose": 160,
+                "ModeOfOperation": 1,
+                "GlobalKvp_V": 120,
+                "GlobalFocusVoltage_V": 3000,
+                "NumberOfMultishots": 1,
+                "GlobalPulsewidth_ms": 8,
+                "CathodeCurrent_mA": 0,
+                "CurrentPrebiasRatio": 1.2,
+                "GlobalShotCount": 4,
+                "LinearData": {
+                  "ScanData": [
+                    {
+                      "ScanLocation": "P_SCAN_LT",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 20
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_LT_SyncScan",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 20
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_AP",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 20
+                        }
+                      ]
+                    },
+                    {
+                      "ScanLocation": "P_SCAN_AP_SyncScan",
+                      "SeriesParameters": [
+                        {
+                          "MultiShotNum": 1,
+                          "ShotCount": 4,
+                          "AfterShotDelay_ms": 150,
+                          "AnodeCurrent_ma": 20
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "StartPos": 300,
+                "EndPos": 850,
+                "BedSpeed": 50
+              }
+            },
+            "GainFiles": {
+              "AirVal_Calibration_2D_Position": {
+                "Locations": [
+                  "UltraFar",
+                  "AirRefVal_375",
+                  "AirRefVal_420",
+                  "AirRefVal_480",
+                  "AirRefVal_525",
+                  "AirRefVal_600",
+                  "AirRefVal_645",
+                  "AirRefVal_750"
+                ]
+              },
+              "Auto_Calibration_2D_Position": {
+                "Locations": [
+                  "P_SRC_POS_CAL_1",
+                  "P_SRC_POS_CAL_2",
+                  "P_SRC_POS_CAL_3",
+                  "P_SRC_POS_CAL_7",
+                  "P_SRC_POS_CAL_6",
+                  "P_SRC_POS_CAL_5",
+                  "P_SRC_POS_CAL_4"
+                ]
+              },
+              "Compensation_Calibration_2D_Position": {
+                "Locations": [
+                  "DGC_FAR_0"
+                ]
+              },
+              "Defect_Calibration_2D_Position": {
+                "Locations": [
+                  "DEFECT_POS_CAL"
+                ]
+              },
+              "Dynamic_Calibration_2D_Position": {
+                "Locations": [
+                  "UltraFar"
+                ]
+              }
+            }
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-08-11 10:04:25",
+        "updated_at": "2025-08-11 10:04:40",
+        "created_by": "admin-id-123",
+        "description": "",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": null,
+        "parent_type": null
+      },
+      {
+        "id": "djdsay9xd9hme6w9voq",
+        "name": "Motion",
+        "type": "COMPONENT",
+        "parent_id": null,
+        "data": {
+          "FrameLocationCoordinates": {
+            "LocationCoordinates": {
+              "Left": {
+                "EXAMPLE_FRM": {
+                  "Target": "Base,X,Y,Z,A,B,C,Status,Turn,E1#subTool",
+                  "Seed": [
+                    "1,2,3,4,5,6,7"
+                  ],
+                  "seedType": "accuratePredefine",
+                  "DistToIn": 3
+                },
+                "P_HOME": {
+                  "Target": "BaseCor/BaseWork,0,0,0,0,0,0,0,0,0#fcu",
+                  "Seed": [
+                    "-120, 106, 75, 64, 0, -100, -13"
+                  ],
+                  "seedType": "jointsPredefine"
+                },
+                "P_CLEAR": {
+                  "Target": "BaseCor/BaseWork,0,0,0,0,0,0,0,0,0#fcu",
+                  "Seed": [
+                    "-120, 106, 75, 64, 0, -100, -10"
+                  ],
+                  "seedType": "jointsPredefine"
+                },
+                "P_CLEAR_L": {
+                  "Target": "BaseCor/BaseWork,0,0,0,0,0,0,0,0,0#fcu",
+                  "Seed": [
+                    "-120, 106, 75, 64, 0, -100, -10"
+                  ],
+                  "seedType": "jointsPredefine"
+                },
+                "P_TOOL_OUT": {
+                  "Target": "BaseCor/BaseWork/BaseTLB,6.54, 176.4, -0.9, 66.38, -89.72, 22.79, 5,38,-56.7902#fcu",
+                  "Seed": [
+                    "-168.17, 63.43, 91.78, 107.25, 60.26, -64.88, -90.52"
+                  ],
+                  "seedType": "accuratePredefine",
+                  "DistToIn": 180
+                },
+                "P_TLW_OUT": {
+                  "Target": "BaseCor/BaseWork/BaseTLW,0,0,-200,-180,0,0,5,45,-86.17#fcu/tool",
+                  "Seed": [
+                    "19, -76, -86, 71, 62, -82, 39"
+                  ],
+                  "seedType": "accuratePredefine",
+                  "DistToIn": 180
+                },
+                "P_IMPLANT_LEFT": {
+                  "Target": "BaseCor/BaseWork/BaseImp,0,0,-140,0,0,0,5,54,-160#fcu/tool/screw",
+                  "Seed": [
+                    "-90, 33, 20, 68, -44, -52, -54"
+                  ],
+                  "seedType": "suggestion",
+                  "DistToIn": 140
+                },
+                "P_LOAD_TOOL": {
+                  "Target": "BaseCor/BaseWork,600,650,-50,0,0,0,5,54,-32.32657#fcu",
+                  "Seed": [
+                    "-45, 80, -10, 60, 50, -110, -95"
+                  ],
+                  "seedType": "jointsPredefine"
+                },
+                "P_LOAD_SCREW": {
+                  "Target": "BaseCor/BaseWork,600,650,-50,-220,0,0,5,54,-32.32657#fcu",
+                  "Seed": [
+                    "-60, 65, -8, 44, 64, -105, -90"
+                  ],
+                  "seedType": "jointsPredefine"
+                },
+                "P_IMPLANT_RIGHT": {
+                  "Target": "BaseCor/BaseWork/BaseImp,0,0,-140,0,0,0,5,54,-140#fcu/tool/screw",
+                  "Seed": [
+                    "-90, 33, 20, 68, -44, -52, -54"
+                  ],
+                  "seedType": "suggestion",
+                  "DistToIn": 140
+                },
+                "P_BONECUT": {
+                  "Target": "BaseCor/BaseWork/BaseImp,0,0,-140,0,0,0,5,54,-140#fcu/tool",
+                  "Seed": [
+                    "-90, 33, 20, 68, -44, -52, -54"
+                  ],
+                  "seedType": "suggestion",
+                  "DistToIn": 140
+                },
+                "P_SCAN_LEFT": {
+                  "Target": "BaseCor/BaseWork/BaseScan,370,0,0,-90,15,90,5,26,-166#fcu/tool",
+                  "Seed": [
+                    "89, -66, -165, 96, -98, -93, 43"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_LEFT_SyncScan": {
+                  "Target": "BaseCor/BaseWork/BaseScan, 340,1,6.52,-90,-11,90,5,26,-166#fcu/tool",
+                  "Seed": [
+                    "54, -52, 3, -60, 127, -98, 23"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_RIGHT": {
+                  "Target": "BaseCor/BaseWork/BaseScan,-370,0,0,90,-50,90,5,54,-135#fcu/tool",
+                  "Seed": [
+                    "-88, -45, -37, 13, -101, -71, -99"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_RIGHT_SyncScan": {
+                  "Target": "BaseCor/BaseWork/BaseScan,-336.28, -5.06, 6.7, 86, -62.7, 93.55,5,54,-135#fcu/tool",
+                  "Seed": [
+                    "-73.5, -60.5, 86, -44, 104, -69, -69"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_LT_SyncScan": {
+                  "Target": "BaseCor/BaseWork/BaseScan,-336.28, -5.06, 6.7, 86, -62.7, 93.55,5,54,-135#fcu/tool",
+                  "Seed": [
+                    "-73.5, -60.5, 86, -44, 104, -69, -69"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_AP": {
+                  "Target": "BaseCor/BaseWork/BaseScan,0,0,340,-50,0,180,5,54,-135#fcu/tool",
+                  "Seed": [
+                    "-67, -59, -144, 35, -51, -100, 6"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_AP_SyncScan": {
+                  "Target": "BaseCor/BaseWork/BaseScan,-6.2,-4.1,206.34,-8.6,-0.6,179.1,5,54,-135#fcu/tool",
+                  "Seed": [
+                    "-33.5, -70.5, 63, -115, 83, -85, 64"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_AP_AltSyncScan": {
+                  "Target": "BaseCor/BaseWork/BaseScan,-6.2,-4.1,336.28,-8.6,-0.6,179.1,5,54,-135#fcu/tool",
+                  "Seed": [
+                    "-73.5, -60.5, 86, -44, 104, -69, -69"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "P_DETECTOR_OUT": {
+                  "Target": "BaseCor/BaseWork/BaseDet,0, 0, -270, 0, 0, 0,5,38,-53.48776#fcu",
+                  "Seed": [
+                    "-143, 48, 74, 81.5, 45, -112, 120"
+                  ],
+                  "seedType": "accuratePredefine",
+                  "DistToIn": 388
+                },
+                "P_SCAN_LT": {
+                  "Target": "BaseCor/BaseWork/BaseScan,-360,0,0,90,-50,90,5,59,-135#fcu/tool",
+                  "Seed": [
+                    "-84, -61, -135, 24, -7, -59, -100"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SRC_POS_CAL_1": {
+                  "Target": "BaseCor/BaseWork, 705,600,-280,  -90,  -5,  90,  5,  26,  -166#fcu/tool",
+                  "Seed": [
+                    "54, -52, 3, -60, 127, -98, 23"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SRC_POS_CAL_2": {
+                  "Target": "P_SRC_POS_CAL_1"
+                },
+                "P_SRC_POS_CAL_3": {
+                  "Target": "P_SRC_POS_CAL_1"
+                },
+                "P_SRC_POS_CAL_4": {
+                  "Target": "P_SRC_POS_CAL_1"
+                },
+                "P_SRC_POS_CAL_5": {
+                  "Target": "P_SRC_POS_CAL_1"
+                },
+                "P_SRC_POS_CAL_6": {
+                  "Target": "P_SRC_POS_CAL_1"
+                },
+                "P_SRC_POS_CAL_7": {
+                  "Target": "P_SRC_POS_CAL_1"
+                },
+                "DEFECT_POS_CAL": {
+                  "Target": "BaseCor/BaseWork,600,400,600,180,0,180,0,0,-135#fcu/tool",
+                  "Seed": [
+                    "-67, -59, -144, 35, -51, -100, 6"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "DGC_FAR_0": {
+                  "Target": "BaseCor/BaseWork,0,600,720,0,0,180,0,0,-135#fcu/tool",
+                  "Seed": [
+                    "-67, -59, -144, 35, -51, -100, 6"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "DGC_NEAR_0": {
+                  "Target": "BaseCor/BaseWork,0,600,0,-8,0,180,0,0,-135#fcu/tool",
+                  "Seed": [
+                    "-67, -59, -144, 35, -51, -100, 6"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "DGC_FAR_135": {
+                  "Target": "BaseCor/BaseWork/BaseScan, 860,0,0,   -90,  5,  90,  5,  26,  -166#fcu/tool",
+                  "Seed": [
+                    "54, -52, 3, -60, 127, -98, 23"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "DGC_NEAR_135": {
+                  "Target": "BaseCor/BaseWork/BaseScan,300,0,0,-90,5,90,5,26,-166#fcu/tool",
+                  "Seed": [
+                    "54, -52, 3, -60, 127, -98, 23"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "UltraFar": {
+                  "Target": "BaseCor/BaseWork,715.04, 613.60, 603.69, 120.82, 159.58, -32.02,0,0,-135#fcu/tool",
+                  "Seed": [
+                    "-67, -59, -144, 35, -51, -100, 6"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "AirRefVal_375": {
+                  "Target": "UltraFar"
+                },
+                "AirRefVal_420": {
+                  "Target": "UltraFar"
+                },
+                "AirRefVal_480": {
+                  "Target": "UltraFar"
+                },
+                "AirRefVal_525": {
+                  "Target": "UltraFar"
+                },
+                "AirRefVal_600": {
+                  "Target": "UltraFar"
+                },
+                "AirRefVal_645": {
+                  "Target": "UltraFar"
+                },
+                "AirRefVal_750": {
+                  "Target": "UltraFar"
+                },
+                "P_DYNAMIC": {
+                  "Target": "BaseCor/BaseWork/BaseDynamic,0,0,0,0,0,0,5,59,-135#fcu/tool",
+                  "Seed": [
+                    "-33.5, -70.5, 63, -115, 83, -85, 64"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "P_SCAN_OFFSET": {
+                  "Target": "BaseCor/BaseWork/BaseDynamic,0,0,0,0,0,0,5,59,-135#fcu/tool",
+                  "Seed": [
+                    "runtimeJointPosition"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_OFFSET_SyncScan": {
+                  "Target": "BaseCor/BaseWork/BaseDynamic,0,0,0,0,0,0,5,59,-135#fcu/tool",
+                  "Seed": [
+                    "runtimeJointPosition"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_POINT_ON_scan_path": {
+                  "Target": "BaseCor/BaseWork,0,0,0,0,0,0,0,0,0#fcu/tool",
+                  "Seed": [
+                    "-120, 106, 75, 64, 0, -100, -13"
+                  ],
+                  "seedType": "jointsPredefine"
+                }
+              },
+              "Right": {
+                "EXAMPLE_FRM1": {
+                  "Target": "Base,X,Y,Z,A,B,C,Status,Turn,E1#subTool",
+                  "Seed": [
+                    "1,2,3,4,5,6,7"
+                  ],
+                  "seedType": "jointsPredefine"
+                },
+                "P_HOME": {
+                  "Target": "BaseCor/BaseWork,-447.31,98.75,263.84,-22.424,-48.66,-123.516,3,15,-96#fcu",
+                  "Seed": [
+                    "-60, -106, -75, -64, 0, 100, -162"
+                  ],
+                  "seedType": "jointsPredefine"
+                },
+                "P_CLEAR": {
+                  "Target": "BaseCor/BaseWork,-447.31,98.75,263.84,-22.424,-48.66,-123.516,3,15,-96#fcu",
+                  "Seed": [
+                    "-60, -106, -75, -64, 0, 100, -165"
+                  ],
+                  "seedType": "jointsPredefine"
+                },
+                "P_CLEAR_R": {
+                  "Target": "BaseCor/BaseWork,-447.31,98.75,263.84,-22.424,-48.66,-123.516,3,15,-96#fcu",
+                  "Seed": [
+                    "-60, -106, -75, -64, 0, 100, -165"
+                  ],
+                  "seedType": "jointsPredefine"
+                },
+                "P_TOOL_OUT": {
+                  "Target": "BaseCor/BaseWork/BaseTLB,5.03, 175.63, 1.48, 66.38, -89.72, 22.79, 5,38,-56.7902#fcu",
+                  "Seed": [
+                    "-11, -73, -85, -105.5, -69, 76, -86"
+                  ],
+                  "seedType": "accuratePredefine",
+                  "DistToIn": 180
+                },
+                "P_IMPLANT_LEFT": {
+                  "Target": "BaseCor/BaseWork/BaseImp,0,0,-140,90,0,0,3,26,17#fcu/tool/screw",
+                  "Seed": [
+                    "-60, -106, -75, -64, 0, 100, -162"
+                  ],
+                  "seedType": "suggestion",
+                  "DistToIn": 140
+                },
+                "P_IMPLANT_RIGHT": {
+                  "Target": "BaseCor/BaseWork/BaseImp,0,0,-140,180,0,0,3,39,10#fcu/tool/screw",
+                  "Seed": [
+                    "-115, -53, -31, -78, 33, 62, -121"
+                  ],
+                  "seedType": "suggestion",
+                  "DistToIn": 140
+                },
+                "P_TLW_OUT": {
+                  "Target": "BaseCor/BaseWork/BaseTLW,0,0,-200,0,0,0,3,15,-73.9914686121404#fcu/tool",
+                  "Seed": [
+                    "-24.72,-85.56,-74,-78,3.46,34.2,97.6"
+                  ],
+                  "seedType": "suggestion",
+                  "DistToIn": 140
+                },
+                "P_TLW_IN": {
+                  "Target": "BaseCor/BaseWork/BaseTLW,0,0,30,0,0,0,3,15,-84.7501966394842#fcu/tool",
+                  "Seed": [
+                    "22,-107,-62,-86,154,98,-98"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_LOAD_SCREW": {
+                  "Target": "BaseCor/BaseWork,-600,625,-50,-135,0,0,3,27,0#fcu",
+                  "Seed": [
+                    "-120, -65, 8, -44, -64, 105, -90"
+                  ],
+                  "seedType": "jointsPredefine"
+                },
+                "P_BONECUT": {
+                  "Target": "BaseCor/BaseWork/BaseImp,0,0,-140,180,0,0,3,39,10#fcu/tool",
+                  "Seed": [
+                    "-115, -53, -31, -78, 33, 62, -121"
+                  ],
+                  "seedType": "suggestion",
+                  "DistToIn": 140
+                },
+                "P_LOAD_TOOL": {
+                  "Target": "BaseCor/BaseWork,-600,625,-50,-135,0,0,3,27,0#fcu",
+                  "Seed": [
+                    "-135, -80, 10, -60, -50, 110, -85"
+                  ],
+                  "seedType": "jointsPredefine"
+                },
+                "P_LOAD_TOOL_original": {
+                  "Target": "BaseCor/BaseWork/BaseTLB,6.35, 200, 1.62, 63.8, -89, 25.87,3,31,-65.9276428222657#fcu",
+                  "Seed": [
+                    "-17, -63, -66, -94, -54, 94, -91"
+                  ],
+                  "seedType": "jointsPredefine"
+                },
+                "P_DYNAMIC": {
+                  "Target": "BaseCor/BaseWork/BaseDynamic,0,0,0,0,0,0,5,59,-135#fcu/tool",
+                  "Seed": [
+                    "runtimeJointPosition"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_OFFSET": {
+                  "Target": "BaseCor/BaseWork/BaseDynamic,0,0,0,0,0,0,5,59,-135#fcu/tool",
+                  "Seed": [
+                    "runtimeJointPosition"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_OFFSET_SyncScan": {
+                  "Target": "BaseCor/BaseWork/BaseDynamic,0,0,0,0,0,0,5,59,-135#fcu/tool",
+                  "Seed": [
+                    "runtimeJointPosition"
+                  ],
+                  "seedType": "accuratePredefine"
+                }
+              },
+              "Bottom": {
+                "EXAMPLE_FRM2": {
+                  "Target": "Base,X,Y,Z,A,B,C,Status,Turn,E1#subTool",
+                  "Seed": [
+                    "1,2,3,4,5,6,7"
+                  ],
+                  "seedType": "jointsPredefine"
+                },
+                "P_SCAN_RIGHT": {
+                  "Target": "BaseCor/BaseWork/BaseScan,-550,0,0,90,-40,90,0,4,-22.25#fcu/tool",
+                  "Seed": [
+                    "95, 71, -30, 46, 153, 27, 61"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_RIGHT_SyncScan": {
+                  "Target": "BaseCor/BaseWork/BaseScan, -500, 1.66, -5.43, 92, -73, 88,0,4,-22.25#fcu/tool",
+                  "Seed": [
+                    "100, 66, -22, 47, 101, 55, -20"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_LEFT": {
+                  "Target": "BaseCor/BaseWork/BaseScan,540,0,0,90,0,-90,0,1,70#fcu/tool",
+                  "Seed": [
+                    "-106, 63, 70.87, 34, 90, 57, -35"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_LEFT_SyncScan": {
+                  "Target": "BaseCor/BaseWork/BaseScan,465.75, -0.83, -11.95, 85.3, -67.4, -84.8, 0,1,70#fcu/tool",
+                  "Seed": [
+                    "-89, 62.5, 46.5, 54, 42, -36, 31"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_P1": {
+                  "Target": "BaseCor/BaseWork/BaseScan,540,0,0,90,0,-90,0,1,70#fcu/tool",
+                  "Seed": [
+                    "-106, 63, 70.87, 34, 90, 57, -35"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_P2": {
+                  "Target": "BaseCor/BaseWork/BaseScan/BaseScan2,-630,0,0,90,-40,90,0,4,-22.25#fcu/tool",
+                  "Seed": [
+                    "82, 73, -22, 51, 135, 27, -50"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_P3": {
+                  "Target": "BaseCor/BaseWork/BaseScan,540,0,0,90,0,-90,0,1,70#fcu/tool",
+                  "Seed": [
+                    "-106, 63, 70.87, 34, 90, 57, -35"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_P4": {
+                  "Target": "BaseCor/BaseWork/BaseScan,-550,0,0,90,-40,90,0,4,-22.25#fcu/tool",
+                  "Seed": [
+                    "95, 71, -30, 46, 153, 27, 61"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_AP": {
+                  "Target": "BaseCor/BaseWork/BaseScan,0,0,-540,120,0,0,0,0,30#fcu/tool",
+                  "Seed": [
+                    "22, 61, 30, 105, 49, 79, 24"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_AP_SyncScan": {
+                  "Target": "BaseCor/BaseWork/BaseScan,8.72,0.26,-630.88,110.93,0.62,-0.37,0,0,30#fcu/tool",
+                  "Seed": [
+                    "16.5, 78.5, 24.5, 117, 51.5, 63, 33.5"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "P_SCAN_AP_AltSyncScan": {
+                  "Target": "BaseCor/BaseWork/BaseScan,8.72,0.26,-465.88,110.93,0.62,-0.37,0,0,30#fcu/tool",
+                  "Seed": [
+                    "-89, 62.5, 46.5, 54, 42, -36, 31"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "P_SCAN_LT": {
+                  "Target": "BaseCor/BaseWork/BaseScan,540,0,0,90.00001,-50,-90.00008,0,33,70#fcu/tool",
+                  "Seed": [
+                    "-83, 54, 70, 42, 150, 34, -101"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_LT_SyncScan": {
+                  "Target": "BaseCor/BaseWork/BaseScan,465.75, -0.83, -11.95, 85.3, -67.4, -84.8, 0,1,70#fcu/tool",
+                  "Seed": [
+                    "-89, 62.5, 46.5, 54, 42, -36, 31"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SRC_POS_CAL_1": {
+                  "Target": "BaseCor/BaseWork,-460,600,-280,90,-40,90,0,4,-22.25#fcu/tool",
+                  "Seed": [
+                    "-110, -41, 95, 80, 114, -44, 36"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "P_SRC_POS_CAL_2": {
+                  "Target": "BaseCor/BaseWork,-500,600,-280,90,-40,90,0,4,-22.25#fcu/tool",
+                  "Seed": [
+                    "-110, -41, 95, 80, 114, -44, 36"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "P_SRC_POS_CAL_3": {
+                  "Target": "BaseCor/BaseWork,-540,600,-280,90,-40,90,0,4,-22.25#fcu/tool",
+                  "Seed": [
+                    "-110, -41, 95, 80, 114, -44, 36"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "P_SRC_POS_CAL_4": {
+                  "Target": "BaseCor/BaseWork,-580,600,-280,90,-40,90,0,4,-22.25#fcu/tool",
+                  "Seed": [
+                    "-110, -41, 95, 80, 114, -44, 36"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "P_SRC_POS_CAL_5": {
+                  "Target": "BaseCor/BaseWork,-620,600,-280,90,-40,90,0,4,-22.25#fcu/tool",
+                  "Seed": [
+                    "-110, -41, 95, 80, 114, -44, 36"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "P_SRC_POS_CAL_6": {
+                  "Target": "BaseCor/BaseWork,-660,600,-280,90,-40,90,0,4,-22.25#fcu/tool",
+                  "Seed": [
+                    "-110, -41, 95, 80, 114, -44, 36"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "P_SRC_POS_CAL_7": {
+                  "Target": "BaseCor/BaseWork,-700,600,-280,90,-40,90,0,4,-22.25#fcu/tool",
+                  "Seed": [
+                    "-110, -41, 95, 80, 114, -44, 36"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "DEFECT_POS_CAL": {
+                  "Target": "BaseCor/BaseWork,600,400,-1130,180,0,0,0,0,30#fcu/tool",
+                  "Seed": [
+                    "22, 61, 30, 105, 49, 79, 24"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "DGC_NEAR_0": {
+                  "Target": "BaseCor/BaseWork,0,600,-800,-8,0,0,0,0,30#fcu/tool",
+                  "Seed": [
+                    "16.5, 78.5, 24.5, 117, 51.5, 63, 33.5"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "DGC_FAR_0": {
+                  "Target": "BaseCor/BaseWork,0,600,-1190,4,0,0,0,0,30#fcu/tool",
+                  "Seed": [
+                    "16.5, 78.5, 24.5, 117, 51.5, 63, 33.5"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "DGC_FAR_135": {
+                  "Target": "BaseCor/BaseWork/BaseScan, -510, 0,0,90,-50,90,0,4,-22.25#fcu/tool",
+                  "Seed": [
+                    "100, 66, -22, 47, 101, 55, -20"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "DGC_NEAR_135": {
+                  "Target": "BaseCor/BaseWork/BaseScan, -400, 0,0,90,-50,90,0,4,-22.25#fcu/tool",
+                  "Seed": [
+                    "100, 66, -22, 47, 101, 55, -20"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "UltraFar": {
+                  "Target": "BaseCor/BaseWork,-600.56, 585.47, -1159.22, 70.72, 14.71, 34.24,0,0,-135#fcu/tool",
+                  "Seed": [
+                    "100, 66, -22, 47, 101, 55, -20"
+                  ],
+                  "seedType": "suggestion"
+                },
+                "AirRefVal_375": {
+                  "Target": "UltraFar"
+                },
+                "AirRefVal_420": {
+                  "Target": "UltraFar"
+                },
+                "AirRefVal_480": {
+                  "Target": "UltraFar"
+                },
+                "AirRefVal_525": {
+                  "Target": "UltraFar"
+                },
+                "AirRefVal_600": {
+                  "Target": "UltraFar"
+                },
+                "AirRefVal_645": {
+                  "Target": "UltraFar"
+                },
+                "AirRefVal_750": {
+                  "Target": "UltraFar"
+                },
+                "P_SCAN_CLEAN": {
+                  "Target": "BaseCor/BaseWork,348.5,404.08,-351.11,83.46,-89.26,6.58,0,0,64.92#fcu/tool",
+                  "Seed": [
+                    "106.85,75.32,52.64,83.91,76.26,52.86,-66.63"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_CLEAN_SyncScan": {
+                  "Target": "BaseCor/BaseWork,348.5,404.08,-351.11,83.46,-89.26,6.58,0,0,64.92#fcu/tool",
+                  "Seed": [
+                    "106.85,75.32,52.64,83.91,76.26,52.86,-66.63"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_OBL": {
+                  "Target": "BaseCor/BaseWork/BaseScan,0,113,-520,120,0,0,0,0,29.65#fcu/tool",
+                  "Seed": [
+                    "106.8523, 75.3285, 52.6406, 83.9157, 76.2609, 52.863, -66.6318"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_OBL_SyncScan": {
+                  "Target": "BaseCor/BaseWork/BaseScan,0,113,-520,120,0,0,0,0,29.65#fcu/tool",
+                  "Seed": [
+                    "106.8523, 75.3285, 52.6406, 83.9157, 76.2609, 52.863, -66.6318"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_HOME": {
+                  "Target": "BaseCor/BaseWork,-80,532,-1080,90,0,0,0,0,70#fcu/tool",
+                  "Seed": [
+                    "79, 51, 70, 109, 48, 87, -51"
+                  ],
+                  "seedType": "jointsPredefine"
+                },
+                "P_DYNAMIC": {
+                  "Target": "BaseCor/BaseWork/BaseDynamic,0,0,0,0,0,0,5,59,-135#fcu/tool",
+                  "Seed": [
+                    "runtimeJointPosition"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_DYNAMIC_0_close": {
+                  "Target": "BaseCor/BaseWork/BaseDynamic,300,0,0,90,-50,-90,0,33,70#fcu/tool",
+                  "Seed": [
+                    "-83, 54, 70, 42, 150, 34, -101"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_DYNAMIC_0_far": {
+                  "Target": "BaseCor/BaseWork/BaseDynamic,640,0,0,90,-50,-90,0,33,70#fcu/tool",
+                  "Seed": [
+                    "-83, 54, 70, 42, 150, 34, -101"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_OFFSET": {
+                  "Target": "BaseCor/BaseWork/BaseDynamic,0,0,0,0,0,0,5,59,-135#fcu/tool",
+                  "Seed": [
+                    "runtimeJointPosition"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_SCAN_OFFSET_SyncScan": {
+                  "Target": "BaseCor/BaseWork/BaseDynamic,0,0,0,0,0,0,5,59,-135#fcu/tool",
+                  "Seed": [
+                    "runtimeJointPosition"
+                  ],
+                  "seedType": "accuratePredefine"
+                },
+                "P_POINT_ON_scan_path": {
+                  "Target": "BaseCor/BaseWork,0,0,0,0,0,0,0,0,0#fcu/tool",
+                  "Seed": [
+                    "-120, 106, 75, 64, 0, -100, -13"
+                  ],
+                  "seedType": "jointsPredefine"
+                }
+              }
+            }
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-08-11 09:12:48",
+        "updated_at": "2025-08-11 09:13:05",
+        "created_by": "admin-id-123",
+        "description": "",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": null,
+        "parent_type": null
+      },
+      {
+        "id": "vztxmg0wbhme6vqidk",
+        "name": "ToolManager",
+        "type": "COMPONENT",
+        "parent_id": null,
+        "data": {
+          "Tools": {
+            "TrailBlazer": {
+              "TrailBlazerParams": {
+                "ToolType": "TrailBlazer",
+                "ToolTypeId": "3",
+                "ToolId": 15,
+                "JsonVer": 0.1,
+                "Elmo1fileName": null,
+                "Elmo2fileName": null,
+                "RbtToolData": {
+                  "name": "TrailBlazer",
+                  "mass": 2,
+                  "msX": 0,
+                  "msY": 0,
+                  "msZ": 0,
+                  "msA": 0,
+                  "msB": 0,
+                  "msC": 0,
+                  "InertiaX": 0,
+                  "InertiaY": 0,
+                  "InertiaZ": 0,
+                  "TcpX": -185.5,
+                  "TcpY": -0.55,
+                  "TcpZ": 70.7,
+                  "TcpA": 0,
+                  "TcpB": -90,
+                  "TcpC": 0
+                },
+                "DrvToolData": {
+                  "BKParam": [
+                    {
+                      "AxisId": 0,
+                      "BkParamIdx": 1058,
+                      "Value": 100
+                    },
+                    {
+                      "AxisId": 0,
+                      "BkParamIdx": 1059,
+                      "Value": 100
+                    },
+                    {
+                      "AxisId": 0,
+                      "BkParamIdx": 1008,
+                      "Value": 10
+                    },
+                    {
+                      "AxisId": 0,
+                      "BkParamIdx": 1039,
+                      "Value": 10
+                    },
+                    {
+                      "AxisId": 0,
+                      "BkParamIdx": 1056,
+                      "Value": 100
+                    },
+                    {
+                      "AxisId": 0,
+                      "BkParamIdx": 1057,
+                      "Value": 1191536
+                    },
+                    {
+                      "AxisId": 1,
+                      "BkParamIdx": 1058,
+                      "Value": 500
+                    },
+                    {
+                      "AxisId": 1,
+                      "BkParamIdx": 1059,
+                      "Value": 500
+                    },
+                    {
+                      "AxisId": 1,
+                      "BkParamIdx": 1008,
+                      "Value": 20
+                    },
+                    {
+                      "AxisId": 1,
+                      "BkParamIdx": 1039,
+                      "Value": 20
+                    },
+                    {
+                      "AxisId": 1,
+                      "BkParamIdx": 1056,
+                      "Value": 100
+                    },
+                    {
+                      "AxisId": 1,
+                      "BkParamIdx": 1057,
+                      "Value": 1191536
+                    }
+                  ]
+                },
+                "DetectorToolData": null,
+                "SourceToolData": null,
+                "TotalWorkTimeSec": 0
+              }
+            },
+            "ScrewInserter": {
+              "220001": {
+                "ScrewInserterParams": {
+                  "ToolType": "ScrewInserter",
+                  "ToolTypeId": "2",
+                  "ToolId": 220001,
+                  "ToolVer": "2.0",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "ScrewInserter",
+                    "mass": 4,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 0,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -351.51,
+                    "TcpY": 6.07,
+                    "TcpZ": 73.4,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1058,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1059,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1008,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1039,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1057,
+                        "Value": 84763
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1058,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1059,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1008,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1039,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1056,
+                        "Value": 100
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1057,
+                        "Value": 2157824
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1058,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1059,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1008,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1039,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1057,
+                        "Value": 121160.403
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              },
+              "220002": {
+                "ScrewInserterParams": {
+                  "ToolType": "ScrewInserter",
+                  "ToolTypeId": "2",
+                  "ToolId": 220002,
+                  "ToolVer": "2.0",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "ScrewInserter",
+                    "mass": 4,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 0,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -351.51,
+                    "TcpY": 6.07,
+                    "TcpZ": 73.4,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1058,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1059,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1008,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1039,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1057,
+                        "Value": 84763
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1058,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1059,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1008,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1039,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1056,
+                        "Value": 100
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1057,
+                        "Value": 2157824
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1058,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1059,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1008,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1039,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1057,
+                        "Value": 121160.403
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              },
+              "225001": {
+                "ScrewInserterParams": {
+                  "ToolType": "ScrewInserter",
+                  "ToolTypeId": "6",
+                  "ToolId": 225001,
+                  "ToolVer": "2.5",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "ScrewInserter",
+                    "mass": 4,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 0,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -278.291,
+                    "TcpY": 7.15,
+                    "TcpZ": 73.7,
+                    "TcpA": 0.38,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1058,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1059,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1008,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1039,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1057,
+                        "Value": 84763
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1058,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1059,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1008,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1039,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1056,
+                        "Value": 100
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1057,
+                        "Value": 2157824
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1058,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1059,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1008,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1039,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1057,
+                        "Value": 121160.403
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              },
+              "225003": {
+                "ScrewInserterParams": {
+                  "ToolType": "ScrewInserter",
+                  "ToolTypeId": "6",
+                  "ToolId": 225003,
+                  "ToolVer": "2.5",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "ScrewInserter",
+                    "mass": 4,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 0,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -278.291,
+                    "TcpY": 6.12,
+                    "TcpZ": 73.3,
+                    "TcpA": 0.38,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1058,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1059,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1008,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1039,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1057,
+                        "Value": 84763
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1058,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1059,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1008,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1039,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1056,
+                        "Value": 100
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1057,
+                        "Value": 2157824
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1058,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1059,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1008,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1039,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1057,
+                        "Value": 121160.403
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              },
+              "500101": {
+                "ScrewInserterParams": {
+                  "ToolType": "ScrewInserter",
+                  "ToolTypeId": "2",
+                  "ToolId": 500101,
+                  "ToolVer": "2.0",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "ScrewInserter",
+                    "mass": 5,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 110,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -351.51,
+                    "TcpY": 6.07,
+                    "TcpZ": 73.4,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1058,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1059,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1008,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1039,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1057,
+                        "Value": 84763
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1058,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1059,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1008,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1039,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1056,
+                        "Value": 100
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1057,
+                        "Value": 2157824
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1058,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1059,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1008,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1039,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1057,
+                        "Value": 121160.403
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              },
+              "500102": {
+                "ScrewInserterParams": {
+                  "ToolType": "ScrewInserter",
+                  "ToolTypeId": "2",
+                  "ToolId": 500102,
+                  "ToolVer": "2.0",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "ScrewInserter",
+                    "mass": 5,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 110,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -351.51,
+                    "TcpY": 6.07,
+                    "TcpZ": 73.4,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1058,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1059,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1008,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1039,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1057,
+                        "Value": 84763
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1058,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1059,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1008,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1039,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1056,
+                        "Value": 100
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1057,
+                        "Value": 2157824
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1058,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1059,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1008,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1039,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1057,
+                        "Value": 121160.403
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              },
+              "600101": {
+                "ScrewInserterParams": {
+                  "ToolType": "ScrewInserter",
+                  "ToolTypeId": "6",
+                  "ToolId": 600101,
+                  "ToolVer": "2.5",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "ScrewInserter",
+                    "mass": 5,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 110,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -280.2994,
+                    "TcpY": 4.0457,
+                    "TcpZ": 69.7381,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1058,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1059,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1008,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1039,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1057,
+                        "Value": 84763
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1058,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1059,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1008,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1039,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1056,
+                        "Value": 100
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1057,
+                        "Value": 2157824
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1058,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1059,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1008,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1039,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1057,
+                        "Value": 121160.403
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              },
+              "600102": {
+                "ScrewInserterParams": {
+                  "ToolType": "ScrewInserter",
+                  "ToolTypeId": "6",
+                  "ToolId": 600102,
+                  "ToolVer": "2.5",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "ScrewInserter",
+                    "mass": 5,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 110,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -280.2994,
+                    "TcpY": 4.0457,
+                    "TcpZ": 69.7381,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1058,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1059,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1008,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1039,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1057,
+                        "Value": 84763
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1058,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1059,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1008,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1039,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1056,
+                        "Value": 100
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1057,
+                        "Value": 2157824
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1058,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1059,
+                        "Value": 15000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1008,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1039,
+                        "Value": 8000
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1057,
+                        "Value": 121160.403
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              }
+            },
+            "retractor": {
+              "retractorParams": {
+                "ToolType": "Retractor",
+                "ToolTypeId": "7",
+                "ToolId": 2504,
+                "JsonVer": 0.1,
+                "Elmo1fileName": null,
+                "Elmo2fileName": null,
+                "RbtToolData": {
+                  "name": "retractor",
+                  "mass": 5.2,
+                  "msX": 0,
+                  "msY": 0,
+                  "msZ": 0,
+                  "msA": 0,
+                  "msB": 0,
+                  "msC": 0,
+                  "InertiaX": 0,
+                  "InertiaY": 0,
+                  "InertiaZ": 0,
+                  "TcpX": -29.5,
+                  "TcpY": 0,
+                  "TcpZ": 228.94,
+                  "TcpA": 0,
+                  "TcpB": -65,
+                  "TcpC": 0
+                },
+                "DrvToolData": {},
+                "DetectorToolData": null,
+                "SourceToolData": null,
+                "TotalWorkTimeSec": 0,
+                "DummyTool": true
+              }
+            },
+            "OSDrill": {
+              "300101": {
+                "OSDrillParams": {
+                  "ToolType": "OSDrill",
+                  "ToolTypeId": "4",
+                  "ToolId": 300101,
+                  "ToolVer": "2.0",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "OSDrill",
+                    "mass": 4.1,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 110,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -286,
+                    "TcpY": 0,
+                    "TcpZ": 79.5,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1059,
+                        "Value": 170666
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1008,
+                        "Value": 170666
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1039,
+                        "Value": 170666
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1057,
+                        "Value": 2048
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              },
+              "400101": {
+                "OSDrillParams": {
+                  "ToolType": "Pendulum",
+                  "ToolTypeId": "8",
+                  "ToolId": 400101,
+                  "ToolVer": "2.5",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "OSDrill",
+                    "mass": 4.1,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 110,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -278.3304,
+                    "TcpY": -1.2782,
+                    "TcpZ": 70.719,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1058,
+                        "Value": 960000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1059,
+                        "Value": 960000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1008,
+                        "Value": 96000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1039,
+                        "Value": 96000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1057,
+                        "Value": 12
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              },
+              "420001": {
+                "OSDrillParams": {
+                  "ToolType": "OSDrill",
+                  "ToolTypeId": "4",
+                  "ToolId": 420001,
+                  "ToolVer": "2.0",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "OSDrill",
+                    "mass": 5,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 0,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -295,
+                    "TcpY": 1,
+                    "TcpZ": 79,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1059,
+                        "Value": 170666
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1008,
+                        "Value": 170666
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1039,
+                        "Value": 170666
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1057,
+                        "Value": 2048
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              },
+              "425001": {
+                "OSDrillParams": {
+                  "ToolType": "Pendulum",
+                  "ToolTypeId": "8",
+                  "ToolId": 425001,
+                  "ToolVer": "2.5",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "OSDrill",
+                    "mass": 5,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 0,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -281.3304,
+                    "TcpY": -2.4,
+                    "TcpZ": 71.85,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1058,
+                        "Value": 960000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1059,
+                        "Value": 960000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1008,
+                        "Value": 96000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1039,
+                        "Value": 96000
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 0,
+                        "BkParamIdx": 1057,
+                        "Value": 12
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              }
+            },
+            "LidarCalib": {
+              "LidarCalibParams": {
+                "ToolType": "LidarCalib",
+                "ToolId": 6,
+                "JsonVer": 0.1,
+                "Elmo1fileName": null,
+                "Elmo2fileName": null,
+                "RbtToolData": {
+                  "name": "LidarCalib",
+                  "mass": 2,
+                  "msX": 0,
+                  "msY": 0,
+                  "msZ": 0,
+                  "msA": 0,
+                  "msB": 0,
+                  "msC": 0,
+                  "InertiaX": 0,
+                  "InertiaY": 0,
+                  "InertiaZ": 0,
+                  "TcpX": 0,
+                  "TcpY": 0,
+                  "TcpZ": 139,
+                  "TcpA": 0,
+                  "TcpB": 0,
+                  "TcpC": 0
+                },
+                "DrvToolData": {
+                  "BKParam": [
+                    {
+                      "AxisId": 0,
+                      "BkParamIdx": 1058,
+                      "Value": 15000
+                    },
+                    {
+                      "AxisId": 0,
+                      "BkParamIdx": 1059,
+                      "Value": 15000
+                    },
+                    {
+                      "AxisId": 0,
+                      "BkParamIdx": 1008,
+                      "Value": 40000
+                    },
+                    {
+                      "AxisId": 0,
+                      "BkParamIdx": 1039,
+                      "Value": 40000
+                    },
+                    {
+                      "AxisId": 0,
+                      "BkParamIdx": 1056,
+                      "Value": 0.1171875
+                    },
+                    {
+                      "AxisId": 1,
+                      "BkParamIdx": 1058,
+                      "Value": 100
+                    },
+                    {
+                      "AxisId": 1,
+                      "BkParamIdx": 1059,
+                      "Value": 100
+                    },
+                    {
+                      "AxisId": 1,
+                      "BkParamIdx": 1008,
+                      "Value": 10
+                    },
+                    {
+                      "AxisId": 1,
+                      "BkParamIdx": 1039,
+                      "Value": 10
+                    },
+                    {
+                      "AxisId": 1,
+                      "BkParamIdx": 1056,
+                      "Value": 0.00015332155823765626
+                    }
+                  ]
+                },
+                "DetectorToolData": null,
+                "SourceToolData": null,
+                "TotalWorkTimeSec": 0
+              }
+            },
+            "HSdrill": {
+              "120001": {
+                "HSdrillParams": {
+                  "ToolType": "HSDrill",
+                  "ToolTypeId": "1",
+                  "ToolId": 120001,
+                  "ToolVer": "2.0",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "HSdrill",
+                    "mass": 5,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 0,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -265.28,
+                    "TcpY": 23.25,
+                    "TcpZ": 74.6,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1058,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1059,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1008,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1039,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1056,
+                        "Value": 100
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1057,
+                        "Value": 1784218
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1058,
+                        "Value": 6826660
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1059,
+                        "Value": 6826660
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1008,
+                        "Value": 341333
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1039,
+                        "Value": 341333
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1057,
+                        "Value": 512
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              },
+              "125001": {
+                "HSdrillParams": {
+                  "ToolType": "HSDrill",
+                  "ToolTypeId": "10",
+                  "ToolId": 125001,
+                  "ToolVer": "2.5",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "HSdrill",
+                    "mass": 5,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 0,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -306.5,
+                    "TcpY": -7,
+                    "TcpZ": 85.3,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1058,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1059,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1008,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1039,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1056,
+                        "Value": 100
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1057,
+                        "Value": 1784218
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1058,
+                        "Value": 6826660
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1059,
+                        "Value": 6826660
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1008,
+                        "Value": 341333
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1039,
+                        "Value": 341333
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1057,
+                        "Value": 12
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              },
+              "125002": {
+                "HSdrillParams": {
+                  "ToolType": "HSDrill",
+                  "ToolTypeId": "10",
+                  "ToolId": 125002,
+                  "ToolVer": "2.5",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "HSdrill",
+                    "mass": 5,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 0,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -306.5,
+                    "TcpY": -7,
+                    "TcpZ": 85.3,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1058,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1059,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1008,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1039,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1056,
+                        "Value": 100
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1057,
+                        "Value": 1784218
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1058,
+                        "Value": 6826660
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1059,
+                        "Value": 6826660
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1008,
+                        "Value": 341333
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1039,
+                        "Value": 341333
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1057,
+                        "Value": 12
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              },
+              "125003": {
+                "HSdrillParams": {
+                  "ToolType": "HSDrill",
+                  "ToolTypeId": "10",
+                  "ToolId": 125003,
+                  "ToolVer": "2.5",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "HSdrill",
+                    "mass": 5,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 0,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -306.5,
+                    "TcpY": -7,
+                    "TcpZ": 85.3,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1058,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1059,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1008,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1039,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1056,
+                        "Value": 100
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1057,
+                        "Value": 1784218
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1058,
+                        "Value": 6826660
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1059,
+                        "Value": 6826660
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1008,
+                        "Value": 341333
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1039,
+                        "Value": 341333
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1057,
+                        "Value": 12
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              },
+              "200101": {
+                "HSdrillParams": {
+                  "ToolType": "HSDrill",
+                  "ToolTypeId": "1",
+                  "ToolId": 200101,
+                  "ToolVer": "2.0",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "HSdrill",
+                    "mass": 5.1,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 130,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -265,
+                    "TcpY": 21.05,
+                    "TcpZ": 73.53,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1058,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1059,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1008,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1039,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1056,
+                        "Value": 100
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1057,
+                        "Value": 1784218
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1058,
+                        "Value": 6826660
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1059,
+                        "Value": 6826660
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1008,
+                        "Value": 341333
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1039,
+                        "Value": 341333
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1057,
+                        "Value": 512
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              },
+              "200251": {
+                "HSdrillParams": {
+                  "ToolType": "HSDrill",
+                  "ToolTypeId": "10",
+                  "ToolId": 200251,
+                  "ToolVer": "2.5",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "HSdrill",
+                    "mass": 5.1,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 130,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -308,
+                    "TcpY": -7,
+                    "TcpZ": 85.3,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1058,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1059,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1008,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1039,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1056,
+                        "Value": 100
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1057,
+                        "Value": 1784218
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1058,
+                        "Value": 6826660
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1059,
+                        "Value": 6826660
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1008,
+                        "Value": 341333
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1039,
+                        "Value": 341333
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1057,
+                        "Value": 12
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              },
+              "200252": {
+                "HSdrillParams": {
+                  "ToolType": "HSDrill",
+                  "ToolTypeId": "10",
+                  "ToolId": 200252,
+                  "ToolVer": "2.5",
+                  "JsonVer": 0.1,
+                  "Elmo1fileName": null,
+                  "Elmo2fileName": null,
+                  "RbtToolData": {
+                    "name": "HSdrill",
+                    "mass": 5.1,
+                    "msX": 0,
+                    "msY": 0,
+                    "msZ": 130,
+                    "msA": 0,
+                    "msB": 0,
+                    "msC": 0,
+                    "InertiaX": 0,
+                    "InertiaY": 0,
+                    "InertiaZ": 0,
+                    "TcpX": -306.5,
+                    "TcpY": -7,
+                    "TcpZ": 85.3,
+                    "TcpA": 0,
+                    "TcpB": -90,
+                    "TcpC": 0
+                  },
+                  "DrvToolData": {
+                    "BKParam": [
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1058,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1059,
+                        "Value": 50
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1008,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1039,
+                        "Value": 10
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1056,
+                        "Value": 100
+                      },
+                      {
+                        "AxisId": 1,
+                        "BkParamIdx": 1057,
+                        "Value": 1784218
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1058,
+                        "Value": 6826660
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1059,
+                        "Value": 6826660
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1008,
+                        "Value": 341333
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1039,
+                        "Value": 341333
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1056,
+                        "Value": 360
+                      },
+                      {
+                        "AxisId": 2,
+                        "BkParamIdx": 1057,
+                        "Value": 12
+                      }
+                    ]
+                  },
+                  "DetectorToolData": null,
+                  "SourceToolData": null,
+                  "TotalWorkTimeSec": 0
+                }
+              }
+            },
+            "fcu": {
+              "fcuParams": {
+                "ToolType": "fcu",
+                "ToolId": 100000,
+                "TotalWorkTimeSec": 0,
+                "RbtToolData": {
+                  "name": "fcu",
+                  "mass": 2.31,
+                  "msX": 0,
+                  "msY": 0,
+                  "msZ": 50,
+                  "msA": 0,
+                  "msB": 0,
+                  "msC": 0,
+                  "InertiaX": 0,
+                  "InertiaY": 0,
+                  "InertiaZ": 0,
+                  "TcpX": 0,
+                  "TcpY": 0,
+                  "TcpZ": 0,
+                  "TcpA": 0,
+                  "TcpB": 0,
+                  "TcpC": 0
+                },
+                "DrvToolData": {}
+              }
+            },
+            "detectorDummy": {
+              "detectorDummyParams": {
+                "ToolType": "detector",
+                "ToolId": 70,
+                "TotalWorkTimeSec": 0,
+                "RbtToolData": {
+                  "name": "detectorDummy",
+                  "mass": 2,
+                  "msX": 0,
+                  "msY": 0,
+                  "msZ": 0,
+                  "msA": 0,
+                  "msB": 0,
+                  "msC": 0,
+                  "InertiaX": 0,
+                  "InertiaY": 0,
+                  "InertiaZ": 0,
+                  "comment": "below tcp params will be override with active detector tcp params",
+                  "TcpX": -0.04,
+                  "TcpY": -41.86,
+                  "TcpZ": 220.12,
+                  "TcpA": -179.8907,
+                  "TcpB": 0.156,
+                  "TcpC": -89.3809
+                },
+                "DrvToolData": {},
+                "DetectorToolData": {
+                  "Id": "CD57M3221_1",
+                  "Type": "Dalsa",
+                  "DefaultMode": "1",
+                  "Manufacturer": "Dalsa",
+                  "SizeX": "296.3",
+                  "SizeY": "296.3",
+                  "Image2Detector": [
+                    0,
+                    1,
+                    0,
+                    0,
+                    -1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-08-11 08:57:44",
+        "updated_at": "2025-08-11 09:02:43",
+        "created_by": "admin-id-123",
+        "description": "",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": null,
+        "parent_type": null
+      },
+      {
+        "id": "v3qpc63we3bme5cmzqa",
+        "name": "NDI",
+        "type": "COMPONENT",
+        "parent_id": null,
+        "data": {
+          "NdiConfig": {
+            "CurrentSystemVer": "IQ2.X",
+            "SimulationMode": "True",
+            "TestingNdiCam": true,
+            "UseSpineReference": false,
+            "EnableStreaming": true,
+            "DynamicCameraIPLookup": true,
+            "Comment": "FrameFrequency values 60-250Hz, TrackFrequency values 0-2, 0 is 1/3 of frame frequency, 1 is 1/2, 2 is 1/1",
+            "FrameFrequency": "60",
+            "TrackFrequency": "0",
+            "CameraWorkVolume": "5",
+            "NdiServerPort": 9452,
+            "NdiMinTranslationThresholdMm": 0.6,
+            "NdiMaxTranslationThresholdMm": 5,
+            "WaitTimeMsATVisibility": 1000,
+            "WaitTimeMsATStability": 2000,
+            "WaitTimeMsSnapshot": 500,
+            "ToolTipDx": -130,
+            "ToolTipDy": 0,
+            "ToolTipDz": -3.5,
+            "SpecificVersionsData": {
+              "IQ2.3": {
+                "NdiCamIp": "169.254.166.83",
+                "NdiCamPort": 8765,
+                "NdiCamTimeoutMs": 10000,
+                "CalibMat": {
+                  "M11": 0.010101,
+                  "M12": 0.999948,
+                  "M13": 0.001046,
+                  "M14": -1.41191,
+                  "M21": -0.724482,
+                  "M22": 0.00804,
+                  "M23": -0.689247,
+                  "M24": -315.198456,
+                  "M31": -0.68922,
+                  "M32": 0.006204,
+                  "M33": 0.724526,
+                  "M34": 751.543791,
+                  "M41": 0,
+                  "M42": 0,
+                  "M43": 0,
+                  "M44": 1,
+                  "IsIdentity": false,
+                  "Translation": {
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 0
+                  }
+                }
+              },
+              "IQ2.2": {
+                "NdiCamIp": "169.254.167.104",
+                "NdiCamPort": 8765,
+                "NdiCamTimeoutMs": 5000,
+                "CalibMat": {
+                  "M11": 0.017601,
+                  "M12": 0.999845,
+                  "M13": 0.001043,
+                  "M14": -7.238098,
+                  "M21": -0.71146,
+                  "M22": 0.013257,
+                  "M23": -0.702601,
+                  "M24": -333.917284,
+                  "M31": -0.702506,
+                  "M32": 0.011624,
+                  "M33": 0.711583,
+                  "M34": 735.617219,
+                  "M41": 0,
+                  "M42": 0,
+                  "M43": 0,
+                  "M44": 1,
+                  "IsIdentity": false,
+                  "Translation": {
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 0
+                  }
+                }
+              },
+              "IQ2.1": {
+                "NdiCamIp": "169.254.11.46",
+                "NdiCamPort": 8765,
+                "NdiCamTimeoutMs": 5000,
+                "CalibMat": {
+                  "M11": -0.003133,
+                  "M12": 0.999993,
+                  "M13": -0.001872,
+                  "M14": 5.63,
+                  "M21": -0.716994,
+                  "M22": -0.0042,
+                  "M23": -0.69707,
+                  "M24": -307.43,
+                  "M31": -0.697072,
+                  "M32": -0.000842,
+                  "M33": 0.717,
+                  "M34": 739.19,
+                  "M41": 0,
+                  "M42": 0,
+                  "M43": 0,
+                  "M44": 1,
+                  "IsIdentity": false,
+                  "Translation": {
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 0
+                  }
+                }
+              },
+              "IQ1.5": {
+                "NdiCamIp": "169.254.11.46",
+                "NdiCamPort": 8765,
+                "NdiCamTimeoutMs": 3000,
+                "CalibMat": {
+                  "M11": 0.0773306042,
+                  "M12": 0.994731963,
+                  "M13": -0.06729292,
+                  "M14": -47.21516,
+                  "M21": -0.357309848,
+                  "M22": -0.0353608727,
+                  "M23": -0.9333163,
+                  "M24": -217.047928,
+                  "M31": -0.93077904,
+                  "M32": 0.09621833,
+                  "M33": 0.352693051,
+                  "M34": 638.361633,
+                  "M41": 0,
+                  "M42": 0,
+                  "M43": 0,
+                  "M44": 1,
+                  "IsIdentity": false,
+                  "Translation": {
+                    "X": 0,
+                    "Y": 0,
+                    "Z": 0
+                  }
+                }
+              }
+            },
+            "ToleratedMessagesFrequency": 1250
+          },
+          "ServiceComConfig": {
+            "RESTServerConfig": {
+              "Hostname": "0.0.0.0",
+              "Port": 16074
+            },
+            "OpenTelemetryConfig": {
+              "Url": "http://otel-collector:4317",
+              "IsDisabled": false
+            },
+            "RabbitConfig": {
+              "UserName": "guest",
+              "Password": "guest",
+              "HostName": "rabbitmq",
+              "Port": 5672,
+              "VirtualHost": "/",
+              "Ssl": false,
+              "StreamUserName": "guest",
+              "StreamPassword": "guest",
+              "StreamHostName": "rabbitmq",
+              "StreamPort": 5552,
+              "StreamVirtualHost": "/",
+              "Exchanges": {
+                "NavToolEventExchange": "ndi.navtoolevent",
+                "NavToolsStream": "ndi.ndi_nav_tool",
+                "ATCoordinatesStream": "ndi.at_coordinates",
+                "TestStatusChangeExchange": "ndi.test_status_changed",
+                "SnapshotTakenExchange": "ndi.snapshot_taken",
+                "ATStatusChangeExchange": "ndi.at_status_change",
+                "NdiToolTestStatusChangeExchange": "ndi.ndi_tool_test_status_changed"
+              },
+              "StreamMaxLengthBytes": 0,
+              "StreamMaxAgeSeconds": 10,
+              "StreamMaxSegmentSizeBytes": 10000000,
+              "StreamMessagesBufferSize": 1
+            },
+            "S3Config": {
+              "accessKey": "minio",
+              "secretKey": "minio123",
+              "bucketName": "magic.platform",
+              "serviceUrl": "http://minio:9099",
+              "region": "us-east-1",
+              "forcePathStyle": true,
+              "sessionToken": ""
+            },
+            "CatalogConfig": {
+              "HostName": "catalog-service",
+              "Port": 9076
+            }
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-08-10 07:15:21",
+        "updated_at": "2025-08-11 08:45:34",
+        "created_by": "admin-id-123",
+        "description": "",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": null,
+        "parent_type": null
+      },
+      {
+        "id": "6czv0tup5bume5cl8xp",
+        "name": "Camera",
+        "type": "COMPONENT",
+        "parent_id": null,
+        "data": {
+          "workingDir": "./working_dir",
+          "Version": "IQ2.X",
+          "keepLocal": false,
+          "activationKey": "IOPFS-AIUMC-VXLJK-CBPSG-OXSAY",
+          "simulationMode": false,
+          "sensorCalibration": true,
+          "trackCalibration": false,
+          "reconstructionParams": {
+            "cw": 1280,
+            "ch": 720,
+            "dw": 1024,
+            "dh": 768,
+            "volumePosition": {
+              "x": -273.22,
+              "y": 121.7,
+              "z": 699.3
+            },
+            "volumeResolution": {
+              "x": 256,
+              "y": 256,
+              "z": 256
+            },
+            "volumeRotation": [
+              0.89,
+              0.26,
+              -0.36,
+              0.44,
+              -0.5664387560416262,
+              0.69,
+              -0.024165679174155942,
+              -0.78,
+              -0.617
+            ],
+            "volumeSize": {
+              "x": 800,
+              "y": 3000,
+              "z": 1000
+            },
+            "fillHoles": true
+          },
+          "meshName": "workingVolume.ply"
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-08-10 07:14:00",
+        "updated_at": "2025-08-10 07:19:27",
+        "created_by": "admin-id-123",
+        "description": "",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": null,
+        "parent_type": null
+      },
+      {
+        "id": "33q1sa9itslme5ck9e4",
+        "name": "KukaPlanner",
+        "type": "COMPONENT",
+        "parent_id": null,
+        "data": {
+          "systemVer": "IQ2.X",
+          "simulationMode": false,
+          "useVisualization": false,
+          "playResults": false,
+          "returnSavedSyncPath": "planner.get_sync_pathResult.json",
+          "validateAccuracyFiles": false,
+          "collisionCheckStepsize": 1,
+          "cycleTimeInS": 0.25,
+          "cycleTimeInSCollCheck": 0.06,
+          "cycleTimeInSFRI": 0.001,
+          "enableAbsAcc": true,
+          "maxPlanningTryTimes": [
+            5,
+            10,
+            15
+          ],
+          "minDist": 6,
+          "numRetries": 1,
+          "workVolumeMaxBoxSize": 220,
+          "boneCutJointsLimitThreshold": 5,
+          "motionJointsLimitThreshold": 1.5,
+          "syncPathJointsLimitThreshold": 1.5,
+          "linPathJointsLimitThreshold": 1.5,
+          "useExtraSafety": true,
+          "redundancyOptimization": true,
+          "comment": "trasformation from robot base to kuka simulation base, old target2BaseIK is: 19.7, -162.018, 1411.028, -180, 0, 0  ->  new: 19.700422, 191.611636, 696.528799, 0, 90, 90",
+          "target2BaseIK": [
+            19.7,
+            -162.018,
+            1411.028,
+            -180,
+            0,
+            0
+          ],
+          "comment1": "we also get the values below from magicApi in Init message",
+          "leftRobotBasePos": [
+            433.074,
+            -341.59,
+            5.63,
+            0,
+            90,
+            -105.17
+          ],
+          "rightRobotBasePos": [
+            -433.071,
+            -341.41,
+            5.53,
+            0,
+            90,
+            -75.12
+          ],
+          "bottomRobotBasePos": [
+            0,
+            -353.63,
+            -714.5,
+            0,
+            90,
+            -90
+          ],
+          "gantry": [
+            0.38,
+            -336.018,
+            -1498.59,
+            180,
+            0,
+            90
+          ],
+          "tlb": [
+            -0.538,
+            -482.591,
+            322.614,
+            -7.401,
+            0.286,
+            89.54
+          ],
+          "comment2": "patient will be replaced by work volume",
+          "table": [
+            0,
+            -353.63,
+            -724.5,
+            0,
+            90,
+            -90
+          ],
+          "tableFile": "tools/IQ2_table_Jan2025.dae",
+          "tableSwivel": [
+            0,
+            -353.63,
+            -724.5,
+            0,
+            90,
+            -90
+          ],
+          "tableSwivelFile": "tools/IQ2_tableSwivel.dae",
+          "tableClamp": [
+            0,
+            -353.63,
+            -724.5,
+            0,
+            90,
+            -90
+          ],
+          "tableClampFile": "tools/IQ2_tableClamp.dae",
+          "tableRails": [
+            0,
+            -353.63,
+            -724.5,
+            0,
+            90,
+            -90
+          ],
+          "tableRailsFile": "tools/IQ2_rails_Jan2025.dae",
+          "patient": [
+            6.66,
+            -460.373,
+            -1435.238,
+            0,
+            0,
+            90
+          ],
+          "swivelCenter": [
+            0,
+            -353.63,
+            -360.5
+          ],
+          "upperRailCenter": [
+            0,
+            -356.13,
+            -593.5
+          ],
+          "bottomRailCenter": [
+            0,
+            -356.13,
+            -1020.5
+          ],
+          "bedLinearEncoderOffset": 995,
+          "railCenterToFrontDist": 215.2,
+          "railCenterToRearDist": 179,
+          "bedHeightEncodersLimits": [
+            0,
+            200
+          ],
+          "bedLinearEncoderLimits": [
+            21,
+            879
+          ],
+          "bedSwivelEncoderLimits": [
+            -30,
+            30
+          ],
+          "gantryEncodersLimits": [
+            20,
+            350
+          ],
+          "gantryEncodersOffset": 350,
+          "tiltLimit": 15,
+          "wallLeftRestrictiveZone": [
+            1000,
+            -162,
+            -411,
+            180,
+            0,
+            0
+          ],
+          "wallRightRestrictiveZone": [
+            -1000,
+            -162,
+            -411,
+            180,
+            0,
+            0
+          ],
+          "ceilRestrictiveZone": [
+            20,
+            -162,
+            1000,
+            0,
+            90,
+            -180
+          ],
+          "wallFrontRestrictiveZone": [
+            20,
+            940,
+            -1480,
+            0,
+            90,
+            -90
+          ],
+          "ndiVisibilityTest": true,
+          "proprietarySync": 2,
+          "accurateWorkVolume": true,
+          "interpolatePathToTarget": false,
+          "killkLibLocalServerOnStart": true,
+          "useMongo": false,
+          "interpolateSyncType": "BSpline",
+          "interpolateSyncTypeOptions": [
+            "Joints",
+            "Cartesean",
+            "Mixed",
+            "BSpline"
+          ],
+          "syncScanShape": "isocentricShape",
+          "syncScanShapeOptions": [
+            "isocentricShape",
+            "ellipticalShape",
+            "isocentricSinShape",
+            "ellipticalSinShape"
+          ],
+          "interpolateBy": "EIAngle",
+          "interpolateByOptions": [
+            "EIAngle",
+            "EIDetector",
+            "EISource"
+          ],
+          "splineAngleEpsilon": 0.001,
+          "weightedCartAxes": [
+            1,
+            1,
+            1,
+            0,
+            0,
+            0
+          ],
+          "weightedSegments": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1
+          ],
+          "weightedJointsInJP": [
+            7,
+            6,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "metricJPLength": 1,
+          "metricCPLength": 0,
+          "metricDistToObj": 0,
+          "MetricExamples": {
+            "default_joint_path_length": {
+              "weightedCartAxes": [
+                1,
+                1,
+                1,
+                0,
+                0,
+                0
+              ],
+              "weightedSegments": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "weightedJointsInJP": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ],
+              "metricJPLength": 1,
+              "metricCPLength": 0,
+              "metricDistToObj": 0
+            },
+            "cart_path_length_translation_only": {
+              "weightedCartAxes": [
+                1,
+                1,
+                1,
+                0,
+                0,
+                0
+              ],
+              "weightedSegments": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "weightedJointsInJP": [
+                7,
+                6,
+                5,
+                4,
+                3,
+                2,
+                1
+              ],
+              "metricJPLength": 0,
+              "metricCPLength": 1,
+              "metricDistToObj": 0
+            },
+            "cart_path_length_translation_and_rotation": {
+              "weightedCartAxes": [
+                1,
+                1,
+                1,
+                0,
+                2,
+                2
+              ],
+              "weightedSegments": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1
+              ],
+              "weightedJointsInJP": [
+                7,
+                6,
+                5,
+                4,
+                3,
+                2,
+                1
+              ],
+              "metricJPLength": 0,
+              "metricCPLength": 1,
+              "metricDistToObj": 0
+            },
+            "cart_path_length_translation_of_tcp_and_flange_cause_stable_move": {
+              "weightedCartAxes": [
+                1,
+                1,
+                1,
+                0,
+                0,
+                0
+              ],
+              "weightedSegments": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                1
+              ],
+              "weightedJointsInJP": [
+                7,
+                6,
+                5,
+                4,
+                3,
+                2,
+                1
+              ],
+              "metricJPLength": 0,
+              "metricCPLength": 1,
+              "metricDistToObj": 0
+            },
+            "joints_weighted_path_length": {
+              "weightedCartAxes": [
+                1,
+                1,
+                1,
+                0,
+                0,
+                0
+              ],
+              "weightedSegments": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                1
+              ],
+              "weightedJointsInJP": [
+                7,
+                6,
+                5,
+                4,
+                3,
+                2,
+                1
+              ],
+              "metricJPLength": 1,
+              "metricCPLength": 0,
+              "metricDistToObj": 0
+            }
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-08-10 07:13:14",
+        "updated_at": "2025-08-10 07:19:51",
+        "created_by": "admin-id-123",
+        "description": "",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": null,
+        "parent_type": null
+      },
+      {
+        "id": "1t0mlzk4klqme5czh56",
+        "name": "IQ3.1",
+        "type": "INSTANCE",
+        "parent_id": "uck0mn4ksmlme5cybzf",
+        "data": {
+          "Camera": {
+            "Version": "IQ3.1"
+          },
+          "NDI": {
+            "NdiConfig": {
+              "TestingNdiCam": false,
+              "CurrentSystemVer": "IQ2"
+            }
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-08-10 07:25:04",
+        "updated_at": "2025-08-11 08:47:26",
+        "created_by": "admin-id-123",
+        "description": "",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": "IQ3",
+        "parent_type": "PRODUCT"
+      },
+      {
+        "id": "uraq0yl4g4ime5cqq9o",
+        "name": "IQ2.3",
+        "type": "INSTANCE",
+        "parent_id": "izjiqcy5eeeme5cq1ud",
+        "data": {
+          "NDI": {
+            "NdiConfig": {
+              "CurrentSystemVer": "IQ2.3"
+            }
+          },
+          "Camera": {
+            "Version": "IQ2.3"
+          },
+          "KukaPlanner": {
+            "systemVer": "IQ2.3"
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-08-10 07:18:16",
+        "updated_at": "2025-08-10 07:21:12",
+        "created_by": "admin-id-123",
+        "description": "",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": "IQ2",
+        "parent_type": "PRODUCT"
+      },
+      {
+        "id": "vvyr8ct548me5cqk1w",
+        "name": "IQ2.2",
+        "type": "INSTANCE",
+        "parent_id": "izjiqcy5eeeme5cq1ud",
+        "data": {
+          "NDI": {
+            "NdiConfig": {
+              "CurrentSystemVer": "IQ2.2"
+            }
+          },
+          "Camera": {
+            "Version": "IQ2.2"
+          },
+          "KukaPlanner": {
+            "systemVer": "IQ2.2"
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-08-10 07:18:08",
+        "updated_at": "2025-08-10 07:23:05",
+        "created_by": "admin-id-123",
+        "description": "",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": "IQ2",
+        "parent_type": "PRODUCT"
+      },
+      {
+        "id": "g2loewxfshime5cqbkk",
+        "name": "IQ2.1",
+        "type": "INSTANCE",
+        "parent_id": "izjiqcy5eeeme5cq1ud",
+        "data": {},
+        "status": "COMMITTED",
+        "created_at": "2025-08-10 07:17:57",
+        "updated_at": "2025-08-10 07:17:57",
+        "created_by": "admin-id-123",
+        "description": "",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": "IQ2",
+        "parent_type": "PRODUCT"
+      },
+      {
+        "id": "uck0mn4ksmlme5cybzf",
+        "name": "IQ3",
+        "type": "PRODUCT",
+        "parent_id": null,
+        "data": {
+          "NDI": {
+            "componentId": "v3qpc63we3bme5cmzqa",
+            "versionId": "v3qpc63we3bme5cmzqa",
+            "componentName": "NDI",
+            "versionName": "NDI (root)"
+          },
+          "Camera": {
+            "componentId": "6czv0tup5bume5cl8xp",
+            "versionId": "6czv0tup5bume5cl8xp",
+            "componentName": "Camera",
+            "versionName": "Camera (root)"
+          },
+          "KukaPlanner": {
+            "componentId": "33q1sa9itslme5ck9e4",
+            "versionId": "p761ef3dk6me5cpc3u",
+            "componentName": "KukaPlanner",
+            "versionName": "KukaPlanner3.0.1"
+          },
+          "Motion": {
+            "componentId": "djdsay9xd9hme6w9voq",
+            "versionId": "djdsay9xd9hme6w9voq",
+            "componentName": "Motion",
+            "versionName": "Motion (root)"
+          },
+          "ToolManager": {
+            "componentId": "vztxmg0wbhme6vqidk",
+            "versionId": "vztxmg0wbhme6vqidk",
+            "componentName": "ToolManager",
+            "versionName": "ToolManager (root)"
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-08-10 07:24:10",
+        "updated_at": "2025-08-11 10:51:23",
+        "created_by": "admin-id-123",
+        "description": "Copy of IQ2",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": null,
+        "parent_type": null
+      },
+      {
+        "id": "izjiqcy5eeeme5cq1ud",
+        "name": "IQ2",
+        "type": "PRODUCT",
+        "parent_id": null,
+        "data": {
+          "NDI": {
+            "componentId": "v3qpc63we3bme5cmzqa",
+            "versionId": "v3qpc63we3bme5cmzqa",
+            "componentName": "NDI",
+            "versionName": "NDI (root)"
+          },
+          "Camera": {
+            "componentId": "6czv0tup5bume5cl8xp",
+            "versionId": "6czv0tup5bume5cl8xp",
+            "componentName": "Camera",
+            "versionName": "Camera (root)"
+          },
+          "KukaPlanner": {
+            "componentId": "33q1sa9itslme5ck9e4",
+            "versionId": "33q1sa9itslme5ck9e4",
+            "componentName": "KukaPlanner",
+            "versionName": "KukaPlanner (root)"
+          }
+        },
+        "status": "COMMITTED",
+        "created_at": "2025-08-10 07:17:44",
+        "updated_at": "2025-08-11 10:44:24",
+        "created_by": "admin-id-123",
+        "description": "",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": null,
+        "parent_type": null
+      },
+      {
+        "id": "veiaq5wiyvmme6xz6la",
+        "name": "bvfghfghfgh",
+        "type": "USER",
+        "parent_id": "1t0mlzk4klqme5czh56",
+        "data": {
+          "Motion": {
+            "FrameLocationCoordinates": {
+              "LocationCoordinates": {
+                "Right": {
+                  "EXAMPLE_FRM1": {
+                    "Target": "Base,X,Y,Z,A,b,C,Status,Turn,E1#subTool"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "status": "DRAFT",
+        "created_at": "2025-08-11 10:00:28",
+        "updated_at": "2025-08-11 10:01:02",
+        "created_by": "admin-id-123",
+        "description": "",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": "IQ3.1",
+        "parent_type": "INSTANCE"
+      },
+      {
+        "id": "rwsc0hcq3sme6zrdfs",
+        "name": "XR3.0.1",
+        "type": "VERSION",
+        "parent_id": "es5kuxghdhme6y49mq",
+        "data": {},
+        "status": "DRAFT",
+        "created_at": "2025-08-11 10:50:23",
+        "updated_at": "2025-08-11 10:50:23",
+        "created_by": "admin-id-123",
+        "description": "",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": "XrayScanParams",
+        "parent_type": "COMPONENT"
+      },
+      {
+        "id": "p761ef3dk6me5cpc3u",
+        "name": "KukaPlanner3.0.1",
+        "type": "VERSION",
+        "parent_id": "33q1sa9itslme5ck9e4",
+        "data": {
+          "systemVer": "IQ3.X"
+        },
+        "status": "DRAFT",
+        "created_at": "2025-08-10 07:17:11",
+        "updated_at": "2025-08-10 07:20:01",
+        "created_by": "admin-id-123",
+        "description": "",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": "KukaPlanner",
+        "parent_type": "COMPONENT"
+      },
+      {
+        "id": "tgchvtgjo3me5cor3b",
+        "name": "cam3.0.1",
+        "type": "VERSION",
+        "parent_id": "6czv0tup5bume5cl8xp",
+        "data": {
+          "Version": "IQ3.X"
+        },
+        "status": "DRAFT",
+        "created_at": "2025-08-10 07:16:43",
+        "updated_at": "2025-08-10 07:19:36",
+        "created_by": "admin-id-123",
+        "description": "",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": "Camera",
+        "parent_type": "COMPONENT"
+      },
+      {
+        "id": "pfqsmfu9jcqme5cnsz4",
+        "name": "NDI3.0.1",
+        "type": "VERSION",
+        "parent_id": "v3qpc63we3bme5cmzqa",
+        "data": {
+          "NdiConfig": {
+            "CurrentSystemVer": "IQ3.X"
+          }
+        },
+        "status": "DRAFT",
+        "created_at": "2025-08-10 07:15:59",
+        "updated_at": "2025-08-10 07:19:19",
+        "created_by": "admin-id-123",
+        "description": "",
+        "archived": 0,
+        "created_by_username": "admin",
+        "parent_name": "NDI",
+        "parent_type": "COMPONENT"
+      }
+    ]
+  }
+}
