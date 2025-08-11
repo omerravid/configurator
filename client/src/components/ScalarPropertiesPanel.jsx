@@ -150,29 +150,25 @@ const ScalarPropertiesPanel = ({
   };
 
   const copyToClipboard = async (text, label = "Value") => {
+    // Always use fallback since Clipboard API is blocked in iframes
     try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(text);
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+      textArea.select();
+      textArea.setSelectionRange(0, 99999); // For mobile
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+
+      if (successful) {
         showToast(`${label} copied to clipboard!`);
       } else {
-        // Fallback for iframes and older browsers
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        textArea.style.position = "fixed";
-        textArea.style.opacity = "0";
-        document.body.appendChild(textArea);
-        textArea.select();
-        textArea.setSelectionRange(0, 99999);
-        const successful = document.execCommand("copy");
-        document.body.removeChild(textArea);
-
-        if (successful) {
-          showToast(`${label} copied to clipboard!`);
-        } else {
-          showToast("Failed to copy to clipboard", "error");
-        }
+        showToast("Failed to copy to clipboard", "error");
       }
     } catch (err) {
+      console.error("Failed to copy to clipboard:", err);
       showToast("Failed to copy to clipboard", "error");
     }
   };
