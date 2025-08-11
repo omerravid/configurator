@@ -6,8 +6,10 @@ import {
   InformationCircleIcon,
   ClipboardIcon,
   MapIcon,
+  DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
 import { useToast } from "../context/ToastContext";
+import ContextMenu from "./ContextMenu";
 
 const ScalarPropertiesPanel = ({
   selectedPath,
