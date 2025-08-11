@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { configAPI } from "../services/api";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, FolderArrowDownIcon } from "@heroicons/react/24/outline";
 import ComponentSelector from "./ComponentSelector";
 
 const ConfigurationEditor = ({
