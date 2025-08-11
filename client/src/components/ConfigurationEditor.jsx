@@ -593,7 +593,7 @@ const ConfigurationEditor = ({
     }
 
     if (isCreatingComponent) {
-      return "As a Component configuration, you can define reusable properties that can be added to Products.";
+      return "As a Component configuration, you can define reusable properties that can be added to Products. You can also import a folder structure with JSON files to quickly build your component.";
     }
 
     if (!isCreating && !isCreatingChild && config) {
