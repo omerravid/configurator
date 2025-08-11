@@ -259,6 +259,7 @@ const StructuralTreeNode = ({
               onNodeSelect={onNodeSelect}
               selectedPath={selectedPath}
               onStructuralChange={onStructuralChange}
+              parentValue={actualValue}
             />
           );
         }
@@ -283,6 +284,7 @@ const StructuralTreeNode = ({
             onNodeSelect={onNodeSelect}
             selectedPath={selectedPath}
             onStructuralChange={onStructuralChange}
+            parentValue={actualValue}
           />
         );
       }
