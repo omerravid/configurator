@@ -193,23 +193,26 @@ const ScalarPropertiesPanel = ({
     e.preventDefault();
     const { actualValue } = getActualValueAndSource(value);
 
-    // Create path for this property
-    const propertyPath = selectedPath === "root"
-      ? propertyName
-      : selectedPath.replace(/^root\./, "")
-        ? `${selectedPath.replace(/^root\./, "")}.${propertyName}`
-        : propertyName;
+    // Create the full path for this property (matching flat view logic)
+    const fullPath = selectedPath === "root"
+      ? `root.${propertyName}`
+      : `${selectedPath}.${propertyName}`;
+
+    // Strip "root." prefix for display (matching flat view)
+    const cleanPath = fullPath.startsWith("root.")
+      ? fullPath.substring(5)
+      : fullPath;
 
     const menuItems = [
       {
         label: "Copy Value",
         icon: ClipboardIcon,
-        onClick: () => copyToClipboard(safeToString(actualValue), "Value"),
+        onClick: () => copyToClipboard(JSON.stringify(actualValue), "Value"),
       },
       {
         label: "Copy Path",
         icon: MapIcon,
-        onClick: () => copyToClipboard(propertyPath, "Path"),
+        onClick: () => copyToClipboard(cleanPath, "Path"),
       },
       {
         label: "Copy as JSON",
