@@ -53,8 +53,7 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// Make database available to all routes
-app.locals.db = db;
+// MongoDB models are available through the models/index.js
 
 // Routes
 app.use("/api/auth", require("./routes/auth"));
