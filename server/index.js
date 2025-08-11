@@ -6,8 +6,7 @@ const helmet = require("helmet");
 const app = express();
 const PORT = process.env.PORT || 3002;
 
-// Initialize database
-const db = require("./models/database");
+// Database initialization is handled by embedded MongoDB
 
 // Initialize MongoDB by default (can be disabled with USE_MONGODB='false')
 if (process.env.USE_MONGODB !== 'false') {
