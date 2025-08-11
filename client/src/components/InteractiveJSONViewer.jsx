@@ -723,8 +723,8 @@ const InteractiveJSONViewer = ({
           if (parentPath) {
             onDataChange(parentPath, newParentValue);
           } else {
-            // Adding to root level - merge with existing data
-            onDataChange("", { ...data, [param1]: param2 });
+            // Adding to root level - replace each property individually
+            onDataChange(param1, param2);
           }
         }
         break;
@@ -743,10 +743,8 @@ const InteractiveJSONViewer = ({
           if (parentPath) {
             onDataChange(parentPath, newParentValue);
           } else {
-            // Removing from root level
-            const newRootValue = { ...data };
-            delete newRootValue[key];
-            onDataChange("", newRootValue);
+            // Removing from root level - set the key to undefined to delete it
+            onDataChange(key, undefined);
           }
 
           // Clear selection if the removed item was selected
@@ -785,11 +783,13 @@ const InteractiveJSONViewer = ({
           if (parentPath) {
             onDataChange(parentPath, newParentValue);
           } else {
-            // Renaming at root level
-            const newRootValue = { ...data };
-            newRootValue[newKey] = newRootValue[oldKey];
-            delete newRootValue[oldKey];
-            onDataChange("", newRootValue);
+            // Renaming at root level - add new key and remove old key
+            const valueToMove = data[oldKey];
+            onDataChange(newKey, valueToMove);
+            // After the first change is processed, remove the old key
+            setTimeout(() => {
+              onDataChange(oldKey, undefined);
+            }, 100);
           }
 
           // Update selected path if it was the renamed item
