@@ -577,7 +577,7 @@ const InteractiveJSONViewer = ({
   // Global state to preserve expand/collapse states across data updates
   const [expandedPaths, setExpandedPaths] = useState(new Set());
   // Mode toggle between Flat and Structural view
-  const [viewMode, setViewMode] = useState("flat");
+  const [viewMode, setViewMode] = useState("structural");
   // Structural mode state
   const [selectedStructuralPath, setSelectedStructuralPath] = useState("root");
   const [selectedStructuralValue, setSelectedStructuralValue] = useState(data);
