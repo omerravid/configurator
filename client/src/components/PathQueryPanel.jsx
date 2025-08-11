@@ -107,7 +107,10 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
 
     try {
       let textToCopy;
-      if (queryResult.isMinimal) {
+
+      if (queryResult.notFound) {
+        textToCopy = `Path not found: ${queryResult.query.path}`;
+      } else if (queryResult.isMinimal) {
         // For minimal responses, copy the raw value
         if (typeof queryResult.data === 'string') {
           textToCopy = queryResult.data;
