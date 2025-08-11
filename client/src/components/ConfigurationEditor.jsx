@@ -453,6 +453,17 @@ const ConfigurationEditor = ({
     setIsImporting(true);
     try {
       // Create file input for directory selection
+      // Expected folder structure example:
+      // MyComponent/
+      //   ├── config.json
+      //   ├── settings/
+      //   │   ├── database.json
+      //   │   └── logging.json
+      //   └── features/
+      //       ├── auth.json
+      //       └── payment.json
+      // Results in: { "config": {...}, "settings": { "database": {...}, "logging": {...} }, "features": { "auth": {...}, "payment": {...} } }
+
       const dirInput = document.createElement('input');
       dirInput.type = 'file';
       dirInput.webkitdirectory = true;
