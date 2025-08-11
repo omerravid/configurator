@@ -337,10 +337,11 @@ const StructuralTreeNode = ({
                 onBlur={handleRename}
                 className="px-1 py-0 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                 autoFocus
+                placeholder="Enter object name"
               />
             ) : (
               <span className="font-medium text-gray-700 truncate">
-                {keyName}
+                {keyName || "(unnamed)"}
                 {hasChildren && (
                   <span className="ml-1 text-xs text-gray-500">
                     ({getItemCount()})
