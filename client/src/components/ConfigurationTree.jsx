@@ -176,6 +176,7 @@ const TreeNode = ({
   onDelete,
   onArchive,
   onRestore,
+  onAddComponent,
   user,
   isExpanded,
   onExpansionChange,
