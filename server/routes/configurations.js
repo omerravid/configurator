@@ -261,8 +261,11 @@ router.put(
         return res.status(400).json({ error: error.details[0].message });
       }
 
+      // Use string ID to ensure proper ObjectId handling
+      const configId = String(req.params.id);
+
       const config = await ConfigurationService.updateConfiguration(
-        req.params.id,
+        configId,
         value,
         req.user.id,
       );
@@ -275,6 +278,7 @@ router.put(
       console.error("Update configuration error:", error);
 
       if (
+        error.message.includes("not found") ||
         error.message.includes("not allowed") ||
         error.message.includes("Cannot update")
       ) {
