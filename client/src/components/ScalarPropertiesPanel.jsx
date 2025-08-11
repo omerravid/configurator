@@ -349,7 +349,11 @@ const ScalarPropertiesPanel = ({
             const isEditing = editingProperty === propertyName;
 
             return (
-              <div key={propertyName} className="group flex items-center justify-between p-2 border border-gray-200 rounded hover:bg-gray-50">
+              <div
+                key={propertyName}
+                className="group flex items-center justify-between p-2 border border-gray-200 rounded hover:bg-gray-50 cursor-context-menu"
+                onContextMenu={(e) => handlePropertyContextMenu(e, propertyName, value)}
+              >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2">
                     <span className="font-medium text-gray-700">{propertyName}:</span>
