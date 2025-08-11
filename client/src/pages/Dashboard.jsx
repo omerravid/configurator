@@ -436,14 +436,11 @@ const Dashboard = () => {
       const productResponse = await configAPI.getRawById(productId);
       const currentData = productResponse.data.resolved || {};
 
-      // Add the component to the product's components array
+      // Add the component directly as a top-level property
       const updatedData = { ...currentData };
 
-      if (!updatedData.components) {
-        updatedData.components = [];
-      }
-
       let componentToAdd = null;
+      let componentKey = "";
 
       if (componentData.type === "COMPONENT") {
         // When dragging a component, add it with its root/default version
@@ -459,21 +456,19 @@ const Dashboard = () => {
           return;
         }
 
-        // Check if this component-version combination is already added
-        const existingComponent = updatedData.components.find(c =>
-          c.componentId === componentData.id && c.versionId === rootVersion.id
-        );
+        componentKey = componentData.name;
 
-        if (existingComponent) {
-          showToast(`${componentData.name} (${rootVersion.name}) is already added to this product`, "warning");
+        // Check if this component is already added
+        if (updatedData[componentKey]) {
+          showToast(`${componentData.name} is already added to this product`, "warning");
           return;
         }
 
         componentToAdd = {
           componentId: componentData.id,
-          componentName: componentData.name,
           versionId: rootVersion.id,
-          versionName: rootVersion.name
+          componentName: componentData.name,
+          versionName: `${componentData.name} (${rootVersion.name})`
         };
 
       } else if (componentData.type === "VERSION") {
@@ -481,31 +476,30 @@ const Dashboard = () => {
         const versionResponse = await configAPI.getById(componentData.id);
         const versionConfig = versionResponse.data;
 
-        // Check if this component-version combination is already added
-        const existingComponent = updatedData.components.find(c =>
-          c.componentId === versionConfig.parent_id && c.versionId === componentData.id
-        );
+        const componentName = versionConfig.parent_name || "Unknown Component";
+        componentKey = componentName;
 
-        if (existingComponent) {
-          showToast(`${versionConfig.parent_name || 'Component'} (${componentData.name}) is already added to this product`, "warning");
+        // Check if this component is already added
+        if (updatedData[componentKey]) {
+          showToast(`${componentName} is already added to this product`, "warning");
           return;
         }
 
         componentToAdd = {
           componentId: versionConfig.parent_id,
-          componentName: versionConfig.parent_name || "Unknown Component",
           versionId: componentData.id,
-          versionName: componentData.name
+          componentName: componentName,
+          versionName: `${componentName} (${componentData.name})`
         };
       }
 
-      if (!componentToAdd) {
+      if (!componentToAdd || !componentKey) {
         showToast("Failed to determine component details", "error");
         return;
       }
 
-      // Add the complete component-version couple
-      updatedData.components.push(componentToAdd);
+      // Add the component as a direct property with component name as key
+      updatedData[componentKey] = componentToAdd;
 
       // Update the product configuration
       await configAPI.update(productId, { data: updatedData });
