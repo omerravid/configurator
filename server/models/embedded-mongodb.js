@@ -85,13 +85,15 @@ class EmbeddedMongoDB {
   // Initialize default admin user and seed data
   async initializeData() {
     try {
-      const { User } = require('./index');
-      
+      const { User, Configuration } = require('./index');
+
       // Check if admin user exists
       const existingAdmin = await User.findByUsername('admin');
+      let adminUser;
+
       if (!existingAdmin) {
         console.log('Creating default admin user...');
-        await User.create({
+        adminUser = await User.create({
           username: 'admin',
           password: 'admin123', // Change this in production
           role: 'ADMIN'
@@ -99,6 +101,89 @@ class EmbeddedMongoDB {
         console.log('Default admin user created (username: admin, password: admin123)');
       } else {
         console.log('Admin user already exists');
+        adminUser = existingAdmin;
+      }
+
+      // Check if sample configurations exist
+      const existingConfig = await Configuration.findByName('prod_ecommerce');
+      if (!existingConfig) {
+        console.log('Creating sample configurations...');
+
+        // Create sample configurations similar to SQLite initialization
+        const productConfig = await Configuration.create({
+          name: 'prod_ecommerce',
+          type: 'PRODUCT',
+          parentId: null,
+          data: {
+            system: {
+              logging: {
+                level: "INFO",
+                retention_days: 30,
+              },
+              api_keys: ["key1", "key2"],
+              database: {
+                connection_pool_size: 10,
+                timeout: 5000,
+              },
+            },
+            feature_flags: {
+              new_ui: false,
+              beta_feature: false,
+              analytics: true,
+            },
+            business: {
+              tax_rate: 0.08,
+              shipping_cost: 9.99,
+            },
+          },
+          createdBy: adminUser.id,
+          description: 'Main ecommerce product configuration',
+        });
+
+        const instanceConfig = await Configuration.create({
+          name: 'inst_staging_eu',
+          type: 'INSTANCE',
+          parentId: productConfig.id,
+          data: {
+            system: {
+              logging: {
+                level: "DEBUG",
+              },
+              database: {
+                connection_pool_size: 5,
+              },
+            },
+            feature_flags: {
+              new_ui: true,
+              beta_feature: true,
+            },
+          },
+          createdBy: adminUser.id,
+          description: 'Staging environment for EU region',
+        });
+
+        await Configuration.create({
+          name: 'user_dev_john_v1',
+          type: 'USER',
+          parentId: instanceConfig.id,
+          data: {
+            system: {
+              logging: {
+                retention_days: 7,
+              },
+            },
+            business: {
+              tax_rate: 0.0,
+            },
+          },
+          createdBy: adminUser.id,
+          description: 'John developer personal configuration',
+          status: 'DRAFT',
+        });
+
+        console.log('Sample configurations created');
+      } else {
+        console.log('Sample configurations already exist');
       }
     } catch (error) {
       console.error('Failed to initialize MongoDB data:', error);
