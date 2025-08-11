@@ -124,28 +124,28 @@ const StructuralTreeNode = ({
       }
     );
 
-    if (isEditable && navigator.clipboard) {
-      navigator.clipboard.readText().then(text => {
-        try {
-          JSON.parse(text);
-          menuItems.push({
-            label: "Paste",
-            icon: DocumentDuplicateIcon,
-            onClick: () => {
-              try {
-                const parsedData = JSON.parse(text);
-                const newName = generateUniqueName(actualValue, "pastedItem");
-                onStructuralChange("add", currentPath, newName, parsedData);
-              } catch (err) {
-                showToast("Invalid JSON in clipboard", "error");
-              }
-            },
-          });
-        } catch {
-          // Not valid JSON, don't add paste option
-        }
-      }).catch(() => {
-        // Clipboard access failed, ignore
+    // Always add paste option for structural editing if editable
+    if (isEditable) {
+      menuItems.push({
+        label: "Paste",
+        icon: DocumentDuplicateIcon,
+        onClick: async () => {
+          try {
+            let clipboardText = "";
+            if (navigator.clipboard && navigator.clipboard.readText) {
+              clipboardText = await navigator.clipboard.readText();
+            } else {
+              clipboardText = prompt("Paste JSON data:");
+              if (!clipboardText) return;
+            }
+
+            const parsedData = JSON.parse(clipboardText);
+            const newName = generateUniqueName(actualValue, "pastedItem");
+            onStructuralChange("add", currentPath, newName, parsedData);
+          } catch (err) {
+            showToast("Invalid JSON in clipboard", "error");
+          }
+        },
       });
     }
 
