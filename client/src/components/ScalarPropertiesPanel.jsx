@@ -151,6 +151,7 @@ const ScalarPropertiesPanel = ({
 
   const copyToClipboard = async (text, label = "Value") => {
     // Always use fallback since Clipboard API is blocked in iframes
+    console.log(`Attempting to copy ${label}:`, text);
     try {
       const textArea = document.createElement("textarea");
       textArea.value = text;
@@ -163,8 +164,10 @@ const ScalarPropertiesPanel = ({
       document.body.removeChild(textArea);
 
       if (successful) {
+        console.log(`Successfully copied ${label}`);
         showToast(`${label} copied to clipboard!`);
       } else {
+        console.error(`Failed to copy ${label} - execCommand returned false`);
         showToast("Failed to copy to clipboard", "error");
       }
     } catch (err) {
