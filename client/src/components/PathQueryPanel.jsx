@@ -70,7 +70,24 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
       setLastQuery(queryInfo);
     } catch (err) {
       console.error("Query failed:", err);
-      setError(err.response?.data?.error || err.message || "Query failed");
+
+      // Handle 404 as a special case - path doesn't exist
+      if (err.response?.status === 404) {
+        setQueryResult({
+          data: null,
+          query: {
+            configId: selectedConfigId,
+            configName: configurations.find((c) => c.id === selectedConfigId)?.name || selectedConfigId,
+            path: queryPath || "(root)",
+            timestamp: new Date().toISOString(),
+          },
+          isMinimal: true,
+          notFound: true,
+        });
+        setError(null);
+      } else {
+        setError(err.response?.data?.error || err.message || "Query failed");
+      }
     } finally {
       setLoading(false);
     }
