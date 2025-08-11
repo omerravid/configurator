@@ -206,17 +206,26 @@ const ScalarPropertiesPanel = ({
       {
         label: "Copy Value",
         icon: ClipboardIcon,
-        onClick: () => copyToClipboard(JSON.stringify(actualValue), "Value"),
+        onClick: () => {
+          console.log("Copy Value clicked for:", propertyName, actualValue);
+          copyToClipboard(JSON.stringify(actualValue), "Value");
+        },
       },
       {
         label: "Copy Path",
         icon: MapIcon,
-        onClick: () => copyToClipboard(cleanPath, "Path"),
+        onClick: () => {
+          console.log("Copy Path clicked for:", propertyName, "path:", cleanPath);
+          copyToClipboard(cleanPath, "Path");
+        },
       },
       {
         label: "Copy as JSON",
         icon: DocumentDuplicateIcon,
-        onClick: () => copyToClipboard(JSON.stringify(actualValue, null, 2), "JSON"),
+        onClick: () => {
+          console.log("Copy as JSON clicked for:", propertyName, actualValue);
+          copyToClipboard(JSON.stringify(actualValue, null, 2), "JSON");
+        },
       },
     ];
 
