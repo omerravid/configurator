@@ -311,6 +311,7 @@ const ScalarPropertiesPanel = ({
             const cleanPath = selectedPath.startsWith("root.")
               ? selectedPath.substring(5)
               : selectedPath;
+            console.log("Header path copy clicked, selectedPath:", selectedPath, "cleanPath:", cleanPath);
             copyToClipboard(cleanPath, "Path");
           }}
           className="ml-2 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded"
