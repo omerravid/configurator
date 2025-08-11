@@ -515,6 +515,7 @@ const ConfigurationEditor = ({
 
   const buildFolderStructure = async (jsonFiles) => {
     const structure = {};
+    const errors = [];
 
     for (const file of jsonFiles) {
       try {
@@ -526,6 +527,11 @@ const ConfigurationEditor = ({
 
         // Remove the first part (root folder name) to start from the content
         const relativeParts = pathParts.slice(1);
+
+        // Skip if no relative parts (shouldn't happen with webkitdirectory)
+        if (relativeParts.length === 0) {
+          continue;
+        }
 
         // Build nested structure
         let currentLevel = structure;
@@ -542,15 +548,22 @@ const ConfigurationEditor = ({
         // Add the file (remove .json extension from name)
         const fileName = relativeParts[relativeParts.length - 1];
         const fileNameWithoutExt = fileName.replace(/\.json$/i, '');
+
+        // Validate that the file name is not empty after removing extension
+        if (!fileNameWithoutExt) {
+          errors.push({ file: file.name, error: 'Invalid filename' });
+          continue;
+        }
+
         currentLevel[fileNameWithoutExt] = jsonContent;
 
       } catch (error) {
+        errors.push({ file: file.name, error: error.message });
         console.warn(`Failed to parse ${file.name}:`, error);
-        // Continue with other files
       }
     }
 
-    return structure;
+    return { structure, errors };
   };
 
   const readFileAsText = (file) => {
