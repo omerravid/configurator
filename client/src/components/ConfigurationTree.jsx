@@ -397,7 +397,12 @@ const TreeNode = ({
   const handleDrop = async (e) => {
     if (!isDroppable) return;
     e.preventDefault();
-    e.target.classList.remove("bg-blue-100", "border-blue-300");
+
+    // Clean up drop zone styling
+    e.currentTarget.classList.remove("bg-blue-50", "border-blue-400", "border-dashed");
+    e.currentTarget.style.backgroundColor = "";
+    e.currentTarget.style.borderColor = "";
+    e.currentTarget.style.borderStyle = "";
 
     try {
       const draggedData = JSON.parse(e.dataTransfer.getData("text/plain"));
