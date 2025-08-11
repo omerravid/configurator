@@ -423,8 +423,8 @@ const TreeNode = ({
     <div className="select-none relative">
       <div
         className={`tree-item ${isSelected ? "selected" : ""} group cursor-context-menu ${
-          isDraggable ? "cursor-grab" : ""
-        } ${isDroppable ? "border-2 border-transparent" : ""}`}
+          isDraggable ? "cursor-grab hover:bg-gray-50" : ""
+        } ${isDroppable ? "border-2 border-transparent transition-colors" : ""}`}
         style={{ paddingLeft: `${level * 20 + 12}px` }}
         onClick={handleSelect}
         onContextMenu={handleContextMenu}
@@ -435,6 +435,13 @@ const TreeNode = ({
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        title={
+          isDraggable
+            ? `Drag ${config.type.toLowerCase()} to add to a product`
+            : isDroppable
+              ? "Drop components here to add them to this product"
+              : undefined
+        }
       >
         {hasChildren && (
           <button
