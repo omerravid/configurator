@@ -22,8 +22,8 @@ if (process.env.USE_MONGODB !== 'false') {
     })
     .catch(error => {
       console.error('Failed to start embedded MongoDB:', error.message);
-      console.log('Falling back to SQLite...');
-      process.env.USE_MONGODB = 'false';
+      console.error('Cannot start application without database. Exiting...');
+      process.exit(1);
     });
 
   // Graceful shutdown
