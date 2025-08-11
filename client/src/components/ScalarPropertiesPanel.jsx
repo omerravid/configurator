@@ -270,8 +270,15 @@ const ScalarPropertiesPanel = ({
     );
   }
 
+  const handleContainerClick = (e) => {
+    // Close context menu when clicking elsewhere
+    if (contextMenu && !e.target.closest('.context-menu')) {
+      setContextMenu(null);
+    }
+  };
+
   return (
-    <div className="p-4">
+    <div className="p-4" onClick={handleContainerClick}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium text-gray-900">Properties</h3>
         {isEditable && (
