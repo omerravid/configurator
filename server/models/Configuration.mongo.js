@@ -103,7 +103,10 @@ class Configuration {
   }
 
   static async findById(id) {
-    const config = await ConfigurationModel.findById(id)
+    // Ensure ID is a string for proper ObjectId handling
+    const configId = String(id);
+
+    const config = await ConfigurationModel.findById(configId)
       .populate('created_by', 'username')
       .populate('parent_id', 'name type');
 
