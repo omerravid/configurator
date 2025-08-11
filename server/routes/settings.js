@@ -1,9 +1,7 @@
 const express = require("express");
 const Joi = require("joi");
-const mongodb = require("../models/mongodb");
 const { authenticateToken, requireAdmin } = require("../middleware/auth");
-const DataMigration = require("../scripts/migrate-to-mongodb");
-const BackupRestore = require("../backup-restore");
+// Migration scripts removed with SQLite removal
 
 const router = express.Router();
 
