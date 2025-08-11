@@ -38,7 +38,9 @@ const renameConfigSchema = Joi.object({
 // Middleware to check permissions for config operations
 const checkConfigPermissions = async (req, res, next) => {
   try {
-    const config = await Configuration.findById(req.params.id);
+    // Ensure ID is a string for proper ObjectId handling
+    const configId = String(req.params.id);
+    const config = await Configuration.findById(configId);
     if (!config) {
       return res.status(404).json({ error: "Configuration not found" });
     }
