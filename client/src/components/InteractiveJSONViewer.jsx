@@ -747,12 +747,10 @@ const InteractiveJSONViewer = ({
             onDataChange(key, undefined);
           }
 
-          // Clear selection if the removed item was selected
-          if (selectedStructuralPath === path) {
+          // Clear selection if the removed item was selected or its parent
+          if (selectedStructuralPath === path || selectedStructuralPath.startsWith(path + ".")) {
             setSelectedStructuralPath("root");
-            // Update selected value to the new root data after deletion
-            const newRootData = parentPath ? data : newParentValue;
-            setSelectedStructuralValue(newRootData);
+            // The useEffect will update selectedStructuralValue when data changes
           }
         }
         break;
