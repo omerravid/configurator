@@ -713,8 +713,20 @@ const InteractiveJSONViewer = ({
     switch (action) {
       case "add": {
         const parentPath = path.replace(/^root\./, "");
-        const newPath = parentPath ? `${parentPath}.${param1}` : param1;
-        onDataChange(newPath, param2);
+        const parentValue = getValueAtPath(data, path);
+
+        if (parentValue && typeof parentValue === "object") {
+          const newParentValue = { ...parentValue };
+          newParentValue[param1] = param2;
+
+          // Update the parent object with the new child
+          if (parentPath) {
+            onDataChange(parentPath, newParentValue);
+          } else {
+            // Adding to root level - merge with existing data
+            onDataChange("", { ...data, [param1]: param2 });
+          }
+        }
         break;
       }
       case "remove": {
@@ -727,7 +739,21 @@ const InteractiveJSONViewer = ({
         if (parentValue && typeof parentValue === "object") {
           const newParentValue = { ...parentValue };
           delete newParentValue[key];
-          onDataChange(parentPath, newParentValue);
+
+          if (parentPath) {
+            onDataChange(parentPath, newParentValue);
+          } else {
+            // Removing from root level
+            const newRootValue = { ...data };
+            delete newRootValue[key];
+            onDataChange("", newRootValue);
+          }
+
+          // Clear selection if the removed item was selected
+          if (selectedStructuralPath === path) {
+            setSelectedStructuralPath("root");
+            setSelectedStructuralValue(data);
+          }
         }
         break;
       }
@@ -738,12 +764,33 @@ const InteractiveJSONViewer = ({
         const oldKey = pathParts[pathParts.length - 1];
         const newKey = param1;
 
+        // Prevent renaming to the same name or empty name
+        if (!newKey || newKey === oldKey) {
+          console.warn("Invalid rename operation");
+          return;
+        }
+
         const parentValue = getValueAtPath(data, parentPath ? `root.${parentPath}` : "root");
         if (parentValue && typeof parentValue === "object" && parentValue.hasOwnProperty(oldKey)) {
+          // Check if new key already exists
+          if (parentValue.hasOwnProperty(newKey)) {
+            console.warn(`Key "${newKey}" already exists`);
+            return;
+          }
+
           const newParentValue = { ...parentValue };
           newParentValue[newKey] = newParentValue[oldKey];
           delete newParentValue[oldKey];
-          onDataChange(parentPath, newParentValue);
+
+          if (parentPath) {
+            onDataChange(parentPath, newParentValue);
+          } else {
+            // Renaming at root level
+            const newRootValue = { ...data };
+            newRootValue[newKey] = newRootValue[oldKey];
+            delete newRootValue[oldKey];
+            onDataChange("", newRootValue);
+          }
 
           // Update selected path if it was the renamed item
           if (selectedStructuralPath === path) {
