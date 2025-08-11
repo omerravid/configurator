@@ -344,6 +344,11 @@ const ScalarPropertiesPanel = ({
         </div>
       )}
 
+      {/* Help text */}
+      <div className="mb-4 text-xs text-gray-500">
+        💡 Right-click on properties for more options • Click ℹ️ to see source configuration
+      </div>
+
       {/* Properties List */}
       <div className="space-y-2">
         {scalarProperties.length === 0 ? (
