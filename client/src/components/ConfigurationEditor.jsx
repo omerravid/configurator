@@ -457,9 +457,11 @@ const ConfigurationEditor = ({
       dirInput.type = 'file';
       dirInput.webkitdirectory = true;
       dirInput.multiple = true;
+      dirInput.accept = '.json';
 
-      const files = await new Promise((resolve) => {
+      const files = await new Promise((resolve, reject) => {
         dirInput.onchange = (e) => resolve(Array.from(e.target.files));
+        dirInput.oncancel = () => resolve(null);
         dirInput.click();
       });
 
@@ -472,21 +474,37 @@ const ConfigurationEditor = ({
       const jsonFiles = files.filter(file => file.name.toLowerCase().endsWith('.json'));
 
       if (jsonFiles.length === 0) {
-        alert('No JSON files found in the selected folder.');
+        showToast('No JSON files found in the selected folder.', 'error');
         setIsImporting(false);
         return;
       }
 
       // Build folder structure
-      const folderStructure = await buildFolderStructure(jsonFiles);
+      const { structure, errors } = await buildFolderStructure(jsonFiles);
+
+      // Check if we have any valid data
+      if (Object.keys(structure).length === 0) {
+        showToast('No valid JSON files could be imported.', 'error');
+        setIsImporting(false);
+        return;
+      }
 
       // Set the imported data
       setFormData(prev => ({
         ...prev,
-        data: JSON.stringify(folderStructure, null, 2)
+        data: JSON.stringify(structure, null, 2)
       }));
 
-      showToast(`Successfully imported ${jsonFiles.length} JSON files`);
+      let message = `Successfully imported ${jsonFiles.length - errors.length} JSON files`;
+      if (errors.length > 0) {
+        message += ` (${errors.length} files had errors)`;
+      }
+      showToast(message, errors.length > 0 ? 'warning' : 'success');
+
+      if (errors.length > 0) {
+        console.warn('Import errors:', errors);
+      }
+
     } catch (error) {
       console.error('Import error:', error);
       showToast('Failed to import folder structure', 'error');
