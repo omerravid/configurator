@@ -447,6 +447,113 @@ const ConfigurationEditor = ({
     }
   };
 
+  const handleFolderImport = async () => {
+    setIsImporting(true);
+    try {
+      // Create file input for directory selection
+      const dirInput = document.createElement('input');
+      dirInput.type = 'file';
+      dirInput.webkitdirectory = true;
+      dirInput.multiple = true;
+
+      const files = await new Promise((resolve) => {
+        dirInput.onchange = (e) => resolve(Array.from(e.target.files));
+        dirInput.click();
+      });
+
+      if (!files || files.length === 0) {
+        setIsImporting(false);
+        return;
+      }
+
+      // Filter for JSON files only
+      const jsonFiles = files.filter(file => file.name.toLowerCase().endsWith('.json'));
+
+      if (jsonFiles.length === 0) {
+        alert('No JSON files found in the selected folder.');
+        setIsImporting(false);
+        return;
+      }
+
+      // Build folder structure
+      const folderStructure = await buildFolderStructure(jsonFiles);
+
+      // Set the imported data
+      setFormData(prev => ({
+        ...prev,
+        data: JSON.stringify(folderStructure, null, 2)
+      }));
+
+      showToast(`Successfully imported ${jsonFiles.length} JSON files`);
+    } catch (error) {
+      console.error('Import error:', error);
+      showToast('Failed to import folder structure', 'error');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const buildFolderStructure = async (jsonFiles) => {
+    const structure = {};
+
+    for (const file of jsonFiles) {
+      try {
+        const fileContent = await readFileAsText(file);
+        const jsonContent = JSON.parse(fileContent);
+
+        // Get the relative path from the file's webkitRelativePath
+        const pathParts = file.webkitRelativePath.split('/');
+
+        // Remove the first part (root folder name) to start from the content
+        const relativeParts = pathParts.slice(1);
+
+        // Build nested structure
+        let currentLevel = structure;
+
+        // Process folders
+        for (let i = 0; i < relativeParts.length - 1; i++) {
+          const folderName = relativeParts[i];
+          if (!currentLevel[folderName]) {
+            currentLevel[folderName] = {};
+          }
+          currentLevel = currentLevel[folderName];
+        }
+
+        // Add the file (remove .json extension from name)
+        const fileName = relativeParts[relativeParts.length - 1];
+        const fileNameWithoutExt = fileName.replace(/\.json$/i, '');
+        currentLevel[fileNameWithoutExt] = jsonContent;
+
+      } catch (error) {
+        console.warn(`Failed to parse ${file.name}:`, error);
+        // Continue with other files
+      }
+    }
+
+    return structure;
+  };
+
+  const readFileAsText = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsText(file);
+    });
+  };
+
+  const isEmptyComponent = () => {
+    if (!isCreatingComponent) return false;
+
+    try {
+      const parsedData = JSON.parse(formData.data || '{}');
+      return Object.keys(parsedData).length === 0;
+    } catch {
+      // If data is not valid JSON, consider it empty
+      return !formData.data || formData.data.trim() === '' || formData.data.trim() === '{}';
+    }
+  };
+
   const getEditingHelp = () => {
     if (isCreatingProduct) {
       return "As a Product configuration, you can define any new properties.";
