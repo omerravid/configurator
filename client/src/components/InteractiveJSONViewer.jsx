@@ -670,6 +670,8 @@ const InteractiveJSONViewer = ({
   const handleStructuralChange = (action, path, param1, param2) => {
     if (!onDataChange) return;
 
+    console.log("Structural change:", { action, path, param1, param2 });
+
     const getValueAtPath = (obj, path) => {
       if (!path || path === "root") return obj;
       const keys = path.replace(/^root\./, "").split(".");
