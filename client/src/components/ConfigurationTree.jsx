@@ -504,6 +504,7 @@ const TreeNode = ({
                 onDelete={onDelete}
                 onArchive={onArchive}
                 onRestore={onRestore}
+                onAddComponent={onAddComponent}
                 user={user}
                 isExpanded={isNodeExpanded(child.id, level + 1)}
                 onExpansionChange={onExpansionChange}
