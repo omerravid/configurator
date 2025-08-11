@@ -298,7 +298,13 @@ const ScalarPropertiesPanel = ({
       <div className="text-sm text-gray-600 mb-4">
         Path: <span className="font-mono bg-gray-100 px-1 rounded">{selectedPath}</span>
         <button
-          onClick={() => copyToClipboard(selectedPath, "Path")}
+          onClick={() => {
+            // Strip "root." prefix for display consistency
+            const cleanPath = selectedPath.startsWith("root.")
+              ? selectedPath.substring(5)
+              : selectedPath;
+            copyToClipboard(cleanPath, "Path");
+          }}
           className="ml-2 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded"
           title="Copy path"
         >
