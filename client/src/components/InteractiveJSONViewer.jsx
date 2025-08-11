@@ -579,8 +579,8 @@ const InteractiveJSONViewer = ({
   // Mode toggle between Flat and Structural view
   const [viewMode, setViewMode] = useState("flat");
   // Structural mode state
-  const [selectedStructuralPath, setSelectedStructuralPath] = useState("");
-  const [selectedStructuralValue, setSelectedStructuralValue] = useState(null);
+  const [selectedStructuralPath, setSelectedStructuralPath] = useState("root");
+  const [selectedStructuralValue, setSelectedStructuralValue] = useState(data);
 
   const handleHover = (path, source, fullPath, clickEvent) => {
     setHoveredSource(source);
