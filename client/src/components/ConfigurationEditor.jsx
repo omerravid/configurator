@@ -18,6 +18,7 @@ const ConfigurationEditor = ({
     isCreatingProduct || isCreatingComponent || isCreatingChild || !config,
   );
   const [loading, setLoading] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState(null);
   const [showRename, setShowRename] = useState(isRenaming);
   const [loadingRawData, setLoadingRawData] = useState(false);
