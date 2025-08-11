@@ -214,6 +214,81 @@ Click "Show Inheritance Chain" to see:
 - Workflow: Create as draft → Edit and test → Commit when stable
       `
     },
+    "structural-editing": {
+      title: "Structural View and Advanced Editing",
+      content: `
+**Structural View Mode**
+Toggle between "Flat" and "Structural" views using the mode selector:
+
+**Flat View**
+- Shows all configuration data in a traditional JSON tree format
+- Single panel with expandable/collapsible sections
+- Provenance indicators for each value
+- Suitable for reviewing complete configuration data
+
+**Structural View**
+- Split-panel interface for complex configuration editing
+- Left panel: Hierarchical tree showing only objects and arrays
+- Right panel: Scalar properties of selected structural items
+- Enhanced editing capabilities with context menus
+
+**Left Panel - Structural Tree**
+- Click to expand/collapse objects and arrays
+- Select items to view their scalar properties in right panel
+- Right-click for context menu with structural operations:
+  - Add Object/Array: Create new nested structures
+  - Rename: Change object keys with approve/cancel buttons
+  - Delete: Remove structural elements
+  - Copy/Paste: Duplicate structural elements
+- Drag handle for components/versions (enables drag-and-drop)
+
+**Right Panel - Scalar Properties**
+- Shows only primitive values (strings, numbers, booleans) for selected item
+- Inline editing: Click edit icon to modify values directly
+- Add Property: Create new scalar properties
+- Delete Property: Remove individual properties
+- Context menu operations:
+  - Copy Value: Copy the actual property value
+  - Copy Path: Copy the full JSON path to the property
+  - Copy as JSON: Copy the property as JSON format
+
+**Drag-and-Drop Component Integration**
+- Drag components from the configuration tree into products
+- Drag specific versions for precise version control
+- Components added as direct properties with proper metadata:
+  - componentId: Reference to the component
+  - versionId: Reference to the specific version
+  - componentName: Human-readable component name
+  - versionName: Human-readable version identifier
+- Visual feedback during drag operations with hover effects
+- Only valid drop targets (products) accept dropped components
+
+**Import Functionality for Components**
+- Import button available only for empty components
+- Select entire folders from your local file system
+- Automatically builds JSON structure from folder hierarchy
+- Includes content from JSON files found in folders
+- Preserves folder structure as nested objects
+- Review and modify imported structure before saving
+
+**Context Menu Operations**
+Available in both flat and structural views:
+- Copy Value: Get the actual data value
+- Copy Path: Get the JSON path for API access
+- Copy as JSON: Get formatted JSON representation
+- Edit: Start inline editing mode
+- Add/Remove: Modify structure (structural view only)
+- Paste: Insert copied structural elements (structural view only)
+
+**Best Practices for Structural Editing**
+1. Use structural view for complex configurations with deep nesting
+2. Organize related properties under logical object groupings
+3. Use meaningful names for objects and arrays
+4. Test changes in both view modes to ensure consistency
+5. Use drag-and-drop for quick component integration
+6. Import folder structures for rapid component prototyping
+      `
+    },
     "best-practices": {
       title: "Best Practices",
       content: `
