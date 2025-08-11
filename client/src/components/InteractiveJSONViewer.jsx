@@ -773,6 +773,7 @@ const InteractiveJSONViewer = ({
           // Check if new key already exists
           if (parentValue.hasOwnProperty(newKey)) {
             console.warn(`Key "${newKey}" already exists`);
+            // You could add a toast notification here if needed
             return;
           }
 
