@@ -189,6 +189,56 @@ const ScalarPropertiesPanel = ({
     }
   };
 
+  const handlePropertyContextMenu = (e, propertyName, value) => {
+    e.preventDefault();
+    const { actualValue } = getActualValueAndSource(value);
+
+    // Create path for this property
+    const propertyPath = selectedPath === "root"
+      ? propertyName
+      : selectedPath.replace(/^root\./, "")
+        ? `${selectedPath.replace(/^root\./, "")}.${propertyName}`
+        : propertyName;
+
+    const menuItems = [
+      {
+        label: "Copy Value",
+        icon: ClipboardIcon,
+        onClick: () => copyToClipboard(safeToString(actualValue), "Value"),
+      },
+      {
+        label: "Copy Path",
+        icon: MapIcon,
+        onClick: () => copyToClipboard(propertyPath, "Path"),
+      },
+      {
+        label: "Copy as JSON",
+        icon: DocumentDuplicateIcon,
+        onClick: () => copyToClipboard(JSON.stringify(actualValue, null, 2), "JSON"),
+      },
+    ];
+
+    if (isEditable) {
+      menuItems.unshift({
+        label: "Edit Value",
+        icon: PencilIcon,
+        onClick: () => handleEditStart(propertyName, value),
+      });
+
+      menuItems.push({
+        label: "Delete Property",
+        icon: TrashIcon,
+        onClick: () => handleDeleteProperty(propertyName),
+      });
+    }
+
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      items: menuItems,
+    });
+  };
+
   const renderPropertyValue = (value) => {
     const { actualValue } = getActualValueAndSource(value);
 
