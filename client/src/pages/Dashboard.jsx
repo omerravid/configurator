@@ -377,8 +377,13 @@ const Dashboard = () => {
         current = current[pathParts[i]];
       }
 
-      // Set the new value
-      current[pathParts[pathParts.length - 1]] = newValue;
+      // Set the new value or delete if undefined
+      const lastKey = pathParts[pathParts.length - 1];
+      if (newValue === undefined) {
+        delete current[lastKey];
+      } else {
+        current[lastKey] = newValue;
+      }
 
       // Update the configuration with only the modified data
       await configAPI.update(selectedConfig.id, { data: newData });
