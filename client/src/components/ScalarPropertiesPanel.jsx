@@ -28,6 +28,7 @@ const ScalarPropertiesPanel = ({
   const [newPropertyName, setNewPropertyName] = useState("");
   const [newPropertyValue, setNewPropertyValue] = useState("");
   const [showAddProperty, setShowAddProperty] = useState(false);
+  const [contextMenu, setContextMenu] = useState(null);
 
   // Extract actual value and source from provenance wrapper
   const getActualValueAndSource = (val) => {
