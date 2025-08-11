@@ -53,7 +53,25 @@ const StructuralTreeNode = ({
   const actualValue = getActualValue(value);
   const isObject = actualValue && typeof actualValue === "object" && !Array.isArray(actualValue);
   const isArray = Array.isArray(actualValue);
-  const hasChildren = isObject || isArray;
+
+  // Check if this node has children that are objects or arrays (not scalar values)
+  const hasStructuralChildren = () => {
+    if (isArray) {
+      return actualValue.some(item => {
+        const itemActualValue = getActualValue(item);
+        return itemActualValue && (typeof itemActualValue === "object" || Array.isArray(itemActualValue));
+      });
+    }
+    if (isObject) {
+      return Object.values(actualValue).some(val => {
+        const valActualValue = getActualValue(val);
+        return valActualValue && (typeof valActualValue === "object" || Array.isArray(valActualValue));
+      });
+    }
+    return false;
+  };
+
+  const hasChildren = hasStructuralChildren();
 
   const toggleExpanded = () => {
     onExpandToggle(currentPath, !isExpanded);
