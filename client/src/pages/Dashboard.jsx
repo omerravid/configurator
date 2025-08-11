@@ -429,6 +429,71 @@ const Dashboard = () => {
     }
   };
 
+  // Handle adding component to product via drag and drop
+  const handleAddComponent = async (productId, componentData) => {
+    try {
+      // Get the current product configuration
+      const productResponse = await configAPI.getRawById(productId);
+      const currentData = productResponse.data.resolved || {};
+
+      // Add the component to the product's components array
+      const updatedData = { ...currentData };
+
+      if (!updatedData.components) {
+        updatedData.components = [];
+      }
+
+      // Check if component is already added
+      const existingComponent = updatedData.components.find(c =>
+        c.componentId === componentData.id ||
+        (componentData.type === "VERSION" && c.versionId === componentData.id)
+      );
+
+      if (existingComponent) {
+        showToast(`${componentData.name} is already added to this product`, "warning");
+        return;
+      }
+
+      // Add the new component
+      if (componentData.type === "COMPONENT") {
+        updatedData.components.push({
+          componentId: componentData.id,
+          componentName: componentData.name,
+          versionId: "", // Will need to be selected later
+          versionName: ""
+        });
+      } else if (componentData.type === "VERSION") {
+        // Get component info for this version
+        const versionResponse = await configAPI.getById(componentData.id);
+        const versionConfig = versionResponse.data.resolved;
+
+        updatedData.components.push({
+          componentId: versionConfig.parent_id,
+          componentName: versionConfig.parent_name || "Unknown Component",
+          versionId: componentData.id,
+          versionName: componentData.name
+        });
+      }
+
+      // Update the product configuration
+      await configAPI.update(productId, { data: updatedData });
+
+      showToast(`Added ${componentData.name} to product successfully`);
+
+      // Refresh the selected configuration if it's the product we just updated
+      if (selectedConfig && selectedConfig.id === productId) {
+        await loadConfigurationData(selectedConfig);
+      }
+
+      // Trigger a refresh of the tree
+      setRefreshTrigger(prev => prev + 1);
+
+    } catch (error) {
+      console.error("Failed to add component:", error);
+      showToast("Failed to add component to product", "error");
+    }
+  };
+
   // Context menu handlers for tree items
   const handleTreeEdit = (config) => {
     setSelectedConfig(config);
