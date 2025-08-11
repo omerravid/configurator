@@ -20,8 +20,7 @@
     "joi": "^17.11.0",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
-    "mongoose": "^8.8.4",
-    "uuid": "^9.0.1"
+    "mongoose": "^8.8.4"
   },
   "devDependencies": {
     "jest": "^29.7.0",
