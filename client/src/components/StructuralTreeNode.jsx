@@ -130,7 +130,10 @@ const StructuralTreeNode = ({
         label: "Remove",
         icon: TrashIcon,
         onClick: () => {
-          onStructuralChange("remove", currentPath);
+          // Confirm deletion for safety
+          if (window.confirm(`Are you sure you want to remove "${keyName || '(unnamed)'}" and all its contents?`)) {
+            onStructuralChange("remove", currentPath);
+          }
         },
       });
     }
