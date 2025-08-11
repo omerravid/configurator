@@ -893,6 +893,7 @@ const ConfigurationEditor = ({
                               onClick={handleFolderImport}
                               disabled={isImporting}
                               className="flex items-center space-x-1 text-xs text-primary-600 hover:text-primary-700 disabled:opacity-50"
+                              title="Import folder structure with JSON files. Folder names become object keys, JSON files become nested objects."
                             >
                               <FolderArrowDownIcon className="w-3 h-3" />
                               <span>{isImporting ? 'Importing...' : 'Import Folder'}</span>
