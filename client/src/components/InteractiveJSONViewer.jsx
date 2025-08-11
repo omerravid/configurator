@@ -780,16 +780,12 @@ const InteractiveJSONViewer = ({
           newParentValue[newKey] = newParentValue[oldKey];
           delete newParentValue[oldKey];
 
+          // Always update the parent object (whether it's a nested object or root)
           if (parentPath) {
             onDataChange(parentPath, newParentValue);
           } else {
-            // Renaming at root level - add new key and remove old key
-            const valueToMove = data[oldKey];
-            onDataChange(newKey, valueToMove);
-            // After the first change is processed, remove the old key
-            setTimeout(() => {
-              onDataChange(oldKey, undefined);
-            }, 100);
+            // For root level, we need to replace the entire root object
+            onDataChange("_root_", newParentValue);
           }
 
           // Update selected path if it was the renamed item
