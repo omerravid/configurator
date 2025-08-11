@@ -587,7 +587,10 @@ const ConfigurationEditor = ({
   };
 
   const isEmptyComponent = () => {
-    if (!isCreatingComponent) return false;
+    // Allow import for creating components or editing existing COMPONENT type configurations
+    if (!isCreatingComponent && !(formData.type === "COMPONENT" && !isCreating && !isCreatingChild)) {
+      return false;
+    }
 
     try {
       const parsedData = JSON.parse(formData.data || '{}');
