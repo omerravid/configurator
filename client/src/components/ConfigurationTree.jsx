@@ -335,16 +335,82 @@ const TreeNode = ({
     });
   };
 
+  // Drag and drop handlers
+  const isDraggable = (config.type === "COMPONENT" || config.type === "VERSION") && !Boolean(config.archived);
+  const isDroppable = config.type === "PRODUCT" && !Boolean(config.archived);
+
+  const handleDragStart = (e) => {
+    if (!isDraggable) return;
+
+    e.dataTransfer.setData("text/plain", JSON.stringify({
+      id: config.id,
+      name: config.name,
+      type: config.type
+    }));
+    e.dataTransfer.effectAllowed = "copy";
+
+    // Add visual feedback
+    e.target.style.opacity = "0.5";
+  };
+
+  const handleDragEnd = (e) => {
+    if (!isDraggable) return;
+    e.target.style.opacity = "";
+  };
+
+  const handleDragOver = (e) => {
+    if (!isDroppable) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  };
+
+  const handleDragEnter = (e) => {
+    if (!isDroppable) return;
+    e.preventDefault();
+    e.target.classList.add("bg-blue-100", "border-blue-300");
+  };
+
+  const handleDragLeave = (e) => {
+    if (!isDroppable) return;
+    e.target.classList.remove("bg-blue-100", "border-blue-300");
+  };
+
+  const handleDrop = async (e) => {
+    if (!isDroppable) return;
+    e.preventDefault();
+    e.target.classList.remove("bg-blue-100", "border-blue-300");
+
+    try {
+      const draggedData = JSON.parse(e.dataTransfer.getData("text/plain"));
+
+      // Call the onAddComponent function if provided
+      if (onAddComponent) {
+        await onAddComponent(config.id, draggedData);
+      }
+    } catch (error) {
+      console.error("Failed to handle drop:", error);
+    }
+  };
+
   const isSelected = selectedId === config.id;
   const hasChildren = children.length > 0 || !hasLoadedChildren;
 
   return (
     <div className="select-none relative">
       <div
-        className={`tree-item ${isSelected ? "selected" : ""} group cursor-context-menu`}
+        className={`tree-item ${isSelected ? "selected" : ""} group cursor-context-menu ${
+          isDraggable ? "cursor-grab" : ""
+        } ${isDroppable ? "border-2 border-transparent" : ""}`}
         style={{ paddingLeft: `${level * 20 + 12}px` }}
         onClick={handleSelect}
         onContextMenu={handleContextMenu}
+        draggable={isDraggable}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
       >
         {hasChildren && (
           <button
