@@ -14,6 +14,7 @@ const ConfigurationEditor = ({
   isCreatingChild = false,
 }) => {
   const { user } = useAuth();
+  const { showToast } = useToast();
   // Determine if we're creating a new config or editing an existing one
   const [isCreating, setIsCreating] = useState(
     isCreatingProduct || isCreatingComponent || isCreatingChild || !config,
