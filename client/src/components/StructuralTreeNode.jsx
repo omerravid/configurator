@@ -25,6 +25,7 @@ const StructuralTreeNode = ({
   onNodeSelect = () => {},
   selectedPath = "",
   onStructuralChange = () => {},
+  parentValue = null,
 }) => {
   const { showToast } = useToast();
   const [contextMenu, setContextMenu] = useState(null);
