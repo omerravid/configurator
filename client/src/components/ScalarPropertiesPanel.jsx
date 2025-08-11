@@ -94,7 +94,15 @@ const ScalarPropertiesPanel = ({
       // Keep as string if parsing fails
     }
 
-    const propertyPath = selectedPath ? `${selectedPath}.${propertyName}` : propertyName;
+    // Create the full path for the property
+    let propertyPath;
+    if (selectedPath === "root") {
+      propertyPath = `root.${propertyName}`;
+    } else {
+      propertyPath = `${selectedPath}.${propertyName}`;
+    }
+
+    console.log("ScalarPanel editing:", { propertyName, newValue, selectedPath, propertyPath });
     onValueChange?.(propertyPath, newValue);
     setEditingProperty(null);
   };
