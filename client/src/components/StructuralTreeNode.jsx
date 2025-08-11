@@ -203,8 +203,18 @@ const StructuralTreeNode = ({
   };
 
   const handleRename = () => {
-    if (renameValue && renameValue !== keyName) {
-      onStructuralChange("rename", currentPath, renameValue);
+    const trimmedValue = renameValue ? renameValue.trim() : "";
+
+    // Validate the new name
+    if (!trimmedValue) {
+      showToast("Object name cannot be empty", "error");
+      setIsRenaming(false);
+      setRenameValue(keyName);
+      return;
+    }
+
+    if (trimmedValue !== keyName) {
+      onStructuralChange("rename", currentPath, trimmedValue);
     }
     setIsRenaming(false);
   };
