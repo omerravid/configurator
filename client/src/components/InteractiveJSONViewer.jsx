@@ -582,6 +582,13 @@ const InteractiveJSONViewer = ({
   const [selectedStructuralPath, setSelectedStructuralPath] = useState("root");
   const [selectedStructuralValue, setSelectedStructuralValue] = useState(data);
 
+  // Initialize expanded paths for structural mode
+  useEffect(() => {
+    if (viewMode === "structural" && expandedPaths.size === 0) {
+      setExpandedPaths(new Set(["root"]));
+    }
+  }, [viewMode]);
+
   // Update selected structural value when data changes
   useEffect(() => {
     if (selectedStructuralPath === "root") {
