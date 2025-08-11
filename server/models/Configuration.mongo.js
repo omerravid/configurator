@@ -236,6 +236,9 @@ class Configuration {
   }
 
   static async update(id, { data, description }) {
+    // Ensure ID is a string
+    const configId = String(id);
+
     const updateFields = {};
 
     if (data !== undefined) {
@@ -250,8 +253,8 @@ class Configuration {
       throw new Error("No fields to update");
     }
 
-    await ConfigurationModel.findByIdAndUpdate(id, updateFields, { new: true });
-    return await this.findById(id);
+    await ConfigurationModel.findByIdAndUpdate(configId, updateFields, { new: true });
+    return await this.findById(configId);
   }
 
   static async updateName(id, name) {
