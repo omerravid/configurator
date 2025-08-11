@@ -211,15 +211,25 @@ const StructuralTreeNode = ({
     // Validate the new name
     if (!trimmedValue) {
       showToast("Object name cannot be empty", "error");
-      setIsRenaming(false);
-      setRenameValue(keyName);
       return;
     }
 
-    if (trimmedValue !== keyName) {
-      onStructuralChange("rename", currentPath, trimmedValue);
+    if (trimmedValue === keyName) {
+      // No change, just exit rename mode
+      setIsRenaming(false);
+      return;
     }
+
+    // Check for invalid characters (optional - add any restrictions needed)
+    if (!/^[a-zA-Z0-9_-]+$/.test(trimmedValue)) {
+      showToast("Object name can only contain letters, numbers, underscores, and hyphens", "error");
+      return;
+    }
+
+    // Perform the rename
+    onStructuralChange("rename", currentPath, trimmedValue);
     setIsRenaming(false);
+    showToast(`Renamed "${keyName}" to "${trimmedValue}"`);
   };
 
   const handleRenameCancel = () => {
