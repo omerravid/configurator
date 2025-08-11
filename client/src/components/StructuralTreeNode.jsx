@@ -329,19 +329,34 @@ const StructuralTreeNode = ({
         {!isRoot && (
           <div className="flex-1 min-w-0">
             {isRenaming ? (
-              <input
-                type="text"
-                value={renameValue}
-                onChange={(e) => setRenameValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleRename();
-                  if (e.key === "Escape") handleRenameCancel();
-                }}
-                onBlur={handleRename}
-                className="px-1 py-0 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                autoFocus
-                placeholder="Enter object name"
-              />
+              <div className="flex items-center space-x-1">
+                <input
+                  type="text"
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleRename();
+                    if (e.key === "Escape") handleRenameCancel();
+                  }}
+                  className="flex-1 px-1 py-0 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  autoFocus
+                  placeholder="Enter object name"
+                />
+                <button
+                  onClick={handleRename}
+                  className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 focus:outline-none"
+                  title="Apply"
+                >
+                  ✓
+                </button>
+                <button
+                  onClick={handleRenameCancel}
+                  className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600 focus:outline-none"
+                  title="Cancel"
+                >
+                  ✕
+                </button>
+              </div>
             ) : (
               <span className="font-medium text-gray-700 truncate">
                 {keyName || "(unnamed)"}
