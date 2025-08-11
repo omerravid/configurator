@@ -352,6 +352,17 @@ const TreeNode = ({
 
     // Add visual feedback
     e.target.style.opacity = "0.5";
+    e.target.style.transform = "rotate(2deg)";
+
+    // Add a custom drag image
+    const dragImage = e.target.cloneNode(true);
+    dragImage.style.opacity = "0.8";
+    dragImage.style.transform = "rotate(2deg)";
+    dragImage.style.backgroundColor = "#f3f4f6";
+    dragImage.style.border = "2px dashed #6b7280";
+    document.body.appendChild(dragImage);
+    e.dataTransfer.setDragImage(dragImage, 0, 0);
+    setTimeout(() => document.body.removeChild(dragImage), 0);
   };
 
   const handleDragEnd = (e) => {
