@@ -620,7 +620,7 @@ const ConfigurationEditor = ({
         case "USER":
           return "You are editing User-level overrides. Only include properties you want to override from parent configurations.";
         case "COMPONENT":
-          return "You are editing a Component configuration. This defines a reusable component that can be added to Products.";
+          return "You are editing a Component configuration. This defines a reusable component that can be added to Products. If the component is empty, you can import a folder structure with JSON files.";
         case "VERSION":
           return "You are editing a Version configuration. This is a specific version of a component.";
         default:
