@@ -856,6 +856,17 @@ const ConfigurationEditor = ({
                             " - Level-Specific Overrides Only"}
                         </label>
                         <div className="flex space-x-2">
+                          {isCreatingComponent && isEmptyComponent() && (
+                            <button
+                              type="button"
+                              onClick={handleFolderImport}
+                              disabled={isImporting}
+                              className="flex items-center space-x-1 text-xs text-primary-600 hover:text-primary-700 disabled:opacity-50"
+                            >
+                              <FolderArrowDownIcon className="w-3 h-3" />
+                              <span>{isImporting ? 'Importing...' : 'Import Folder'}</span>
+                            </button>
+                          )}
                           {isCreatingProduct && (
                             <button
                               type="button"
