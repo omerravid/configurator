@@ -74,7 +74,8 @@ const StructuralTreeNode = ({
   const hasChildren = hasStructuralChildren();
 
   const toggleExpanded = () => {
-    onExpandToggle(currentPath, !isExpanded);
+    const newExpandedState = !isExpanded;
+    onExpandToggle(currentPath, newExpandedState);
   };
 
   const handleNodeClick = () => {
