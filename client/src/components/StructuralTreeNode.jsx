@@ -227,6 +227,12 @@ const StructuralTreeNode = ({
       return;
     }
 
+    // Check for duplicate names in parent
+    if (parentValue && typeof parentValue === "object" && parentValue.hasOwnProperty(trimmedValue)) {
+      showToast(`Name "${trimmedValue}" already exists in this location`, "error");
+      return;
+    }
+
     // Perform the rename
     onStructuralChange("rename", currentPath, trimmedValue);
     setIsRenaming(false);
