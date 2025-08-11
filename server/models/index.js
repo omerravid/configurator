@@ -8,9 +8,9 @@ if (useMongoDB) {
   User = require('./User.mongo');
   Configuration = require('./Configuration.mongo');
 } else {
-  console.log('Using SQLite models');
-  User = require('./User');
-  Configuration = require('./Configuration');
+  console.log('SQLite support has been removed. Please use MongoDB.');
+  console.error('Cannot start application without MongoDB. Exiting...');
+  process.exit(1);
 }
 
 module.exports = {
