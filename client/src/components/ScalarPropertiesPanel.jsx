@@ -615,7 +615,14 @@ const ScalarPropertiesPanel = ({
       <div className="space-y-2 mb-6">
         {scalarProperties.length === 0 ? (
           <div className="text-center text-gray-500 py-8">
-            No scalar properties to display
+            <div>No scalar properties to display</div>
+            {actualSelectedValue && typeof actualSelectedValue === 'object' && (
+              <div className="mt-2 text-xs">
+                <div>Available properties: {Object.keys(actualSelectedValue).join(', ')}</div>
+                <div>Config type: {configType}</div>
+                <div>Is component: {isCompRef ? 'Yes' : 'No'}</div>
+              </div>
+            )}
           </div>
         ) : (
           scalarProperties.map(([propertyName, value]) => {
