@@ -665,7 +665,8 @@ const InteractiveJSONViewer = ({
 
   const handleStructuralNodeSelect = (path, value) => {
     setSelectedStructuralPath(path);
-    setSelectedStructuralValue(value);
+    // Don't set the value directly - let the useEffect handle it to ensure consistency
+    // setSelectedStructuralValue(value);
   };
 
   const handleNavigateToPath = (path) => {
