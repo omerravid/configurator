@@ -110,6 +110,16 @@ const ScalarPropertiesPanel = ({
   const subObjects = getSubObjects(selectedValue);
   const scalarProperties = getScalarProperties(selectedValue);
 
+  // Debug logging
+  console.log("ScalarPropertiesPanel:", {
+    selectedPath,
+    selectedValue,
+    componentRef,
+    isComponentReference: isComponentReference(),
+    scalarProperties: scalarProperties.length,
+    subObjects: subObjects.length
+  });
+
   // Load available versions when a component is selected
   useEffect(() => {
     if (componentRef) {
