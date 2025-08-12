@@ -568,6 +568,7 @@ const InteractiveJSONViewer = ({
   className = "",
   isEditable = false,
   onDataChange,
+  configType,
 }) => {
   const [hoveredSource, setHoveredSource] = useState(null);
   const [hoveredPath, setHoveredPath] = useState(null);
