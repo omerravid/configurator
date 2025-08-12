@@ -442,8 +442,8 @@ class ConfigurationService {
       throw new Error("Cannot update committed user configuration");
     }
 
-    // Validate schema enforcement for updates
-    if (data && config.type !== "PRODUCT" && config.parent_id) {
+    // Validate schema enforcement for updates - TEMPORARILY DISABLED FOR INSTANCE
+    if (data && config.type !== "PRODUCT" && config.type !== "INSTANCE" && config.parent_id) {
       // Ensure parent_id is a string, not a populated object
       let parentId;
       if (typeof config.parent_id === 'string') {
