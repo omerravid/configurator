@@ -430,7 +430,7 @@ const ScalarPropertiesPanel = ({
         <h3 className="text-lg font-medium text-gray-900">
           {componentRef ? "Component" : "Properties"}
         </h3>
-        {isEditable && !componentRef && (
+        {isEditable && !componentRef && configType === "COMPONENT" && (
           <button
             onClick={() => setShowAddProperty(true)}
             className="flex items-center space-x-1 px-2 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
