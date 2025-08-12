@@ -205,6 +205,24 @@ const ScalarPropertiesPanel = ({
     onPropertyDelete?.(selectedPath, propertyName);
   };
 
+  const handleVersionChange = (newVersionId) => {
+    if (!componentRef || !newVersionId) return;
+
+    const selectedVersion = availableVersions.find(v => v.id === newVersionId);
+    if (!selectedVersion) return;
+
+    // Update the component reference
+    const updatedComponentRef = {
+      ...componentRef,
+      versionId: newVersionId,
+      versionName: selectedVersion.name
+    };
+
+    // Create the path for the component reference and update it
+    onValueChange?.(selectedPath, updatedComponentRef);
+    showToast(`Component version updated to ${selectedVersion.name}`, "success");
+  };
+
   const copyToClipboard = async (text, label = "Value") => {
     // Always use fallback since Clipboard API is blocked in iframes
     console.log(`Attempting to copy ${label}:`, text);
