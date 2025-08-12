@@ -72,6 +72,11 @@ const ScalarPropertiesPanel = ({
     }
 
     return Object.entries(value).filter(([key, val]) => {
+      // Skip component-specific properties if this is a component reference
+      if (componentRef && ['componentId', 'versionId', 'componentName', 'versionName'].includes(key)) {
+        return false;
+      }
+
       const { actualValue } = getActualValueAndSource(val);
       return (
         actualValue === null ||
