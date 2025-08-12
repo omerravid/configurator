@@ -490,6 +490,9 @@ const ConfigurationEditor = ({
         return;
       }
 
+      // Get root folder name from the first file
+      const rootFolderName = jsonFiles[0].webkitRelativePath.split('/')[0];
+
       // Build folder structure
       const { structure, errors } = await buildFolderStructure(jsonFiles);
 
@@ -500,9 +503,10 @@ const ConfigurationEditor = ({
         return;
       }
 
-      // Set the imported data
+      // Set the imported data and configuration name if empty
       setFormData(prev => ({
         ...prev,
+        name: prev.name && prev.name.trim() ? prev.name : rootFolderName,
         data: JSON.stringify(structure, null, 2)
       }));
 
