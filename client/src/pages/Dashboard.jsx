@@ -481,12 +481,15 @@ const Dashboard = () => {
         // For value updates, send minimal delta
         current[lastKey] = newValue;
 
-        // Merge delta with existing raw data
-        const existingData = JSON.parse(JSON.stringify(currentData));
-        const mergedData = deepMerge(existingData, deltaData);
+        // Always get the most current raw data to ensure we have all previous overrides
+        const freshRawResponse = await configAPI.getRawById(configId);
+        const freshExistingData = freshRawResponse.data.data || {};
+
+        // Merge delta with the fresh existing data
+        const mergedData = deepMerge(freshExistingData, deltaData);
 
         console.log("Delta update:", deltaData);
-        console.log("Existing data:", existingData);
+        console.log("Fresh existing data:", freshExistingData);
         console.log("Merged result:", mergedData);
 
         await configAPI.update(configId, { data: mergedData });
