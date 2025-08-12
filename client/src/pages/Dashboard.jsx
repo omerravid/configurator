@@ -327,6 +327,29 @@ const Dashboard = () => {
     }
   };
 
+  // Helper function to deeply merge objects while preserving inheritance
+  const deepMerge = (target, source) => {
+    const result = JSON.parse(JSON.stringify(target)); // Deep clone target
+
+    const merge = (obj, src) => {
+      for (const key in src) {
+        if (src.hasOwnProperty(key)) {
+          if (src[key] && typeof src[key] === 'object' && !Array.isArray(src[key])) {
+            if (!obj[key] || typeof obj[key] !== 'object') {
+              obj[key] = {};
+            }
+            merge(obj[key], src[key]);
+          } else {
+            obj[key] = src[key];
+          }
+        }
+      }
+    };
+
+    merge(result, source);
+    return result;
+  };
+
   const handleDataChange = async (path, newValue) => {
     if (!selectedConfig || !canEdit()) return;
 
