@@ -93,11 +93,25 @@ const ScalarPropertiesPanel = ({
   const isComponentReference = () => {
     if (!selectedValue || typeof selectedValue !== "object") return false;
     const { actualValue } = getActualValueAndSource(selectedValue);
-    return actualValue &&
-           typeof actualValue === "object" &&
-           actualValue.componentId &&
-           actualValue.versionId &&
-           actualValue.componentName;
+
+    // Check if it's a component reference by looking for required properties
+    if (actualValue && typeof actualValue === "object" && !Array.isArray(actualValue)) {
+      const hasComponentId = actualValue.hasOwnProperty('componentId') && actualValue.componentId;
+      const hasVersionId = actualValue.hasOwnProperty('versionId') && actualValue.versionId;
+      const hasComponentName = actualValue.hasOwnProperty('componentName') && actualValue.componentName;
+
+      console.log("Component detection:", {
+        actualValue,
+        hasComponentId,
+        hasVersionId,
+        hasComponentName,
+        result: hasComponentId && hasVersionId && hasComponentName
+      });
+
+      return hasComponentId && hasVersionId && hasComponentName;
+    }
+
+    return false;
   };
 
   // Get sub-objects for navigation
