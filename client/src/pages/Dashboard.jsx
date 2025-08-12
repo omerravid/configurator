@@ -326,14 +326,20 @@ const Dashboard = () => {
     if (!selectedConfig || !canEdit()) return;
 
     try {
+      console.log("handleDataChange - selectedConfig:", selectedConfig);
+      console.log("handleDataChange - selectedConfig.id:", selectedConfig.id, typeof selectedConfig.id);
+
+      // Ensure selectedConfig.id is a string
+      const configId = typeof selectedConfig.id === 'string' ? selectedConfig.id : String(selectedConfig.id);
+
       // Get the raw configuration data (only this level's overrides)
-      const rawResponse = await configAPI.getRawById(selectedConfig.id);
+      const rawResponse = await configAPI.getRawById(configId);
       const currentData = rawResponse.data.resolved || {};
 
       // Special case: if path is "_root_", replace the entire data object
       if (path === "_root_") {
         // Update the configuration with the new root data
-        await configAPI.update(selectedConfig.id, { data: newValue });
+        await configAPI.update(configId, { data: newValue });
 
         // Reload data
         const response = await configAPI.getById(selectedConfig.id, true);
