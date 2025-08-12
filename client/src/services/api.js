@@ -63,7 +63,14 @@ export const configAPI = {
   create: (configData) => api.post("/configs", configData),
 
   // Update configuration
-  update: (id, data) => api.put(`/configs/${id}`, data),
+  update: (id, data) => {
+    console.log("=== configAPI.update called ===");
+    console.log("id:", id);
+    console.log("id type:", typeof id);
+    console.log("id stringified:", JSON.stringify(id));
+    console.log("URL will be:", `/configs/${id}`);
+    return api.put(`/configs/${id}`, data);
+  },
 
   // Rename configuration
   rename: (id, name) => api.put(`/configs/${id}/rename`, { name }),
