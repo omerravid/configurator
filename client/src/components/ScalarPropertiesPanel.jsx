@@ -577,7 +577,8 @@ const ScalarPropertiesPanel = ({
                     value={safeToString(componentRef.versionId)}
                     onChange={(e) => handleVersionChange(e.target.value)}
                     disabled={loadingVersions}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white relative z-10"
+                    style={{ minWidth: '200px' }}
                   >
                     {availableVersions.map(version => (
                       <option key={version.id} value={version.id}>
