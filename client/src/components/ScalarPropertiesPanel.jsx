@@ -681,18 +681,9 @@ const ScalarPropertiesPanel = ({
       </div>
 
       {/* Properties List */}
-      <div className="space-y-2 mb-6">
-        {scalarProperties.length === 0 ? (
-          <div className="text-center text-gray-500 py-8">
-            <div>No scalar properties to display</div>
-            {subObjects.length > 0 && (
-              <div className="mt-2 text-xs text-blue-600">
-                Check the Objects section below for navigation
-              </div>
-            )}
-          </div>
-        ) : (
-          scalarProperties.map(([propertyName, value]) => {
+      {scalarProperties.length > 0 && (
+        <div className="space-y-2 mb-6">
+          {scalarProperties.map(([propertyName, value]) => {
             const { source } = getActualValueAndSource(value);
             const isEditing = editingProperty === propertyName;
 
@@ -782,9 +773,9 @@ const ScalarPropertiesPanel = ({
                 )}
               </div>
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      )}
 
       {/* Objects Navigation */}
       {!componentRef && subObjects.length > 0 && (
