@@ -24,6 +24,7 @@ const ScalarPropertiesPanel = ({
   onHover,
   onHoverEnd,
   onGetActiveTooltipPath,
+  onNavigateToPath, // New prop for navigation
 }) => {
   const { showToast } = useToast();
   const [editingProperty, setEditingProperty] = useState(null);
