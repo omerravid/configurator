@@ -342,7 +342,7 @@ const Dashboard = () => {
         await configAPI.update(configId, { data: newValue });
 
         // Reload data
-        const response = await configAPI.getById(selectedConfig.id, true);
+        const response = await configAPI.getById(configId, true);
         setResolvedData(response.data);
         showToast("Configuration updated successfully");
         return;
