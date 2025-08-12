@@ -397,13 +397,27 @@ const ScalarPropertiesPanel = ({
       return;
     }
 
-    console.log("Removing component:", {
-      componentRef,
-      selectedPath
-    });
+    console.log("=== REMOVE COMPONENT DEBUG ===");
+    console.log("componentRef:", componentRef);
+    console.log("selectedPath:", selectedPath);
+
+    // Extract the component path (should be at root level)
+    // If we're viewing a nested path like "root.ComponentName.property",
+    // we want to remove just "root.ComponentName"
+    let componentPath = selectedPath;
+
+    // If the path starts with "root.", get the next level (the component name)
+    if (selectedPath.startsWith("root.")) {
+      const pathParts = selectedPath.split(".");
+      if (pathParts.length >= 2) {
+        componentPath = `${pathParts[0]}.${pathParts[1]}`; // "root.ComponentName"
+      }
+    }
+
+    console.log("Computed componentPath for removal:", componentPath);
 
     // Remove the component by setting the value to undefined
-    onValueChange?.(selectedPath, undefined);
+    onValueChange?.(componentPath, undefined);
     showToast(`Removed ${componentRef.componentName} from product`, "success");
   };
 
