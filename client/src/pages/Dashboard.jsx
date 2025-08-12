@@ -79,6 +79,11 @@ const Dashboard = () => {
   }, [refreshTrigger]);
 
   const handleConfigSelect = (config) => {
+    console.log("=== handleConfigSelect called ===");
+    console.log("config:", config);
+    console.log("config.id:", config.id, typeof config.id);
+    console.log("config.id stringified:", JSON.stringify(config.id));
+
     setSelectedConfig(config);
     setShowEditor(false);
     setShowRename(false);
