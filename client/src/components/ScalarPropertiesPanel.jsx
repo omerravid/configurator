@@ -497,8 +497,8 @@ const ScalarPropertiesPanel = ({
       },
     ];
 
-    if (isEditable) {
-      // Value editing allowed for all editable configurations
+    if (isEditable && configType !== "PRODUCT") {
+      // Value editing allowed for all editable configurations except PRODUCT
       menuItems.unshift({
         label: "Edit Value",
         icon: PencilIcon,
