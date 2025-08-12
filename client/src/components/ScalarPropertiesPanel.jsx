@@ -641,13 +641,15 @@ const ScalarPropertiesPanel = ({
                         >
                           <PencilIcon className="w-3 h-3" />
                         </button>
-                        <button
-                          onClick={() => handleDeleteProperty(propertyName)}
-                          className="p-1 text-red-400 hover:text-red-600 hover:bg-red-100 rounded"
-                          title="Delete property"
-                        >
-                          <TrashIcon className="w-3 h-3" />
-                        </button>
+                        {configType === "COMPONENT" && (
+                          <button
+                            onClick={() => handleDeleteProperty(propertyName)}
+                            className="p-1 text-red-400 hover:text-red-600 hover:bg-red-100 rounded"
+                            title="Delete property"
+                          >
+                            <TrashIcon className="w-3 h-3" />
+                          </button>
+                        )}
                       </>
                     )}
                   </div>
