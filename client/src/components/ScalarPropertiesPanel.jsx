@@ -137,7 +137,7 @@ const ScalarPropertiesPanel = ({
     return false;
   };
 
-  // Get sub-objects for navigation
+  // Get sub-objects for navigation (includes both regular objects and component references)
   const getSubObjects = (value) => {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
       return [];
@@ -145,7 +145,17 @@ const ScalarPropertiesPanel = ({
 
     return Object.entries(value).filter(([key, val]) => {
       const { actualValue } = getActualValueAndSource(val);
-      return actualValue && typeof actualValue === "object" && !Array.isArray(actualValue);
+
+      // Include if it's any kind of object (including component references)
+      const isObject = actualValue && typeof actualValue === "object" && !Array.isArray(actualValue);
+
+      // Mark component references specially
+      const isComponentRef = isObject &&
+        actualValue.componentId &&
+        actualValue.versionId &&
+        actualValue.componentName;
+
+      return isObject;
     });
   };
 
