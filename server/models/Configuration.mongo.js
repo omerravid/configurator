@@ -102,6 +102,34 @@ class Configuration {
     return Math.random().toString(36).substring(2) + Date.now().toString(36);
   }
 
+  // Helper function to fix populated fields by preserving original IDs
+  static fixPopulatedFields(result) {
+    if (!result) return result;
+
+    // Handle single object
+    if (!Array.isArray(result)) {
+      // Preserve original IDs before they get overwritten by populated objects
+      const originalParentId = result.parent_id ? result.parent_id._id || result.parent_id : null;
+      const originalCreatedBy = result.created_by ? result.created_by._id || result.created_by : null;
+
+      // Add populated fields in expected format
+      if (result.created_by && typeof result.created_by === 'object') {
+        result.created_by_username = result.created_by.username;
+        result.created_by = originalCreatedBy; // Restore original ID string
+      }
+      if (result.parent_id && typeof result.parent_id === 'object') {
+        result.parent_name = result.parent_id.name;
+        result.parent_type = result.parent_id.type;
+        result.parent_id = originalParentId; // Restore original ID string
+      }
+
+      return result;
+    }
+
+    // Handle array of objects
+    return result.map(item => this.fixPopulatedFields(item.toJSON ? item.toJSON() : item));
+  }
+
   static async findById(id) {
     const config = await ConfigurationModel.findById(id)
       .populate('created_by', 'username')
