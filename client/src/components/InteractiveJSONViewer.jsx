@@ -669,15 +669,23 @@ const InteractiveJSONViewer = ({
 
   const handleNavigateToPath = (path) => {
     setSelectedStructuralPath(path);
-    // Expand the path in the tree
+
+    // Get the value at the target path
+    const valueAtPath = getValueAtPath(data, path);
+    setSelectedStructuralValue(valueAtPath);
+
+    // Expand all parent paths in the tree
     const pathParts = path.split('.');
     let currentPath = '';
+
     for (const part of pathParts) {
       if (currentPath) {
         currentPath += `.${part}`;
       } else {
         currentPath = part;
       }
+
+      // Add to expanded paths (except root)
       if (currentPath !== 'root') {
         setExpandedPaths(prev => new Set([...prev, currentPath]));
       }
