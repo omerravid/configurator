@@ -34,6 +34,10 @@ const ScalarPropertiesPanel = ({
   const [showAddProperty, setShowAddProperty] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
 
+  // Component version management state
+  const [availableVersions, setAvailableVersions] = useState([]);
+  const [loadingVersions, setLoadingVersions] = useState(false);
+
   // Extract actual value and source from provenance wrapper
   const getActualValueAndSource = (val) => {
     let currentVal = val;
