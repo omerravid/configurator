@@ -82,7 +82,55 @@ const ScalarPropertiesPanel = ({
     });
   };
 
+  // Detect if the selected item is a component reference
+  const isComponentReference = () => {
+    if (!selectedValue || typeof selectedValue !== "object") return false;
+    const { actualValue } = getActualValueAndSource(selectedValue);
+    return actualValue &&
+           typeof actualValue === "object" &&
+           actualValue.componentId &&
+           actualValue.versionId &&
+           actualValue.componentName;
+  };
+
+  // Get sub-objects for navigation
+  const getSubObjects = (value) => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      return [];
+    }
+
+    return Object.entries(value).filter(([key, val]) => {
+      const { actualValue } = getActualValueAndSource(val);
+      return actualValue && typeof actualValue === "object" && !Array.isArray(actualValue);
+    });
+  };
+
+  const componentRef = isComponentReference() ? getActualValueAndSource(selectedValue).actualValue : null;
+  const subObjects = getSubObjects(selectedValue);
   const scalarProperties = getScalarProperties(selectedValue);
+
+  // Load available versions when a component is selected
+  useEffect(() => {
+    if (componentRef) {
+      setLoadingVersions(true);
+      configAPI.getComponents()
+        .then(response => {
+          const component = response.data.find(c => c.id === componentRef.componentId);
+          if (component) {
+            setAvailableVersions(component.versions || []);
+          }
+        })
+        .catch(error => {
+          console.error("Failed to load component versions:", error);
+          showToast("Failed to load component versions", "error");
+        })
+        .finally(() => {
+          setLoadingVersions(false);
+        });
+    } else {
+      setAvailableVersions([]);
+    }
+  }, [componentRef?.componentId]);
 
   const handleEditStart = (propertyName, value) => {
     setEditingProperty(propertyName);
