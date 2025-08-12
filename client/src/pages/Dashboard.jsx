@@ -425,27 +425,49 @@ const Dashboard = () => {
       console.log("Original path:", path, "Clean path:", cleanPath);
 
       const pathParts = cleanPath.split(".");
-      const newData = JSON.parse(JSON.stringify(currentData)); // Deep clone
 
-      // Navigate to the parent of the target property
-      let current = newData;
+      // Create a minimal delta object containing only the change
+      // This preserves existing overrides and inheritance
+      const deltaData = {};
+      let current = deltaData;
+
+      // Build the path structure in delta
       for (let i = 0; i < pathParts.length - 1; i++) {
-        if (!current[pathParts[i]]) {
-          current[pathParts[i]] = {};
-        }
+        current[pathParts[i]] = {};
         current = current[pathParts[i]];
       }
 
-      // Set the new value or delete if undefined
+      // Set the new value or deletion marker
       const lastKey = pathParts[pathParts.length - 1];
       if (newValue === undefined) {
-        delete current[lastKey];
-      } else {
-        current[lastKey] = newValue;
-      }
+        // For deletion, we need to check existing data and merge properly
+        // Get the existing raw data and apply the deletion
+        const existingData = JSON.parse(JSON.stringify(currentData));
+        let existingCurrent = existingData;
+        for (let i = 0; i < pathParts.length - 1; i++) {
+          if (!existingCurrent[pathParts[i]]) {
+            existingCurrent[pathParts[i]] = {};
+          }
+          existingCurrent = existingCurrent[pathParts[i]];
+        }
+        delete existingCurrent[lastKey];
 
-      // Update the configuration with only the modified data
-      await configAPI.update(configId, { data: newData });
+        // Send the updated complete data for deletions
+        await configAPI.update(configId, { data: existingData });
+      } else {
+        // For value updates, send minimal delta
+        current[lastKey] = newValue;
+
+        // Merge delta with existing raw data
+        const existingData = JSON.parse(JSON.stringify(currentData));
+        const mergedData = this.deepMerge(existingData, deltaData);
+
+        console.log("Delta update:", deltaData);
+        console.log("Existing data:", existingData);
+        console.log("Merged result:", mergedData);
+
+        await configAPI.update(configId, { data: mergedData });
+      }
 
       // Optimized update: only reload data without refreshing the tree
       // This preserves expand/collapse states and focus
