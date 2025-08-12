@@ -244,13 +244,19 @@ Toggle between "Flat" and "Structural" views using the mode selector:
 
 **Right Panel - Scalar Properties**
 - Shows only primitive values (strings, numbers, booleans) for selected item
+- **Component Version Management**: For component references in products:
+  - Displays compact "version" property with current selection
+  - Dropdown selector to change component versions (products only)
+  - Removal button (🗑️) to unlink components from products
 - Inline editing: Click edit icon to modify values directly
-- Add Property: Create new scalar properties
-- Delete Property: Remove individual properties
+- Add Property: Create new scalar properties (restricted by config type)
+- Delete Property: Remove individual properties (restricted by config type)
 - Context menu operations:
   - Copy Value: Copy the actual property value
   - Copy Path: Copy the full JSON path to the property
   - Copy as JSON: Copy the property as JSON format
+  - Edit Value: Modify property values (based on permissions)
+  - Delete Property: Remove properties (based on permissions)
 
 **Drag-and-Drop Component Integration**
 - Drag components from the configuration tree into products
