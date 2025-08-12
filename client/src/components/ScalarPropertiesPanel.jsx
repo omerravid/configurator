@@ -563,7 +563,7 @@ const ScalarPropertiesPanel = ({
                 Component
               </label>
               <div className="text-sm text-gray-900 bg-white px-3 py-2 border border-gray-200 rounded">
-                {componentRef.componentName}
+                {safeToString(componentRef.componentName)}
               </div>
             </div>
 
@@ -574,7 +574,7 @@ const ScalarPropertiesPanel = ({
               {configType === "PRODUCT" && isEditable ? (
                 <div className="flex items-center space-x-2">
                   <select
-                    value={componentRef.versionId}
+                    value={safeToString(componentRef.versionId)}
                     onChange={(e) => handleVersionChange(e.target.value)}
                     disabled={loadingVersions}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -591,7 +591,7 @@ const ScalarPropertiesPanel = ({
                 </div>
               ) : (
                 <div className="text-sm text-gray-900 bg-white px-3 py-2 border border-gray-200 rounded">
-                  {componentRef.versionName || 'Unknown Version'}
+                  {safeToString(componentRef.versionName) || 'Unknown Version'}
                   {configType !== "PRODUCT" && (
                     <span className="ml-2 text-xs text-gray-500">(version can only be changed at product level)</span>
                   )}
