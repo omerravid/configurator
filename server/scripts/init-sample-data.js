@@ -112,8 +112,12 @@ async function initializeSampleData() {
     for (let i = 0; i < 3; i++) {
       const config = sampleConfigurations[i];
       const created = await Configuration.create({
-        ...config,
-        created_by: adminUser.id
+        name: config.name,
+        type: config.type,
+        data: config.data,
+        description: config.description,
+        status: config.status,
+        createdBy: adminUser.id
       });
       createdConfigs.push(created);
       console.log(`Created component: ${config.name}`);
