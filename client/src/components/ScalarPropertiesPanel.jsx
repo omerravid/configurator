@@ -391,6 +391,22 @@ const ScalarPropertiesPanel = ({
     showToast(`Component version updated to ${selectedVersion.name}`, "success");
   };
 
+  const handleRemoveComponent = () => {
+    if (!componentRef || !selectedPath) {
+      console.log("Remove component aborted: missing componentRef or selectedPath");
+      return;
+    }
+
+    console.log("Removing component:", {
+      componentRef,
+      selectedPath
+    });
+
+    // Remove the component by setting the value to undefined
+    onValueChange?.(selectedPath, undefined);
+    showToast(`Removed ${componentRef.componentName} from product`, "success");
+  };
+
   const handleNavigateToSubObject = (subObjectKey) => {
     if (!selectedPath || !onNavigateToPath) return;
 
