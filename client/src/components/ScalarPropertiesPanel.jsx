@@ -188,13 +188,21 @@ const ScalarPropertiesPanel = ({
         typeof actualValue === "boolean"
       );
       const isComponentProp = isCompRef && ['componentId', 'versionId', 'componentName', 'versionName'].includes(key);
+      const isComponentRef = actualValue &&
+        typeof actualValue === "object" &&
+        !Array.isArray(actualValue) &&
+        actualValue.componentId &&
+        actualValue.versionId &&
+        actualValue.componentName;
 
       console.log(`Property ${key}:`, {
-        actualValue,
+        actualValue: isComponentRef ? `Component: ${actualValue.componentName}` : actualValue,
         type: typeof actualValue,
         isScalar,
         isComponentProp,
-        willShow: isScalar && !isComponentProp
+        isComponentRef,
+        willShowAsScalar: isScalar && !isComponentProp && !isComponentRef,
+        willShowAsObject: !isScalar || isComponentRef
       });
     });
   }
