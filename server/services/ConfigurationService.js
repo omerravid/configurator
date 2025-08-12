@@ -450,7 +450,17 @@ class ConfigurationService {
         parentId = config.parent_id;
       } else if (config.parent_id && typeof config.parent_id === 'object') {
         // Handle populated object case - extract the _id or id field
-        parentId = config.parent_id._id || config.parent_id.id || String(config.parent_id);
+      if (config.parent_id._id) {
+        parentId = String(config.parent_id._id);
+      } else if (config.parent_id.id) {
+        parentId = String(config.parent_id.id);
+      } else if (config.parent_id.toString && typeof config.parent_id.toString === 'function') {
+        parentId = config.parent_id.toString();
+      } else {
+        // Log the object structure to help debug
+        console.log("Unable to extract ID from parent_id object:", JSON.stringify(config.parent_id, null, 2));
+        throw new Error(`Invalid parent_id object structure: ${JSON.stringify(config.parent_id)}`);
+      }
       } else {
         parentId = String(config.parent_id);
       }
