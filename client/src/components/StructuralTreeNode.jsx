@@ -110,7 +110,10 @@ const StructuralTreeNode = ({
 
     const menuItems = [];
 
-    if (isEditable && (isObject || isArray)) {
+    // Structural editing (add/rename/remove) only allowed in COMPONENT configurations
+    const canDoStructuralEditing = isEditable && configType === "COMPONENT";
+
+    if (canDoStructuralEditing && (isObject || isArray)) {
       menuItems.push({
         label: "Add Object",
         icon: PlusIcon,
@@ -121,7 +124,7 @@ const StructuralTreeNode = ({
       });
     }
 
-    if (isEditable && !isRoot) {
+    if (canDoStructuralEditing && !isRoot) {
       menuItems.push({
         label: "Rename",
         icon: PencilIcon,
