@@ -50,6 +50,10 @@ const Dashboard = () => {
       setAllConfigurations(response.data.configs || []);
     } catch (err) {
       console.error("Failed to load all configurations:", err);
+      // Don't show error toast for empty configurations
+      if (err.response?.status !== 404) {
+        showToast("Failed to load configurations", "error");
+      }
     }
   };
 
