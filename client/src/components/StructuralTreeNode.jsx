@@ -295,6 +295,7 @@ const StructuralTreeNode = ({
             selectedPath={selectedPath}
             onStructuralChange={onStructuralChange}
             parentValue={actualValue}
+            configType={configType}
           />
         );
       }
