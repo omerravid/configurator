@@ -679,17 +679,25 @@ const InteractiveJSONViewer = ({
     const pathParts = path.split('.');
     let currentPath = '';
 
-    for (const part of pathParts) {
+    for (let i = 0; i < pathParts.length; i++) {
+      const part = pathParts[i];
+
       if (currentPath) {
         currentPath += `.${part}`;
       } else {
         currentPath = part;
       }
 
-      // Add to expanded paths (except root)
-      if (currentPath !== 'root') {
+      // Always add to expanded paths, including intermediate paths
+      // Only skip the target path itself (last one) since we want to expand parents
+      if (i < pathParts.length - 1) {
         setExpandedPaths(prev => new Set([...prev, currentPath]));
       }
+    }
+
+    // If navigating to a direct child of root, make sure root is expanded
+    if (pathParts.length === 2 && pathParts[0] === 'root') {
+      setExpandedPaths(prev => new Set([...prev, 'root']));
     }
   };
 
