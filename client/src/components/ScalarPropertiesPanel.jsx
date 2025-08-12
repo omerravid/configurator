@@ -100,8 +100,23 @@ const ScalarPropertiesPanel = ({
       const hasVersionId = actualValue.hasOwnProperty('versionId') && actualValue.versionId;
       const hasComponentName = actualValue.hasOwnProperty('componentName') && actualValue.componentName;
 
+      // A component reference must have ALL three properties AND no other significant properties
+      const componentKeys = ['componentId', 'versionId', 'componentName', 'versionName'];
+      const otherKeys = Object.keys(actualValue).filter(key => !componentKeys.includes(key));
+      const isComponentRef = hasComponentId && hasVersionId && hasComponentName;
 
-      return hasComponentId && hasVersionId && hasComponentName;
+      console.log("Component detection details:", {
+        actualValue,
+        hasComponentId,
+        hasVersionId,
+        hasComponentName,
+        componentKeys,
+        otherKeys,
+        otherKeysCount: otherKeys.length,
+        isComponentRef
+      });
+
+      return isComponentRef;
     }
 
     return false;
