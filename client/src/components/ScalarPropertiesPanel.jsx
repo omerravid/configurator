@@ -609,63 +609,50 @@ const ScalarPropertiesPanel = ({
         </button>
       </div>
 
-      {/* Component View */}
+      {/* Component Reference - Compact Version */}
       {componentRef && (
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-center mb-3">
-            <CogIcon className="w-5 h-5 text-blue-600 mr-2" />
-            <h4 className="text-lg font-medium text-blue-900">Component Reference</h4>
-          </div>
-
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Component
-              </label>
-              <div className="text-sm text-gray-900 bg-white px-3 py-2 border border-gray-200 rounded">
-                {safeToString(componentRef.componentName)}
+        <div className="mb-6">
+          <div
+            className="group flex items-center justify-between p-2 border border-blue-200 rounded hover:bg-blue-50 bg-blue-25"
+          >
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-2">
+                <CogIcon className="w-4 h-4 text-blue-600" />
+                <span className="font-medium text-gray-700">version:</span>
+                {configType === "PRODUCT" && isEditable ? (
+                  <select
+                    value={safeToString(componentRef.versionId)}
+                    onChange={(e) => handleVersionChange(e.target.value)}
+                    disabled={loadingVersions}
+                    className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  >
+                    {availableVersions.map(version => (
+                      <option key={version.id} value={version.id}>
+                        {version.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className="text-blue-600">
+                    {safeToString(componentRef.versionName) || 'Unknown Version'}
+                  </span>
+                )}
+                {loadingVersions && (
+                  <span className="text-xs text-gray-500">Loading...</span>
+                )}
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Version
-              </label>
-              {configType === "PRODUCT" && isEditable ? (
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <select
-                      value={safeToString(componentRef.versionId)}
-                      onChange={(e) => handleVersionChange(e.target.value)}
-                      disabled={loadingVersions}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white relative z-10"
-                      style={{ minWidth: '200px' }}
-                    >
-                      {availableVersions.map(version => (
-                        <option key={version.id} value={version.id}>
-                          {version.name}
-                        </option>
-                      ))}
-                    </select>
-                    {loadingVersions && (
-                      <div className="text-sm text-gray-500">Loading...</div>
-                    )}
-                  </div>
-                  <button
-                    onClick={handleRemoveComponent}
-                    className="w-full px-3 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                    title="Remove this component from the product"
-                  >
-                    Remove Component
-                  </button>
-                </div>
-              ) : (
-                <div className="text-sm text-gray-900 bg-white px-3 py-2 border border-gray-200 rounded">
-                  {safeToString(componentRef.versionName) || 'Unknown Version'}
-                  {configType !== "PRODUCT" && (
-                    <span className="ml-2 text-xs text-gray-500">(version can only be changed at product level)</span>
-                  )}
-                </div>
+            {/* Actions */}
+            <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              {configType === "PRODUCT" && isEditable && (
+                <button
+                  onClick={handleRemoveComponent}
+                  className="p-1 text-red-400 hover:text-red-600 hover:bg-red-100 rounded"
+                  title="Remove this component from the product"
+                >
+                  <TrashIcon className="w-3 h-3" />
+                </button>
               )}
             </div>
           </div>
