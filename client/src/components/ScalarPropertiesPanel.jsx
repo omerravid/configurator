@@ -141,9 +141,6 @@ const ScalarPropertiesPanel = ({
   const actualSelectedValue = selectedValue ? getActualValueAndSource(selectedValue).actualValue : null;
 
   // Debug logging for component detection and property filtering
-  const actualSelectedValue = selectedValue ? getActualValueAndSource(selectedValue).actualValue : null;
-  const isCompRef = isComponentReference();
-
   console.log("ScalarPropertiesPanel Debug:", {
     selectedPath,
     configType,
