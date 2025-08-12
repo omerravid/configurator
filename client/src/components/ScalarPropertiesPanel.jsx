@@ -748,22 +748,43 @@ const ScalarPropertiesPanel = ({
         <div className="mb-6">
           <h4 className="text-sm font-medium text-gray-700 mb-2">Objects</h4>
           <div className="space-y-1">
-            {subObjects.map(([key, value]) => (
-              <div key={key} className="flex items-center justify-between p-2 bg-gray-50 border border-gray-200 rounded hover:bg-gray-100">
-                <div className="flex items-center space-x-2">
-                  <FolderIcon className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm font-medium text-gray-700">{key}</span>
+            {subObjects.map(([key, value]) => {
+              const { actualValue } = getActualValueAndSource(value);
+              const isComponentRef = actualValue &&
+                actualValue.componentId &&
+                actualValue.versionId &&
+                actualValue.componentName;
+
+              return (
+                <div key={key} className={`flex items-center justify-between p-2 border border-gray-200 rounded hover:bg-gray-100 ${
+                  isComponentRef ? 'bg-blue-50 border-blue-200' : 'bg-gray-50'
+                }`}>
+                  <div className="flex items-center space-x-2">
+                    {isComponentRef ? (
+                      <CogIcon className="w-4 h-4 text-blue-600" />
+                    ) : (
+                      <FolderIcon className="w-4 h-4 text-gray-500" />
+                    )}
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-gray-700">{key}</span>
+                      {isComponentRef && (
+                        <span className="text-xs text-blue-600">
+                          {actualValue.componentName} ({actualValue.versionName})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleNavigateToSubObject(key)}
+                    className="flex items-center space-x-1 px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                    title={`Navigate to ${key}`}
+                  >
+                    <ArrowRightIcon className="w-3 h-3" />
+                    <span>Go to</span>
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleNavigateToSubObject(key)}
-                  className="flex items-center space-x-1 px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
-                  title={`Navigate to ${key}`}
-                >
-                  <ArrowRightIcon className="w-3 h-3" />
-                  <span>Go to</span>
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
