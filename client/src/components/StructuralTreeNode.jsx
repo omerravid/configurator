@@ -412,16 +412,10 @@ const StructuralTreeNode = ({
 
         {!hasChildren && <div className="w-6 mr-1" />}
 
-        {/* Folder icon */}
-        {hasChildren && (
-          <div className="flex-shrink-0 mr-2">
-            {isExpanded ? (
-              <FolderOpenIcon className="w-4 h-4 text-yellow-600" />
-            ) : (
-              <FolderIcon className="w-4 h-4 text-yellow-600" />
-            )}
-          </div>
-        )}
+        {/* Type-specific icon */}
+        <div className="flex-shrink-0 mr-2">
+          {getItemIcon()}
+        </div>
 
         {/* Key name */}
         {!isRoot && (
