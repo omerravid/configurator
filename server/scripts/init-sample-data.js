@@ -136,8 +136,12 @@ async function initializeSampleData() {
 
     // Create product
     const product = await Configuration.create({
-      ...productConfig,
-      created_by: adminUser.id
+      name: productConfig.name,
+      type: productConfig.type,
+      data: productConfig.data,
+      description: productConfig.description,
+      status: productConfig.status,
+      createdBy: adminUser.id
     });
     createdConfigs.push(product);
     console.log(`Created product: ${productConfig.name}`);
