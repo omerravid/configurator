@@ -131,6 +131,11 @@ class Configuration {
   }
 
   static async findById(id) {
+    console.log("=== Configuration.findById called ===");
+    console.log("id received:", id);
+    console.log("id type:", typeof id);
+    console.log("id stringified:", JSON.stringify(id));
+
     const config = await ConfigurationModel.findById(id)
       .populate('created_by', 'username')
       .populate('parent_id', 'name type');
