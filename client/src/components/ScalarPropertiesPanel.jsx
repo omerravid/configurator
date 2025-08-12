@@ -221,15 +221,6 @@ const ScalarPropertiesPanel = ({
   };
 
   const handleVersionChange = (newVersionId) => {
-    console.log("Version change triggered:", {
-      newVersionId,
-      componentRef,
-      configType,
-      isEditable,
-      availableVersions: availableVersions.length,
-      selectedPath
-    });
-
     if (!componentRef || !newVersionId) return;
 
     const selectedVersion = availableVersions.find(v => v.id === newVersionId);
@@ -241,8 +232,6 @@ const ScalarPropertiesPanel = ({
       versionId: newVersionId,
       versionName: selectedVersion.name
     };
-
-    console.log("Updating component ref:", { old: componentRef, new: updatedComponentRef });
 
     // Create the path for the component reference and update it
     onValueChange?.(selectedPath, updatedComponentRef);
