@@ -110,14 +110,20 @@ class Configuration {
     if (!config) return null;
 
     const result = config.toJSON();
-    
+
+    // Preserve original IDs before they get overwritten by populated objects
+    const originalParentId = result.parent_id ? result.parent_id._id || result.parent_id : null;
+    const originalCreatedBy = result.created_by ? result.created_by._id || result.created_by : null;
+
     // Add populated fields in expected format
     if (config.created_by) {
       result.created_by_username = config.created_by.username;
+      result.created_by = originalCreatedBy; // Restore original ID string
     }
     if (config.parent_id) {
       result.parent_name = config.parent_id.name;
       result.parent_type = config.parent_id.type;
+      result.parent_id = originalParentId; // Restore original ID string
     }
 
     return result;
