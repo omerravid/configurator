@@ -69,7 +69,18 @@ export const configAPI = {
     console.log("id type:", typeof id);
     console.log("id stringified:", JSON.stringify(id));
     console.log("URL will be:", `/configs/${id}`);
-    return api.put(`/configs/${id}`, data);
+
+    // Check if id is an object and warn
+    if (typeof id === 'object' && id !== null) {
+      console.error("ERROR: ID is an object, not a string!", id);
+      throw new Error(`Invalid ID type: received object instead of string. ID: ${JSON.stringify(id)}`);
+    }
+
+    // Ensure id is converted to string
+    const stringId = String(id);
+    console.log("Using stringId:", stringId);
+
+    return api.put(`/configs/${stringId}`, data);
   },
 
   // Rename configuration
