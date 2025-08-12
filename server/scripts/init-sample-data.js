@@ -1,86 +1,279 @@
 const { Configuration, User } = require('../models');
 
-const sampleConfigurations = [
+// Three components with hierarchical structure
+const sampleComponents = [
   {
-    name: "Database Component",
+    name: "Tools",
     type: "COMPONENT", 
     data: {
-      host: "localhost",
-      port: 5432,
-      database: "myapp",
-      ssl: false,
-      connectionTimeout: 30000,
-      maxConnections: 10
-    },
-    description: "Standard database configuration component",
-    created_by: "admin",
-    status: "COMMITTED"
-  },
-  {
-    name: "API Gateway Component", 
-    type: "COMPONENT",
-    data: {
-      baseUrl: "https://api.example.com",
-      timeout: 10000,
-      retryAttempts: 3,
-      authentication: {
-        type: "bearer",
-        tokenEndpoint: "/auth/token"
+      TrailBlazer: {
+        enabled: true,
+        settings: {
+          precision: "high",
+          mode: "auto"
+        }
       },
-      rateLimit: {
-        requests: 1000,
-        window: 3600
+      ScrewInserter: {
+        enabled: true,
+        torque: 25,
+        speed: "medium"
+      },
+      retractor: {
+        enabled: false,
+        position: "home"
+      },
+      OSDrill: {
+        enabled: true,
+        depth: 10.5,
+        speed: "slow"
+      },
+      LidarCalib: {
+        enabled: true,
+        accuracy: 0.1,
+        range: 100
+      },
+      HSdrill: {
+        enabled: false,
+        temperature: 25.0
+      },
+      fcu: {
+        enabled: true,
+        controlMode: "manual",
+        timeout: 30
+      },
+      detectorDummy: {
+        enabled: false,
+        sensitivity: 0.8
       }
     },
-    description: "API Gateway configuration for external services",
-    created_by: "admin", 
+    description: "Complete toolset configuration with 8 different tools",
     status: "COMMITTED"
   },
   {
-    name: "Cache Component",
+    name: "IQ3",
     type: "COMPONENT",
     data: {
-      type: "redis",
-      host: "localhost", 
-      port: 6379,
-      ttl: 3600,
-      maxMemory: "100mb",
-      evictionPolicy: "allkeys-lru"
+      system: {
+        version: "3.1.4",
+        mode: "production",
+        debug: false
+      },
+      network: {
+        interface: "eth0",
+        dhcp: true,
+        dns: ["8.8.8.8", "8.8.4.4"]
+      },
+      storage: {
+        capacity: "1TB",
+        compression: true,
+        backup: {
+          enabled: true,
+          interval: "daily",
+          retention: 30
+        }
+      },
+      processing: {
+        threads: 8,
+        priority: "normal",
+        cache: {
+          size: "512MB",
+          policy: "LRU"
+        }
+      },
+      monitoring: {
+        enabled: true,
+        metrics: ["cpu", "memory", "disk", "network"],
+        alerts: {
+          cpu: 80,
+          memory: 85,
+          disk: 90
+        }
+      }
     },
-    description: "Caching layer configuration",
-    created_by: "admin",
+    description: "IQ3 system configuration with comprehensive settings",
     status: "COMMITTED"
   },
   {
-    name: "MyApp Product",
+    name: "Database",
+    type: "COMPONENT",
+    data: {
+      connection: {
+        host: "localhost",
+        port: 5432,
+        database: "maindb",
+        ssl: {
+          enabled: false,
+          verify: false
+        }
+      },
+      pool: {
+        min: 5,
+        max: 20,
+        timeout: 30000
+      },
+      queries: {
+        timeout: 15000,
+        retries: 3,
+        cache: {
+          enabled: true,
+          ttl: 300
+        }
+      },
+      logging: {
+        enabled: true,
+        level: "info",
+        slowQuery: 5000
+      },
+      backup: {
+        enabled: true,
+        schedule: "0 2 * * *",
+        retention: {
+          daily: 7,
+          weekly: 4,
+          monthly: 12
+        }
+      }
+    },
+    description: "Database configuration with connection pooling and backup settings",
+    status: "COMMITTED"
+  }
+];
+
+// Component versions (one additional version per component)
+const sampleVersions = [
+  {
+    name: "Tools v2",
+    type: "VERSION",
+    parentComponent: "Tools",
+    data: {
+      TrailBlazer: {
+        settings: {
+          precision: "ultra",
+          mode: "precision"
+        }
+      },
+      ScrewInserter: {
+        torque: 35,
+        speed: "fast"
+      },
+      HSdrill: {
+        enabled: true,
+        temperature: 22.0
+      },
+      detectorDummy: {
+        enabled: true,
+        sensitivity: 0.9
+      }
+    },
+    description: "Enhanced tools configuration with improved precision and additional tool enablement",
+    status: "COMMITTED"
+  },
+  {
+    name: "IQ3 v2",
+    type: "VERSION", 
+    parentComponent: "IQ3",
+    data: {
+      system: {
+        version: "3.2.1",
+        mode: "performance"
+      },
+      processing: {
+        threads: 16,
+        priority: "high",
+        cache: {
+          size: "1GB",
+          policy: "LFU"
+        }
+      },
+      monitoring: {
+        alerts: {
+          cpu: 90,
+          memory: 90,
+          disk: 95
+        }
+      }
+    },
+    description: "Performance-optimized IQ3 version with enhanced processing capabilities",
+    status: "COMMITTED"
+  },
+  {
+    name: "Database v2",
+    type: "VERSION",
+    parentComponent: "Database", 
+    data: {
+      connection: {
+        ssl: {
+          enabled: true,
+          verify: true
+        }
+      },
+      pool: {
+        max: 50,
+        timeout: 60000
+      },
+      queries: {
+        timeout: 30000,
+        cache: {
+          ttl: 600
+        }
+      },
+      logging: {
+        level: "debug",
+        slowQuery: 2000
+      }
+    },
+    description: "Enhanced database configuration with SSL and improved performance settings",
+    status: "COMMITTED"
+  }
+];
+
+// Two products with different component combinations and no self data
+const sampleProducts = [
+  {
+    name: "Production System Alpha",
     type: "PRODUCT",
     data: {
-      database: {
+      Tools: {
         componentId: null, // Will be set after components are created
-        versionId: null,
-        componentName: "Database Component",
-        versionName: "Database Component (root)"
+        versionId: null,   // Will use Tools v2
+        componentName: "Tools",
+        versionName: "Tools v2"
       },
-      api: {
-        componentId: null, // Will be set after components are created  
-        versionId: null,
-        componentName: "API Gateway Component",
-        versionName: "API Gateway Component (root)"
-      },
-      cache: {
+      IQ3: {
         componentId: null, // Will be set after components are created
-        versionId: null, 
-        componentName: "Cache Component",
-        versionName: "Cache Component (root)"
+        versionId: null,   // Will use IQ3 (root)
+        componentName: "IQ3", 
+        versionName: "IQ3 (root)"
       },
-      appConfig: {
-        name: "My Application",
-        version: "1.0.0",
-        environment: "development"
+      Database: {
+        componentId: null, // Will be set after components are created
+        versionId: null,   // Will use Database v2
+        componentName: "Database",
+        versionName: "Database v2"
       }
     },
-    description: "Main application product configuration",
-    created_by: "admin",
+    description: "Production system using enhanced tools, standard IQ3, and secure database",
+    status: "COMMITTED"
+  },
+  {
+    name: "Development System Beta",
+    type: "PRODUCT", 
+    data: {
+      Tools: {
+        componentId: null, // Will be set after components are created
+        versionId: null,   // Will use Tools (root)
+        componentName: "Tools",
+        versionName: "Tools (root)"
+      },
+      IQ3: {
+        componentId: null, // Will be set after components are created
+        versionId: null,   // Will use IQ3 v2
+        componentName: "IQ3",
+        versionName: "IQ3 v2" 
+      }
+      // Note: No Database component in this product
+    },
+    description: "Development system using standard tools and performance IQ3, no database",
     status: "COMMITTED"
   }
 ];
@@ -106,98 +299,155 @@ async function initializeSampleData() {
 
     console.log('Found admin user:', adminUser.id);
 
-    const createdConfigs = [];
+    const createdComponents = [];
+    const createdVersions = [];
+    const createdProducts = [];
+    const createdInstances = [];
 
-    // Create components first
-    for (let i = 0; i < 3; i++) {
-      const config = sampleConfigurations[i];
+    // 1. Create three components
+    for (const componentData of sampleComponents) {
       const created = await Configuration.create({
-        name: config.name,
-        type: config.type,
-        data: config.data,
-        description: config.description,
-        status: config.status,
+        name: componentData.name,
+        type: componentData.type,
+        data: componentData.data,
+        description: componentData.description,
+        status: componentData.status,
         createdBy: adminUser.id
       });
-      createdConfigs.push(created);
-      console.log(`Created component: ${config.name}`);
+      createdComponents.push(created);
+      console.log(`Created component: ${componentData.name}`);
     }
 
-    // Update product configuration with component IDs
-    const productConfig = sampleConfigurations[3];
-    productConfig.data.database.componentId = createdConfigs[0].id;
-    productConfig.data.database.versionId = createdConfigs[0].id;
-    
-    productConfig.data.api.componentId = createdConfigs[1].id; 
-    productConfig.data.api.versionId = createdConfigs[1].id;
-    
-    productConfig.data.cache.componentId = createdConfigs[2].id;
-    productConfig.data.cache.versionId = createdConfigs[2].id;
+    // 2. Create versions for each component
+    for (let i = 0; i < sampleVersions.length; i++) {
+      const versionData = sampleVersions[i];
+      const parentComponent = createdComponents[i];
+      
+      const created = await Configuration.create({
+        name: versionData.name,
+        type: versionData.type,
+        parentId: parentComponent.id,
+        data: versionData.data,
+        description: versionData.description,
+        status: versionData.status,
+        createdBy: adminUser.id
+      });
+      createdVersions.push(created);
+      console.log(`Created version: ${versionData.name}`);
+    }
 
-    // Create product
-    const product = await Configuration.create({
-      name: productConfig.name,
-      type: productConfig.type,
-      data: productConfig.data,
-      description: productConfig.description,
-      status: productConfig.status,
-      createdBy: adminUser.id
-    });
-    createdConfigs.push(product);
-    console.log(`Created product: ${productConfig.name}`);
+    // 3. Create two products with different component combinations
+    for (let i = 0; i < sampleProducts.length; i++) {
+      const productData = sampleProducts[i];
+      
+      // Update component references with actual IDs
+      if (productData.data.Tools) {
+        productData.data.Tools.componentId = createdComponents[0].id; // Tools component
+        // Use Tools v2 for first product, Tools root for second
+        productData.data.Tools.versionId = i === 0 ? createdVersions[0].id : createdComponents[0].id;
+      }
+      
+      if (productData.data.IQ3) {
+        productData.data.IQ3.componentId = createdComponents[1].id; // IQ3 component
+        // Use IQ3 root for first product, IQ3 v2 for second
+        productData.data.IQ3.versionId = i === 0 ? createdComponents[1].id : createdVersions[1].id;
+      }
+      
+      if (productData.data.Database) {
+        productData.data.Database.componentId = createdComponents[2].id; // Database component
+        productData.data.Database.versionId = createdVersions[2].id; // Database v2
+      }
 
-    // Create an instance of the product
-    const instanceConfig = {
-      name: "MyApp - Production",
-      type: "INSTANCE",
-      parent_id: product.id,
-      data: {
-        database: {
-          host: "prod-db.example.com",
-          ssl: true
+      const created = await Configuration.create({
+        name: productData.name,
+        type: productData.type,
+        data: productData.data,
+        description: productData.description,
+        status: productData.status,
+        createdBy: adminUser.id
+      });
+      createdProducts.push(created);
+      console.log(`Created product: ${productData.name}`);
+    }
+
+    // 4. Create one instance per product
+    const instanceConfigs = [
+      {
+        name: "Alpha Production Instance",
+        type: "INSTANCE",
+        parent_id: createdProducts[0].id,
+        data: {
+          Tools: {
+            TrailBlazer: {
+              settings: {
+                mode: "production"
+              }
+            }
+          },
+          Database: {
+            connection: {
+              host: "prod-alpha-db.company.com",
+              database: "alpha_prod"
+            }
+          }
         },
-        api: {
-          baseUrl: "https://api.prod.example.com"
+        description: "Production instance for Alpha system with environment-specific overrides",
+        status: "COMMITTED"
+      },
+      {
+        name: "Beta Development Instance",
+        type: "INSTANCE", 
+        parent_id: createdProducts[1].id,
+        data: {
+          Tools: {
+            TrailBlazer: {
+              enabled: true,
+              settings: {
+                mode: "debug",
+                precision: "medium"
+              }
+            },
+            ScrewInserter: {
+              speed: "slow"
+            }
+          },
+          IQ3: {
+            system: {
+              debug: true
+            },
+            monitoring: {
+              alerts: {
+                cpu: 95,
+                memory: 95
+              }
+            }
+          }
         },
-        appConfig: {
-          environment: "production",
-          debug: false
-        }
-      },
-      description: "Production instance with overrides",
-      created_by: adminUser.id,
-      status: "COMMITTED"
-    };
+        description: "Development instance for Beta system with debug settings",
+        status: "COMMITTED"
+      }
+    ];
 
-    const instance = await Configuration.create({
-      name: instanceConfig.name,
-      type: instanceConfig.type,
-      parentId: instanceConfig.parent_id,
-      data: instanceConfig.data,
-      description: instanceConfig.description,
-      status: instanceConfig.status,
-      createdBy: adminUser.id
-    });
-    console.log(`Created instance: ${instanceConfig.name}`);
-
-    // Create a version of the database component
-    const dbVersion = await Configuration.create({
-      name: "Database Component v2",
-      type: "VERSION",
-      parentId: createdConfigs[0].id,
-      data: {
-        ssl: true,
-        connectionTimeout: 60000,
-        maxConnections: 20
-      },
-      description: "Enhanced database configuration with SSL",
-      status: "DRAFT",
-      createdBy: adminUser.id
-    });
-    console.log(`Created version: Database Component v2`);
+    for (const instanceData of instanceConfigs) {
+      const created = await Configuration.create({
+        name: instanceData.name,
+        type: instanceData.type,
+        parentId: instanceData.parent_id,
+        data: instanceData.data,
+        description: instanceData.description,
+        status: instanceData.status,
+        createdBy: adminUser.id
+      });
+      createdInstances.push(created);
+      console.log(`Created instance: ${instanceData.name}`);
+    }
 
     console.log('Sample data initialization completed successfully!');
-    console.log(`Created ${createdConfigs.length + 2} configurations total`);
+    console.log(`Created ${createdComponents.length} components`);
+    console.log(`Created ${createdVersions.length} versions`);
+    console.log(`Created ${createdProducts.length} products`);
+    console.log(`Created ${createdInstances.length} instances`);
+    console.log(`Total configurations: ${createdComponents.length + createdVersions.length + createdProducts.length + createdInstances.length}`);
     
   } catch (error) {
     console.error('Failed to initialize sample data:', error);
@@ -206,7 +456,7 @@ async function initializeSampleData() {
 }
 
 // Export for use in other scripts
-module.exports = { initializeSampleData, sampleConfigurations };
+module.exports = { initializeSampleData, sampleComponents, sampleVersions, sampleProducts };
 
 // Run if called directly
 if (require.main === module) {
