@@ -244,14 +244,25 @@ const ScalarPropertiesPanel = ({
 
           if (component) {
             // Include the component itself as the root version plus any child versions
-            const allVersions = [
-              {
+            const versions = component.versions || [];
+
+            // Check if the component ID already exists in versions to avoid duplicates
+            const hasComponentAsVersion = versions.some(v => v.id === component.id);
+
+            const allVersions = [];
+
+            // Add component as root only if it's not already in versions
+            if (!hasComponentAsVersion) {
+              allVersions.push({
                 id: component.id,
                 name: `${component.name} (root)`,
                 isRoot: true
-              },
-              ...(component.versions || [])
-            ];
+              });
+            }
+
+            // Add all versions
+            allVersions.push(...versions);
+
             setAvailableVersions(allVersions);
             console.log("Set available versions:", allVersions);
           } else {
