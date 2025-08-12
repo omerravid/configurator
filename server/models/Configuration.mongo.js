@@ -269,7 +269,10 @@ class Configuration {
     const merge = (obj, src) => {
       for (const key in src) {
         if (src.hasOwnProperty(key)) {
-          if (src[key] && typeof src[key] === 'object' && !Array.isArray(src[key])) {
+          // Handle deletion: if source value is null or undefined, delete the property
+          if (src[key] === null || src[key] === undefined) {
+            delete obj[key];
+          } else if (src[key] && typeof src[key] === 'object' && !Array.isArray(src[key])) {
             if (!obj[key] || typeof obj[key] !== 'object') {
               obj[key] = {};
             }
