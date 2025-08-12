@@ -100,13 +100,6 @@ const ScalarPropertiesPanel = ({
       const hasVersionId = actualValue.hasOwnProperty('versionId') && actualValue.versionId;
       const hasComponentName = actualValue.hasOwnProperty('componentName') && actualValue.componentName;
 
-      console.log("Component detection:", {
-        actualValue,
-        hasComponentId,
-        hasVersionId,
-        hasComponentName,
-        result: hasComponentId && hasVersionId && hasComponentName
-      });
 
       return hasComponentId && hasVersionId && hasComponentName;
     }
