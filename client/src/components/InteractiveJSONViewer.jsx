@@ -1009,7 +1009,7 @@ const InteractiveJSONViewer = ({
           </div>
 
           {/* Right Panel - Scalar Properties */}
-          <div className="w-1/2 bg-white border border-gray-200 rounded-lg overflow-auto">
+          <div className="w-1/2 bg-white border border-gray-200 rounded-lg overflow-auto relative">
             <div className="p-2 border-b border-gray-200 bg-gray-50">
               <h4 className="text-sm font-medium text-gray-700">Properties</h4>
             </div>
