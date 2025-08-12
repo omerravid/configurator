@@ -656,10 +656,10 @@ const ScalarPropertiesPanel = ({
             <div>No scalar properties to display</div>
             {actualSelectedValue && typeof actualSelectedValue === 'object' && (
               <div className="mt-2 text-xs">
-                <div>Available properties: {Object.keys(actualSelectedValue).join(', ')}</div>
-                <div>Config type: {configType}</div>
+                <div>Available properties: {Object.keys(actualSelectedValue || {}).join(', ')}</div>
+                <div>Config type: {configType || 'Unknown'}</div>
                 <div>Is component: {isCompRef ? 'Yes' : 'No'}</div>
-                <div>Objects count: {subObjects.length}</div>
+                <div>Objects count: {subObjects.length || 0}</div>
                 <div className="mt-1 text-blue-600">
                   {subObjects.length > 0 ? 'Check the Objects section below for navigation' : 'This object contains only component references or complex objects'}
                 </div>
