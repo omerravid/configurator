@@ -134,9 +134,11 @@ const ScalarPropertiesPanel = ({
     });
   };
 
-  const componentRef = isComponentReference() ? getActualValueAndSource(selectedValue).actualValue : null;
+  const isCompRef = isComponentReference();
+  const componentRef = isCompRef ? getActualValueAndSource(selectedValue).actualValue : null;
   const subObjects = getSubObjects(selectedValue);
   const scalarProperties = getScalarProperties(selectedValue, !!componentRef);
+  const actualSelectedValue = selectedValue ? getActualValueAndSource(selectedValue).actualValue : null;
 
   // Debug logging for component detection and property filtering
   const actualSelectedValue = selectedValue ? getActualValueAndSource(selectedValue).actualValue : null;
