@@ -223,6 +223,16 @@ const ScalarPropertiesPanel = ({
     showToast(`Component version updated to ${selectedVersion.name}`, "success");
   };
 
+  const handleNavigateToSubObject = (subObjectKey) => {
+    if (!selectedPath || !onNavigateToPath) return;
+
+    const newPath = selectedPath === "root"
+      ? `root.${subObjectKey}`
+      : `${selectedPath}.${subObjectKey}`;
+
+    onNavigateToPath(newPath);
+  };
+
   const copyToClipboard = async (text, label = "Value") => {
     // Always use fallback since Clipboard API is blocked in iframes
     console.log(`Attempting to copy ${label}:`, text);
