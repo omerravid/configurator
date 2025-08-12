@@ -30,6 +30,7 @@ const StructuralTreeNode = ({
   onStructuralChange = () => {},
   parentValue = null,
   configType = null,
+  configName = null,
 }) => {
   const { showToast } = useToast();
   const [contextMenu, setContextMenu] = useState(null);
