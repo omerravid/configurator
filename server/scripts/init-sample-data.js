@@ -1,140 +1,157 @@
 const { Configuration, User } = require('../models');
 
-// Three components with hierarchical structure
+// Three smart watch components with hierarchical structure
 const sampleComponents = [
   {
-    name: "Tools",
+    name: "Display",
     type: "COMPONENT", 
     data: {
-      TrailBlazer: {
-        enabled: true,
-        settings: {
-          precision: "high",
-          mode: "auto"
+      screen: {
+        resolution: {
+          width: 454,
+          height: 454
+        },
+        brightness: {
+          auto: true,
+          min: 10,
+          max: 100,
+          default: 75
+        },
+        colorDepth: "16bit",
+        refresh: 60
+      },
+      ui: {
+        theme: "light",
+        layout: "grid",
+        animations: true,
+        gestures: {
+          swipe: true,
+          tap: true,
+          longPress: true,
+          crown: true
         }
       },
-      ScrewInserter: {
-        enabled: true,
-        torque: 25,
-        speed: "medium"
+      watchface: {
+        style: "analog",
+        complications: ["date", "battery", "steps"],
+        customizable: true
       },
-      retractor: {
+      alwaysOn: {
         enabled: false,
-        position: "home"
+        dimLevel: 5,
+        updateFreq: 1
       },
-      OSDrill: {
-        enabled: true,
-        depth: 10.5,
-        speed: "slow"
-      },
-      LidarCalib: {
-        enabled: true,
-        accuracy: 0.1,
-        range: 100
-      },
-      HSdrill: {
-        enabled: false,
-        temperature: 25.0
-      },
-      fcu: {
-        enabled: true,
-        controlMode: "manual",
-        timeout: 30
-      },
-      detectorDummy: {
-        enabled: false,
-        sensitivity: 0.8
+      accessibility: {
+        fontSize: "medium",
+        voiceOver: false,
+        hapticFeedback: true
       }
     },
-    description: "Complete toolset configuration with 8 different tools",
+    description: "Complete display and user interface configuration for smart watch",
     status: "COMMITTED"
   },
   {
-    name: "IQ3",
+    name: "Sensors",
     type: "COMPONENT",
     data: {
-      system: {
-        version: "3.1.4",
-        mode: "production",
-        debug: false
-      },
-      network: {
-        interface: "eth0",
-        dhcp: true,
-        dns: ["8.8.8.8", "8.8.4.4"]
-      },
-      storage: {
-        capacity: "1TB",
-        compression: true,
-        backup: {
-          enabled: true,
-          interval: "daily",
-          retention: 30
+      heartRate: {
+        enabled: true,
+        sampleRate: 1,
+        accuracy: "high",
+        zones: {
+          resting: [50, 90],
+          fat_burn: [90, 126],
+          cardio: [126, 153],
+          peak: [153, 200]
         }
       },
-      processing: {
-        threads: 8,
-        priority: "normal",
-        cache: {
-          size: "512MB",
-          policy: "LRU"
+      gps: {
+        enabled: true,
+        accuracy: "balanced",
+        satellites: ["GPS", "GLONASS"],
+        assistedGPS: true,
+        coldStart: 30,
+        hotStart: 3
+      },
+      accelerometer: {
+        enabled: true,
+        sensitivity: "medium",
+        range: "8g",
+        sampleRate: 50
+      },
+      gyroscope: {
+        enabled: true,
+        range: "2000dps",
+        calibration: true
+      },
+      barometer: {
+        enabled: true,
+        precision: 1,
+        seaLevel: 1013.25
+      },
+      ambient: {
+        light: true,
+        temperature: false,
+        humidity: false
+      },
+      stepCounter: {
+        enabled: true,
+        sensitivity: "auto",
+        goalDaily: 10000
+      }
+    },
+    description: "Comprehensive sensor package for health and fitness tracking",
+    status: "COMMITTED"
+  },
+  {
+    name: "Battery",
+    type: "COMPONENT",
+    data: {
+      capacity: {
+        mAh: 284,
+        voltage: 3.8,
+        chemistry: "LiPo"
+      },
+      charging: {
+        method: "wireless",
+        maxWatts: 5,
+        fastCharge: false,
+        efficiency: 85,
+        timeToFull: 120
+      },
+      power: {
+        management: "adaptive",
+        lowPowerMode: {
+          threshold: 20,
+          features: ["gps", "wifi", "animations"],
+          brightness: 30
+        },
+        sleepMode: {
+          enabled: true,
+          timeout: 300,
+          wakeGestures: ["tap", "crown", "raise"]
         }
       },
       monitoring: {
-        enabled: true,
-        metrics: ["cpu", "memory", "disk", "network"],
+        reporting: true,
+        intervals: [1, 5, 15, 60],
         alerts: {
-          cpu: 80,
-          memory: 85,
-          disk: 90
+          low: 15,
+          critical: 5
+        },
+        optimization: {
+          adaptive: true,
+          learning: true,
+          backgroundSync: "smart"
         }
+      },
+      lifespan: {
+        cycleCount: 0,
+        degradation: 0,
+        warranty: 500
       }
     },
-    description: "IQ3 system configuration with comprehensive settings",
-    status: "COMMITTED"
-  },
-  {
-    name: "Database",
-    type: "COMPONENT",
-    data: {
-      connection: {
-        host: "localhost",
-        port: 5432,
-        database: "maindb",
-        ssl: {
-          enabled: false,
-          verify: false
-        }
-      },
-      pool: {
-        min: 5,
-        max: 20,
-        timeout: 30000
-      },
-      queries: {
-        timeout: 15000,
-        retries: 3,
-        cache: {
-          enabled: true,
-          ttl: 300
-        }
-      },
-      logging: {
-        enabled: true,
-        level: "info",
-        slowQuery: 5000
-      },
-      backup: {
-        enabled: true,
-        schedule: "0 2 * * *",
-        retention: {
-          daily: 7,
-          weekly: 4,
-          monthly: 12
-        }
-      }
-    },
-    description: "Database configuration with connection pooling and backup settings",
+    description: "Advanced battery management and power optimization system",
     status: "COMMITTED"
   }
 ];
@@ -142,138 +159,177 @@ const sampleComponents = [
 // Component versions (one additional version per component)
 const sampleVersions = [
   {
-    name: "Tools v2",
+    name: "Display v2",
     type: "VERSION",
-    parentComponent: "Tools",
+    parentComponent: "Display",
     data: {
-      TrailBlazer: {
-        settings: {
-          precision: "ultra",
-          mode: "precision"
+      screen: {
+        brightness: {
+          max: 120,
+          auto: true,
+          outdoor: 90
+        },
+        colorDepth: "24bit",
+        refresh: 120
+      },
+      ui: {
+        theme: "adaptive",
+        animations: true,
+        gestures: {
+          pinch: true,
+          rotate: true
         }
       },
-      ScrewInserter: {
-        torque: 35,
-        speed: "fast"
-      },
-      HSdrill: {
+      alwaysOn: {
         enabled: true,
-        temperature: 22.0
+        dimLevel: 8,
+        smartSchedule: true
       },
-      detectorDummy: {
-        enabled: true,
-        sensitivity: 0.9
+      accessibility: {
+        fontSize: "large",
+        voiceOver: true,
+        magnification: 1.2
       }
     },
-    description: "Enhanced tools configuration with improved precision and additional tool enablement",
+    description: "Enhanced display with higher refresh rate, adaptive themes, and improved accessibility",
     status: "COMMITTED"
   },
   {
-    name: "IQ3 v2",
+    name: "Sensors v2",
     type: "VERSION", 
-    parentComponent: "IQ3",
+    parentComponent: "Sensors",
     data: {
-      system: {
-        version: "3.2.1",
-        mode: "performance"
+      heartRate: {
+        sampleRate: 0.5,
+        accuracy: "clinical",
+        zones: {
+          resting: [45, 85],
+          recovery: [85, 100],
+          aerobic: [100, 140],
+          anaerobic: [140, 175],
+          neuromuscular: [175, 220]
+        },
+        variability: true
       },
-      processing: {
-        threads: 16,
-        priority: "high",
-        cache: {
-          size: "1GB",
-          policy: "LFU"
+      gps: {
+        accuracy: "precise",
+        satellites: ["GPS", "GLONASS", "Galileo", "BeiDou"],
+        dualFreq: true,
+        coldStart: 15,
+        hotStart: 1
+      },
+      spo2: {
+        enabled: true,
+        accuracy: "medical",
+        continuousMode: false,
+        sleepTracking: true
+      },
+      temperature: {
+        enabled: true,
+        skin: true,
+        ambient: true,
+        fever: true
+      }
+    },
+    description: "Advanced sensor suite with SpO2, temperature monitoring, and enhanced GPS",
+    status: "COMMITTED"
+  },
+  {
+    name: "Battery v2",
+    type: "VERSION",
+    parentComponent: "Battery", 
+    data: {
+      capacity: {
+        mAh: 340,
+        fastCharge: true
+      },
+      charging: {
+        maxWatts: 7.5,
+        timeToFull: 90,
+        efficiency: 92,
+        reverse: false
+      },
+      power: {
+        management: "AI",
+        lowPowerMode: {
+          threshold: 30,
+          aggressive: true
+        },
+        sleepMode: {
+          deepSleep: true,
+          scheduledWake: true
         }
       },
       monitoring: {
-        alerts: {
-          cpu: 90,
-          memory: 90,
-          disk: 95
+        intervals: [0.5, 1, 5, 15],
+        health: {
+          temperature: true,
+          impedance: true,
+          cycles: true
+        },
+        optimization: {
+          usage: "predictive",
+          appLearning: true
         }
       }
     },
-    description: "Performance-optimized IQ3 version with enhanced processing capabilities",
-    status: "COMMITTED"
-  },
-  {
-    name: "Database v2",
-    type: "VERSION",
-    parentComponent: "Database", 
-    data: {
-      connection: {
-        ssl: {
-          enabled: true,
-          verify: true
-        }
-      },
-      pool: {
-        max: 50,
-        timeout: 60000
-      },
-      queries: {
-        timeout: 30000,
-        cache: {
-          ttl: 600
-        }
-      },
-      logging: {
-        level: "debug",
-        slowQuery: 2000
-      }
-    },
-    description: "Enhanced database configuration with SSL and improved performance settings",
+    description: "Enhanced battery with larger capacity, fast charging, and AI-powered optimization",
     status: "COMMITTED"
   }
 ];
 
-// Two products with different component combinations and no self data
+// Two smart watch products with different component combinations and no self data
 const sampleProducts = [
   {
-    name: "Production System Alpha",
+    name: "FitnessWatch Pro",
     type: "PRODUCT",
     data: {
-      Tools: {
+      Display: {
         componentId: null, // Will be set after components are created
-        versionId: null,   // Will use Tools v2
-        componentName: "Tools",
-        versionName: "Tools v2"
+        versionId: null,   // Will use Display v2
+        componentName: "Display",
+        versionName: "Display v2"
       },
-      IQ3: {
+      Sensors: {
         componentId: null, // Will be set after components are created
-        versionId: null,   // Will use IQ3 (root)
-        componentName: "IQ3", 
-        versionName: "IQ3 (root)"
+        versionId: null,   // Will use Sensors v2
+        componentName: "Sensors", 
+        versionName: "Sensors v2"
       },
-      Database: {
+      Battery: {
         componentId: null, // Will be set after components are created
-        versionId: null,   // Will use Database v2
-        componentName: "Database",
-        versionName: "Database v2"
+        versionId: null,   // Will use Battery v2
+        componentName: "Battery",
+        versionName: "Battery v2"
       }
     },
-    description: "Production system using enhanced tools, standard IQ3, and secure database",
+    description: "Premium fitness watch with advanced display, comprehensive sensors, and enhanced battery",
     status: "COMMITTED"
   },
   {
-    name: "Development System Beta",
+    name: "SmartWatch Lite",
     type: "PRODUCT", 
     data: {
-      Tools: {
+      Display: {
         componentId: null, // Will be set after components are created
-        versionId: null,   // Will use Tools (root)
-        componentName: "Tools",
-        versionName: "Tools (root)"
+        versionId: null,   // Will use Display (root)
+        componentName: "Display",
+        versionName: "Display (root)"
       },
-      IQ3: {
+      Sensors: {
         componentId: null, // Will be set after components are created
-        versionId: null,   // Will use IQ3 v2
-        componentName: "IQ3",
-        versionName: "IQ3 v2" 
+        versionId: null,   // Will use Sensors (root)
+        componentName: "Sensors",
+        versionName: "Sensors (root)" 
+      },
+      Battery: {
+        componentId: null, // Will be set after components are created
+        versionId: null,   // Will use Battery (root)
+        componentName: "Battery",
+        versionName: "Battery (root)"
       }
-      // Note: No Database component in this product
     },
-    description: "Development system using standard tools and performance IQ3, no database",
+    description: "Essential smart watch with standard display, basic sensors, and standard battery",
     status: "COMMITTED"
   }
 ];
@@ -304,7 +360,7 @@ async function initializeSampleData() {
     const createdProducts = [];
     const createdInstances = [];
 
-    // 1. Create three components
+    // 1. Create three smart watch components
     for (const componentData of sampleComponents) {
       const created = await Configuration.create({
         name: componentData.name,
@@ -336,26 +392,27 @@ async function initializeSampleData() {
       console.log(`Created version: ${versionData.name}`);
     }
 
-    // 3. Create two products with different component combinations
+    // 3. Create two smart watch products with different component combinations
     for (let i = 0; i < sampleProducts.length; i++) {
       const productData = sampleProducts[i];
       
       // Update component references with actual IDs
-      if (productData.data.Tools) {
-        productData.data.Tools.componentId = createdComponents[0].id; // Tools component
-        // Use Tools v2 for first product, Tools root for second
-        productData.data.Tools.versionId = i === 0 ? createdVersions[0].id : createdComponents[0].id;
+      if (productData.data.Display) {
+        productData.data.Display.componentId = createdComponents[0].id; // Display component
+        // Use Display v2 for FitnessWatch Pro, Display root for SmartWatch Lite
+        productData.data.Display.versionId = i === 0 ? createdVersions[0].id : createdComponents[0].id;
       }
       
-      if (productData.data.IQ3) {
-        productData.data.IQ3.componentId = createdComponents[1].id; // IQ3 component
-        // Use IQ3 root for first product, IQ3 v2 for second
-        productData.data.IQ3.versionId = i === 0 ? createdComponents[1].id : createdVersions[1].id;
+      if (productData.data.Sensors) {
+        productData.data.Sensors.componentId = createdComponents[1].id; // Sensors component
+        // Use Sensors v2 for FitnessWatch Pro, Sensors root for SmartWatch Lite
+        productData.data.Sensors.versionId = i === 0 ? createdVersions[1].id : createdComponents[1].id;
       }
       
-      if (productData.data.Database) {
-        productData.data.Database.componentId = createdComponents[2].id; // Database component
-        productData.data.Database.versionId = createdVersions[2].id; // Database v2
+      if (productData.data.Battery) {
+        productData.data.Battery.componentId = createdComponents[2].id; // Battery component
+        // Use Battery v2 for FitnessWatch Pro, Battery root for SmartWatch Lite
+        productData.data.Battery.versionId = i === 0 ? createdVersions[2].id : createdComponents[2].id;
       }
 
       const created = await Configuration.create({
@@ -373,57 +430,92 @@ async function initializeSampleData() {
     // 4. Create one instance per product
     const instanceConfigs = [
       {
-        name: "Alpha Production Instance",
+        name: "FitnessWatch Pro - Sports Edition",
         type: "INSTANCE",
         parent_id: createdProducts[0].id,
         data: {
-          Tools: {
-            TrailBlazer: {
-              settings: {
-                mode: "production"
+          Display: {
+            screen: {
+              brightness: {
+                default: 85
               }
+            },
+            ui: {
+              theme: "sport",
+              layout: "tiles"
+            },
+            watchface: {
+              style: "digital",
+              complications: ["heartRate", "pace", "distance", "calories"]
             }
           },
-          Database: {
-            connection: {
-              host: "prod-alpha-db.company.com",
-              database: "alpha_prod"
+          Sensors: {
+            heartRate: {
+              sampleRate: 0.2,
+              zones: {
+                sport: [120, 180]
+              }
+            },
+            gps: {
+              accuracy: "precise",
+              recordingRate: 1
+            }
+          },
+          Battery: {
+            power: {
+              management: "performance",
+              lowPowerMode: {
+                threshold: 25
+              }
             }
           }
         },
-        description: "Production instance for Alpha system with environment-specific overrides",
+        description: "Sports-optimized configuration for fitness enthusiasts",
         status: "COMMITTED"
       },
       {
-        name: "Beta Development Instance",
+        name: "SmartWatch Lite - Everyday Use",
         type: "INSTANCE", 
         parent_id: createdProducts[1].id,
         data: {
-          Tools: {
-            TrailBlazer: {
-              enabled: true,
-              settings: {
-                mode: "debug",
-                precision: "medium"
+          Display: {
+            screen: {
+              brightness: {
+                default: 60,
+                auto: true
               }
             },
-            ScrewInserter: {
-              speed: "slow"
+            ui: {
+              theme: "classic",
+              animations: false
+            },
+            alwaysOn: {
+              enabled: false
             }
           },
-          IQ3: {
-            system: {
-              debug: true
+          Sensors: {
+            heartRate: {
+              sampleRate: 5,
+              accuracy: "balanced"
             },
-            monitoring: {
-              alerts: {
-                cpu: 95,
-                memory: 95
+            gps: {
+              enabled: false
+            },
+            stepCounter: {
+              goalDaily: 8000
+            }
+          },
+          Battery: {
+            power: {
+              management: "efficiency",
+              lowPowerMode: {
+                threshold: 15,
+                aggressive: true
               }
             }
           }
         },
-        description: "Development instance for Beta system with debug settings",
+        description: "Battery-optimized configuration for daily wear",
         status: "COMMITTED"
       }
     ];
