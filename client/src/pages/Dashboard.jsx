@@ -405,7 +405,11 @@ const Dashboard = () => {
         console.log("Skipping path validation for INSTANCE - allowing component override");
       }
 
-      const pathParts = path.split(".");
+      // Remove "root." prefix if present
+      const cleanPath = path.startsWith("root.") ? path.substring(5) : path;
+      console.log("Original path:", path, "Clean path:", cleanPath);
+
+      const pathParts = cleanPath.split(".");
       const newData = JSON.parse(JSON.stringify(currentData)); // Deep clone
 
       // Navigate to the parent of the target property
