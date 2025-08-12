@@ -1004,6 +1004,7 @@ const InteractiveJSONViewer = ({
                 selectedPath={selectedStructuralPath}
                 onStructuralChange={handleStructuralChange}
                 configType={configType}
+                configName={title}
               />
             </div>
           </div>
