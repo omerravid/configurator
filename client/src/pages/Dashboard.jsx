@@ -373,7 +373,7 @@ const Dashboard = () => {
       // For component removal in products, we need the resolved data to see all components
       // For other edits, use raw data to preserve inheritance
       let currentData;
-      if (selectedConfig.type === "PRODUCT" && selectedPath && newValue === undefined) {
+      if (selectedConfig.type === "PRODUCT" && path && newValue === undefined) {
         // Component removal: use resolved data to see all current components
         const resolvedResponse = await configAPI.getById(configId, true);
         currentData = resolvedResponse.data.resolved || {};
