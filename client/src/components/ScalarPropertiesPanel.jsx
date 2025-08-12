@@ -375,8 +375,10 @@ const ScalarPropertiesPanel = ({
   return (
     <div className="p-4" onClick={handleContainerClick}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium text-gray-900">Properties</h3>
-        {isEditable && (
+        <h3 className="text-lg font-medium text-gray-900">
+          {componentRef ? "Component" : "Properties"}
+        </h3>
+        {isEditable && !componentRef && (
           <button
             onClick={() => setShowAddProperty(true)}
             className="flex items-center space-x-1 px-2 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
