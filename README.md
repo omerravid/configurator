@@ -62,8 +62,21 @@ A comprehensive component-based configuration management system with deep merge 
 
 1. **Install Dependencies**
 
+   You need to install dependencies for both the server and client:
+
    ```bash
+   # Install root dependencies (contains scripts to run both)
    npm install
+
+   # Install server dependencies
+   cd server
+   npm install
+   cd ..
+
+   # Install client dependencies
+   cd client
+   npm install
+   cd ..
    ```
 
 2. **Verify Installation** (Optional but recommended)
@@ -78,6 +91,8 @@ A comprehensive component-based configuration management system with deep merge 
    ```
 
 That's it! The embedded MongoDB will start automatically and the application will be ready to use.
+
+**⚠️ Important**: Make sure to install dependencies for both server and client before running the application. The root npm install only installs the scripts to coordinate both services.
 
 This will start:
 - **Backend** on port 3002 with embedded MongoDB
