@@ -483,7 +483,7 @@ const Dashboard = () => {
 
         // Merge delta with existing raw data
         const existingData = JSON.parse(JSON.stringify(currentData));
-        const mergedData = this.deepMerge(existingData, deltaData);
+        const mergedData = deepMerge(existingData, deltaData);
 
         console.log("Delta update:", deltaData);
         console.log("Existing data:", existingData);
