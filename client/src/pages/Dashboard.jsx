@@ -331,13 +331,17 @@ const Dashboard = () => {
     if (!selectedConfig || !canEdit()) return;
 
     try {
-      console.log("=== handleDataChange - INSTANCE UPDATE DEBUG ===");
-      console.log("selectedConfig:", selectedConfig);
-      console.log("selectedConfig.id:", selectedConfig.id, typeof selectedConfig.id);
-      console.log("selectedConfig.type:", selectedConfig.type);
-      console.log("selectedConfig.parent_id:", selectedConfig.parent_id, typeof selectedConfig.parent_id);
-      console.log("path:", path);
-      console.log("newValue:", newValue);
+      console.log("=== handleDataChange - INHERITANCE DEBUG ===");
+      console.log("SELECTED CONFIG (what will be updated):");
+      console.log("  - Name:", selectedConfig.name);
+      console.log("  - Type:", selectedConfig.type);
+      console.log("  - ID:", selectedConfig.id);
+      console.log("PATH BEING EDITED:", path);
+      console.log("NEW VALUE:", newValue);
+      console.log("INHERITANCE EXPECTATION:");
+      console.log("  - If editing COMPONENT: should modify component directly");
+      console.log("  - If editing INSTANCE: should create override in instance");
+      console.log("  - If editing USER: should create override in user config");
 
       // Ensure selectedConfig.id is a string
       const configId = typeof selectedConfig.id === 'string' ? selectedConfig.id : String(selectedConfig.id);
