@@ -774,7 +774,7 @@ const ScalarPropertiesPanel = ({
                     >
                       <ClipboardIcon className="w-3 h-3" />
                     </button>
-                    {isEditable && (
+                    {isEditable && configType !== "PRODUCT" && (
                       <>
                         <button
                           onClick={() => handleEditStart(propertyName, value)}
