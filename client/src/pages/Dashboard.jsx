@@ -349,7 +349,7 @@ const Dashboard = () => {
 
       // Get the raw configuration data (only this level's overrides)
       const rawResponse = await configAPI.getRawById(configId);
-      const currentData = rawResponse.data.resolved || {};
+      const currentData = rawResponse.data.data || {}; // Use raw data, not resolved
 
       // Special case: if path is "_root_", replace the entire data object
       if (path === "_root_") {
