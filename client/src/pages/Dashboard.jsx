@@ -359,8 +359,10 @@ const Dashboard = () => {
         return;
       }
 
-      // For child configurations, we need to validate the path exists in parent
-      if (selectedConfig.type !== "PRODUCT" && selectedConfig.parent_id) {
+      // For child configurations, validate the path exists in parent
+      // Note: INSTANCE configurations should be allowed to override component properties more freely
+      if (selectedConfig.type !== "PRODUCT" && selectedConfig.type !== "INSTANCE" && selectedConfig.parent_id) {
+        console.log("Performing path validation for non-PRODUCT, non-INSTANCE configuration");
         try {
           // Ensure parent_id is a string
           const parentId = typeof selectedConfig.parent_id === 'string' ? selectedConfig.parent_id : String(selectedConfig.parent_id);
@@ -399,6 +401,8 @@ const Dashboard = () => {
           console.error("Path validation error:", pathCheckError);
           throw pathCheckError;
         }
+      } else if (selectedConfig.type === "INSTANCE") {
+        console.log("Skipping path validation for INSTANCE - allowing component override");
       }
 
       const pathParts = path.split(".");
