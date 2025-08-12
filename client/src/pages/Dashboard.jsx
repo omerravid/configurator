@@ -939,6 +939,7 @@ const Dashboard = () => {
                     className="max-w-none"
                     isEditable={canEdit()}
                     onDataChange={handleDataChange}
+                    configType={selectedConfig?.type}
                   />
                 ) : (
                   <div className="text-center text-gray-500 p-8">
