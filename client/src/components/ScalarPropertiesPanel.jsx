@@ -245,10 +245,23 @@ const ScalarPropertiesPanel = ({
   };
 
   const handleVersionChange = (newVersionId) => {
-    if (!componentRef || !newVersionId) return;
+    console.log("Version change handler called:", {
+      newVersionId,
+      componentRef,
+      availableVersions,
+      selectedPath
+    });
+
+    if (!componentRef || !newVersionId) {
+      console.log("Version change aborted: missing componentRef or versionId");
+      return;
+    }
 
     const selectedVersion = availableVersions.find(v => v.id === newVersionId);
-    if (!selectedVersion) return;
+    if (!selectedVersion) {
+      console.log("Version change aborted: selected version not found");
+      return;
+    }
 
     // Update the component reference
     const updatedComponentRef = {
@@ -256,6 +269,11 @@ const ScalarPropertiesPanel = ({
       versionId: newVersionId,
       versionName: selectedVersion.name
     };
+
+    console.log("Updating component reference:", {
+      old: componentRef,
+      new: updatedComponentRef
+    });
 
     // Create the path for the component reference and update it
     onValueChange?.(selectedPath, updatedComponentRef);
