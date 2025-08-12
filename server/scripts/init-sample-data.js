@@ -194,7 +194,7 @@ async function initializeSampleData() {
       status: "DRAFT",
       createdBy: adminUser.id
     });
-    console.log(`Created version: ${dbVersionConfig.name}`);
+    console.log(`Created version: Database Component v2`);
 
     console.log('Sample data initialization completed successfully!');
     console.log(`Created ${createdConfigs.length + 2} configurations total`);
