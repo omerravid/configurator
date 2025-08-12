@@ -28,9 +28,16 @@ A comprehensive component-based configuration management system with deep merge 
 
 ### User Interface
 
-- **Tree Navigation**: Browse configurations in a hierarchical tree structure
+- **Tree Navigation**: Browse configurations in a hierarchical tree structure with drag-and-drop support
+- **Dual View Modes**: Toggle between Flat JSON view and Structural split-panel editing
 - **JSON Viewer with Provenance**: Hover over any value to see which configuration provided it
 - **Component Selector**: Easy component selection and version management for products
+- **Structural Editing**: Split-panel interface with tree navigation and property panel
+- **Context Menus**: Right-click operations for copy, paste, add, rename, delete
+- **Drag-and-Drop**: Direct component integration into products via drag-and-drop
+- **Import Functionality**: Import folder structures to quickly prototype components
+- **Version Management**: Inline component version editing with dropdown selection
+- **Component Removal**: Easy unlinking of components from products
 - **Admin Settings Panel**: Configure MongoDB connections and migrate data
 - **Role-based Access**: Admin and User roles with appropriate permissions
 
@@ -366,7 +373,7 @@ node backup-restore.js backup my-backup-name
 │   │   └── settings.js    # MongoDB management endpoints
 │   ├── scripts/           # Migration scripts
 │   └── middleware/        # Authentication middleware
-├── client/                # React frontend
+├─�� client/                # React frontend
 │   ├── src/
 │   │   ├── components/    # React components
 │   │   │   ├── ComponentSelector.jsx   # Component selection UI
