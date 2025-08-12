@@ -417,7 +417,9 @@ const ScalarPropertiesPanel = ({
     console.log("Computed componentPath for removal:", componentPath);
 
     // Remove the component by setting the value to undefined
-    onValueChange?.(componentPath, undefined);
+    // For component removal, we need to pass null explicitly to indicate deletion
+    console.log("Calling onValueChange with:", { path: componentPath, value: null });
+    onValueChange?.(componentPath, null);
     showToast(`Removed ${componentRef.componentName} from product`, "success");
   };
 
