@@ -78,6 +78,76 @@ const StructuralTreeNode = ({
 
   const hasChildren = hasStructuralChildren();
 
+  // Detect if this item is a component reference
+  const isComponentReference = () => {
+    if (!isObject || !actualValue) return false;
+    return actualValue.hasOwnProperty('componentId') &&
+           actualValue.hasOwnProperty('versionId') &&
+           actualValue.hasOwnProperty('componentName');
+  };
+
+  // Detect if this item is a versioned component (has both component data and version metadata)
+  const isVersionedComponent = () => {
+    if (!isComponentReference()) return false;
+    return actualValue.hasOwnProperty('versionName') && actualValue.versionName;
+  };
+
+  // Get the appropriate icon for this item
+  const getItemIcon = () => {
+    if (isRoot) {
+      // Root element uses configuration type icon
+      return getConfigTypeIcon(configType);
+    } else if (isComponentReference()) {
+      if (isVersionedComponent()) {
+        return <CubeIcon className="w-4 h-4 text-blue-600" title="Versioned Component" />;
+      } else {
+        return <CogIcon className="w-4 h-4 text-teal-600" title="Component" />;
+      }
+    } else if (isObject || isArray) {
+      // Regular object/array
+      return <DocumentIcon className="w-4 h-4 text-gray-600" title="Object" />;
+    }
+    return null;
+  };
+
+  // Get configuration type icon for root
+  const getConfigTypeIcon = (type) => {
+    switch (type) {
+      case "PRODUCT":
+        return (
+          <div className="w-4 h-4 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold" title="Product">
+            P
+          </div>
+        );
+      case "COMPONENT":
+        return (
+          <div className="w-4 h-4 bg-teal-500 text-white rounded-full flex items-center justify-center text-xs font-bold" title="Component">
+            C
+          </div>
+        );
+      case "VERSION":
+        return (
+          <div className="w-4 h-4 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold" title="Version">
+            V
+          </div>
+        );
+      case "INSTANCE":
+        return (
+          <div className="w-4 h-4 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold" title="Instance">
+            I
+          </div>
+        );
+      case "USER":
+        return (
+          <div className="w-4 h-4 bg-purple-500 text-white rounded-full flex items-center justify-center text-xs font-bold" title="User Config">
+            U
+          </div>
+        );
+      default:
+        return <DocumentIcon className="w-4 h-4 text-gray-600" title="Configuration" />;
+    }
+  };
+
   const toggleExpanded = () => {
     const newExpandedState = !isExpanded;
     onExpandToggle(currentPath, newExpandedState);
@@ -382,7 +452,7 @@ const StructuralTreeNode = ({
                   className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600 focus:outline-none"
                   title="Cancel"
                 >
-                  ✕
+                  ���
                 </button>
               </div>
             ) : (
