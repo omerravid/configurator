@@ -362,17 +362,21 @@ const ScalarPropertiesPanel = ({
     ];
 
     if (isEditable) {
+      // Value editing allowed for all editable configurations
       menuItems.unshift({
         label: "Edit Value",
         icon: PencilIcon,
         onClick: () => handleEditStart(propertyName, value),
       });
 
-      menuItems.push({
-        label: "Delete Property",
-        icon: TrashIcon,
-        onClick: () => handleDeleteProperty(propertyName),
-      });
+      // Property deletion only allowed in COMPONENT configurations
+      if (configType === "COMPONENT") {
+        menuItems.push({
+          label: "Delete Property",
+          icon: TrashIcon,
+          onClick: () => handleDeleteProperty(propertyName),
+        });
+      }
     }
 
     setContextMenu({
