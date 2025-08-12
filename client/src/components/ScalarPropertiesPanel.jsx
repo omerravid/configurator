@@ -407,6 +407,56 @@ const ScalarPropertiesPanel = ({
         </button>
       </div>
 
+      {/* Component View */}
+      {componentRef && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center mb-3">
+            <CogIcon className="w-5 h-5 text-blue-600 mr-2" />
+            <h4 className="text-lg font-medium text-blue-900">Component Reference</h4>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Component
+              </label>
+              <div className="text-sm text-gray-900 bg-white px-3 py-2 border border-gray-200 rounded">
+                {componentRef.componentName}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Version
+              </label>
+              {isEditable ? (
+                <div className="flex items-center space-x-2">
+                  <select
+                    value={componentRef.versionId}
+                    onChange={(e) => handleVersionChange(e.target.value)}
+                    disabled={loadingVersions}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {availableVersions.map(version => (
+                      <option key={version.id} value={version.id}>
+                        {version.name}
+                      </option>
+                    ))}
+                  </select>
+                  {loadingVersions && (
+                    <div className="text-sm text-gray-500">Loading...</div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-900 bg-white px-3 py-2 border border-gray-200 rounded">
+                  {componentRef.versionName}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Add Property Form */}
       {showAddProperty && (
         <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded">
