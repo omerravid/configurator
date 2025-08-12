@@ -89,12 +89,14 @@ app.use("*", (req, res) => {
 app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
 
-  // Initialize sample data if database is empty
-  try {
-    await initializeSampleData();
-  } catch (error) {
-    console.log('Sample data initialization handled:', error.message);
-  }
+  // Initialize sample data if database is empty (with delay to ensure admin user is created)
+  setTimeout(async () => {
+    try {
+      await initializeSampleData();
+    } catch (error) {
+      console.log('Sample data initialization handled:', error.message);
+    }
+  }, 2000); // 2 second delay
 });
 
 module.exports = app;
