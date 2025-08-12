@@ -653,6 +653,10 @@ const ScalarPropertiesPanel = ({
                 <div>Available properties: {Object.keys(actualSelectedValue).join(', ')}</div>
                 <div>Config type: {configType}</div>
                 <div>Is component: {isCompRef ? 'Yes' : 'No'}</div>
+                <div>Objects count: {subObjects.length}</div>
+                <div className="mt-1 text-blue-600">
+                  {subObjects.length > 0 ? 'Check the Objects section below for navigation' : 'This object contains only component references or complex objects'}
+                </div>
               </div>
             )}
           </div>
