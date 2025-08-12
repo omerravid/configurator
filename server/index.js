@@ -6,9 +6,13 @@ const helmet = require("helmet");
 const app = express();
 const PORT = process.env.PORT || 3002;
 
-// Initialize database
-const db = require("./models/database");
 const { initializeSampleData } = require("./scripts/init-sample-data");
+
+// Initialize database conditionally
+let db;
+if (process.env.USE_MONGODB !== 'true') {
+  db = require("./models/database");
+}
 
 // Initialize MongoDB if enabled
 if (process.env.USE_MONGODB === 'true') {
