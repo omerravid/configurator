@@ -445,7 +445,19 @@ class ConfigurationService {
     // Validate schema enforcement for updates
     if (data && config.type !== "PRODUCT" && config.parent_id) {
       // Ensure parent_id is a string, not a populated object
-      const parentId = typeof config.parent_id === 'string' ? config.parent_id : String(config.parent_id);
+      let parentId;
+      if (typeof config.parent_id === 'string') {
+        parentId = config.parent_id;
+      } else if (config.parent_id && typeof config.parent_id === 'object') {
+        // Handle populated object case - extract the _id or id field
+        parentId = config.parent_id._id || config.parent_id.id || String(config.parent_id);
+      } else {
+        parentId = String(config.parent_id);
+      }
+
+      console.log("validateSchemaEnforcement - original parent_id:", config.parent_id);
+      console.log("validateSchemaEnforcement - converted parentId:", parentId);
+
       await this.validateSchemaEnforcement(data, parentId);
     }
 
