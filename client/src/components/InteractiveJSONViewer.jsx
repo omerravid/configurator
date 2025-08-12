@@ -613,7 +613,7 @@ const InteractiveJSONViewer = ({
       const valueAtPath = getValueAtPath(data, selectedStructuralPath);
       setSelectedStructuralValue(valueAtPath);
     }
-  }, [data, selectedStructuralPath]);
+  }, [data, selectedStructuralPath, getValueAtPath]);
 
   const handleHover = (path, source, fullPath, clickEvent) => {
     setHoveredSource(source);
