@@ -411,12 +411,12 @@ const Dashboard = () => {
       }
 
       // Update the configuration with only the modified data
-      await configAPI.update(selectedConfig.id, { data: newData });
+      await configAPI.update(configId, { data: newData });
 
       // Optimized update: only reload data without refreshing the tree
       // This preserves expand/collapse states and focus
       try {
-        const response = await configAPI.getById(selectedConfig.id, true);
+        const response = await configAPI.getById(configId, true);
         setResolvedData(response.data);
 
         // Don't refresh tree for simple value updates
