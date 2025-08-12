@@ -558,7 +558,17 @@ class ConfigurationService {
           if (version && (version.type === 'VERSION' || version.type === 'COMPONENT')) {
             // Resolve the version/component with its full inheritance chain
             const resolvedVersion = await this.resolveConfiguration(version.id, includeProvenance);
-            expandedData[componentName] = resolvedVersion.resolved;
+
+            // Preserve the component reference metadata while including resolved data
+            expandedData[componentName] = {
+              // Keep the original component reference metadata
+              componentId: reference.componentId,
+              versionId: reference.versionId,
+              componentName: reference.componentName,
+              versionName: reference.versionName,
+              // Include all resolved properties from the component/version
+              ...resolvedVersion.resolved
+            };
           } else {
             console.warn(`Version/Component not found for reference:`, reference);
             expandedData[componentName] = {};
