@@ -418,6 +418,20 @@ const StructuralTreeNode = ({
           {getItemIcon()}
         </div>
 
+        {/* Root element name */}
+        {isRoot && (
+          <div className="flex-1 min-w-0">
+            <span className="font-medium text-gray-900 truncate">
+              {configName || keyName || "Configuration"}
+              {hasChildren && (
+                <span className="ml-1 text-xs text-gray-500">
+                  ({getItemCount()})
+                </span>
+              )}
+            </span>
+          </div>
+        )}
+
         {/* Key name */}
         {!isRoot && (
           <div className="flex-1 min-w-0">
