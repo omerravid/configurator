@@ -610,21 +610,6 @@ const InteractiveJSONViewer = ({
     if (selectedStructuralPath === "root") {
       setSelectedStructuralValue(data);
     } else {
-      // Find the value at the current selected path
-      const getValueAtPath = (obj, path) => {
-        if (!path || path === "root") return obj;
-        const keys = path.replace(/^root\./, "").split(".");
-        let current = obj;
-        for (const key of keys) {
-          if (current && typeof current === "object" && current.hasOwnProperty(key)) {
-            current = current[key];
-          } else {
-            return null;
-          }
-        }
-        return current;
-      };
-
       const valueAtPath = getValueAtPath(data, selectedStructuralPath);
       setSelectedStructuralValue(valueAtPath);
     }
