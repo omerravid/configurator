@@ -86,7 +86,7 @@ class EmbeddedMongoDB {
   async initializeData() {
     try {
       console.log('Loading MongoDB models for user initialization...');
-      const { User } = require('./index');
+      const User = require('./User.mongo');
 
       // Check if admin user exists
       const existingAdmin = await User.findByUsername('admin');
