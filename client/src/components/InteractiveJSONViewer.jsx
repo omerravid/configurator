@@ -585,7 +585,7 @@ const InteractiveJSONViewer = ({
 
   // Helper function to get value at a specific path
   const getValueAtPath = (obj, path) => {
-    if (!path || path === "root") return obj;
+    if (!obj || !path || path === "root") return obj;
     const keys = path.replace(/^root\./, "").split(".");
     let current = obj;
     for (const key of keys) {
