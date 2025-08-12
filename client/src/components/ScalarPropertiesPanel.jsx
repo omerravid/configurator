@@ -111,24 +111,22 @@ const ScalarPropertiesPanel = ({
 
     // Check if it's a component reference by looking for required properties
     if (actualValue && typeof actualValue === "object" && !Array.isArray(actualValue)) {
+      // Check for component reference properties (allowing for some flexibility)
       const hasComponentId = actualValue.hasOwnProperty('componentId') && actualValue.componentId;
       const hasVersionId = actualValue.hasOwnProperty('versionId') && actualValue.versionId;
       const hasComponentName = actualValue.hasOwnProperty('componentName') && actualValue.componentName;
 
-      // A component reference must have ALL three properties AND no other significant properties
-      const componentKeys = ['componentId', 'versionId', 'componentName', 'versionName'];
-      const otherKeys = Object.keys(actualValue).filter(key => !componentKeys.includes(key));
       const isComponentRef = hasComponentId && hasVersionId && hasComponentName;
 
       console.log("Component detection details:", {
+        selectedPath,
         actualValue,
-        hasComponentId,
-        hasVersionId,
-        hasComponentName,
-        componentKeys,
-        otherKeys,
-        otherKeysCount: otherKeys.length,
-        isComponentRef
+        hasComponentId: hasComponentId ? `Yes (${actualValue.componentId})` : 'No',
+        hasVersionId: hasVersionId ? `Yes (${actualValue.versionId})` : 'No',
+        hasComponentName: hasComponentName ? `Yes (${actualValue.componentName})` : 'No',
+        allKeys: Object.keys(actualValue),
+        isComponentRef,
+        configType
       });
 
       return isComponentRef;
