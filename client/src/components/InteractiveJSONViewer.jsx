@@ -1019,6 +1019,7 @@ const InteractiveJSONViewer = ({
               onHover={handleHover}
               onHoverEnd={handleHoverEnd}
               onGetActiveTooltipPath={getActiveTooltipPath}
+              onNavigateToPath={handleNavigateToPath}
             />
           </div>
         </div>
