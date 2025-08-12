@@ -427,6 +427,11 @@ class ConfigurationService {
    * Update a configuration with validation
    */
   static async updateConfiguration(configId, { data, description }, updaterId) {
+    console.log("=== updateConfiguration called ===");
+    console.log("configId received:", configId);
+    console.log("configId type:", typeof configId);
+    console.log("configId stringified:", JSON.stringify(configId));
+
     const config = await Configuration.findById(configId);
     if (!config) {
       throw new Error("Configuration not found");
