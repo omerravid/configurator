@@ -271,7 +271,19 @@ class Configuration {
     const updateFields = {};
 
     if (data !== undefined) {
-      updateFields.data = data;
+      // Get existing configuration to merge data instead of overriding
+      const existingConfig = await ConfigurationModel.findById(normalizedId);
+      if (!existingConfig) {
+        throw new Error("Configuration not found for update");
+      }
+
+      // Merge incoming data with existing data
+      const existingData = existingConfig.data || {};
+      updateFields.data = this.deepMerge(existingData, data);
+
+      console.log("Data merge - existing:", JSON.stringify(existingData, null, 2));
+      console.log("Data merge - incoming:", JSON.stringify(data, null, 2));
+      console.log("Data merge - result:", JSON.stringify(updateFields.data, null, 2));
     }
 
     if (description !== undefined) {
