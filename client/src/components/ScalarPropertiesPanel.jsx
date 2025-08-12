@@ -79,6 +79,21 @@ const ScalarPropertiesPanel = ({
       }
 
       const { actualValue } = getActualValueAndSource(val);
+
+      // Check if this property is itself a component reference
+      const isComponentProperty = actualValue &&
+        typeof actualValue === "object" &&
+        !Array.isArray(actualValue) &&
+        actualValue.componentId &&
+        actualValue.versionId &&
+        actualValue.componentName;
+
+      // If it's a component property, don't show it as a scalar property
+      // (it will be shown in the Objects section instead)
+      if (isComponentProperty) {
+        return false;
+      }
+
       return (
         actualValue === null ||
         actualValue === undefined ||
