@@ -138,14 +138,42 @@ const ScalarPropertiesPanel = ({
   const subObjects = getSubObjects(selectedValue);
   const scalarProperties = getScalarProperties(selectedValue, !!componentRef);
 
-  // Debug logging for component detection
+  // Debug logging for component detection and property filtering
+  const actualSelectedValue = selectedValue ? getActualValueAndSource(selectedValue).actualValue : null;
+  const isCompRef = isComponentReference();
+
   console.log("ScalarPropertiesPanel Debug:", {
     selectedPath,
     configType,
-    isComponentRef: isComponentReference(),
+    isComponentRef: isCompRef,
     componentRef,
-    selectedValue: selectedValue ? getActualValueAndSource(selectedValue).actualValue : null
+    selectedValue: actualSelectedValue,
+    allProperties: actualSelectedValue && typeof actualSelectedValue === 'object' ? Object.keys(actualSelectedValue) : [],
+    scalarPropertiesCount: scalarProperties.length,
+    subObjectsCount: subObjects.length
   });
+
+  if (actualSelectedValue && typeof actualSelectedValue === 'object') {
+    Object.entries(actualSelectedValue).forEach(([key, val]) => {
+      const { actualValue } = getActualValueAndSource(val);
+      const isScalar = (
+        actualValue === null ||
+        actualValue === undefined ||
+        typeof actualValue === "string" ||
+        typeof actualValue === "number" ||
+        typeof actualValue === "boolean"
+      );
+      const isComponentProp = isCompRef && ['componentId', 'versionId', 'componentName', 'versionName'].includes(key);
+
+      console.log(`Property ${key}:`, {
+        actualValue,
+        type: typeof actualValue,
+        isScalar,
+        isComponentProp,
+        willShow: isScalar && !isComponentProp
+      });
+    });
+  }
 
 
   // Load available versions when a component is selected
