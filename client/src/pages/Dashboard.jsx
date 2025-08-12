@@ -460,41 +460,14 @@ const Dashboard = () => {
         current = current[pathParts[i]];
       }
 
-      // Set the new value or deletion marker
+      // Set the new value in delta
       const lastKey = pathParts[pathParts.length - 1];
-      if (newValue === undefined) {
-        // For deletion, we need to check existing data and merge properly
-        // Get the most current raw data to ensure we have all previous overrides
-        const freshRawResponse = await configAPI.getRawById(configId);
-        const existingData = JSON.parse(JSON.stringify(freshRawResponse.data.data || {}));
-        let existingCurrent = existingData;
-        for (let i = 0; i < pathParts.length - 1; i++) {
-          if (!existingCurrent[pathParts[i]]) {
-            existingCurrent[pathParts[i]] = {};
-          }
-          existingCurrent = existingCurrent[pathParts[i]];
-        }
-        delete existingCurrent[lastKey];
+      current[lastKey] = newValue;
 
-        // Send the updated complete data for deletions
-        await configAPI.update(configId, { data: existingData });
-      } else {
-        // For value updates, send minimal delta
-        current[lastKey] = newValue;
+      console.log("Sending delta update:", deltaData);
 
-        // Always get the most current raw data to ensure we have all previous overrides
-        const freshRawResponse = await configAPI.getRawById(configId);
-        const freshExistingData = freshRawResponse.data.data || {};
-
-        // Merge delta with the fresh existing data
-        const mergedData = deepMerge(freshExistingData, deltaData);
-
-        console.log("Delta update:", deltaData);
-        console.log("Fresh existing data:", freshExistingData);
-        console.log("Merged result:", mergedData);
-
-        await configAPI.update(configId, { data: mergedData });
-      }
+      // Send delta to server - server will handle merging with existing data
+      await configAPI.update(configId, { data: deltaData });
 
       // Optimized update: only reload data without refreshing the tree
       // This preserves expand/collapse states and focus
