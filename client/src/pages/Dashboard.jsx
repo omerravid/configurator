@@ -347,9 +347,18 @@ const Dashboard = () => {
       const configId = typeof selectedConfig.id === 'string' ? selectedConfig.id : String(selectedConfig.id);
       console.log("configId after string conversion:", configId);
 
-      // Get the raw configuration data (only this level's overrides)
-      const rawResponse = await configAPI.getRawById(configId);
-      const currentData = rawResponse.data.data || {}; // Use raw data, not resolved
+      // For component removal in products, we need the resolved data to see all components
+      // For other edits, use raw data to preserve inheritance
+      let currentData;
+      if (configType === "PRODUCT" && selectedPath && newValue === undefined) {
+        // Component removal: use resolved data to see all current components
+        const resolvedResponse = await configAPI.getById(configId, true);
+        currentData = resolvedResponse.data.resolved || {};
+      } else {
+        // Normal property edits: use raw data to preserve inheritance
+        const rawResponse = await configAPI.getRawById(configId);
+        currentData = rawResponse.data.data || {};
+      }
 
       // Special case: if path is "_root_", replace the entire data object
       if (path === "_root_") {
