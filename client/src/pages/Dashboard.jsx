@@ -447,19 +447,7 @@ const Dashboard = () => {
       let componentKey = "";
 
       if (componentData.type === "COMPONENT") {
-        // When dragging a component, add it with its root/default version
-        // First, get all versions for this component to find the root version
-        const childrenResponse = await configAPI.getChildren(componentData.id);
-        const versions = childrenResponse.data.children || [];
-
-        // Find the root version (typically the first one or one named "root")
-        let rootVersion = versions.find(v => v.name.toLowerCase() === "root") || versions[0];
-
-        if (!rootVersion) {
-          showToast(`Component ${componentData.name} has no versions. Please create a version first.`, "warning");
-          return;
-        }
-
+        // When dragging a component, add it with its root/default version (the component itself)
         componentKey = componentData.name;
 
         // Check if this component is already added
@@ -470,9 +458,9 @@ const Dashboard = () => {
 
         componentToAdd = {
           componentId: componentData.id,
-          versionId: rootVersion.id,
+          versionId: componentData.id, // Use component itself as the root version
           componentName: componentData.name,
-          versionName: `${componentData.name} (${rootVersion.name})`
+          versionName: `${componentData.name} (root)`
         };
 
       } else if (componentData.type === "VERSION") {
