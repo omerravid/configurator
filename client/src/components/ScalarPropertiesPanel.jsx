@@ -472,7 +472,7 @@ const ScalarPropertiesPanel = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Version
               </label>
-              {isEditable && configType === "PRODUCT" ? (
+              {configType === "PRODUCT" && isEditable ? (
                 <div className="flex items-center space-x-2">
                   <select
                     value={componentRef.versionId}
@@ -492,8 +492,8 @@ const ScalarPropertiesPanel = ({
                 </div>
               ) : (
                 <div className="text-sm text-gray-900 bg-white px-3 py-2 border border-gray-200 rounded">
-                  {componentRef.versionName}
-                  {configType !== "PRODUCT" && isEditable && (
+                  {componentRef.versionName || 'Unknown Version'}
+                  {configType !== "PRODUCT" && (
                     <span className="ml-2 text-xs text-gray-500">(version can only be changed at product level)</span>
                   )}
                 </div>
