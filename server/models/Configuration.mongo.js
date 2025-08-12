@@ -329,18 +329,6 @@ class Configuration {
       throw new Error("No fields to update");
     }
 
-    // Ensure ID is a string for both MongoDB calls
-    let normalizedId = id;
-    if (typeof id === 'object' && id !== null) {
-      if (id.toString && typeof id.toString === 'function') {
-        normalizedId = id.toString();
-        console.log("Converted ObjectId to string in update:", normalizedId);
-      } else {
-        console.error("Received object that is not an ObjectId in update:", id);
-        throw new Error(`Invalid ID format in update: ${JSON.stringify(id)}`);
-      }
-    }
-
     await ConfigurationModel.findByIdAndUpdate(normalizedId, updateFields, { new: true });
     return await this.findById(normalizedId);
   }
