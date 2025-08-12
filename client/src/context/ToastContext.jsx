@@ -13,9 +13,11 @@ export const useToast = () => {
 
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
+  const [toastCounter, setToastCounter] = useState(0);
 
   const showToast = (message, type = "success", duration = 2000) => {
-    const id = Date.now();
+    const id = `${Date.now()}-${toastCounter}`;
+    setToastCounter(prev => prev + 1);
     const toast = { id, message, type, duration };
 
     setToasts((prev) => [...prev, toast]);
