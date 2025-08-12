@@ -351,9 +351,12 @@ const Dashboard = () => {
       // For child configurations, we need to validate the path exists in parent
       if (selectedConfig.type !== "PRODUCT" && selectedConfig.parent_id) {
         try {
+          // Ensure parent_id is a string
+          const parentId = typeof selectedConfig.parent_id === 'string' ? selectedConfig.parent_id : String(selectedConfig.parent_id);
+
           // Check if the path exists in the resolved parent configuration
           const resolvedParent = await configAPI.getById(
-            selectedConfig.parent_id,
+            parentId,
             true,
           );
           const parentResolved = resolvedParent.data.resolved || {};
