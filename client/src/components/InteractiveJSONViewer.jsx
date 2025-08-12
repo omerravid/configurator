@@ -584,7 +584,7 @@ const InteractiveJSONViewer = ({
   const [selectedStructuralValue, setSelectedStructuralValue] = useState(data);
 
   // Helper function to get value at a specific path
-  const getValueAtPath = (obj, path) => {
+  const getValueAtPath = useCallback((obj, path) => {
     if (!obj || !path || path === "root") return obj;
     const keys = path.replace(/^root\./, "").split(".");
     let current = obj;
@@ -596,7 +596,7 @@ const InteractiveJSONViewer = ({
       }
     }
     return current;
-  };
+  }, []);
 
   // Initialize expanded paths for structural mode
   useEffect(() => {
