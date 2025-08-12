@@ -104,6 +104,8 @@ async function initializeSampleData() {
       throw new Error('Admin user not found. Please ensure the admin user is created first.');
     }
 
+    console.log('Found admin user:', adminUser.id);
+
     const createdConfigs = [];
 
     // Create components first
