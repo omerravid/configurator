@@ -464,8 +464,9 @@ const Dashboard = () => {
       const lastKey = pathParts[pathParts.length - 1];
       if (newValue === undefined) {
         // For deletion, we need to check existing data and merge properly
-        // Get the existing raw data and apply the deletion
-        const existingData = JSON.parse(JSON.stringify(currentData));
+        // Get the most current raw data to ensure we have all previous overrides
+        const freshRawResponse = await configAPI.getRawById(configId);
+        const existingData = JSON.parse(JSON.stringify(freshRawResponse.data.data || {}));
         let existingCurrent = existingData;
         for (let i = 0; i < pathParts.length - 1; i++) {
           if (!existingCurrent[pathParts[i]]) {
