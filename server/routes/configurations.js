@@ -255,6 +255,11 @@ router.put(
   checkConfigPermissions,
   async (req, res) => {
     try {
+      console.log("=== PUT /api/configs/:id called ===");
+      console.log("req.params.id:", req.params.id);
+      console.log("req.params.id type:", typeof req.params.id);
+      console.log("req.body:", req.body);
+
       // Validate input
       const { error, value } = updateConfigSchema.validate(req.body);
       if (error) {
