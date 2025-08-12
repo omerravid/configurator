@@ -156,8 +156,8 @@ const StructuralTreeNode = ({
       }
     );
 
-    // Always add paste option for structural editing if editable
-    if (isEditable) {
+    // Paste option only for structural editing in COMPONENT configurations
+    if (canDoStructuralEditing) {
       menuItems.push({
         label: "Paste",
         icon: DocumentDuplicateIcon,
