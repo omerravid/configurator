@@ -713,7 +713,7 @@ const ScalarPropertiesPanel = ({
                           onClick={() => handleEditSave(propertyName)}
                           className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
                         >
-                          ���
+                          ✓
                         </button>
                         <button
                           onClick={handleEditCancel}
