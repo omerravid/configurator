@@ -375,7 +375,9 @@ const Dashboard = () => {
           const parentResolved = resolvedParent.data.resolved || {};
 
           // Check if path exists in parent by traversing the path
-          const pathParts = path.split(".");
+          // Remove "root." prefix if present for validation
+          const cleanPath = path.startsWith("root.") ? path.substring(5) : path;
+          const pathParts = cleanPath.split(".");
           let checkCurrent = parentResolved;
           let pathExists = true;
 
