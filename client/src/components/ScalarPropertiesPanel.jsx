@@ -113,7 +113,7 @@ const ScalarPropertiesPanel = ({
 
   const componentRef = isComponentReference() ? getActualValueAndSource(selectedValue).actualValue : null;
   const subObjects = getSubObjects(selectedValue);
-  const scalarProperties = getScalarProperties(selectedValue);
+  const scalarProperties = getScalarProperties(selectedValue, !!componentRef);
 
   // Debug logging
   console.log("ScalarPropertiesPanel:", {
