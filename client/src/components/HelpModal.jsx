@@ -406,6 +406,19 @@ Import Issues
 - Check file permissions and accessibility
 - Verify folder structure is not too complex or deeply nested
 
+Component Version Issues
+- Version editing only available in product configurations
+- Ensure you're viewing the component reference, not nested properties
+- Dropdown may not appear if component has no versions available
+- Check that component and versions exist and are accessible
+
+Component Removal Issues
+- Component removal only available in product configurations
+- Must be viewing the component reference in structural view
+- Trash icon appears on hover in the properties panel
+- Ensure you have edit permissions for the product
+- Removal unlinks the component but doesn't delete it from the system
+
 **Getting Help**
 1. Hover tooltips: Most UI elements have helpful tooltips
 2. Provenance tracking: Use colored dots to understand value origins
