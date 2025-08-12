@@ -331,11 +331,17 @@ const Dashboard = () => {
     if (!selectedConfig || !canEdit()) return;
 
     try {
-      console.log("handleDataChange - selectedConfig:", selectedConfig);
-      console.log("handleDataChange - selectedConfig.id:", selectedConfig.id, typeof selectedConfig.id);
+      console.log("=== handleDataChange - INSTANCE UPDATE DEBUG ===");
+      console.log("selectedConfig:", selectedConfig);
+      console.log("selectedConfig.id:", selectedConfig.id, typeof selectedConfig.id);
+      console.log("selectedConfig.type:", selectedConfig.type);
+      console.log("selectedConfig.parent_id:", selectedConfig.parent_id, typeof selectedConfig.parent_id);
+      console.log("path:", path);
+      console.log("newValue:", newValue);
 
       // Ensure selectedConfig.id is a string
       const configId = typeof selectedConfig.id === 'string' ? selectedConfig.id : String(selectedConfig.id);
+      console.log("configId after string conversion:", configId);
 
       // Get the raw configuration data (only this level's overrides)
       const rawResponse = await configAPI.getRawById(configId);
