@@ -66,14 +66,14 @@ const ScalarPropertiesPanel = ({
     return String(actualValue);
   };
 
-  const getScalarProperties = (value) => {
+  const getScalarProperties = (value, isComponent = false) => {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
       return [];
     }
 
     return Object.entries(value).filter(([key, val]) => {
       // Skip component-specific properties if this is a component reference
-      if (componentRef && ['componentId', 'versionId', 'componentName', 'versionName'].includes(key)) {
+      if (isComponent && ['componentId', 'versionId', 'componentName', 'versionName'].includes(key)) {
         return false;
       }
 
