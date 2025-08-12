@@ -222,8 +222,24 @@ const ScalarPropertiesPanel = ({
       setLoadingVersions(true);
       configAPI.getComponents()
         .then(response => {
-          console.log("Components API response:", response.data);
-          const component = response.data.find(c => c.id === componentRef.componentId);
+          console.log("Components API response:", response);
+          console.log("Response data type:", typeof response.data);
+          console.log("Response data:", response.data);
+
+          // Handle different response structures
+          let componentsArray;
+          if (Array.isArray(response.data)) {
+            componentsArray = response.data;
+          } else if (Array.isArray(response)) {
+            componentsArray = response;
+          } else if (response.data && Array.isArray(response.data.components)) {
+            componentsArray = response.data.components;
+          } else {
+            console.error("Unexpected API response structure:", response);
+            throw new Error("API response is not in expected format");
+          }
+
+          const component = componentsArray.find(c => c.id === componentRef.componentId);
           console.log("Found component for versions:", component);
 
           if (component) {
@@ -238,6 +254,9 @@ const ScalarPropertiesPanel = ({
             ];
             setAvailableVersions(allVersions);
             console.log("Set available versions:", allVersions);
+          } else {
+            console.warn("Component not found in response:", componentRef.componentId);
+            setAvailableVersions([]);
           }
         })
         .catch(error => {
