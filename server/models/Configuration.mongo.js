@@ -151,17 +151,7 @@ class Configuration {
     if (!config) return null;
 
     const result = config.toJSON();
-    
-    // Add populated fields in expected format
-    if (config.created_by) {
-      result.created_by_username = config.created_by.username;
-    }
-    if (config.parent_id) {
-      result.parent_name = config.parent_id.name;
-      result.parent_type = config.parent_id.type;
-    }
-
-    return result;
+    return this.fixPopulatedFields(result);
   }
 
   static async findAll(includeArchived = false) {
