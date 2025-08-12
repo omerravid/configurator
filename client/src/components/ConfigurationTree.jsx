@@ -683,17 +683,9 @@ const ConfigurationTree = ({
     );
   }
 
-  if (rootConfigs.length === 0) {
-    return (
-      <div className="p-4 text-center">
-        <p className="text-sm text-gray-500">No configurations found</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-1">
-      {/* Tab Header */}
+      {/* Tab Header - Always visible */}
       <div className="px-4 py-2 border-b border-gray-200">
         <div className="flex space-x-1 mb-3">
           <button
@@ -729,7 +721,13 @@ const ConfigurationTree = ({
         </label>
       </div>
 
-      {rootConfigs.map((config) => (
+      {/* Content Area */}
+      {rootConfigs.length === 0 ? (
+        <div className="p-4 text-center">
+          <p className="text-sm text-gray-500">No configurations found</p>
+        </div>
+      ) : (
+        rootConfigs.map((config) => (
         <TreeNode
           key={config.id}
           config={config}
@@ -751,7 +749,8 @@ const ConfigurationTree = ({
           onExpansionChange={handleExpansionChange}
           isNodeExpanded={isNodeExpanded}
         />
-      ))}
+        ))
+      )}
     </div>
   );
 };
