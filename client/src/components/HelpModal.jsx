@@ -289,6 +289,47 @@ Available in both flat and structural views:
 6. Import folder structures for rapid component prototyping
       `
     },
+    "component-management": {
+      title: "Component Management & Version Control",
+      content: `
+**Component Version Editing in Products**
+- When viewing a product configuration that contains components:
+  - Select any component reference in the structural view
+  - Properties panel shows a compact "version" property selector
+  - Edit icon appears next to the version for products only
+  - Dropdown shows all available versions of that component
+  - Changes are applied immediately and preserved
+
+**Component Removal from Products**
+- In product configurations, components can be unlinked:
+  - Navigate to the component reference in structural view
+  - Properties panel shows the component version information
+  - Trash icon (🗑️) appears on hover for removal
+  - Click to unlink the component from the product
+  - Component is removed but remains available for re-use
+
+**Access Control by Configuration Type**
+- **COMPONENT**: Full editing capabilities (add/remove properties, rename objects)
+- **PRODUCT**: Component version management and value viewing only
+- **INSTANCE**: Property value overriding allowed
+- **USER**: Property value overriding allowed
+- **VERSION**: Full editing capabilities like components
+
+**Context Menu Restrictions**
+Context menus adapt based on configuration type and permissions:
+- Component/Version configs: Full structural editing options
+- Product configs: Limited to component version changes and navigation
+- Instance/User configs: Property value editing and navigation only
+- Read-only configs: Copy and navigation options only
+
+**Best Practices for Component Management**
+1. **Product Level**: Use for component composition and version selection
+2. **Instance/User Level**: Use for environment-specific value overrides
+3. **Component Level**: Design reusable, well-documented modules
+4. **Version Management**: Pin stable versions in products for consistency
+5. **Removal Strategy**: Unlink unused components to keep products clean
+      `
+    },
     "best-practices": {
       title: "Best Practices",
       content: `
