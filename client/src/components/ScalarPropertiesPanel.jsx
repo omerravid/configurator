@@ -506,7 +506,7 @@ const ScalarPropertiesPanel = ({
       </div>
 
       {/* Properties List */}
-      <div className="space-y-2">
+      <div className="space-y-2 mb-6">
         {scalarProperties.length === 0 ? (
           <div className="text-center text-gray-500 py-8">
             No scalar properties to display
@@ -603,6 +603,31 @@ const ScalarPropertiesPanel = ({
           })
         )}
       </div>
+
+      {/* Objects Navigation */}
+      {!componentRef && subObjects.length > 0 && (
+        <div className="mb-6">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Objects</h4>
+          <div className="space-y-1">
+            {subObjects.map(([key, value]) => (
+              <div key={key} className="flex items-center justify-between p-2 bg-gray-50 border border-gray-200 rounded hover:bg-gray-100">
+                <div className="flex items-center space-x-2">
+                  <FolderIcon className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm font-medium text-gray-700">{key}</span>
+                </div>
+                <button
+                  onClick={() => handleNavigateToSubObject(key)}
+                  className="flex items-center space-x-1 px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                  title={`Navigate to ${key}`}
+                >
+                  <ArrowRightIcon className="w-3 h-3" />
+                  <span>Go to</span>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Context Menu */}
       {contextMenu && (
