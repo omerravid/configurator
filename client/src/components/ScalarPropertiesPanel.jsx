@@ -9,6 +9,7 @@ import {
   DocumentDuplicateIcon,
   ArrowRightIcon,
   CogIcon,
+  FolderIcon,
 } from "@heroicons/react/24/outline";
 import { useToast } from "../context/ToastContext";
 import ContextMenu from "./ContextMenu";
