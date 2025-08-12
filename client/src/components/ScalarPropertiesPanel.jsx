@@ -787,7 +787,7 @@ const ScalarPropertiesPanel = ({
                       <span className="text-sm font-medium text-gray-700">{key}</span>
                       {isComponentRef && (
                         <span className="text-xs text-blue-600">
-                          {actualValue.componentName} ({actualValue.versionName})
+                          {safeToString(actualValue.componentName)} ({safeToString(actualValue.versionName)})
                         </span>
                       )}
                     </div>
