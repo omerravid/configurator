@@ -698,20 +698,6 @@ const InteractiveJSONViewer = ({
 
     console.log("Structural change:", { action, path, param1, param2 });
 
-    const getValueAtPath = (obj, path) => {
-      if (!path || path === "root") return obj;
-      const keys = path.replace(/^root\./, "").split(".");
-      let current = obj;
-      for (const key of keys) {
-        if (current && typeof current === "object" && current.hasOwnProperty(key)) {
-          current = current[key];
-        } else {
-          return undefined;
-        }
-      }
-      return current;
-    };
-
     const setValueAtPath = (obj, path, value) => {
       if (!path || path === "root") return value;
       const keys = path.replace(/^root\./, "").split(".");
