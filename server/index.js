@@ -59,8 +59,10 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// Make database available to all routes
-app.locals.db = db;
+// Make database available to all routes (only for SQLite)
+if (db) {
+  app.locals.db = db;
+}
 
 // Routes
 app.use("/api/auth", require("./routes/auth"));
