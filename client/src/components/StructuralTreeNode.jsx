@@ -9,6 +9,9 @@ import {
   TrashIcon,
   ClipboardIcon,
   DocumentDuplicateIcon,
+  CogIcon,
+  CubeIcon,
+  DocumentIcon,
 } from "@heroicons/react/24/outline";
 import ContextMenu from "./ContextMenu";
 import { useToast } from "../context/ToastContext";
