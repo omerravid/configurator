@@ -169,25 +169,31 @@ async function initializeSampleData() {
       status: "COMMITTED"
     };
 
-    const instance = await Configuration.create(instanceConfig);
+    const instance = await Configuration.create({
+      name: instanceConfig.name,
+      type: instanceConfig.type,
+      parentId: instanceConfig.parent_id,
+      data: instanceConfig.data,
+      description: instanceConfig.description,
+      status: instanceConfig.status,
+      createdBy: adminUser.id
+    });
     console.log(`Created instance: ${instanceConfig.name}`);
 
     // Create a version of the database component
-    const dbVersionConfig = {
+    const dbVersion = await Configuration.create({
       name: "Database Component v2",
-      type: "VERSION", 
-      parent_id: createdConfigs[0].id,
+      type: "VERSION",
+      parentId: createdConfigs[0].id,
       data: {
         ssl: true,
         connectionTimeout: 60000,
         maxConnections: 20
       },
       description: "Enhanced database configuration with SSL",
-      created_by: adminUser.id,
-      status: "DRAFT"
-    };
-
-    const dbVersion = await Configuration.create(dbVersionConfig);
+      status: "DRAFT",
+      createdBy: adminUser.id
+    });
     console.log(`Created version: ${dbVersionConfig.name}`);
 
     console.log('Sample data initialization completed successfully!');
