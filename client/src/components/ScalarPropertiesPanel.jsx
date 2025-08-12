@@ -126,18 +126,13 @@ const ScalarPropertiesPanel = ({
 
   // Load available versions when a component is selected
   useEffect(() => {
-    console.log("Loading versions effect triggered:", { componentRef, componentId: componentRef?.componentId });
-
     if (componentRef) {
       setLoadingVersions(true);
       configAPI.getComponents()
         .then(response => {
-          console.log("Components API response:", response.data);
           const component = response.data.find(c => c.id === componentRef.componentId);
-          console.log("Found component:", component);
           if (component) {
             setAvailableVersions(component.versions || []);
-            console.log("Set available versions:", component.versions || []);
           }
         })
         .catch(error => {
