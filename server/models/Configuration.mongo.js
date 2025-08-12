@@ -262,6 +262,29 @@ class Configuration {
     return chain.reverse();
   }
 
+  // Helper method to deeply merge objects
+  static deepMerge(target, source) {
+    const result = JSON.parse(JSON.stringify(target)); // Deep clone target
+
+    const merge = (obj, src) => {
+      for (const key in src) {
+        if (src.hasOwnProperty(key)) {
+          if (src[key] && typeof src[key] === 'object' && !Array.isArray(src[key])) {
+            if (!obj[key] || typeof obj[key] !== 'object') {
+              obj[key] = {};
+            }
+            merge(obj[key], src[key]);
+          } else {
+            obj[key] = src[key];
+          }
+        }
+      }
+    };
+
+    merge(result, source);
+    return result;
+  }
+
   static async update(id, { data, description }) {
     console.log("=== Configuration.update called ===");
     console.log("id received:", id);
