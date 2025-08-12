@@ -116,16 +116,6 @@ const ScalarPropertiesPanel = ({
   const subObjects = getSubObjects(selectedValue);
   const scalarProperties = getScalarProperties(selectedValue, !!componentRef);
 
-  // Debug logging
-  console.log("ScalarPropertiesPanel:", {
-    selectedPath,
-    selectedValue,
-    componentRef,
-    isComponentReference: isComponentReference(),
-    scalarProperties: scalarProperties.length,
-    subObjects: subObjects.length
-  });
-
   // Load available versions when a component is selected
   useEffect(() => {
     if (componentRef) {
@@ -561,7 +551,7 @@ const ScalarPropertiesPanel = ({
                           onClick={() => handleEditSave(propertyName)}
                           className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
                         >
-                          ✓
+                          ���
                         </button>
                         <button
                           onClick={handleEditCancel}
