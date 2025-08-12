@@ -444,7 +444,9 @@ class ConfigurationService {
 
     // Validate schema enforcement for updates
     if (data && config.type !== "PRODUCT" && config.parent_id) {
-      await this.validateSchemaEnforcement(data, config.parent_id);
+      // Ensure parent_id is a string, not a populated object
+      const parentId = typeof config.parent_id === 'string' ? config.parent_id : String(config.parent_id);
+      await this.validateSchemaEnforcement(data, parentId);
     }
 
     return await Configuration.update(configId, { data, description });
