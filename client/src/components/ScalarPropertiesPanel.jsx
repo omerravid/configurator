@@ -178,8 +178,10 @@ const ScalarPropertiesPanel = ({
   });
 
   if (actualSelectedValue && typeof actualSelectedValue === 'object') {
+    console.log("Full Tools object structure:", JSON.stringify(actualSelectedValue, null, 2));
+
     Object.entries(actualSelectedValue).forEach(([key, val]) => {
-      const { actualValue } = getActualValueAndSource(val);
+      const { actualValue, source } = getActualValueAndSource(val);
       const isScalar = (
         actualValue === null ||
         actualValue === undefined ||
@@ -196,11 +198,15 @@ const ScalarPropertiesPanel = ({
         actualValue.componentName;
 
       console.log(`Property ${key}:`, {
-        actualValue: isComponentRef ? `Component: ${actualValue.componentName}` : actualValue,
+        rawValue: val,
+        actualValue,
+        source,
+        keys: actualValue && typeof actualValue === 'object' ? Object.keys(actualValue) : 'N/A',
         type: typeof actualValue,
         isScalar,
         isComponentProp,
         isComponentRef,
+        hasProvenance: val !== actualValue,
         willShowAsScalar: isScalar && !isComponentProp && !isComponentRef,
         willShowAsObject: !isScalar || isComponentRef
       });
