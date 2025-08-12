@@ -86,8 +86,15 @@ app.use("*", (req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
+
+  // Initialize sample data if database is empty
+  try {
+    await initializeSampleData();
+  } catch (error) {
+    console.log('Sample data initialization handled:', error.message);
+  }
 });
 
 module.exports = app;
