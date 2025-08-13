@@ -862,7 +862,7 @@ const Dashboard = () => {
                   onContextMenu={handleContextMenuShow}
                 >
                   <div>
-                    <h2 className={`text-xl font-semibold ${Boolean(selectedConfig.archived) ? 'text-gray-500' : 'text-gray-900'}`}>
+                    <h2 className={`text-xl font-semibold ${Boolean(selectedConfig.archived) ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}`}>
                       {selectedConfig.name}
                       {Boolean(selectedConfig.archived) && (
                         <span className="ml-2 text-sm text-gray-400 font-normal">(archived)</span>
