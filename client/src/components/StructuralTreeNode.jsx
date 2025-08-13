@@ -312,14 +312,25 @@ const StructuralTreeNode = ({
 
     console.log("Attempting to copy text:", text);
 
+    // Try Clipboard API first, but fall back gracefully if blocked
+    let clipboardSuccess = false;
+
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        console.log("Using navigator.clipboard.writeText");
+        console.log("Trying navigator.clipboard.writeText");
         await navigator.clipboard.writeText(text);
         console.log("Successfully copied with navigator.clipboard");
-      } else {
-        console.log("Using fallback copy method");
-        // Fallback for iframes and browsers without clipboard API
+        clipboardSuccess = true;
+      }
+    } catch (clipboardError) {
+      console.log("Clipboard API failed (likely blocked in iframe):", clipboardError.name);
+      // Continue to fallback method
+    }
+
+    // Use fallback method if Clipboard API failed or not available
+    if (!clipboardSuccess) {
+      console.log("Using fallback copy method (execCommand)");
+      try {
         const textArea = document.createElement("textarea");
         textArea.value = text;
         textArea.style.position = "fixed";
@@ -327,7 +338,9 @@ const StructuralTreeNode = ({
         textArea.style.top = "-999999px";
         textArea.style.opacity = "0";
         textArea.style.pointerEvents = "none";
+        textArea.setAttribute('readonly', '');
         document.body.appendChild(textArea);
+
         textArea.focus();
         textArea.select();
         textArea.setSelectionRange(0, 99999); // For mobile devices
@@ -336,13 +349,13 @@ const StructuralTreeNode = ({
         document.body.removeChild(textArea);
 
         if (!successful) {
-          throw new Error("document.execCommand('copy') failed");
+          throw new Error("Both Clipboard API and execCommand failed");
         }
-        console.log("Successfully copied with execCommand");
+        console.log("Successfully copied with execCommand fallback");
+      } catch (fallbackError) {
+        console.error("Fallback copy method also failed:", fallbackError);
+        throw new Error("Failed to copy to clipboard - both modern and fallback methods failed");
       }
-    } catch (err) {
-      console.error("Copy operation failed:", err);
-      throw err;
     }
   };
 
