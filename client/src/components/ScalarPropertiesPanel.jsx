@@ -27,6 +27,7 @@ const ScalarPropertiesPanel = ({
   onGetActiveTooltipPath,
   onNavigateToPath, // New prop for navigation
   configType, // New prop for configuration type
+  selectedConfig, // New prop for reset functionality
 }) => {
   const { showToast } = useToast();
   const [editingProperty, setEditingProperty] = useState(null);
