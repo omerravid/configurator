@@ -20,22 +20,22 @@
   }
 
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors;
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200 font-medium py-2 px-4 rounded-lg transition-colors;
   }
 
   .input-field {
-    @apply border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    @apply border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors;
   }
 
   .tree-item {
-    @apply flex items-center space-x-2 p-2 hover:bg-gray-100 cursor-pointer rounded-lg;
+    @apply flex items-center space-x-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer rounded-lg transition-colors;
   }
 
   .tree-item.selected {
-    @apply bg-primary-50 border-l-4 border-primary-500;
+    @apply bg-primary-50 dark:bg-primary-900/20 border-l-4 border-primary-500;
   }
 
   .config-card {
-    @apply bg-white border border-gray-200 rounded-lg p-4 shadow-sm;
+    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm transition-colors;
   }
 }
