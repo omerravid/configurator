@@ -51,7 +51,9 @@ const Dashboard = () => {
 
   const loadAllConfigurations = async () => {
     try {
+      console.log("🔵 [FRONTEND] Dashboard calling loadAllConfigurations");
       const response = await configAPI.getAll();
+      console.log("🔵 [FRONTEND] Got response:", response.data.configs?.length, "configs");
       setAllConfigurations(response.data.configs || []);
     } catch (err) {
       console.error("Failed to load all configurations:", err);
