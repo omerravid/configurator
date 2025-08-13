@@ -358,13 +358,13 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col transition-colors">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Database Settings</h2>
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Database Settings</h2>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             <XMarkIcon className="w-6 h-6" />
           </button>
@@ -374,11 +374,11 @@ const SettingsModal = ({ isOpen, onClose }) => {
         <div className="flex-1 overflow-auto p-6 space-y-6">
           
           {/* MongoDB Status */}
-          <div className="bg-gray-50 rounded-lg p-4">
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 transition-colors">
             <div className="flex items-center space-x-3">
               {getStatusIcon(mongoStatus?.status)}
               <div>
-                <h3 className="font-medium text-gray-900">MongoDB Status</h3>
+                <h3 className="font-medium text-gray-900 dark:text-gray-100">MongoDB Status</h3>
                 <p className={`text-sm ${getStatusColor(mongoStatus?.status)}`}>
                   {mongoStatus?.status ? mongoStatus.status.charAt(0).toUpperCase() + mongoStatus.status.slice(1) : 'Unknown'}
                   {mongoStatus?.host && ` - ${mongoStatus.host}/${mongoStatus.name}`}
@@ -389,7 +389,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
           {/* Connection String Input */}
           <div>
-            <label htmlFor="connectionString" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="connectionString" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
               MongoDB Connection String
             </label>
             <input
@@ -397,10 +397,10 @@ const SettingsModal = ({ isOpen, onClose }) => {
               id="connectionString"
               value={connectionString}
               onChange={(e) => setConnectionString(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors"
               placeholder="mongodb://localhost:27017/config_manager"
             />
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               Example: mongodb://username:password@localhost:27017/config_manager
             </p>
           </div>
