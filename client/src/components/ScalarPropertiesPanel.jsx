@@ -194,6 +194,7 @@ const ScalarPropertiesPanel = ({
   const componentRef = isCompRef ? getActualValueAndSource(selectedValue).actualValue : null;
   const subObjects = getSubObjects(selectedValue);
   const scalarProperties = getScalarProperties(selectedValue, !!componentRef);
+  const scalarArrays = getScalarArrays(selectedValue);
   const actualSelectedValue = selectedValue ? getActualValueAndSource(selectedValue).actualValue : null;
 
   // Debug logging for component detection and property filtering
