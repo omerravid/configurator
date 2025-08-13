@@ -570,19 +570,26 @@ const ScalarPropertiesPanel = ({
 
     // Get the current array from the resolved data
     // We need to traverse the path to get the array
-    const pathKeys = arrayPath.replace(/^root\./, '').split('.');
+    const cleanArrayPath = arrayPath.replace(/^root\.?/, '');
     let currentData = actualSelectedValue;
 
-    // Navigate to the parent object containing the array
-    for (let i = 0; i < pathKeys.length - 1; i++) {
-      if (currentData && typeof currentData === 'object') {
-        currentData = getActualValueAndSource(currentData[pathKeys[i]]).actualValue;
-      }
-    }
+    if (cleanArrayPath) {
+      const pathKeys = cleanArrayPath.split('.');
 
-    // Get the array
-    const arrayKey = pathKeys[pathKeys.length - 1];
-    const arrayWithProvenance = currentData ? currentData[arrayKey] : null;
+      // Navigate to the parent object containing the array
+      for (let i = 0; i < pathKeys.length - 1; i++) {
+        if (currentData && typeof currentData === 'object') {
+          currentData = getActualValueAndSource(currentData[pathKeys[i]]).actualValue;
+        }
+      }
+
+      // Get the array
+      const arrayKey = pathKeys[pathKeys.length - 1];
+      var arrayWithProvenance = currentData ? currentData[arrayKey] : null;
+    } else {
+      // Array is at root level
+      var arrayWithProvenance = actualSelectedValue;
+    }
     const { actualValue: currentArray } = getActualValueAndSource(arrayWithProvenance);
 
     if (!Array.isArray(currentArray)) {
