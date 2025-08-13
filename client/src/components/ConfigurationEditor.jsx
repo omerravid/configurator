@@ -895,7 +895,7 @@ const ConfigurationEditor = ({
                       <div className="flex items-center justify-between">
                         <label
                           htmlFor="data"
-                          className="block text-sm font-medium text-gray-700"
+                          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
                         >
                           Configuration Data (JSON)
                           {!isCreating &&
@@ -910,7 +910,7 @@ const ConfigurationEditor = ({
                               type="button"
                               onClick={handleFolderImport}
                               disabled={isImporting}
-                              className="flex items-center space-x-1 text-xs text-primary-600 hover:text-primary-700 disabled:opacity-50"
+                              className="flex items-center space-x-1 text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 disabled:opacity-50"
                               title="Import folder structure with JSON files. Folder names become object keys, JSON files become nested objects."
                             >
                               <FolderArrowDownIcon className="w-3 h-3" />
@@ -926,7 +926,7 @@ const ConfigurationEditor = ({
                                   data: getProductTemplate(),
                                 }))
                               }
-                              className="text-xs text-primary-600 hover:text-primary-700"
+                              className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
                             >
                               Use Template
                             </button>
@@ -942,7 +942,7 @@ const ConfigurationEditor = ({
                                     data: getChildTemplate(),
                                   }))
                                 }
-                                className="text-xs text-primary-600 hover:text-primary-700"
+                                className="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
                               >
                                 Use Example
                               </button>
@@ -954,7 +954,7 @@ const ConfigurationEditor = ({
                         name="data"
                         rows={16}
                         required
-                        className="mt-1 input-field w-full font-mono text-sm"
+                        className="mt-1 input-field w-full font-mono text-sm dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
                         value={formData.data}
                         onChange={handleInputChange}
                         placeholder={
@@ -965,7 +965,7 @@ const ConfigurationEditor = ({
                               : '{\n  "property": "value"\n}'
                         }
                       />
-                      <div className="mt-1 text-xs text-gray-500">
+                      <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         {!isCreating &&
                           !isCreatingChild &&
                           !isCreatingProduct &&
