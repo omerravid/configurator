@@ -451,7 +451,7 @@ const TreeNode = ({
               e.stopPropagation();
               handleToggle();
             }}
-            className="flex-shrink-0 p-1 hover:bg-gray-200 rounded"
+            className="flex-shrink-0 p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
           >
             {isExpanded ? (
               <ChevronDownIcon className="w-4 h-4" />
