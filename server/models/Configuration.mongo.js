@@ -78,7 +78,7 @@ class Configuration {
     // Debug createdBy field
     console.log("🏗️  [Configuration.create] Debug createdBy:");
     console.log("🏗️  createdBy:", createdBy);
-    console.log("���️  createdBy type:", typeof createdBy);
+    console.log("🏗️  createdBy type:", typeof createdBy);
     console.log("🏗️  createdBy constructor:", createdBy?.constructor?.name);
     console.log("🏗️  createdBy JSON:", JSON.stringify(createdBy));
 
@@ -204,25 +204,6 @@ class Configuration {
       .populate('parent_id', 'name type')
       .sort({ createdAt: -1 });
 
-    // Get all unique user IDs to fetch usernames
-    const userIds = [...new Set(configs.map(config => config.created_by))];
-    const { User } = require('./index');
-    const users = {};
-
-    // Fetch all users at once
-    for (const userId of userIds) {
-      if (userId) {
-        try {
-          const user = await User.findById(userId);
-          if (user) {
-            users[userId] = user.username;
-          }
-        } catch (error) {
-          console.warn(`Failed to fetch user ${userId}:`, error.message);
-        }
-      }
-    }
-
     return configs.map(config => {
       // Extract populated data BEFORE calling toJSON()
       const parentName = config.parent_id?.name;
@@ -231,9 +212,9 @@ class Configuration {
       // Now call toJSON() which will convert ObjectIds to strings
       const result = config.toJSON();
 
-      // Add username from our user lookup
-      if (result.created_by && users[result.created_by]) {
-        result.created_by_username = users[result.created_by];
+      // created_by is already the username, so set created_by_username
+      if (result.created_by) {
+        result.created_by_username = result.created_by;
       }
 
       // Add populated fields in expected format
