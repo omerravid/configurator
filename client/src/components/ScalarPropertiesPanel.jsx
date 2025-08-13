@@ -393,8 +393,13 @@ const ScalarPropertiesPanel = ({
   const handleArrayValueChange = (arrayName, index, newValue) => {
     console.log("Array value change:", { arrayName, index, newValue, selectedPath });
 
-    // Get the current array
-    const currentArray = actualSelectedValue[arrayName];
+    // Get the current array, properly extracting from provenance wrapper
+    const arrayWithProvenance = actualSelectedValue[arrayName];
+    const { actualValue: currentArray } = getActualValueAndSource(arrayWithProvenance);
+
+    console.log("Array with provenance:", arrayWithProvenance);
+    console.log("Extracted array:", currentArray);
+
     if (!Array.isArray(currentArray)) {
       console.error("Not an array:", currentArray);
       return;
