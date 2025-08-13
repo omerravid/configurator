@@ -536,7 +536,7 @@ const TreeNode = ({
         {isPrimitive ? (
           renderEditableValue()
         ) : isArray ? (
-          <span className="text-gray-600">[{actualValue.length} items]</span>
+          <span className="text-gray-600 dark:text-gray-400">[{actualValue.length} items]</span>
         ) : (
           <span className="text-gray-600 dark:text-gray-400">
             {`{${Object.keys(actualValue).length} properties}`}
