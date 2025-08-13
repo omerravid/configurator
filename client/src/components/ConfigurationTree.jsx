@@ -639,7 +639,7 @@ const ConfigurationTree = ({
       // 1. Root-level configs (no parent) - includes PRODUCT and COMPONENT
       // 2. USER configs created by the current user (regardless of parent_id)
       let rootConfigs = (response.data.configs || []).filter(config =>
-        !config.parent_id || (config.type === "USER" && config.created_by === user?.id)
+        !config.parent_id || (config.type === "USER" && config.created_by === user?.username)
       );
 
       // Filter by archived status based on active tab
