@@ -455,6 +455,8 @@ const StructuralTreeNode = ({
             onStructuralChange={onStructuralChange}
             parentValue={actualValue}
             configType={configType}
+            isArrayElement={true}
+            arrayIndex={index}
           />
         );
       });
