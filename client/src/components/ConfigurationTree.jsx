@@ -423,7 +423,7 @@ const TreeNode = ({
     <div className="select-none relative">
       <div
         className={`tree-item ${isSelected ? "selected" : ""} group cursor-context-menu ${
-          isDraggable ? "cursor-grab hover:bg-gray-50" : ""
+          isDraggable ? "cursor-grab hover:bg-gray-50 dark:hover:bg-gray-700" : ""
         } ${isDroppable ? "border-2 border-transparent transition-colors" : ""}`}
         style={{ paddingLeft: `${level * 20 + 12}px` }}
         onClick={handleSelect}
