@@ -638,9 +638,23 @@ const ConfigurationTree = ({
       // Filter to show:
       // 1. Root-level configs (no parent) - includes PRODUCT and COMPONENT
       // 2. USER configs created by the current user (regardless of parent_id)
-      let rootConfigs = (response.data.configs || []).filter(config =>
-        !config.parent_id || (config.type === "USER" && config.created_by === user?.id)
-      );
+      let rootConfigs = (response.data.configs || []).filter(config => {
+        const isRootLevel = !config.parent_id;
+        const isUserConfigByCurrentUser = config.type === "USER" && config.created_by === user?.id;
+
+        // Debug: Store user configs info for display
+        if (config.type === "USER") {
+          window.debugUserConfigs = window.debugUserConfigs || [];
+          window.debugUserConfigs.push({
+            name: config.name,
+            created_by: config.created_by,
+            current_user_id: user?.id,
+            matches: config.created_by === user?.id
+          });
+        }
+
+        return isRootLevel || isUserConfigByCurrentUser;
+      });
 
       // Filter by archived status based on active tab
       if (activeTab === 'archived') {
