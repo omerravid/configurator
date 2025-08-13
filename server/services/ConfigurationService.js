@@ -522,8 +522,6 @@ class ConfigurationService {
         parentId = String(config.parent_id);
       }
 
-      console.log("validateSchemaEnforcement - original parent_id:", config.parent_id);
-      console.log("validateSchemaEnforcement - converted parentId:", parentId);
 
       await this.validateSchemaEnforcement(data, parentId);
     }
