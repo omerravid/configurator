@@ -264,7 +264,7 @@ router.post("/", authenticateToken, async (req, res) => {
       type,
       parentId: cleanParentId,
       data,
-      createdBy: req.user.id,
+      createdBy: req.user.username,
       description: description || "",
     });
 
