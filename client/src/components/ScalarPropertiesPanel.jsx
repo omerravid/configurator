@@ -915,6 +915,118 @@ const ScalarPropertiesPanel = ({
         </div>
       )}
 
+      {/* Arrays List */}
+      {scalarArrays.length > 0 && (
+        <div className="space-y-4 mb-6">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Arrays</h4>
+          {scalarArrays.map(([arrayName, arrayValue]) => {
+            const { actualValue: actualArray } = getActualValueAndSource(arrayValue);
+
+            return (
+              <div key={arrayName} className="border border-gray-200 rounded p-3 bg-gray-50">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="font-medium text-gray-700">{arrayName}:</span>
+                  {isEditable && configType !== "PRODUCT" && (
+                    <button
+                      onClick={() => handleArrayItemAdd(arrayName)}
+                      className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                      title="Add array item"
+                    >
+                      + Add
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-2 pl-4">
+                  {actualArray.map((item, index) => {
+                    const { actualValue: actualItem } = getActualValueAndSource(item);
+                    const itemKey = `${arrayName}-${index}`;
+                    const isEditingItem = editingProperty === itemKey;
+
+                    return (
+                      <div
+                        key={index}
+                        className="group flex items-center justify-between p-2 border border-gray-300 rounded bg-white hover:bg-gray-50"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-500 min-w-0">[{index}]:</span>
+                            {isEditingItem ? (
+                              <div className="flex items-center space-x-2 flex-1">
+                                <input
+                                  type="text"
+                                  value={editValue}
+                                  onChange={(e) => setEditValue(e.target.value)}
+                                  className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      handleArrayValueChange(arrayName, index, editValue);
+                                      setEditingProperty(null);
+                                    }
+                                    if (e.key === "Escape") handleEditCancel();
+                                  }}
+                                  autoFocus
+                                />
+                                <button
+                                  onClick={() => {
+                                    handleArrayValueChange(arrayName, index, editValue);
+                                    setEditingProperty(null);
+                                  }}
+                                  className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
+                                >
+                                  ✓
+                                </button>
+                                <button
+                                  onClick={handleEditCancel}
+                                  className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center space-x-2 flex-1">
+                                {renderPropertyValue(item)}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Array Item Actions */}
+                        {!isEditingItem && isEditable && configType !== "PRODUCT" && (
+                          <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => {
+                                setEditingProperty(itemKey);
+                                setEditValue(safeToString(actualItem));
+                              }}
+                              className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded"
+                              title="Edit array item"
+                            >
+                              <PencilIcon className="w-3 h-3" />
+                            </button>
+                            <button
+                              onClick={() => handleArrayItemDelete(arrayName, index)}
+                              className="p-1 text-red-400 hover:text-red-600 hover:bg-red-100 rounded"
+                              title="Delete array item"
+                            >
+                              <TrashIcon className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {actualArray.length === 0 && (
+                    <div className="text-sm text-gray-500 italic pl-2">Empty array</div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* Objects Navigation */}
       {subObjects.length > 0 && (
         <div className="mb-6">
