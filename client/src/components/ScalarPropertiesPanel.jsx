@@ -1243,7 +1243,7 @@ const ScalarPropertiesPanel = ({
                     return (
                       <div
                         key={index}
-                        className="group flex items-center justify-between p-2 border border-gray-300 rounded bg-white hover:bg-gray-50"
+                        className="group flex items-center justify-between p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                       >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-2">
