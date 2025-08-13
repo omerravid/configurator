@@ -827,7 +827,7 @@ const Dashboard = () => {
         {/* Left Panel - Configuration Tree */}
         <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-colors">
           <div className="p-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">
+            <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
               Configurations
             </h2>
           </div>
