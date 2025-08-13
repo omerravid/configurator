@@ -1132,19 +1132,19 @@ const InteractiveJSONViewer = ({
       ) : hasNoChanges ? (
         /* No Changes Message for Structural View */
         <div className="flex gap-4 h-96">
-          <div className="w-1/2 bg-white border border-gray-200 rounded-lg overflow-auto">
-            <div className="p-2 border-b border-gray-200 bg-gray-50">
-              <h4 className="text-sm font-medium text-gray-700">Structure</h4>
+          <div className="w-1/2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-auto transition-colors">
+            <div className="p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 transition-colors">
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Structure</h4>
             </div>
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
               <div className="text-sm">No local changes to display</div>
             </div>
           </div>
-          <div className="w-1/2 bg-white border border-gray-200 rounded-lg overflow-auto">
-            <div className="p-2 border-b border-gray-200 bg-gray-50">
-              <h4 className="text-sm font-medium text-gray-700">Properties</h4>
+          <div className="w-1/2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-auto transition-colors">
+            <div className="p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 transition-colors">
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Properties</h4>
             </div>
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
               <div className="text-sm">No local changes to display</div>
             </div>
           </div>
