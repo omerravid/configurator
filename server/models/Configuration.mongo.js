@@ -312,9 +312,6 @@ class Configuration {
       const existingData = existingConfig.data || {};
       updateFields.data = this.deepMerge(existingData, data);
 
-      console.log("Data merge - existing:", JSON.stringify(existingData, null, 2));
-      console.log("Data merge - incoming:", JSON.stringify(data, null, 2));
-      console.log("Data merge - result:", JSON.stringify(updateFields.data, null, 2));
     }
 
     if (description !== undefined) {
