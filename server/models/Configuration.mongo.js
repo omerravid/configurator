@@ -186,13 +186,27 @@ class Configuration {
       .sort({ type: 1, createdAt: -1 });
 
     return configs.map(config => {
+      // Debug raw MongoDB document
+      console.log("🔍 [findAll] Raw MongoDB document:");
+      console.log("🔍 config._doc.created_by:", config._doc.created_by);
+      console.log("🔍 config._doc.created_by type:", typeof config._doc.created_by);
+      console.log("🔍 config._doc.created_by constructor:", config._doc.created_by?.constructor?.name);
+
       // Extract populated data BEFORE calling toJSON()
       const createdByUsername = config.created_by?.username;
       const parentName = config.parent_id?.name;
       const parentType = config.parent_id?.type;
 
+      // Debug populated vs original
+      console.log("🔍 config.created_by (populated):", config.created_by);
+      console.log("🔍 config.created_by type:", typeof config.created_by);
+
       // Now call toJSON() which will convert ObjectIds to strings
       const result = config.toJSON();
+
+      // Debug result after toJSON
+      console.log("🔍 result.created_by after toJSON():", result.created_by);
+      console.log("🔍 result.created_by type:", typeof result.created_by);
 
       // Add populated fields in expected format
       if (createdByUsername) {
