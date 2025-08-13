@@ -47,9 +47,6 @@ const configurationSchema = new mongoose.Schema({
       if (ret.parent_id) {
         ret.parent_id = ret.parent_id.toString();
       }
-      if (ret.created_by) {
-        ret.created_by = ret.created_by.toString();
-      }
       delete ret._id;
       delete ret.__v;
       delete ret.createdAt;
