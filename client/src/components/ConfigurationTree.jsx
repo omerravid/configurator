@@ -466,7 +466,7 @@ const TreeNode = ({
         <ConfigTypeIcon type={config.type} status={config.status} />
 
         <div className="flex-1 min-w-0">
-          <div className={`text-sm font-medium truncate ${Boolean(config.archived) ? 'text-gray-500' : 'text-gray-900'}`}>
+          <div className={`text-sm font-medium truncate ${Boolean(config.archived) ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}`}>
             {config.name}
             {Boolean(config.archived) && (
               <span className="ml-1 text-xs text-gray-400">(archived)</span>
