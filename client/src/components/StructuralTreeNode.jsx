@@ -39,7 +39,10 @@ const StructuralTreeNode = ({
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(keyName);
 
-  const currentPath = path ? `${path}.${keyName}` : keyName;
+  // Handle array element path construction differently - no period before bracket notation
+  const currentPath = isArrayElement
+    ? `${path}${keyName}` // For array elements like [0], don't add period: "root.ObjArray[0]"
+    : path ? `${path}.${keyName}` : keyName; // For regular properties: "root.ObjArray"
   const isExpanded = expandedPaths.has(currentPath);
   const isSelected = currentPath === selectedPath;
 
