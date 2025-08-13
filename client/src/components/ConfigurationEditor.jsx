@@ -459,7 +459,7 @@ const ConfigurationEditor = ({
       //   ├── settings/
       //   │   ├── database.json
       //   │   └── logging.json
-      //   └���─ features/
+      //   └── features/
       //       ├── auth.json
       //       └── payment.json
       // Results in: { "config": {...}, "settings": { "database": {...}, "logging": {...} }, "features": { "auth": {...}, "payment": {...} } }
@@ -771,7 +771,7 @@ const ConfigurationEditor = ({
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-200"
               >
                 Configuration Name
               </label>
@@ -781,7 +781,7 @@ const ConfigurationEditor = ({
                 name="name"
                 required
                 disabled={!isCreating && !isCreatingChild && !showRename}
-                className="mt-1 input-field w-full disabled:bg-gray-50"
+                className="mt-1 input-field w-full disabled:bg-gray-50 dark:disabled:bg-gray-700 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
                 value={formData.name}
                 onChange={handleInputChange}
                 placeholder={
@@ -791,7 +791,7 @@ const ConfigurationEditor = ({
                 }
               />
               {showRename && (
-                <p className="mt-1 text-xs text-orange-600">
+                <p className="mt-1 text-xs text-orange-600 dark:text-orange-400">
                   ⚠️ Renaming will affect all references to this configuration
                 </p>
               )}
@@ -803,7 +803,7 @@ const ConfigurationEditor = ({
                 <div>
                   <label
                     htmlFor="type"
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-200"
                   >
                     Configuration Type
                   </label>
@@ -814,7 +814,7 @@ const ConfigurationEditor = ({
                       (!isCreating && !isCreatingChild) ||
                       typeOptions.length === 1
                     }
-                    className="mt-1 input-field w-full disabled:bg-gray-50"
+                    className="mt-1 input-field w-full disabled:bg-gray-50 dark:disabled:bg-gray-700 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
                     value={formData.type}
                     onChange={handleInputChange}
                   >
@@ -825,7 +825,7 @@ const ConfigurationEditor = ({
                     ))}
                   </select>
                   {!isCreating && !isCreatingChild && (
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                       Configuration type cannot be changed when editing.
                     </p>
                   )}
