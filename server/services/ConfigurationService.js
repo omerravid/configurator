@@ -273,22 +273,66 @@ class ConfigurationService {
   static async getValueAtPath(configIdOrName, path, minimal = false) {
     const resolved = await this.resolveConfiguration(configIdOrName, true);
 
-    const pathParts = path.split(".");
     let current = resolved.resolved;
-    let pathSoFar = [];
+    let i = 0;
+    let pathSoFar = "";
 
-    for (const part of pathParts) {
-      pathSoFar.push(part);
+    while (i < path.length && current != null) {
+      // Look for array notation [index]
+      const bracketStart = path.indexOf('[', i);
 
-      if (!current || typeof current !== "object") {
-        throw new Error(`Path not found: ${pathSoFar.join(".")}`);
+      if (bracketStart === i) {
+        // Path starts with array notation like "[0]"
+        const bracketEnd = path.indexOf(']', i);
+        if (bracketEnd === -1) {
+          throw new Error(`Invalid array notation in path: ${path}`);
+        }
+
+        const index = parseInt(path.slice(i + 1, bracketEnd));
+        if (!Array.isArray(current) || isNaN(index) || index < 0 || index >= current.length) {
+          throw new Error(`Array index ${index} not found at path: ${pathSoFar}`);
+        }
+
+        current = current[index];
+        pathSoFar += `[${index}]`;
+        i = bracketEnd + 1;
+
+        // Skip optional dot after bracket
+        if (i < path.length && path[i] === '.') {
+          i++;
+        }
+      } else {
+        // Look for next property name
+        let nextDot = path.indexOf('.', i);
+        let nextBracket = path.indexOf('[', i);
+
+        // Find the next delimiter (dot or bracket)
+        let nextDelimiter = -1;
+        if (nextDot !== -1 && nextBracket !== -1) {
+          nextDelimiter = Math.min(nextDot, nextBracket);
+        } else if (nextDot !== -1) {
+          nextDelimiter = nextDot;
+        } else if (nextBracket !== -1) {
+          nextDelimiter = nextBracket;
+        }
+
+        const key = nextDelimiter === -1
+          ? path.slice(i)
+          : path.slice(i, nextDelimiter);
+
+        if (!current || typeof current !== "object" || current[key] === undefined) {
+          throw new Error(`Path not found: ${pathSoFar}${pathSoFar ? '.' : ''}${key}`);
+        }
+
+        current = current[key];
+        pathSoFar += (pathSoFar ? '.' : '') + key;
+        i = nextDelimiter === -1 ? path.length : nextDelimiter;
+
+        // Skip dot delimiter
+        if (i < path.length && path[i] === '.') {
+          i++;
+        }
       }
-
-      if (current[part] === undefined) {
-        throw new Error(`Path not found: ${pathSoFar.join(".")}`);
-      }
-
-      current = current[part];
     }
 
     if (minimal) {
