@@ -67,6 +67,33 @@ const ScalarPropertiesPanel = ({
     return String(actualValue);
   };
 
+  // Check if a value is a scalar array (array containing only scalar values)
+  const isScalarArray = (arr) => {
+    if (!Array.isArray(arr)) return false;
+    return arr.every(item => {
+      const { actualValue } = getActualValueAndSource(item);
+      return (
+        actualValue === null ||
+        actualValue === undefined ||
+        typeof actualValue === "string" ||
+        typeof actualValue === "number" ||
+        typeof actualValue === "boolean"
+      );
+    });
+  };
+
+  // Get scalar arrays from the object
+  const getScalarArrays = (value) => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      return [];
+    }
+
+    return Object.entries(value).filter(([key, val]) => {
+      const { actualValue } = getActualValueAndSource(val);
+      return isScalarArray(actualValue);
+    });
+  };
+
   const getScalarProperties = (value, isComponent = false) => {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
       return [];
