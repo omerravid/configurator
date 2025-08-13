@@ -249,11 +249,11 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
           </div>
 
           {/* API Info */}
-          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded border">
+          <div className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-600 transition-colors">
             <strong>API Endpoint:</strong> GET /api/configs/
             {selectedConfigId || "{id}"}/data
             {queryPath && <span>?path={encodeURIComponent(queryPath)}</span>}
-            <span className="text-green-600">&minimal=true</span>
+            <span className="text-green-600 dark:text-green-400">&minimal=true</span>
             <br />
             <strong>Example:</strong> GET /api/configs/{selectedConfigId || "prod_ecommerce"}/data
             {queryPath ? `?path=${encodeURIComponent(queryPath)}&minimal=true` : "?minimal=true"}
@@ -263,7 +263,7 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
 
           {/* Error Display */}
           {error && (
-            <div className="flex items-center space-x-2 text-red-700 bg-red-50 border border-red-200 rounded-md p-3">
+            <div className="flex items-center space-x-2 text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-3 transition-colors">
               <ExclamationTriangleIcon className="w-5 h-5 flex-shrink-0" />
               <span className="text-sm">{error}</span>
             </div>
@@ -271,11 +271,11 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
 
           {/* Result Display */}
           {queryResult && (
-            <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
+            <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md p-4 transition-colors">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-2">
                   <CheckCircleIcon className="w-5 h-5 text-green-600" />
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                     Query Result
                   </span>
                   {queryResult.isMinimal && (
@@ -283,13 +283,13 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
                       Minimal Response
                     </span>
                   )}
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     {queryResult.query.configName} → {queryResult.query.path}
                   </span>
                 </div>
                 <button
                   onClick={copyResult}
-                  className="px-2 py-1 text-xs text-gray-600 hover:text-gray-800 border border-gray-300 rounded hover:bg-white"
+                  className="px-2 py-1 text-xs text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 border border-gray-300 dark:border-gray-600 rounded hover:bg-white dark:hover:bg-gray-700 transition-colors"
                 >
                   Copy Result
                 </button>
