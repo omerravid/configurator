@@ -388,6 +388,82 @@ const ScalarPropertiesPanel = ({
     onPropertyDelete?.(selectedPath, propertyName);
   };
 
+  // Array editing handlers
+  const handleArrayValueChange = (arrayName, index, newValue) => {
+    console.log("Array value change:", { arrayName, index, newValue, selectedPath });
+
+    // Get the current array
+    const currentArray = actualSelectedValue[arrayName];
+    if (!Array.isArray(currentArray)) {
+      console.error("Not an array:", currentArray);
+      return;
+    }
+
+    // Create a new array with the updated value
+    const newArray = [...currentArray];
+
+    // Parse the value appropriately
+    let parsedValue = newValue;
+    try {
+      if (newValue === "true" || newValue === "false") {
+        parsedValue = newValue === "true";
+      } else if (newValue === "null") {
+        parsedValue = null;
+      } else if (newValue === "" || newValue === undefined) {
+        parsedValue = "";
+      } else if (!isNaN(newValue) && newValue !== "" && newValue !== null) {
+        parsedValue = Number(newValue);
+      }
+    } catch (e) {
+      // Keep as string if parsing fails
+    }
+
+    newArray[index] = parsedValue;
+
+    // Create the full path for the array
+    let arrayPath;
+    if (selectedPath === "root") {
+      arrayPath = `root.${arrayName}`;
+    } else {
+      arrayPath = `${selectedPath}.${arrayName}`;
+    }
+
+    console.log("Updating array at path:", arrayPath, "with new array:", newArray);
+    onValueChange?.(arrayPath, newArray);
+  };
+
+  const handleArrayItemAdd = (arrayName) => {
+    const currentArray = actualSelectedValue[arrayName];
+    if (!Array.isArray(currentArray)) return;
+
+    const newArray = [...currentArray, ""];
+
+    let arrayPath;
+    if (selectedPath === "root") {
+      arrayPath = `root.${arrayName}`;
+    } else {
+      arrayPath = `${selectedPath}.${arrayName}`;
+    }
+
+    onValueChange?.(arrayPath, newArray);
+  };
+
+  const handleArrayItemDelete = (arrayName, index) => {
+    const currentArray = actualSelectedValue[arrayName];
+    if (!Array.isArray(currentArray)) return;
+
+    const newArray = currentArray.filter((_, i) => i !== index);
+
+    let arrayPath;
+    if (selectedPath === "root") {
+      arrayPath = `root.${arrayName}`;
+    } else {
+      arrayPath = `${selectedPath}.${arrayName}`;
+    }
+
+    onValueChange?.(arrayPath, newArray);
+  };
+
   const handleVersionChange = (newVersionId) => {
     console.log("Version change handler called:", {
       newVersionId,
