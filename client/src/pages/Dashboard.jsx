@@ -55,6 +55,21 @@ const Dashboard = () => {
       const response = await configAPI.getAll();
       console.log("🔵 [FRONTEND] Got response:", response.data.configs?.length, "configs");
       setAllConfigurations(response.data.configs || []);
+
+      // Add visible debug for non-admin users
+      if (user?.role !== "ADMIN") {
+        const userConfigs = response.data.configs?.filter(c => c.type === "USER") || [];
+        window.debugConfigInfo = {
+          totalConfigs: response.data.configs?.length || 0,
+          userConfigs: userConfigs.length,
+          userConfigDetails: userConfigs.map(c => ({
+            name: c.name,
+            created_by: c.created_by,
+            current_user: user?.id,
+            match: c.created_by === user?.id
+          }))
+        };
+      }
     } catch (err) {
       console.error("Failed to load all configurations:", err);
       // Don't show error toast for empty configurations
