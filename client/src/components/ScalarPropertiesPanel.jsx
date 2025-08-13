@@ -542,6 +542,12 @@ const ScalarPropertiesPanel = ({
 
   // Handle property changes inside array elements - updates the entire array
   const handleArrayElementPropertyChange = (propertyName, newValue) => {
+    console.log("=== ARRAY ELEMENT PROPERTY CHANGE DEBUG ===");
+    console.log("selectedPath:", selectedPath);
+    console.log("propertyName:", propertyName);
+    console.log("newValue:", newValue);
+    console.log("actualSelectedValue:", actualSelectedValue);
+
     // Parse the selectedPath to get array path and index
     // Example: "root.ObjArray[0]" -> arrayPath: "root.ObjArray", index: 0
     const bracketStart = selectedPath.indexOf('[');
@@ -560,7 +566,7 @@ const ScalarPropertiesPanel = ({
       return;
     }
 
-    console.log("Array element property change:", {
+    console.log("Parsed path info:", {
       selectedPath,
       arrayPath,
       arrayIndex,
