@@ -764,6 +764,21 @@ const Dashboard = () => {
               </div>
             )}
 
+            <button
+              onClick={toggleTheme}
+              className="btn-secondary flex items-center space-x-1"
+              title={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+            >
+              {isDarkMode ? (
+                <SunIcon className="w-4 h-4" />
+              ) : (
+                <MoonIcon className="w-4 h-4" />
+              )}
+              <span className="hidden sm:inline">
+                {isDarkMode ? 'Light' : 'Dark'}
+              </span>
+            </button>
+
             {user.role === "ADMIN" && (
               <button
                 onClick={() => setShowSettings(true)}
