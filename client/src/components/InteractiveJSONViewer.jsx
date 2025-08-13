@@ -742,10 +742,13 @@ const InteractiveJSONViewer = ({
       return newObj;
     };
 
+    // Use current data based on mode
+    const currentData = getCurrentData();
+
     switch (action) {
       case "add": {
         const parentPath = path.replace(/^root\./, "");
-        const parentValue = getValueAtPath(data, path);
+        const parentValue = getValueAtPath(currentData, path);
 
         if (parentValue && typeof parentValue === "object") {
           const newParentValue = { ...parentValue };
@@ -767,7 +770,7 @@ const InteractiveJSONViewer = ({
         const parentPath = pathParts.slice(0, -1).join(".");
         const key = pathParts[pathParts.length - 1];
 
-        const parentValue = getValueAtPath(data, parentPath ? `root.${parentPath}` : "root");
+        const parentValue = getValueAtPath(currentData, parentPath ? `root.${parentPath}` : "root");
         if (parentValue && typeof parentValue === "object") {
           const newParentValue = { ...parentValue };
           delete newParentValue[key];
@@ -800,7 +803,7 @@ const InteractiveJSONViewer = ({
           return;
         }
 
-        const parentValue = getValueAtPath(data, parentPath ? `root.${parentPath}` : "root");
+        const parentValue = getValueAtPath(currentData, parentPath ? `root.${parentPath}` : "root");
         if (parentValue && typeof parentValue === "object" && parentValue.hasOwnProperty(oldKey)) {
           // Check if new key already exists
           if (parentValue.hasOwnProperty(newKey)) {
