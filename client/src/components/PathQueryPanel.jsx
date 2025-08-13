@@ -174,7 +174,7 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
           )}
           <span>REST API Query Panel</span>
           {lastQuery && (
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-gray-500 dark:text-gray-400">
               Last: {lastQuery.configName} → {lastQuery.path}
             </span>
           )}
@@ -188,13 +188,13 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Configuration Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                 Configuration
               </label>
               <select
                 value={selectedConfigId}
                 onChange={(e) => setSelectedConfigId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors"
               >
                 <option value="">Select configuration...</option>
                 {configurations.map((config) => (
@@ -207,7 +207,7 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
 
             {/* Path Input */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                 Path (empty for complete config)
               </label>
               <div className="flex space-x-2">
@@ -216,14 +216,14 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
                   value={queryPath}
                   onChange={(e) => setQueryPath(e.target.value)}
                   placeholder="e.g., system.logging.level"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") executeQuery();
                   }}
                 />
                 <button
                   onClick={handlePaste}
-                  className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 transition-colors"
                   title="Paste from clipboard"
                 >
                   <ClipboardIcon className="w-4 h-4" />
