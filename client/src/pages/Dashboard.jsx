@@ -65,8 +65,8 @@ const Dashboard = () => {
           userConfigDetails: userConfigs.map(c => ({
             name: c.name,
             created_by: c.created_by,
-            current_user: user?.id,
-            match: c.created_by === user?.id
+            current_user: user?.username,
+            match: c.created_by === user?.username
           }))
         };
       }
