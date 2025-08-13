@@ -22,7 +22,7 @@ backend.stderr.on("data", (data) => {
 // Start frontend after a short delay
 setTimeout(() => {
   console.log("Starting frontend server on port 5173...");
-  const frontend = spawn("npm", ["run", "dev"], {
+  const frontend = spawn("npm", ["run", "dev", "--", "--host", "0.0.0.0"], {
     cwd: path.join(__dirname, "client"),
     stdio: ["inherit", "pipe", "pipe"],
     shell: true,
