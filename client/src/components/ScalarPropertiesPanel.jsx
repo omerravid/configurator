@@ -1204,7 +1204,7 @@ const ScalarPropertiesPanel = ({
       {/* Arrays List */}
       {scalarArrays.length > 0 && (
         <div className="space-y-4 mb-6">
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Arrays</h4>
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Arrays</h4>
           {scalarArrays.map(([arrayName, arrayValue]) => {
             const { actualValue: actualArray } = getActualValueAndSource(arrayValue);
 
