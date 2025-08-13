@@ -461,8 +461,22 @@ const StructuralTreeNode = ({
 
     return Object.entries(actualValue).map(([key, val]) => {
       const valActualValue = getActualValue(val);
-      // Only show arrays and objects in structure view
+      // Only show arrays and objects in structure view, but exclude scalar arrays
       if (valActualValue && (typeof valActualValue === "object" || Array.isArray(valActualValue))) {
+        // Skip scalar arrays (they're handled in the properties panel)
+        if (Array.isArray(valActualValue)) {
+          const isScalar = valActualValue.every(item => {
+            const itemActual = getActualValue(item);
+            return (
+              itemActual === null ||
+              itemActual === undefined ||
+              typeof itemActual === "string" ||
+              typeof itemActual === "number" ||
+              typeof itemActual === "boolean"
+            );
+          });
+          if (isScalar) return null;
+        }
         return (
           <StructuralTreeNode
             key={key}
