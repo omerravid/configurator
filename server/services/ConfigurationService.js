@@ -311,11 +311,17 @@ class ConfigurationService {
         // Extract actual value from provenance wrapper
         const actualCurrent = this.extractActualValue(current);
 
+        console.log(`[BACKEND] Array access: pathSoFar="${pathSoFar}", index=${index}, actualCurrent type:`, typeof actualCurrent, 'isArray:', Array.isArray(actualCurrent));
+        if (Array.isArray(actualCurrent)) {
+          console.log(`[BACKEND] Array length: ${actualCurrent.length}, accessing index ${index}`);
+        }
+
         if (!Array.isArray(actualCurrent) || isNaN(index) || index < 0 || index >= actualCurrent.length) {
           throw new Error(`Array index ${index} not found at path: ${pathSoFar} (array length: ${Array.isArray(actualCurrent) ? actualCurrent.length : 'not an array'})`);
         }
 
         current = actualCurrent[index];
+        console.log(`[BACKEND] After array access, current type:`, typeof current);
         pathSoFar += `[${index}]`;
         i = bracketEnd + 1;
 
