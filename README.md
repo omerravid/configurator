@@ -38,6 +38,8 @@ A comprehensive component-based configuration management system with deep merge 
 - **Import Functionality**: Import folder structures to quickly prototype components
 - **Version Management**: Inline component version editing with dropdown selection
 - **Component Removal**: Easy unlinking of components from products
+- **Dark Mode Interface**: Modern dark theme enabled by default with light mode toggle
+- **Theme Persistence**: Theme preference automatically saved and restored
 - **Admin Settings Panel**: Configure MongoDB connections and migrate data
 - **Role-based Access**: Admin and User roles with appropriate permissions
 
