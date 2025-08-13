@@ -432,13 +432,13 @@ Component Removal Issues
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col transition-colors">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Configuration Manager - User Manual</h2>
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Configuration Manager - User Manual</h2>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             <XMarkIcon className="w-6 h-6" />
           </button>
@@ -448,23 +448,23 @@ Component Removal Issues
         <div className="flex-1 overflow-auto p-6">
           <div className="space-y-6">
             {Object.entries(userManualContent).map(([sectionId, section]) => (
-              <div key={sectionId} className="border border-gray-200 rounded-lg">
+              <div key={sectionId} className="border border-gray-200 dark:border-gray-600 rounded-lg">
                 <button
                   onClick={() => toggleSection(sectionId)}
-                  className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+                  className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
-                  <h3 className="text-lg font-semibold text-gray-900">{section.title}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{section.title}</h3>
                   {expandedSections[sectionId] ? (
-                    <ChevronDownIcon className="w-5 h-5 text-gray-500" />
+                    <ChevronDownIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                   ) : (
-                    <ChevronRightIcon className="w-5 h-5 text-gray-500" />
+                    <ChevronRightIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                   )}
                 </button>
                 
                 {expandedSections[sectionId] && (
-                  <div className="px-4 pb-4 border-t border-gray-100">
+                  <div className="px-4 pb-4 border-t border-gray-100 dark:border-gray-600">
                     <div className="prose prose-sm max-w-none">
-                      <pre className="whitespace-pre-wrap text-sm text-gray-700 font-sans">
+                      <pre className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300 font-sans">
                         {section.content.trim()}
                       </pre>
                     </div>
@@ -476,8 +476,8 @@ Component Removal Issues
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-200 p-6">
-          <p className="text-sm text-gray-600 text-center">
+        <div className="border-t border-gray-200 dark:border-gray-700 p-6">
+          <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
             For additional support or questions not covered in this manual, contact your system administrator.
           </p>
         </div>
