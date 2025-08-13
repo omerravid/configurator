@@ -1116,9 +1116,9 @@ const InteractiveJSONViewer = ({
       {/* Help text */}
       <div className="mt-2 text-xs text-gray-500">
         {viewMode === "flat" ? (
-          <>💡 Click ℹ️ to see source configuration • Colored dots indicate inheritance level{isEditable && " • Click ✏️ to edit values"}</>
+          <>💡 Click ℹ️ to see source configuration • Colored dots indicate inheritance level{isEditable && " • Click ✏️ to edit values"} • Use "All"/"Changes" toggle to view resolved vs raw data</>
         ) : (
-          <>💡 Select items in structure tree to view properties • {isEditable && "Right-click for structure editing • "} Click ℹ️ to see source configuration</>
+          <>💡 Select items in structure tree to view properties • {isEditable && "Right-click for structure editing • "} Click ℹ️ to see source configuration • Use "All"/"Changes" toggle to view resolved vs raw data</>
         )}
       </div>
     </div>
