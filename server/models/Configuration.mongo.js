@@ -249,11 +249,15 @@ class Configuration {
       .sort({ type: 1, createdAt: -1 });
 
     return configs.map(config => {
+      // Extract populated data BEFORE calling toJSON()
+      const createdByUsername = config.created_by?.username;
+
+      // Now call toJSON() which will convert ObjectIds to strings
       const result = config.toJSON();
-      
+
       // Add populated fields in expected format
-      if (config.created_by) {
-        result.created_by_username = config.created_by.username;
+      if (createdByUsername) {
+        result.created_by_username = createdByUsername;
       }
 
       return result;
