@@ -1013,7 +1013,15 @@ const InteractiveJSONViewer = ({
       )}
 
       {/* Content based on view mode */}
-      {viewMode === "flat" ? (
+      {hasNoChanges ? (
+        /* No Changes Message */
+        <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
+          <div className="text-gray-500">
+            <div className="text-lg mb-2">No Local Changes</div>
+            <div className="text-sm">This configuration has no local overrides. All values are inherited from parent configurations.</div>
+          </div>
+        </div>
+      ) : viewMode === "flat" ? (
         /* Flat JSON Tree */
         <div className="bg-white border border-gray-200 rounded-lg p-4 max-h-96 overflow-auto">
           <TreeNode
