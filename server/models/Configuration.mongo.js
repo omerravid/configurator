@@ -160,7 +160,6 @@ class Configuration {
 
   static async findByName(name) {
     const config = await ConfigurationModel.findOne({ name })
-      .populate('created_by', 'username')
       .populate('parent_id', 'name type');
 
     if (!config) return null;
