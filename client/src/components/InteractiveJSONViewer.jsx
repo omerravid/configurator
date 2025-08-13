@@ -661,6 +661,10 @@ const InteractiveJSONViewer = ({
       setSelectedStructuralValue(currentData);
     } else {
       const valueAtPath = getValueAtPath(currentData, selectedStructuralPath);
+      console.log("=== STRUCTURAL PATH DEBUG ===");
+      console.log("selectedStructuralPath:", selectedStructuralPath);
+      console.log("currentData:", currentData);
+      console.log("valueAtPath:", valueAtPath);
       setSelectedStructuralValue(valueAtPath);
     }
   }, [data, rawData, dataMode, selectedStructuralPath, getValueAtPath, getCurrentData]);
