@@ -13,11 +13,12 @@ export const useToast = () => {
 
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
-  const [toastCounter, setToastCounter] = useState(0);
+  const toastCounterRef = useRef(0);
 
   const showToast = (message, type = "success", duration = 2000) => {
-    const id = `${Date.now()}-${toastCounter}`;
-    setToastCounter(prev => prev + 1);
+    // Use ref for immediate counter increment to avoid race conditions
+    toastCounterRef.current += 1;
+    const id = `${Date.now()}-${toastCounterRef.current}-${Math.random().toString(36).substr(2, 9)}`;
     const toast = { id, message, type, duration };
 
     setToasts((prev) => [...prev, toast]);
