@@ -635,36 +635,12 @@ const ConfigurationTree = ({
       const includeArchived = activeTab === 'archived';
       const response = await configAPI.getAll(includeArchived);
 
-      // Debug user information
-      console.log("🔍 [FRONTEND] Current user for filtering:", {
-        id: user?.id,
-        id_type: typeof user?.id,
-        role: user?.role,
-        username: user?.username
-      });
-
       // Filter to show:
       // 1. Root-level configs (no parent) - includes PRODUCT and COMPONENT
       // 2. USER configs created by the current user (regardless of parent_id)
-      let rootConfigs = (response.data.configs || []).filter(config => {
-        const isRootLevel = !config.parent_id;
-        const isUserConfigByCurrentUser = config.type === "USER" && config.created_by === user?.id;
-        const shouldShow = isRootLevel || isUserConfigByCurrentUser;
-
-        // Debug logging for USER type configs
-        if (config.type === "USER") {
-          console.log(`🔍 USER config "${config.name}":`, {
-            id: config.id,
-            created_by: config.created_by,
-            current_user_id: user?.id,
-            parent_id: config.parent_id,
-            isUserConfigByCurrentUser,
-            shouldShow
-          });
-        }
-
-        return shouldShow;
-      });
+      let rootConfigs = (response.data.configs || []).filter(config =>
+        !config.parent_id || (config.type === "USER" && config.created_by === user?.id)
+      );
 
       // Filter by archived status based on active tab
       if (activeTab === 'archived') {
