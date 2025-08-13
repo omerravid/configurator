@@ -389,7 +389,17 @@ const ScalarPropertiesPanel = ({
       // Keep as string if parsing fails
     }
 
-    onPropertyAdd?.(selectedPath, newPropertyName, parsedValue);
+    // Check if we're adding a property to an array element
+    const isArrayElementProperty = selectedPath.includes('[') && selectedPath.includes(']');
+
+    if (isArrayElementProperty) {
+      // Handle array element property addition - update the entire array
+      handleArrayElementPropertyChange(newPropertyName, parsedValue);
+    } else {
+      // Normal property addition
+      onPropertyAdd?.(selectedPath, newPropertyName, parsedValue);
+    }
+
     setNewPropertyName("");
     setNewPropertyValue("");
     setShowAddProperty(false);
