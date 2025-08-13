@@ -56,9 +56,10 @@ A comprehensive component-based configuration management system with deep merge 
 ### Frontend
 
 - **React** with Vite
-- **Tailwind CSS** for styling
+- **Tailwind CSS** for styling with dark mode support
 - **React Router** for navigation
 - **Axios** for API communication
+- **Theme Context** for persistent dark/light mode switching
 
 ## Getting Started
 
