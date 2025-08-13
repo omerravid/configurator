@@ -688,16 +688,6 @@ const ConfigurationTree = ({
 
   return (
     <div className="space-y-1">
-      {/* Debug Info - Temporary */}
-      {user?.role !== "ADMIN" && (
-        <div className="px-2 py-1 text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 border-b">
-          Debug: User ID: {user?.id} | USER configs: {window.debugUserConfigs?.length || 0}
-          {window.debugUserConfigs?.map(cfg => (
-            <div key={cfg.name}>"{cfg.name}" - Match: {cfg.matches ? "✓" : "✗"}</div>
-          ))}
-        </div>
-      )}
-
       {/* Tab Header - Always visible */}
       <div className="px-4 py-2 border-b border-gray-200">
         <div className="flex space-x-1 mb-3">
