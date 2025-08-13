@@ -209,8 +209,7 @@ const ScalarPropertiesPanel = ({
     allProperties: actualSelectedValue && typeof actualSelectedValue === 'object' ? Object.keys(actualSelectedValue) : [],
     scalarPropertiesCount: scalarProperties.length,
     subObjectsCount: subObjects.length,
-    rawSelectedValue: selectedValue,
-    isArrayElement: selectedPath.includes('[') && selectedPath.includes(']')
+    rawSelectedValue: selectedValue
   });
 
   if (actualSelectedValue && typeof actualSelectedValue === 'object') {
