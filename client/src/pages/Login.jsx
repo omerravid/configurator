@@ -35,13 +35,13 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8 transition-colors">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100">
             Configuration Manager
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             {isLogin ? "Sign in to your account" : "Create a new account"}
           </p>
         </div>
@@ -50,7 +50,7 @@ const Login = () => {
           <div>
             <label
               htmlFor="username"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-200"
             >
               Username
             </label>
@@ -59,7 +59,7 @@ const Login = () => {
               name="username"
               type="text"
               required
-              className="mt-1 input-field w-full"
+              className="mt-1 input-field w-full dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
               placeholder="Enter your username"
               value={formData.username}
               onChange={handleInputChange}
@@ -69,7 +69,7 @@ const Login = () => {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-200"
             >
               Password
             </label>
@@ -78,7 +78,7 @@ const Login = () => {
               name="password"
               type="password"
               required
-              className="mt-1 input-field w-full"
+              className="mt-1 input-field w-full dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
               placeholder="Enter your password"
               value={formData.password}
               onChange={handleInputChange}
@@ -89,14 +89,14 @@ const Login = () => {
             <div>
               <label
                 htmlFor="role"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-200"
               >
                 Role
               </label>
               <select
                 id="role"
                 name="role"
-                className="mt-1 input-field w-full"
+                className="mt-1 input-field w-full dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600"
                 value={formData.role}
                 onChange={handleInputChange}
               >
@@ -107,7 +107,7 @@ const Login = () => {
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded transition-colors">
               {error}
             </div>
           )}
@@ -132,7 +132,7 @@ const Login = () => {
             <button
               type="button"
               onClick={toggleMode}
-              className="text-primary-600 hover:text-primary-500 text-sm"
+              className="text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 text-sm transition-colors"
             >
               {isLogin
                 ? "Don't have an account? Sign up"
@@ -141,11 +141,11 @@ const Login = () => {
           </div>
         </form>
 
-        <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h3 className="text-sm font-medium text-blue-800 mb-2">
+        <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg transition-colors">
+          <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
             Demo Credentials:
           </h3>
-          <p className="text-xs text-blue-700">
+          <p className="text-xs text-blue-700 dark:text-blue-300">
             Username: <strong>admin</strong>
             <br />
             Password: <strong>admin123</strong>
