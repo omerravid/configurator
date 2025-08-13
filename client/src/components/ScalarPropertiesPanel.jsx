@@ -961,13 +961,24 @@ const ScalarPropertiesPanel = ({
                 <div className="flex items-center justify-between mb-3">
                   <span className="font-medium text-gray-700">{arrayName}:</span>
                   {isEditable && configType !== "PRODUCT" && (
-                    <button
-                      onClick={() => handleArrayItemAdd(arrayName)}
-                      className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
-                      title="Add array item"
-                    >
-                      + Add
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleArrayItemAdd(arrayName)}
+                        className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                        title="Add array item"
+                      >
+                        + Add
+                      </button>
+                      {arrayHasLocalOverride(arrayValue) && (
+                        <button
+                          onClick={() => handleArrayReset(arrayName)}
+                          className="px-2 py-1 text-xs bg-orange-600 text-white rounded hover:bg-orange-700"
+                          title="Reset to inherited value"
+                        >
+                          Reset
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
 
