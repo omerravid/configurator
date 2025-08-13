@@ -1347,7 +1347,7 @@ const ScalarPropertiesPanel = ({
                       <FolderIcon className="w-4 h-4 text-gray-500" />
                     )}
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-700">{key}</span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{key}</span>
                       {isComponentRef && (
                         <span className="text-xs text-blue-600">
                           {safeToString(actualValue.componentName)} ({safeToString(actualValue.versionName)})
