@@ -368,7 +368,7 @@ async function initializeSampleData() {
         data: componentData.data,
         description: componentData.description,
         status: componentData.status,
-        createdBy: adminUser.id
+        createdBy: adminUser.username
       });
       createdComponents.push(created);
       console.log(`Created component: ${componentData.name}`);
@@ -386,7 +386,7 @@ async function initializeSampleData() {
         data: versionData.data,
         description: versionData.description,
         status: versionData.status,
-        createdBy: adminUser.id
+        createdBy: adminUser.username
       });
       createdVersions.push(created);
       console.log(`Created version: ${versionData.name}`);
@@ -421,7 +421,7 @@ async function initializeSampleData() {
         data: productData.data,
         description: productData.description,
         status: productData.status,
-        createdBy: adminUser.id
+        createdBy: adminUser.username
       });
       createdProducts.push(created);
       console.log(`Created product: ${productData.name}`);
@@ -528,7 +528,7 @@ async function initializeSampleData() {
         data: instanceData.data,
         description: instanceData.description,
         status: instanceData.status,
-        createdBy: adminUser.id
+        createdBy: adminUser.username
       });
       createdInstances.push(created);
       console.log(`Created instance: ${instanceData.name}`);
