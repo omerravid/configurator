@@ -355,6 +355,8 @@ router.get("/:id/data", authenticateToken, async (req, res) => {
     const { path, minimal } = req.query;
     const isMinimal = minimal === "true";
 
+    console.log(`[BACKEND] GET /configs/${req.params.id}/data - path: "${path}", minimal: ${minimal}`);
+
     if (!path || path.trim() === "") {
       // If no path provided, return the complete resolved configuration
       const result = await ConfigurationService.resolveConfiguration(
