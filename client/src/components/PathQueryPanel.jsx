@@ -160,17 +160,17 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
   };
 
   return (
-    <div className="border-t border-gray-200 bg-white">
+    <div className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 transition-colors">
       {/* Panel Header */}
-      <div className="px-4 py-3 border-b border-gray-100">
+      <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+          className="flex items-center space-x-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
         >
           {isExpanded ? (
-            <ChevronDownIcon className="w-4 h-4" />
+            <ChevronDownIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
           ) : (
-            <ChevronUpIcon className="w-4 h-4" />
+            <ChevronUpIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
           )}
           <span>REST API Query Panel</span>
           {lastQuery && (
