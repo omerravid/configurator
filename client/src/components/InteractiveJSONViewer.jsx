@@ -1192,6 +1192,7 @@ const InteractiveJSONViewer = ({
               onNavigateToPath={handleNavigateToPath}
               configType={configType}
               selectedConfig={selectedConfig}
+              getCurrentData={getCurrentData}
             />
           </div>
         </div>
