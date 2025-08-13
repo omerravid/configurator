@@ -609,8 +609,20 @@ const InteractiveJSONViewer = ({
     const keys = path.replace(/^root\./, "").split(".");
     let current = obj;
     for (const key of keys) {
-      if (current && typeof current === "object" && current.hasOwnProperty(key)) {
-        current = current[key];
+      if (current && typeof current === "object") {
+        // Handle array index notation like [0], [1], etc.
+        if (key.startsWith('[') && key.endsWith(']')) {
+          const index = parseInt(key.slice(1, -1));
+          if (Array.isArray(current) && index >= 0 && index < current.length) {
+            current = current[index];
+          } else {
+            return null;
+          }
+        } else if (current.hasOwnProperty(key)) {
+          current = current[key];
+        } else {
+          return null;
+        }
       } else {
         return null;
       }
