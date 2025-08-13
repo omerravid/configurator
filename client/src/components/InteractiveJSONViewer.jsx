@@ -611,8 +611,14 @@ const InteractiveJSONViewer = ({
 
   // Get current data based on mode
   const getCurrentData = useCallback(() => {
-    return dataMode === "changes" ? (rawData || {}) : data;
+    if (dataMode === "changes") {
+      return rawData || {};
+    }
+    return data;
   }, [dataMode, rawData, data]);
+
+  // Check if changes mode has no data
+  const hasNoChanges = dataMode === "changes" && (!rawData || Object.keys(rawData).length === 0);
 
   // Update selected structural value when data changes
   useEffect(() => {
