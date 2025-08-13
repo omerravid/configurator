@@ -500,6 +500,31 @@ const ScalarPropertiesPanel = ({
     );
   };
 
+  // Check if a scalar property has local overrides
+  const propertyHasLocalOverride = (propertyValue) => {
+    const { source } = getActualValueAndSource(propertyValue);
+    // If source exists and is not from a parent, it's a local override
+    return source && (
+      !source.configId ||
+      source.configId === (selectedConfig?.id || "") ||
+      source.configName === (selectedConfig?.name || "")
+    );
+  };
+
+  // Reset a scalar property to inherited value
+  const handlePropertyReset = (propertyName) => {
+    let propertyPath;
+    if (selectedPath === "root") {
+      propertyPath = `root.${propertyName}`;
+    } else {
+      propertyPath = `${selectedPath}.${propertyName}`;
+    }
+
+    console.log("Resetting property to default:", propertyPath);
+    onValueChange?.(propertyPath, null); // null removes the override
+    showToast(`Property "${propertyName}" reset to inherited value`, "success");
+  };
+
   const handleVersionChange = (newVersionId) => {
     console.log("Version change handler called:", {
       newVersionId,
