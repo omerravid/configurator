@@ -796,15 +796,6 @@ const Dashboard = () => {
               </span>
             </button>
 
-            {/* Temporary Debug Info for non-admin users */}
-            {user?.role !== "ADMIN" && window.debugConfigInfo && (
-              <div className="text-xs bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 px-2 py-1 rounded">
-                Debug: Total={window.debugConfigInfo.totalConfigs}, USER={window.debugConfigInfo.userConfigs}
-                {window.debugConfigInfo.userConfigDetails?.map((cfg, idx) => (
-                  <div key={idx}>"{cfg.name}": {cfg.match ? "MATCH ✓" : "NO MATCH ✗"}</div>
-                ))}
-              </div>
-            )}
 
             {user.role === "ADMIN" && (
               <button
