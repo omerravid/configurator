@@ -1315,7 +1315,7 @@ const ScalarPropertiesPanel = ({
                   })}
 
                   {actualArray.length === 0 && (
-                    <div className="text-sm text-gray-500 italic pl-2">Empty array</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400 italic pl-2">Empty array</div>
                   )}
                 </div>
               </div>
