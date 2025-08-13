@@ -124,19 +124,12 @@ class Configuration {
   }
 
   static async findById(id) {
-    console.log("=== Configuration.findById called ===");
-    console.log("id received:", id);
-    console.log("id type:", typeof id);
-    console.log("id stringified:", JSON.stringify(id));
-
     // Convert ObjectId to string if needed
     let normalizedId = id;
     if (typeof id === 'object' && id !== null) {
       if (id.toString && typeof id.toString === 'function') {
         normalizedId = id.toString();
-        console.log("Converted ObjectId to string:", normalizedId);
       } else {
-        console.error("Received object that is not an ObjectId:", id);
         throw new Error(`Invalid ID format: ${JSON.stringify(id)}`);
       }
     }
