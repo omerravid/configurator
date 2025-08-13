@@ -683,7 +683,8 @@ const InteractiveJSONViewer = ({
     setSelectedStructuralPath(path);
 
     // Get the value at the target path
-    const valueAtPath = getValueAtPath(data, path);
+    const currentData = getCurrentData();
+    const valueAtPath = getValueAtPath(currentData, path);
     setSelectedStructuralValue(valueAtPath);
 
     // Expand all parent paths in the tree
