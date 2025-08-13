@@ -134,8 +134,15 @@ const StructuralTreeNode = ({
       } else {
         return <CogIcon className="w-4 h-4 text-teal-600" title="Component" />;
       }
-    } else if (isObject || isArray) {
-      // Regular object/array
+    } else if (isArray) {
+      // Array icon
+      return (
+        <div className="w-4 h-4 bg-purple-500 text-white rounded flex items-center justify-center text-xs font-bold" title="Array">
+          []
+        </div>
+      );
+    } else if (isObject) {
+      // Regular object
       return <DocumentIcon className="w-4 h-4 text-gray-600" title="Object" />;
     }
     return null;
