@@ -1050,8 +1050,8 @@ const ScalarPropertiesPanel = ({
 
       {/* Add Property Form */}
       {showAddProperty && (
-        <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded">
-          <h4 className="text-sm font-medium mb-2">Add New Property</h4>
+        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded transition-colors">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Add New Property</h4>
           <div className="space-y-2">
             <input
               type="text"
