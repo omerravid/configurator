@@ -954,7 +954,7 @@ const ScalarPropertiesPanel = ({
   return (
     <div className="p-4" onClick={handleContainerClick}>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium text-gray-900">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
           {componentRef ? "Component" : "Properties"}
         </h3>
         <div className="flex items-center space-x-2">
