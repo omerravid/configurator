@@ -1037,6 +1037,26 @@ const InteractiveJSONViewer = ({
             onGetActiveTooltipPath={getActiveTooltipPath}
           />
         </div>
+      ) : hasNoChanges ? (
+        /* No Changes Message for Structural View */
+        <div className="flex gap-4 h-96">
+          <div className="w-1/2 bg-white border border-gray-200 rounded-lg overflow-auto">
+            <div className="p-2 border-b border-gray-200 bg-gray-50">
+              <h4 className="text-sm font-medium text-gray-700">Structure</h4>
+            </div>
+            <div className="p-8 text-center text-gray-500">
+              <div className="text-sm">No local changes to display</div>
+            </div>
+          </div>
+          <div className="w-1/2 bg-white border border-gray-200 rounded-lg overflow-auto">
+            <div className="p-2 border-b border-gray-200 bg-gray-50">
+              <h4 className="text-sm font-medium text-gray-700">Properties</h4>
+            </div>
+            <div className="p-8 text-center text-gray-500">
+              <div className="text-sm">No local changes to display</div>
+            </div>
+          </div>
+        </div>
       ) : (
         /* Structural View - Split Panel */
         <div className="flex gap-4 h-96">
