@@ -516,8 +516,8 @@ const StructuralTreeNode = ({
   return (
     <div>
       <div
-        className={`flex items-center py-1 px-2 hover:bg-gray-50 rounded cursor-pointer ${
-          isSelected ? "bg-blue-50 border-l-2 border-blue-500" : ""
+        className={`flex items-center py-1 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer transition-colors ${
+          isSelected ? "bg-blue-50 dark:bg-blue-900/20 border-l-2 border-blue-500" : ""
         }`}
         style={{ paddingLeft: `${depth * 20 + 8}px` }}
         onClick={handleNodeClick}
@@ -590,7 +590,7 @@ const StructuralTreeNode = ({
                   className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600 focus:outline-none"
                   title="Cancel"
                 >
-                  ���
+                  �����
                 </button>
               </div>
             ) : (
