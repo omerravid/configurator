@@ -60,6 +60,21 @@ const StructuralTreeNode = ({
   const isObject = actualValue && typeof actualValue === "object" && !Array.isArray(actualValue);
   const isArray = Array.isArray(actualValue);
 
+  // Check if this is a scalar array (array containing only primitive values)
+  const isScalarArray = () => {
+    if (!isArray) return false;
+    return actualValue.every(item => {
+      const itemActualValue = getActualValue(item);
+      return (
+        itemActualValue === null ||
+        itemActualValue === undefined ||
+        typeof itemActualValue === "string" ||
+        typeof itemActualValue === "number" ||
+        typeof itemActualValue === "boolean"
+      );
+    });
+  };
+
   // Check if this node has children that are objects or arrays (not scalar values)
   const hasStructuralChildren = () => {
     if (isArray) {
