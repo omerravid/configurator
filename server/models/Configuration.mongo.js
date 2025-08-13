@@ -21,8 +21,7 @@ const configurationSchema = new mongoose.Schema({
     default: {}
   },
   created_by: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    type: String,
     required: true
   },
   description: {
