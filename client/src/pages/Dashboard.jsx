@@ -69,9 +69,6 @@ const Dashboard = () => {
         configAPI.getById(config.id, true),
         configAPI.getRawById(config.id)
       ]);
-      console.log("=== RAW DATA DEBUG ===");
-      console.log("rawResponse:", rawResponse);
-      console.log("rawResponse.data:", rawResponse.data);
       setResolvedData(resolvedResponse.data);
       setRawData(rawResponse.data);
     } catch (err) {
