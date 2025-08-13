@@ -993,6 +993,7 @@ const Dashboard = () => {
                     isEditable={canEdit()}
                     onDataChange={handleDataChange}
                     configType={selectedConfig?.type}
+                    selectedConfig={selectedConfig}
                   />
                 ) : (
                   <div className="text-center text-gray-500 p-8">
