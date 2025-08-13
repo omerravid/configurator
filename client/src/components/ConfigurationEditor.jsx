@@ -1005,7 +1005,7 @@ const ConfigurationEditor = ({
 
                 {/* Child creation message */}
                 {isCreatingChild && (
-                  <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded text-sm">
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 px-4 py-3 rounded text-sm transition-colors">
                     📝 The child configuration will inherit all data from the
                     parent. You can customize it using inline editing after
                     creation.
@@ -1016,7 +1016,7 @@ const ConfigurationEditor = ({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 transition-colors">
             <button
               type="button"
               onClick={() => onClose(false)}
