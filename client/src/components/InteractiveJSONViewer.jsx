@@ -563,6 +563,7 @@ const TreeNode = ({
 
 const InteractiveJSONViewer = ({
   data,
+  rawData,
   metadata,
   title,
   className = "",
