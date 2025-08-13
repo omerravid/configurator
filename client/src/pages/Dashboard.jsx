@@ -710,7 +710,7 @@ const Dashboard = () => {
     if (user.role === "ADMIN") return true;
     return (
       selectedConfig.type === "USER" &&
-      selectedConfig.created_by === user.id &&
+      selectedConfig.created_by === user.username &&
       selectedConfig.status === "DRAFT"
     );
   };
