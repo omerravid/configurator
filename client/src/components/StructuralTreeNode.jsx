@@ -594,7 +594,7 @@ const StructuralTreeNode = ({
                 </button>
               </div>
             ) : (
-              <span className="font-medium text-gray-700 truncate">
+              <span className="font-medium text-gray-700 dark:text-gray-300 truncate">
                 {keyName || "(unnamed)"}
                 {hasChildren && (
                   <span className="ml-1 text-xs text-gray-500">
