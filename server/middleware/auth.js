@@ -33,7 +33,7 @@ const requireAdmin = (req, res, next) => {
 
 const requireAdminOrOwner = (configCreatedBy) => {
   return (req, res, next) => {
-    if (req.user.role === "ADMIN" || req.user.id === configCreatedBy) {
+    if (req.user.role === "ADMIN" || req.user.username === configCreatedBy) {
       next();
     } else {
       return res
