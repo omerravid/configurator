@@ -1337,8 +1337,8 @@ const ScalarPropertiesPanel = ({
                 actualValue.componentName;
 
               return (
-                <div key={key} className={`flex items-center justify-between p-2 border border-gray-200 rounded hover:bg-gray-100 ${
-                  isComponentRef ? 'bg-blue-50 border-blue-200' : 'bg-gray-50'
+                <div key={key} className={`flex items-center justify-between p-2 border border-gray-200 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                  isComponentRef ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-700'
                 }`}>
                   <div className="flex items-center space-x-2">
                     {isComponentRef ? (
