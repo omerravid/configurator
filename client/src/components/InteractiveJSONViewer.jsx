@@ -290,6 +290,15 @@ const TreeNode = ({
         icon: PencilIcon,
         onClick: handleEditStart,
       });
+
+      // Add reset option if this property has provenance (indicating inheritance)
+      if (source && !isRoot) {
+        menuItems.push({
+          label: "Reset to Inherited",
+          icon: () => <span className="text-orange-500 text-sm font-bold">↺</span>,
+          onClick: handleReset,
+        });
+      }
     }
 
     setContextMenu({
