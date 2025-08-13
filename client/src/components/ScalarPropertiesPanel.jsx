@@ -937,7 +937,7 @@ const ScalarPropertiesPanel = ({
 
   if (!selectedPath) {
     return (
-      <div className="p-4 text-center text-gray-500">
+      <div className="p-4 text-center text-gray-500 dark:text-gray-400">
         <div className="text-lg mb-2">Properties Panel</div>
         <div className="text-sm">Select an item from the structure tree to view its scalar properties</div>
       </div>
