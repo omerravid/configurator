@@ -459,7 +459,7 @@ const ConfigurationEditor = ({
       //   ├── settings/
       //   │   ├── database.json
       //   │   └── logging.json
-      //   └── features/
+      //   └���─ features/
       //       ├── auth.json
       //       └── payment.json
       // Results in: { "config": {...}, "settings": { "database": {...}, "logging": {...} }, "features": { "auth": {...}, "payment": {...} } }
@@ -755,14 +755,14 @@ const ConfigurationEditor = ({
         <form onSubmit={handleSubmit} className="flex flex-col h-full max-h-96">
           <div className="flex-1 p-6 space-y-4 overflow-auto">
             {error && (
-              <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded transition-colors">
                 {error}
               </div>
             )}
 
             {/* Editing Help */}
             {!showRename && (
-              <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded text-sm">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 px-4 py-3 rounded text-sm transition-colors">
                 ℹ️ {getEditingHelp()}
               </div>
             )}
