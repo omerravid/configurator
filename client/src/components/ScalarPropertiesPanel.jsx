@@ -598,10 +598,17 @@ const ScalarPropertiesPanel = ({
       // Clone the array element and update the property
       const elementToUpdate = getActualValueAndSource(newArray[arrayIndex]).actualValue;
       if (elementToUpdate && typeof elementToUpdate === 'object') {
-        newArray[arrayIndex] = {
-          ...elementToUpdate,
-          [propertyName]: newValue
-        };
+        const updatedElement = { ...elementToUpdate };
+
+        if (newValue === undefined) {
+          // Delete the property
+          delete updatedElement[propertyName];
+        } else {
+          // Update the property
+          updatedElement[propertyName] = newValue;
+        }
+
+        newArray[arrayIndex] = updatedElement;
       }
     }
 
