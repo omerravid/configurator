@@ -1034,7 +1034,7 @@ const InteractiveJSONViewer = ({
             <div className="p-2">
               <StructuralTreeNode
                 keyName="root"
-                value={data}
+                value={getCurrentData()}
                 isRoot={true}
                 isEditable={isEditable}
                 expandedPaths={expandedPaths}
