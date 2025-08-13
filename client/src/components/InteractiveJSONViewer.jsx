@@ -1012,7 +1012,7 @@ const InteractiveJSONViewer = ({
         <div className="bg-white border border-gray-200 rounded-lg p-4 max-h-96 overflow-auto">
           <TreeNode
             keyName="root"
-            value={data}
+            value={getCurrentData()}
             onHover={handleHover}
             onHoverEnd={handleHoverEnd}
             isRoot={true}
