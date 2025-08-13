@@ -609,6 +609,11 @@ const InteractiveJSONViewer = ({
     }
   }, [viewMode]);
 
+  // Reset structural path when switching data modes
+  useEffect(() => {
+    setSelectedStructuralPath("root");
+  }, [dataMode]);
+
   // Get current data based on mode
   const getCurrentData = useCallback(() => {
     if (dataMode === "changes") {
