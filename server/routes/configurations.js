@@ -112,14 +112,53 @@ router.get("/", authenticateToken, async (req, res) => {
       const userConfigs = configs.filter(c => c.type === "USER");
       console.log("🚨 Found", userConfigs.length, "USER configurations BEFORE filtering:");
       userConfigs.forEach(cfg => {
-        const createdByStr = cfg.created_by?.toString() || String(cfg.created_by);
-        const userIdStr = req.user.id?.toString() || String(req.user.id);
-        console.log(`🚨 USER config "${cfg.name}": created_by="${createdByStr}", user_id="${userIdStr}", matches=${createdByStr === userIdStr}`);
+        const createdBy = cfg.created_by;
+        const userId = req.user.id;
+
+        console.log(`🚨 USER config "${cfg.name}": created_by=${createdBy} (${typeof createdBy}), user_id=${userId} (${typeof userId})`);
+
+        // Handle ObjectId to string comparison
+        let createdByStr, userIdStr;
+        if (typeof createdBy === 'object' && createdBy && createdBy.toString) {
+          createdByStr = createdBy.toString();
+        } else {
+          createdByStr = String(createdBy);
+        }
+
+        if (typeof userId === 'object' && userId && userId.toString) {
+          userIdStr = userId.toString();
+        } else {
+          userIdStr = String(userId);
+        }
+
+        const matches = createdByStr === userIdStr;
+        console.log(`🚨 Comparison: "${createdByStr}" === "${userIdStr}" = ${matches}`);
       });
 
-      configs = configs.filter(
-        (config) => config.type !== "USER" || (config.created_by?.toString() || String(config.created_by)) === (req.user.id?.toString() || String(req.user.id)),
-      );
+      configs = configs.filter((config) => {
+        if (config.type !== "USER") {
+          return true; // Include non-USER configs
+        }
+
+        const createdBy = config.created_by;
+        const userId = req.user.id;
+
+        // Handle ObjectId to string comparison
+        let createdByStr, userIdStr;
+        if (typeof createdBy === 'object' && createdBy && createdBy.toString) {
+          createdByStr = createdBy.toString();
+        } else {
+          createdByStr = String(createdBy);
+        }
+
+        if (typeof userId === 'object' && userId && userId.toString) {
+          userIdStr = userId.toString();
+        } else {
+          userIdStr = String(userId);
+        }
+
+        return createdByStr === userIdStr;
+      });
 
       const userConfigsAfter = configs.filter(c => c.type === "USER");
       console.log("🚨 Found", userConfigsAfter.length, "USER configurations AFTER filtering");
