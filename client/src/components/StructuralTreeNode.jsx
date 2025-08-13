@@ -431,30 +431,26 @@ const StructuralTreeNode = ({
     if (!hasChildren || !isExpanded) return null;
 
     if (isArray) {
+      // For object arrays, show all items as structural nodes with their index as key
       return actualValue.map((item, index) => {
-        const itemActualValue = getActualValue(item);
-        // Only show arrays and objects in structure view
-        if (itemActualValue && (typeof itemActualValue === "object" || Array.isArray(itemActualValue))) {
-          return (
-            <StructuralTreeNode
-              key={index}
-              keyName={index.toString()}
-              value={item}
-              path={currentPath}
-              depth={depth + 1}
-              isEditable={isEditable}
-              expandedPaths={expandedPaths}
-              onExpandToggle={onExpandToggle}
-              onNodeSelect={onNodeSelect}
-              selectedPath={selectedPath}
-              onStructuralChange={onStructuralChange}
-              parentValue={actualValue}
-              configType={configType}
-            />
-          );
-        }
-        return null;
-      }).filter(Boolean);
+        return (
+          <StructuralTreeNode
+            key={index}
+            keyName={`[${index}]`}
+            value={item}
+            path={currentPath}
+            depth={depth + 1}
+            isEditable={isEditable}
+            expandedPaths={expandedPaths}
+            onExpandToggle={onExpandToggle}
+            onNodeSelect={onNodeSelect}
+            selectedPath={selectedPath}
+            onStructuralChange={onStructuralChange}
+            parentValue={actualValue}
+            configType={configType}
+          />
+        );
+      });
     }
 
     return Object.entries(actualValue).map(([key, val]) => {
