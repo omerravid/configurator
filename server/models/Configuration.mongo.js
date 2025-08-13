@@ -79,6 +79,13 @@ class Configuration {
     status,
     archived = false,
   }) {
+    // Debug createdBy field
+    console.log("🏗️  [Configuration.create] Debug createdBy:");
+    console.log("🏗️  createdBy:", createdBy);
+    console.log("🏗️  createdBy type:", typeof createdBy);
+    console.log("🏗️  createdBy constructor:", createdBy?.constructor?.name);
+    console.log("🏗️  createdBy JSON:", JSON.stringify(createdBy));
+
     // Set status: USER configs default to DRAFT (unless explicitly set), others are COMMITTED
     const finalStatus =
       type === "USER" || type === "VERSION" ? status || "DRAFT" : "COMMITTED";
