@@ -152,7 +152,6 @@ class Configuration {
     }
 
     const config = await ConfigurationModel.findById(normalizedId)
-      .populate('created_by', 'username')
       .populate('parent_id', 'name type');
 
     if (!config) return null;
