@@ -112,7 +112,7 @@ router.get("/", authenticateToken, async (req, res) => {
       const userConfigs = configs.filter(c => c.type === "USER");
       console.log("🚨 Found", userConfigs.length, "USER configurations BEFORE filtering:");
       userConfigs.forEach(cfg => {
-        console.log(`🚨 USER config "${cfg.name}": created_by=${cfg.created_by} (${typeof cfg.created_by}), matches=${cfg.created_by === req.user.id}`);
+        console.log(`🚨 USER config "${cfg.name}": created_by=${cfg.created_by} -> "${String(cfg.created_by)}", user_id="${String(req.user.id)}", matches=${String(cfg.created_by) === String(req.user.id)}`);
       });
 
       configs = configs.filter(
