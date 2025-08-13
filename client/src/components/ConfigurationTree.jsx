@@ -228,7 +228,7 @@ const TreeNode = ({
       if (user?.role === "ADMIN") return true;
       return (
         config.type === "USER" &&
-        config.created_by === user?.id &&
+        config.created_by === user?.username &&
         config.status === "DRAFT"
       );
     };
