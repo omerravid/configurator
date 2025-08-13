@@ -577,26 +577,42 @@ const ScalarPropertiesPanel = ({
     // Get the current array from the resolved data
     // We need to traverse the path to get the array
     const cleanArrayPath = arrayPath.replace(/^root\.?/, '');
-    let currentData = actualSelectedValue;
+    console.log("cleanArrayPath:", cleanArrayPath);
+
+    // We need to get the array from the root data, not from actualSelectedValue
+    // actualSelectedValue is the array element, not the parent containing the array
+
+    // First, get the root data (we need to go up from selectedStructuralValue to root)
+    const rootData = getCurrentData(); // Get the current data (resolved or raw)
+    console.log("rootData:", rootData);
+
+    let currentData = rootData;
 
     if (cleanArrayPath) {
       const pathKeys = cleanArrayPath.split('.');
+      console.log("pathKeys:", pathKeys);
 
       // Navigate to the parent object containing the array
       for (let i = 0; i < pathKeys.length - 1; i++) {
         if (currentData && typeof currentData === 'object') {
-          currentData = getActualValueAndSource(currentData[pathKeys[i]]).actualValue;
+          const extractedValue = getActualValueAndSource(currentData[pathKeys[i]]);
+          currentData = extractedValue.actualValue;
+          console.log(`After navigating to ${pathKeys[i]}:`, currentData);
         }
       }
 
       // Get the array
       const arrayKey = pathKeys[pathKeys.length - 1];
+      console.log("arrayKey:", arrayKey);
       var arrayWithProvenance = currentData ? currentData[arrayKey] : null;
     } else {
       // Array is at root level
-      var arrayWithProvenance = actualSelectedValue;
+      var arrayWithProvenance = currentData;
     }
+
+    console.log("arrayWithProvenance:", arrayWithProvenance);
     const { actualValue: currentArray } = getActualValueAndSource(arrayWithProvenance);
+    console.log("currentArray:", currentArray);
 
     if (!Array.isArray(currentArray)) {
       console.error("Target is not an array:", currentArray);
