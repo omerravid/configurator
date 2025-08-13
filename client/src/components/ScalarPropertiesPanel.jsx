@@ -619,16 +619,25 @@ const ScalarPropertiesPanel = ({
 
   // Reset a scalar property to inherited value
   const handlePropertyReset = (propertyName) => {
-    let propertyPath;
-    if (selectedPath === "root") {
-      propertyPath = `root.${propertyName}`;
-    } else {
-      propertyPath = `${selectedPath}.${propertyName}`;
-    }
+    // Check if we're resetting a property in an array element
+    const isArrayElementProperty = selectedPath.includes('[') && selectedPath.includes(']');
 
-    console.log("Resetting property to default:", propertyPath);
-    onValueChange?.(propertyPath, null); // null removes the override
-    showToast(`Property "${propertyName}" reset to inherited value`, "success");
+    if (isArrayElementProperty) {
+      // Handle array element property reset - update the entire array
+      handleArrayElementPropertyChange(propertyName, null);
+    } else {
+      // Normal property reset
+      let propertyPath;
+      if (selectedPath === "root") {
+        propertyPath = `root.${propertyName}`;
+      } else {
+        propertyPath = `${selectedPath}.${propertyName}`;
+      }
+
+      console.log("Resetting property to default:", propertyPath);
+      onValueChange?.(propertyPath, null); // null removes the override
+      showToast(`Property "${propertyName}" reset to inherited value`, "success");
+    }
   };
 
   // Reset all properties and arrays at current level to inherited values
