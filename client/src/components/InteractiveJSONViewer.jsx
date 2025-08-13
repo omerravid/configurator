@@ -626,6 +626,16 @@ const InteractiveJSONViewer = ({
   // Check if changes mode has no data
   const hasNoChanges = dataMode === "changes" && (!rawData || Object.keys(rawData).length === 0);
 
+  // Debug what we're actually working with
+  useEffect(() => {
+    if (dataMode === "changes") {
+      console.log("=== CHANGES MODE DEBUG ===");
+      console.log("rawData:", rawData);
+      console.log("hasNoChanges:", hasNoChanges);
+      console.log("data (resolved):", data);
+    }
+  }, [dataMode, rawData, hasNoChanges, data]);
+
   // Update selected structural value when data changes
   useEffect(() => {
     const currentData = getCurrentData();
