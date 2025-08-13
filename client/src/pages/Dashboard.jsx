@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import ConfigurationTree from "../components/ConfigurationTree";
 import InteractiveJSONViewer from "../components/InteractiveJSONViewer";
 import ConfigurationEditor from "../components/ConfigurationEditor";
