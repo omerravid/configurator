@@ -72,6 +72,14 @@ The Configuration Manager uses a hierarchical system with five main types:
 
 ## User Interface Overview
 
+### Header - Navigation and Controls
+- **Action buttons**: New Product, New Component for creating configurations
+- **Theme toggle**: Switch between dark mode (default) and light mode
+- **Settings button**: Admin access to database configuration (admin only)
+- **Help button**: Access this user manual
+- **User info**: Shows current user and role
+- **Logout**: Sign out of the application
+
 ### Left Panel - Configuration Tree
 - **Hierarchical view** of all configurations
 - **Colored icons** indicate configuration type
