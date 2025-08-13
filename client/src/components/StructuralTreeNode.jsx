@@ -219,14 +219,22 @@ const StructuralTreeNode = ({
 
     menuItems.push(
       {
-        label: "Copy",
+        label: "Copy Path",
         icon: ClipboardIcon,
-        onClick: () => copyToClipboard(JSON.stringify(actualValue)),
+        onClick: () => {
+          // Strip "root." prefix for clean paths
+          const cleanPath = currentPath.startsWith("root.") ? currentPath.substring(5) : currentPath;
+          copyToClipboard(cleanPath);
+          showToast("Path copied to clipboard", "success");
+        },
       },
       {
-        label: "Copy as JSON",
+        label: "Copy JSON",
         icon: DocumentDuplicateIcon,
-        onClick: () => copyToClipboard(JSON.stringify(actualValue, null, 2)),
+        onClick: () => {
+          copyToClipboard(JSON.stringify(actualValue, null, 2));
+          showToast("JSON copied to clipboard", "success");
+        },
       }
     );
 
