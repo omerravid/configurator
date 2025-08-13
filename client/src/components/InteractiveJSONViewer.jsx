@@ -247,6 +247,13 @@ const TreeNode = ({
     setEditValue(safeToString(actualValue));
   };
 
+  const handleReset = () => {
+    if (!source || isRoot) return;
+
+    onValueChange?.(currentPath, null); // null removes the override
+    console.log("Reset property:", currentPath);
+  };
+
   const handleContextMenu = (e) => {
     e.preventDefault();
     const fullPath = isRoot ? "" : currentPath;
