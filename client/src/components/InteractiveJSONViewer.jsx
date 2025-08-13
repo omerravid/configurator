@@ -529,7 +529,7 @@ const TreeNode = ({
 
         {/* Key name */}
         {!isRoot && (
-          <span className="font-medium text-gray-700 mr-2">"{keyName}":</span>
+          <span className="font-medium text-gray-700 dark:text-gray-300 mr-2">"{keyName}":</span>
         )}
 
         {/* Value */}
