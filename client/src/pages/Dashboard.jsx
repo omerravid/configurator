@@ -735,7 +735,7 @@ const Dashboard = () => {
     if (!selectedConfig || Boolean(selectedConfig.archived)) return false;
     if (selectedConfig.type !== "USER" && selectedConfig.type !== "VERSION") return false;
     if (selectedConfig.status !== "DRAFT") return false;
-    return user.role === "ADMIN" || selectedConfig.created_by === user.id;
+    return user.role === "ADMIN" || selectedConfig.created_by === user.username;
   };
 
   const canCreateChild = () => {
