@@ -609,15 +609,21 @@ const InteractiveJSONViewer = ({
     }
   }, [viewMode]);
 
+  // Get current data based on mode
+  const getCurrentData = useCallback(() => {
+    return dataMode === "changes" ? (rawData || {}) : data;
+  }, [dataMode, rawData, data]);
+
   // Update selected structural value when data changes
   useEffect(() => {
+    const currentData = getCurrentData();
     if (selectedStructuralPath === "root") {
-      setSelectedStructuralValue(data);
+      setSelectedStructuralValue(currentData);
     } else {
-      const valueAtPath = getValueAtPath(data, selectedStructuralPath);
+      const valueAtPath = getValueAtPath(currentData, selectedStructuralPath);
       setSelectedStructuralValue(valueAtPath);
     }
-  }, [data, selectedStructuralPath, getValueAtPath]);
+  }, [data, rawData, dataMode, selectedStructuralPath, getValueAtPath, getCurrentData]);
 
   const handleHover = (path, source, fullPath, clickEvent) => {
     setHoveredSource(source);
