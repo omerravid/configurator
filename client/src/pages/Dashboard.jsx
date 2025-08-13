@@ -64,8 +64,13 @@ const Dashboard = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await configAPI.getById(config.id, true);
-      setResolvedData(response.data);
+      // Load both resolved and raw data
+      const [resolvedResponse, rawResponse] = await Promise.all([
+        configAPI.getById(config.id, true),
+        configAPI.getRawById(config.id)
+      ]);
+      setResolvedData(resolvedResponse.data);
+      setRawData(rawResponse.data);
     } catch (err) {
       console.error("Failed to load configuration data:", err);
       setError("Failed to load configuration data");
