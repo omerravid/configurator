@@ -1107,8 +1107,8 @@ const InteractiveJSONViewer = ({
       {/* Content based on view mode */}
       {hasNoChanges ? (
         /* No Changes Message */
-        <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
-          <div className="text-gray-500">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center transition-colors">
+          <div className="text-gray-500 dark:text-gray-400">
             <div className="text-lg mb-2">No Local Changes</div>
             <div className="text-sm">This configuration has no local overrides. All values are inherited from parent configurations.</div>
           </div>
