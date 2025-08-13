@@ -581,6 +581,8 @@ const InteractiveJSONViewer = ({
   const [expandedPaths, setExpandedPaths] = useState(new Set());
   // Mode toggle between Flat and Structural view
   const [viewMode, setViewMode] = useState("structural");
+  // Mode toggle between All and Changes view
+  const [dataMode, setDataMode] = useState("all");
   // Structural mode state
   const [selectedStructuralPath, setSelectedStructuralPath] = useState("root");
   const [selectedStructuralValue, setSelectedStructuralValue] = useState(data);
