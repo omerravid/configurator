@@ -606,27 +606,66 @@ const InteractiveJSONViewer = ({
   // Helper function to get value at a specific path
   const getValueAtPath = useCallback((obj, path) => {
     if (!obj || !path || path === "root") return obj;
-    const keys = path.replace(/^root\./, "").split(".");
+
+    // Remove root prefix and handle array notation properly
+    let cleanPath = path.replace(/^root\.?/, "");
+    if (!cleanPath) return obj;
+
     let current = obj;
-    for (const key of keys) {
-      if (current && typeof current === "object") {
-        // Handle array index notation like [0], [1], etc.
-        if (key.startsWith('[') && key.endsWith(']')) {
-          const index = parseInt(key.slice(1, -1));
-          if (Array.isArray(current) && index >= 0 && index < current.length) {
-            current = current[index];
-          } else {
-            return null;
+    let i = 0;
+
+    while (i < cleanPath.length && current != null) {
+      // Look for array notation [index]
+      const bracketStart = cleanPath.indexOf('[', i);
+
+      if (bracketStart === i) {
+        // Path starts with array notation like "[0]"
+        const bracketEnd = cleanPath.indexOf(']', i);
+        if (bracketEnd === -1) return null;
+
+        const index = parseInt(cleanPath.slice(i + 1, bracketEnd));
+        if (Array.isArray(current) && index >= 0 && index < current.length) {
+          current = current[index];
+          i = bracketEnd + 1;
+          // Skip optional dot after bracket
+          if (i < cleanPath.length && cleanPath[i] === '.') {
+            i++;
           }
-        } else if (current.hasOwnProperty(key)) {
-          current = current[key];
         } else {
           return null;
         }
       } else {
-        return null;
+        // Look for next property name
+        let nextDot = cleanPath.indexOf('.', i);
+        let nextBracket = cleanPath.indexOf('[', i);
+
+        // Find the next delimiter (dot or bracket)
+        let nextDelimiter = -1;
+        if (nextDot !== -1 && nextBracket !== -1) {
+          nextDelimiter = Math.min(nextDot, nextBracket);
+        } else if (nextDot !== -1) {
+          nextDelimiter = nextDot;
+        } else if (nextBracket !== -1) {
+          nextDelimiter = nextBracket;
+        }
+
+        const key = nextDelimiter === -1
+          ? cleanPath.slice(i)
+          : cleanPath.slice(i, nextDelimiter);
+
+        if (current && typeof current === "object" && current.hasOwnProperty(key)) {
+          current = current[key];
+          i = nextDelimiter === -1 ? cleanPath.length : nextDelimiter;
+          // Skip dot delimiter
+          if (i < cleanPath.length && cleanPath[i] === '.') {
+            i++;
+          }
+        } else {
+          return null;
+        }
       }
     }
+
     return current;
   }, []);
 
