@@ -407,7 +407,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
           {/* Test Result */}
           {testResult && (
-            <div className={`rounded-lg p-4 ${testResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+            <div className={`rounded-lg p-4 transition-colors ${testResult.success ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'}`}>
               <div className="flex items-start space-x-3">
                 {testResult.success ? (
                   <CheckCircleIcon className="w-5 h-5 text-green-600 mt-0.5" />
@@ -415,10 +415,10 @@ const SettingsModal = ({ isOpen, onClose }) => {
                   <ExclamationCircleIcon className="w-5 h-5 text-red-600 mt-0.5" />
                 )}
                 <div>
-                  <h4 className={`font-medium ${testResult.success ? 'text-green-900' : 'text-red-900'}`}>
+                  <h4 className={`font-medium ${testResult.success ? 'text-green-900 dark:text-green-200' : 'text-red-900 dark:text-red-200'}`}>
                     Connection Test {testResult.success ? 'Successful' : 'Failed'}
                   </h4>
-                  <p className={`text-sm mt-1 ${testResult.success ? 'text-green-700' : 'text-red-700'}`}>
+                  <p className={`text-sm mt-1 ${testResult.success ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
                     {testResult.message}
                   </p>
                 </div>
@@ -428,7 +428,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
           {/* Migration Status */}
           {migrationStatus && (
-            <div className={`rounded-lg p-4 ${migrationStatus.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+            <div className={`rounded-lg p-4 transition-colors ${migrationStatus.success ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'}`}>
               <div className="flex items-start space-x-3">
                 {migrationStatus.success ? (
                   <CheckCircleIcon className="w-5 h-5 text-green-600 mt-0.5" />
@@ -436,10 +436,10 @@ const SettingsModal = ({ isOpen, onClose }) => {
                   <ExclamationCircleIcon className="w-5 h-5 text-red-600 mt-0.5" />
                 )}
                 <div>
-                  <h4 className={`font-medium ${migrationStatus.success ? 'text-green-900' : 'text-red-900'}`}>
+                  <h4 className={`font-medium ${migrationStatus.success ? 'text-green-900 dark:text-green-200' : 'text-red-900 dark:text-red-200'}`}>
                     Migration {migrationStatus.success ? 'Successful' : 'Failed'}
                   </h4>
-                  <p className={`text-sm mt-1 ${migrationStatus.success ? 'text-green-700' : 'text-red-700'}`}>
+                  <p className={`text-sm mt-1 ${migrationStatus.success ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
                     {migrationStatus.message}
                     {migrationStatus.stats && (
                       ` - ${migrationStatus.stats.users} users and ${migrationStatus.stats.configurations} configurations migrated`
@@ -499,7 +499,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
             <button
               onClick={migrateData}
               disabled={isMigrating || !connectionString.trim()}
-              className="bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
+              className="bg-orange-600 hover:bg-orange-700 dark:bg-orange-600 dark:hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
             >
               {isMigrating ? (
                 <ArrowPathIcon className="w-4 h-4 animate-spin" />
@@ -512,7 +512,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
             <button
               onClick={migrateToEmbedded}
               disabled={isMigrating}
-              className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
+              className="bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
             >
               {isMigrating ? (
                 <ArrowPathIcon className="w-4 h-4 animate-spin" />
@@ -525,7 +525,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
             <button
               onClick={revertToSQLite}
               disabled={isMigrating}
-              className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
+              className="bg-gray-600 hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
             >
               {isMigrating ? (
                 <ArrowPathIcon className="w-4 h-4 animate-spin" />
@@ -537,9 +537,9 @@ const SettingsModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Information */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-medium text-blue-900 mb-2">Migration Options</h4>
-            <div className="space-y-3 text-sm text-blue-700">
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 transition-colors">
+            <h4 className="font-medium text-blue-900 dark:text-blue-200 mb-2">Migration Options</h4>
+            <div className="space-y-3 text-sm text-blue-700 dark:text-blue-300">
               <div>
                 <strong>Embedded MongoDB (Recommended):</strong>
                 <ul className="ml-4 mt-1 space-y-1">
@@ -558,7 +558,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                   <li>• Existing MongoDB data will be cleared before migration</li>
                 </ul>
               </div>
-              <div className="pt-2 border-t border-blue-200">
+              <div className="pt-2 border-t border-blue-200 dark:border-blue-700">
                 <strong>⚠️ Important:</strong> All migrations create backups for safety
               </div>
             </div>
