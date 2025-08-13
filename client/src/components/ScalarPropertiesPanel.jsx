@@ -980,7 +980,7 @@ const ScalarPropertiesPanel = ({
         </div>
       </div>
 
-      <div className="text-sm text-gray-600 mb-4">
+      <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
         Path: <span className="font-mono bg-gray-100 px-1 rounded">{selectedPath}</span>
         <button
           onClick={() => {
