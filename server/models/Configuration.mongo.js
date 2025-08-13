@@ -115,11 +115,7 @@ class Configuration {
       const originalParentId = result.parent_id ? result.parent_id._id || result.parent_id : null;
       const originalCreatedBy = result.created_by ? result.created_by._id || result.created_by : null;
 
-      // Add populated fields in expected format
-      if (result.created_by && typeof result.created_by === 'object') {
-        result.created_by_username = result.created_by.username;
-        result.created_by = originalCreatedBy; // Restore original ID string
-      }
+      // created_by is now a string, no need to fix it
       if (result.parent_id && typeof result.parent_id === 'object') {
         result.parent_name = result.parent_id.name;
         result.parent_type = result.parent_id.type;
