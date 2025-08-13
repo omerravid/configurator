@@ -1110,7 +1110,7 @@ const ScalarPropertiesPanel = ({
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2">
-                    <span className="font-medium text-gray-700">{propertyName}:</span>
+                    <span className="font-medium text-gray-700 dark:text-gray-300">{propertyName}:</span>
                     {isEditing ? (
                       <div className="flex items-center space-x-2">
                         <input
