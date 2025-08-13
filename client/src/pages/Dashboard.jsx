@@ -824,8 +824,9 @@ const Dashboard = () => {
       </header>
 
       <div className="flex flex-col h-[calc(100vh-4rem)]">
-        {/* Left Panel - Configuration Tree */}
-        <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-colors">
+        <div className="flex flex-1 overflow-hidden">
+          {/* Left Panel - Configuration Tree */}
+          <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-colors">
           <div className="p-4 border-b border-gray-200">
             <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
               Configurations
@@ -848,11 +849,11 @@ const Dashboard = () => {
               onAddComponent={handleAddComponent}
               user={user}
             />
+            </div>
           </div>
-        </div>
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col">
+          {/* Main Content */}
+          <div className="flex-1 flex flex-col overflow-hidden">
           {selectedConfig ? (
             <>
               {/* Configuration Header */}
@@ -1041,15 +1042,16 @@ const Dashboard = () => {
                 </p>
               </div>
             </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Path Query Panel */}
-      <PathQueryPanel
-        configurations={allConfigurations}
-        selectedConfig={selectedConfig}
-      />
+        {/* Path Query Panel */}
+        <PathQueryPanel
+          configurations={allConfigurations}
+          selectedConfig={selectedConfig}
+        />
+      </div>
 
       {/* Configuration Editor Modal */}
       {(showEditor ||
