@@ -485,7 +485,7 @@ const ScalarPropertiesPanel = ({
     }
 
     console.log("Resetting array to default:", arrayPath);
-    onValueChange?.(arrayPath, undefined); // undefined removes the override
+    onValueChange?.(arrayPath, null); // null removes the override (undefined gets lost in JSON serialization)
     showToast(`Array "${arrayName}" reset to inherited value`, "success");
   };
 
