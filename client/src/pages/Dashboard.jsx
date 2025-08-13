@@ -739,7 +739,7 @@ const Dashboard = () => {
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Cog6ToothIcon className="w-8 h-8 text-primary-600" />
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Configuration Manager
             </h1>
           </div>
