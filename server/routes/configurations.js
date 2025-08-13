@@ -303,7 +303,7 @@ router.put(
       const config = await ConfigurationService.updateConfiguration(
         req.params.id,
         value,
-        req.user.id,
+        req.user.username,
       );
 
       res.json({
