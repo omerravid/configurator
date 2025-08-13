@@ -91,6 +91,7 @@ const Dashboard = () => {
     console.log("config.id stringified:", JSON.stringify(config.id));
 
     setSelectedConfig(config);
+    setRawData(null);
     setShowEditor(false);
     setShowRename(false);
     loadConfigurationData(config);
