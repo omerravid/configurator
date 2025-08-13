@@ -471,7 +471,7 @@ router.get("/:id/children", authenticateToken, async (req, res) => {
         ? children
         : children.filter(
             (child) =>
-              child.type !== "USER" || child.created_by === req.user.id,
+              child.type !== "USER" || child.created_by === req.user.username,
           );
 
     res.json({
