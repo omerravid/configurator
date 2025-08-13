@@ -115,24 +115,38 @@ router.get("/", authenticateToken, async (req, res) => {
         const createdBy = cfg.created_by;
         const userId = req.user.id;
 
-        console.log(`🚨 USER config "${cfg.name}": created_by=${createdBy} (${typeof createdBy}), user_id=${userId} (${typeof userId})`);
+        console.log(`🚨 USER config "${cfg.name}":`);
+        console.log(`🚨   created_by:`, createdBy);
+        console.log(`🚨   created_by type:`, typeof createdBy);
+        console.log(`🚨   created_by constructor:`, createdBy?.constructor?.name);
+        console.log(`🚨   created_by JSON:`, JSON.stringify(createdBy));
+        console.log(`🚨   user_id:`, userId);
+        console.log(`🚨   user_id type:`, typeof userId);
 
-        // Handle ObjectId to string comparison
+        // Try different conversion methods
         let createdByStr, userIdStr;
-        if (typeof createdBy === 'object' && createdBy && createdBy.toString) {
-          createdByStr = createdBy.toString();
+
+        // For ObjectId, try multiple approaches
+        if (createdBy && typeof createdBy === 'object') {
+          if (createdBy._id) {
+            createdByStr = String(createdBy._id);
+            console.log(`🚨   Extracted _id: ${createdByStr}`);
+          } else if (createdBy.toString && typeof createdBy.toString === 'function') {
+            createdByStr = createdBy.toString();
+            console.log(`🚨   toString(): ${createdByStr}`);
+          } else {
+            createdByStr = JSON.stringify(createdBy);
+            console.log(`🚨   JSON.stringify(): ${createdByStr}`);
+          }
         } else {
           createdByStr = String(createdBy);
+          console.log(`🚨   String(): ${createdByStr}`);
         }
 
-        if (typeof userId === 'object' && userId && userId.toString) {
-          userIdStr = userId.toString();
-        } else {
-          userIdStr = String(userId);
-        }
+        userIdStr = String(userId);
 
         const matches = createdByStr === userIdStr;
-        console.log(`🚨 Comparison: "${createdByStr}" === "${userIdStr}" = ${matches}`);
+        console.log(`🚨   Final comparison: "${createdByStr}" === "${userIdStr}" = ${matches}`);
       });
 
       configs = configs.filter((config) => {
