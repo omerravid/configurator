@@ -474,6 +474,20 @@ const ScalarPropertiesPanel = ({
     onValueChange?.(arrayPath, newArray);
   };
 
+  const handleArrayReset = (arrayName) => {
+    // Reset array to inherited value by removing the local override
+    let arrayPath;
+    if (selectedPath === "root") {
+      arrayPath = `root.${arrayName}`;
+    } else {
+      arrayPath = `${selectedPath}.${arrayName}`;
+    }
+
+    console.log("Resetting array to default:", arrayPath);
+    onValueChange?.(arrayPath, undefined); // undefined removes the override
+    showToast(`Array "${arrayName}" reset to inherited value`, "success");
+  };
+
   const handleVersionChange = (newVersionId) => {
     console.log("Version change handler called:", {
       newVersionId,
