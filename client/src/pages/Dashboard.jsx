@@ -733,9 +733,9 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors">
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Cog6ToothIcon className="w-8 h-8 text-primary-600" />
