@@ -87,6 +87,7 @@ const checkConfigPermissions = async (req, res, next) => {
 // GET /api/configs - List all configurations
 router.get("/", authenticateToken, async (req, res) => {
   try {
+    console.log("🟡 [BACKEND] GET /api/configs called by user:", req.user.username, "role:", req.user.role);
     const { type, status, includeArchived } = req.query;
     const showArchived = includeArchived === 'true';
 
