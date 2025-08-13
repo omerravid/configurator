@@ -251,6 +251,13 @@ router.post("/", authenticateToken, async (req, res) => {
     const cleanParentId =
       parent_id && parent_id.trim() !== "" ? parent_id : null;
 
+    // Debug user information
+    console.log("🔧 [CREATE CONFIG DEBUG]");
+    console.log("🔧 req.user:", req.user);
+    console.log("🔧 req.user.id:", req.user.id);
+    console.log("🔧 req.user.id type:", typeof req.user.id);
+    console.log("🔧 req.user.id constructor:", req.user.id?.constructor?.name);
+
     // Create configuration using service
     const config = await ConfigurationService.createConfiguration({
       name,
