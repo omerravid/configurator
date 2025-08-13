@@ -1090,7 +1090,7 @@ const ScalarPropertiesPanel = ({
       )}
 
       {/* Help text */}
-      <div className="mb-4 text-xs text-gray-500">
+      <div className="mb-4 text-xs text-gray-500 dark:text-gray-400">
         💡 Right-click on properties for more options • Click ℹ️ to see source configuration
         {subObjects.length > 0 && " • Use 'Go to' buttons to navigate to objects"}
       </div>
