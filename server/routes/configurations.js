@@ -208,9 +208,8 @@ router.post("/", authenticateToken, async (req, res) => {
     // Debug user information
     console.log("🔧 [CREATE CONFIG DEBUG]");
     console.log("🔧 req.user:", req.user);
-    console.log("🔧 req.user.id:", req.user.id);
-    console.log("🔧 req.user.id type:", typeof req.user.id);
-    console.log("🔧 req.user.id constructor:", req.user.id?.constructor?.name);
+    console.log("🔧 req.user.username:", req.user.username);
+    console.log("🔧 req.user.username type:", typeof req.user.username);
 
     // Create configuration using service
     const config = await ConfigurationService.createConfiguration({
