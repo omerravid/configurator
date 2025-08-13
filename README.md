@@ -117,6 +117,7 @@ When you first start the application:
    - Username: `admin`
    - Password: `admin123`
 3. **The embedded MongoDB** starts automatically - no configuration needed
+4. **Dark mode** is enabled by default - use the theme toggle button in the header to switch to light mode
 
 ### Advanced Setup Options
 
