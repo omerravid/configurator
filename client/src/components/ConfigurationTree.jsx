@@ -113,7 +113,7 @@ const InheritanceView = ({ config, onClose }) => {
     <div className="absolute left-full top-0 ml-2 w-80 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-96 overflow-auto">
       <div className="p-3 border-b border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between">
-          <h4 className="font-medium text-gray-900">Inheritance Chain</h4>
+          <h4 className="font-medium text-gray-900 dark:text-gray-100">Inheritance Chain</h4>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
