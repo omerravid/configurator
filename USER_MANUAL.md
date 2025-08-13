@@ -126,7 +126,7 @@ The Configuration Manager uses a hierarchical system with five main types:
 3. Enter a name for the child configuration
 4. Start with empty JSON (inherits everything) or add overrides
 5. Child type is determined automatically:
-   - Product → Instance
+   - Product ��� Instance
    - Instance → User Configuration
    - Component → Version
    - User → User Configuration
@@ -291,6 +291,12 @@ The bottom panel demonstrates REST API usage:
 - **Tree expansion**: Click arrows to expand/collapse sections
 - **Quick selection**: Click any configuration to view details
 - **Inheritance details toggle**: Show/hide detailed inheritance information
+
+### Theme Management
+- **Dark Mode Default**: The application starts in dark mode for reduced eye strain
+- **Theme Toggle**: Use the sun/moon icon in the header to switch themes
+- **Automatic Persistence**: Your theme preference is automatically saved
+- **Instant Application**: Theme changes apply immediately across all interface elements
 
 ---
 
