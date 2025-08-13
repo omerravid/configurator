@@ -245,7 +245,7 @@ const TreeNode = ({
       return (
         (config.type === "USER" || config.type === "VERSION") &&
         config.status === "DRAFT" &&
-        (user?.role === "ADMIN" || config.created_by === user?.id)
+        (user?.role === "ADMIN" || config.created_by === user?.username)
       );
     };
 
