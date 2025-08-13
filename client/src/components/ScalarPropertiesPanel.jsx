@@ -338,16 +338,25 @@ const ScalarPropertiesPanel = ({
       // Keep as string if parsing fails
     }
 
-    // Create the full path for the property
-    let propertyPath;
-    if (selectedPath === "root") {
-      propertyPath = `root.${propertyName}`;
+    // Check if we're editing a property inside an array element
+    const isArrayElementProperty = selectedPath.includes('[') && selectedPath.includes(']');
+
+    if (isArrayElementProperty) {
+      // Handle array element property editing - update the entire array
+      handleArrayElementPropertyChange(propertyName, newValue);
     } else {
-      propertyPath = `${selectedPath}.${propertyName}`;
+      // Normal property editing
+      let propertyPath;
+      if (selectedPath === "root") {
+        propertyPath = `root.${propertyName}`;
+      } else {
+        propertyPath = `${selectedPath}.${propertyName}`;
+      }
+
+      console.log("ScalarPanel editing:", { propertyName, newValue, selectedPath, propertyPath });
+      onValueChange?.(propertyPath, newValue);
     }
 
-    console.log("ScalarPanel editing:", { propertyName, newValue, selectedPath, propertyPath });
-    onValueChange?.(propertyPath, newValue);
     setEditingProperty(null);
   };
 
