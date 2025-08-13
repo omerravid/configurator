@@ -92,7 +92,7 @@ app.use("*", (req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
 
-app.listen(PORT, async () => {
+app.listen(PORT, '0.0.0.0', async () => {
   console.log(`Server running on port ${PORT}`);
 
   // Initialize sample data if database is empty (with delay to ensure admin user is created)
