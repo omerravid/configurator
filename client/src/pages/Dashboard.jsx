@@ -29,6 +29,7 @@ const Dashboard = () => {
   const { showToast } = useToast();
   const [selectedConfig, setSelectedConfig] = useState(null);
   const [resolvedData, setResolvedData] = useState(null);
+  const [rawData, setRawData] = useState(null);
   const [allConfigurations, setAllConfigurations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
