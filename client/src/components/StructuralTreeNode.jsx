@@ -143,7 +143,7 @@ const StructuralTreeNode = ({
       // Array icon
       return (
         <div className="w-4 h-4 bg-purple-500 text-white rounded flex items-center justify-center text-xs font-bold" title="Array">
-          []
+          A
         </div>
       );
     } else if (isObject) {
