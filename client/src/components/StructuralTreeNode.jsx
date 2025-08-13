@@ -78,6 +78,9 @@ const StructuralTreeNode = ({
   // Check if this node has children that are objects or arrays (not scalar values)
   const hasStructuralChildren = () => {
     if (isArray) {
+      // Scalar arrays don't have structural children (they're handled in properties panel)
+      if (isScalarArray()) return false;
+
       return actualValue.some(item => {
         const itemActualValue = getActualValue(item);
         return itemActualValue && (typeof itemActualValue === "object" || Array.isArray(itemActualValue));
@@ -86,7 +89,21 @@ const StructuralTreeNode = ({
     if (isObject) {
       return Object.values(actualValue).some(val => {
         const valActualValue = getActualValue(val);
-        return valActualValue && (typeof valActualValue === "object" || Array.isArray(valActualValue));
+        // Check if it's a structural element (not a scalar array)
+        if (Array.isArray(valActualValue)) {
+          // Only include non-scalar arrays
+          return !valActualValue.every(item => {
+            const itemActual = getActualValue(item);
+            return (
+              itemActual === null ||
+              itemActual === undefined ||
+              typeof itemActual === "string" ||
+              typeof itemActual === "number" ||
+              typeof itemActual === "boolean"
+            );
+          });
+        }
+        return valActualValue && typeof valActualValue === "object";
       });
     }
     return false;
