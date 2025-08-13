@@ -543,23 +543,20 @@ const ScalarPropertiesPanel = ({
   // Handle property changes inside array elements - updates the entire array
   const handleArrayElementPropertyChange = (propertyName, newValue) => {
     // Parse the selectedPath to get array path and index
-    // Example: "root.ObjArray.[0]" -> arrayPath: "root.ObjArray", index: 0
-    const pathParts = selectedPath.split('.');
-    let arrayPath = '';
-    let arrayIndex = -1;
+    // Example: "root.ObjArray[0]" -> arrayPath: "root.ObjArray", index: 0
+    const bracketStart = selectedPath.indexOf('[');
+    const bracketEnd = selectedPath.indexOf(']');
 
-    // Find the array bracket notation
-    for (let i = 0; i < pathParts.length; i++) {
-      const part = pathParts[i];
-      if (part.startsWith('[') && part.endsWith(']')) {
-        arrayIndex = parseInt(part.slice(1, -1));
-        arrayPath = pathParts.slice(0, i).join('.');
-        break;
-      }
+    if (bracketStart === -1 || bracketEnd === -1 || bracketEnd <= bracketStart) {
+      console.error("Could not parse array path:", selectedPath);
+      return;
     }
 
-    if (arrayIndex === -1 || !arrayPath) {
-      console.error("Could not parse array path:", selectedPath);
+    const arrayPath = selectedPath.slice(0, bracketStart);
+    const arrayIndex = parseInt(selectedPath.slice(bracketStart + 1, bracketEnd));
+
+    if (isNaN(arrayIndex) || arrayIndex < 0) {
+      console.error("Invalid array index:", selectedPath);
       return;
     }
 
