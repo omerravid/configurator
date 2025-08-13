@@ -488,6 +488,17 @@ const ScalarPropertiesPanel = ({
     showToast(`Array "${arrayName}" reset to inherited value`, "success");
   };
 
+  // Check if an array has local overrides (shows source from current config level)
+  const arrayHasLocalOverride = (arrayValue) => {
+    const { source } = getActualValueAndSource(arrayValue);
+    // If source exists and is not from a parent, it's a local override
+    return source && (
+      !source.configId ||
+      source.configId === (selectedConfig?.id || "") ||
+      source.configName === (selectedConfig?.name || "")
+    );
+  };
+
   const handleVersionChange = (newVersionId) => {
     console.log("Version change handler called:", {
       newVersionId,
