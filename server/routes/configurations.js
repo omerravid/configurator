@@ -105,20 +105,23 @@ router.get("/", authenticateToken, async (req, res) => {
 
     // Non-admin users can only see their own USER configs
     if (req.user.role !== "ADMIN") {
-      // Debug: log user ID comparison for non-admin users
-      const userConfigs = configs.filter(c => c.type === "USER");
       console.log("=".repeat(80));
       console.log("🚨 [BACKEND] NON-ADMIN USER FILTERING DEBUG");
       console.log("🚨 User:", req.user.username, "| ID:", req.user.id, "| Type:", typeof req.user.id);
-      console.log("🚨 Found", userConfigs.length, "USER configurations:");
+
+      const userConfigs = configs.filter(c => c.type === "USER");
+      console.log("🚨 Found", userConfigs.length, "USER configurations BEFORE filtering:");
       userConfigs.forEach(cfg => {
         console.log(`🚨 USER config "${cfg.name}": created_by=${cfg.created_by} (${typeof cfg.created_by}), matches=${cfg.created_by === req.user.id}`);
       });
-      console.log("=".repeat(80));
 
       configs = configs.filter(
         (config) => config.type !== "USER" || config.created_by === req.user.id,
       );
+
+      const userConfigsAfter = configs.filter(c => c.type === "USER");
+      console.log("🚨 Found", userConfigsAfter.length, "USER configurations AFTER filtering");
+      console.log("=".repeat(80));
     }
 
     res.json({ configs });
