@@ -443,11 +443,18 @@ class Configuration {
       .sort({ type: 1, createdAt: -1 });
 
     return configs.map(config => {
+      // Extract populated data BEFORE calling toJSON()
+      const parentName = config.parent_id?.name;
+      const parentType = config.parent_id?.type;
+
+      // Now call toJSON() which will convert ObjectIds to strings
       const result = config.toJSON();
-      
-      if (config.parent_id) {
-        result.parent_name = config.parent_id.name;
-        result.parent_type = config.parent_id.type;
+
+      if (parentName) {
+        result.parent_name = parentName;
+      }
+      if (parentType) {
+        result.parent_type = parentType;
       }
 
       return result;
