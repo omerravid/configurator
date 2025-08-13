@@ -121,6 +121,12 @@ const ScalarPropertiesPanel = ({
         return false;
       }
 
+      // If it's a scalar array, don't show it as a scalar property
+      // (it will be shown in the Arrays section instead)
+      if (isScalarArray(actualValue)) {
+        return false;
+      }
+
       return (
         actualValue === null ||
         actualValue === undefined ||
