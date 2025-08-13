@@ -550,7 +550,7 @@ const StructuralTreeNode = ({
         {/* Root element name */}
         {isRoot && (
           <div className="flex-1 min-w-0">
-            <span className="font-medium text-gray-900 truncate">
+            <span className="font-medium text-gray-900 dark:text-gray-100 truncate">
               {configName || keyName || "Configuration"}
               {hasChildren && (
                 <span className="ml-1 text-xs text-gray-500">
@@ -590,7 +590,7 @@ const StructuralTreeNode = ({
                   className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600 focus:outline-none"
                   title="Cancel"
                 >
-                  �����
+                  ���
                 </button>
               </div>
             ) : (
