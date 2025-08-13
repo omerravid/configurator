@@ -305,6 +305,47 @@ const StructuralTreeNode = ({
     }
   };
 
+  const copyToClipboardSilent = async (text) => {
+    if (!text) {
+      throw new Error("No text to copy");
+    }
+
+    console.log("Attempting to copy text:", text);
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        console.log("Using navigator.clipboard.writeText");
+        await navigator.clipboard.writeText(text);
+        console.log("Successfully copied with navigator.clipboard");
+      } else {
+        console.log("Using fallback copy method");
+        // Fallback for iframes and browsers without clipboard API
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        textArea.style.opacity = "0";
+        textArea.style.pointerEvents = "none";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        textArea.setSelectionRange(0, 99999); // For mobile devices
+
+        const successful = document.execCommand("copy");
+        document.body.removeChild(textArea);
+
+        if (!successful) {
+          throw new Error("document.execCommand('copy') failed");
+        }
+        console.log("Successfully copied with execCommand");
+      }
+    } catch (err) {
+      console.error("Copy operation failed:", err);
+      throw err;
+    }
+  };
+
   const handleRename = () => {
     const trimmedValue = renameValue ? renameValue.trim() : "";
 
