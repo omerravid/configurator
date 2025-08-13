@@ -406,7 +406,16 @@ const ScalarPropertiesPanel = ({
   };
 
   const handleDeleteProperty = (propertyName) => {
-    onPropertyDelete?.(selectedPath, propertyName);
+    // Check if we're deleting a property from an array element
+    const isArrayElementProperty = selectedPath.includes('[') && selectedPath.includes(']');
+
+    if (isArrayElementProperty) {
+      // Handle array element property deletion - update the entire array
+      handleArrayElementPropertyChange(propertyName, undefined);
+    } else {
+      // Normal property deletion
+      onPropertyDelete?.(selectedPath, propertyName);
+    }
   };
 
   // Array editing handlers
