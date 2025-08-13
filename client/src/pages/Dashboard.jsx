@@ -30,6 +30,7 @@ import {
 const Dashboard = () => {
   const { user, logout } = useAuth();
   const { showToast } = useToast();
+  const { isDarkMode, toggleTheme } = useTheme();
   const [selectedConfig, setSelectedConfig] = useState(null);
   const [resolvedData, setResolvedData] = useState(null);
   const [rawData, setRawData] = useState(null);
