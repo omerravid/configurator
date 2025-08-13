@@ -525,6 +525,59 @@ const ScalarPropertiesPanel = ({
     showToast(`Property "${propertyName}" reset to inherited value`, "success");
   };
 
+  // Reset all properties and arrays at current level to inherited values
+  const handleResetAll = () => {
+    if (!selectedValue || typeof selectedValue !== "object") return;
+
+    // Get all properties that have local overrides at this level
+    const allPropertiesToReset = [];
+
+    // Add scalar properties with local overrides
+    scalarProperties.forEach(([propertyName, value]) => {
+      if (propertyHasLocalOverride(value)) {
+        allPropertiesToReset.push(propertyName);
+      }
+    });
+
+    // Add arrays with local overrides
+    scalarArrays.forEach(([arrayName, arrayValue]) => {
+      if (arrayHasLocalOverride(arrayValue)) {
+        allPropertiesToReset.push(arrayName);
+      }
+    });
+
+    if (allPropertiesToReset.length === 0) {
+      showToast("No local changes to reset at this level", "info");
+      return;
+    }
+
+    // Reset each property
+    allPropertiesToReset.forEach(propertyName => {
+      let propertyPath;
+      if (selectedPath === "root") {
+        propertyPath = `root.${propertyName}`;
+      } else {
+        propertyPath = `${selectedPath}.${propertyName}`;
+      }
+      onValueChange?.(propertyPath, null);
+    });
+
+    showToast(`Reset ${allPropertiesToReset.length} local changes at this level`, "success");
+  };
+
+  // Check if there are any local overrides at current level
+  const hasLocalOverrides = () => {
+    if (!selectedValue || typeof selectedValue !== "object") return false;
+
+    // Check scalar properties
+    const hasScalarOverrides = scalarProperties.some(([, value]) => propertyHasLocalOverride(value));
+
+    // Check arrays
+    const hasArrayOverrides = scalarArrays.some(([, arrayValue]) => arrayHasLocalOverride(arrayValue));
+
+    return hasScalarOverrides || hasArrayOverrides;
+  };
+
   const handleVersionChange = (newVersionId) => {
     console.log("Version change handler called:", {
       newVersionId,
