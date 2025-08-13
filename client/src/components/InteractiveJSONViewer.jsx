@@ -538,7 +538,7 @@ const TreeNode = ({
         ) : isArray ? (
           <span className="text-gray-600">[{actualValue.length} items]</span>
         ) : (
-          <span className="text-gray-600">
+          <span className="text-gray-600 dark:text-gray-400">
             {`{${Object.keys(actualValue).length} properties}`}
           </span>
         )}
