@@ -635,12 +635,9 @@ const ConfigurationTree = ({
       const includeArchived = activeTab === 'archived';
       const response = await configAPI.getAll(includeArchived);
 
-      // Filter to show:
-      // 1. Root-level configs (no parent) - includes PRODUCT and COMPONENT
-      // 2. USER configs created by the current user (regardless of parent_id)
-      let rootConfigs = (response.data.configs || []).filter(config =>
-        !config.parent_id || (config.type === "USER" && config.created_by === user?.username)
-      );
+      // Filter to show only root-level configs (no parent) - includes PRODUCT and COMPONENT
+      // USER configs will be included in their proper hierarchy during tree building
+      let rootConfigs = (response.data.configs || []).filter(config => !config.parent_id);
 
       // Filter by archived status based on active tab
       if (activeTab === 'archived') {
