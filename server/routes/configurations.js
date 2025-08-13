@@ -128,27 +128,7 @@ router.get("/", authenticateToken, async (req, res) => {
           return true; // Include non-USER configs
         }
 
-        const createdBy = config.created_by;
-        const userId = req.user.id;
-
-        // Handle ObjectId to string comparison using the same logic as debug
-        let createdByStr, userIdStr;
-
-        if (createdBy && typeof createdBy === 'object') {
-          if (createdBy._id) {
-            createdByStr = String(createdBy._id);
-          } else if (createdBy.toString && typeof createdBy.toString === 'function') {
-            createdByStr = createdBy.toString();
-          } else {
-            createdByStr = JSON.stringify(createdBy);
-          }
-        } else {
-          createdByStr = String(createdBy);
-        }
-
-        userIdStr = String(userId);
-
-        return createdByStr === userIdStr;
+        return config.created_by === req.user.username;
       });
 
       const userConfigsAfter = configs.filter(c => c.type === "USER");
