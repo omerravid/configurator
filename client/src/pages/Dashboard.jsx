@@ -23,6 +23,8 @@ import {
   EllipsisVerticalIcon,
   QuestionMarkCircleIcon,
   AdjustmentsHorizontalIcon,
+  SunIcon,
+  MoonIcon,
 } from "@heroicons/react/24/outline";
 
 const Dashboard = () => {
