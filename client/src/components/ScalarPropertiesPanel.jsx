@@ -1209,7 +1209,7 @@ const ScalarPropertiesPanel = ({
             const { actualValue: actualArray } = getActualValueAndSource(arrayValue);
 
             return (
-              <div key={arrayName} className="border border-gray-200 rounded p-3 bg-gray-50">
+              <div key={arrayName} className="border border-gray-200 dark:border-gray-600 rounded p-3 bg-gray-50 dark:bg-gray-700 transition-colors">
                 <div className="flex items-center justify-between mb-3">
                   <span className="font-medium text-gray-700">{arrayName}:</span>
                   {isEditable && configType !== "PRODUCT" && (
