@@ -279,19 +279,34 @@ class Configuration {
       filter.archived = { $ne: true };
     }
     const configs = await ConfigurationModel.find(filter)
-      .populate('created_by', 'username')
       .sort({ type: 1, createdAt: -1 });
 
-    return configs.map(config => {
-      // Extract populated data BEFORE calling toJSON()
-      const createdByUsername = config.created_by?.username;
+    // Get all unique user IDs to fetch usernames
+    const userIds = [...new Set(configs.map(config => config.created_by))];
+    const { User } = require('./index');
+    const users = {};
 
+    // Fetch all users at once
+    for (const userId of userIds) {
+      if (userId) {
+        try {
+          const user = await User.findById(userId);
+          if (user) {
+            users[userId] = user.username;
+          }
+        } catch (error) {
+          console.warn(`Failed to fetch user ${userId}:`, error.message);
+        }
+      }
+    }
+
+    return configs.map(config => {
       // Now call toJSON() which will convert ObjectIds to strings
       const result = config.toJSON();
 
-      // Add populated fields in expected format
-      if (createdByUsername) {
-        result.created_by_username = createdByUsername;
+      // Add username from our user lookup
+      if (result.created_by && users[result.created_by]) {
+        result.created_by_username = users[result.created_by];
       }
 
       return result;
