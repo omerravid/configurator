@@ -994,6 +994,7 @@ const Dashboard = () => {
                 ) : resolvedData ? (
                   <InteractiveJSONViewer
                     data={resolvedData.resolved}
+                    rawData={rawData?.data}
                     metadata={resolvedData.metadata}
                     title="Configuration Data"
                     className="max-w-none"
