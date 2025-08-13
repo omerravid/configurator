@@ -286,14 +286,11 @@ class ConfigurationService {
   }
 
   static async getValueAtPath(configIdOrName, path, minimal = false) {
-    console.log(`[BACKEND] getValueAtPath called with path: "${path}"`);
     const resolved = await this.resolveConfiguration(configIdOrName, true);
 
     let current = resolved.resolved;
     let i = 0;
     let pathSoFar = "";
-
-    console.log(`[BACKEND] Starting traversal with current:`, typeof current, Array.isArray(current) ? `array[${current.length}]` : 'object');
 
     while (i < path.length && current != null) {
       // Look for array notation [index]
