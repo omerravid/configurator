@@ -1115,7 +1115,7 @@ const InteractiveJSONViewer = ({
         </div>
       ) : viewMode === "flat" ? (
         /* Flat JSON Tree */
-        <div className="bg-white border border-gray-200 rounded-lg p-4 max-h-96 overflow-auto">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 max-h-96 overflow-auto transition-colors">
           <TreeNode
             keyName="root"
             value={getCurrentData()}
