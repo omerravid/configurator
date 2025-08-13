@@ -298,18 +298,18 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
               <div className="space-y-2">
                 {queryResult.notFound ? (
                   <div>
-                    <div className="text-xs text-gray-500 mb-2">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                       Path not found | Time:{" "}
                       {new Date(queryResult.query.timestamp).toLocaleTimeString()}
                     </div>
-                    <div className="flex items-center space-x-2 text-amber-600 bg-amber-50 p-3 rounded border">
+                    <div className="flex items-center space-x-2 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-3 rounded border border-amber-200 dark:border-amber-800 transition-colors">
                       <ExclamationTriangleIcon className="w-5 h-5" />
                       <span>The specified path does not exist in this configuration.</span>
                     </div>
                   </div>
                 ) : (
                   <div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
                       Type: {typeof queryResult.data} | Size:{" "}
                       {JSON.stringify(queryResult.data).length} chars | Time:{" "}
                       {new Date(queryResult.query.timestamp).toLocaleTimeString()}
@@ -321,8 +321,8 @@ const PathQueryPanel = ({ configurations = [], selectedConfig }) => {
 
               {/* Metadata if available */}
               {queryResult.metadata && Array.isArray(queryResult.metadata) && (
-                <div className="mt-3 pt-3 border-t border-gray-200">
-                  <div className="text-xs text-gray-500 mb-2">
+                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                     Inheritance Chain:
                   </div>
                   <div className="flex flex-wrap gap-2">
