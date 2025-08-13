@@ -339,17 +339,11 @@ class ConfigurationService {
           ? path.slice(i)
           : path.slice(i, nextDelimiter);
 
-        console.log(`[BACKEND] Property access: pathSoFar="${pathSoFar}", key="${key}", current type:`, typeof current);
-        if (current && typeof current === "object") {
-          console.log(`[BACKEND] Current object keys:`, Object.keys(current));
-        }
-
         if (!current || typeof current !== "object" || current[key] === undefined) {
           throw new Error(`Path not found: ${pathSoFar}${pathSoFar ? '.' : ''}${key}`);
         }
 
         current = current[key];
-        console.log(`[BACKEND] After property access, current type:`, typeof current);
         pathSoFar += (pathSoFar ? '.' : '') + key;
         i = nextDelimiter === -1 ? path.length : nextDelimiter;
 
