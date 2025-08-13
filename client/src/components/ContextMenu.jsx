@@ -25,7 +25,7 @@ const ContextMenu = ({ x, y, onClose, items }) => {
 
   return (
     <div
-      className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-48"
+      className="fixed z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg py-1 min-w-48 transition-colors"
       style={{
         left: Math.min(x, window.innerWidth - 200),
         top: Math.min(y, window.innerHeight - 200),
@@ -39,7 +39,7 @@ const ContextMenu = ({ x, y, onClose, items }) => {
             item.onClick();
             onClose();
           }}
-          className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 flex items-center space-x-2 text-gray-700"
+          className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center space-x-2 text-gray-700 dark:text-gray-200 transition-colors"
           disabled={item.disabled}
         >
           {item.icon && <item.icon className="w-4 h-4" />}
