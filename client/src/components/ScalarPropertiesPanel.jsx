@@ -956,6 +956,15 @@ const ScalarPropertiesPanel = ({
                         >
                           <PencilIcon className="w-3 h-3" />
                         </button>
+                        {propertyHasLocalOverride(value) && (
+                          <button
+                            onClick={() => handlePropertyReset(propertyName)}
+                            className="p-1 text-orange-400 hover:text-orange-600 hover:bg-orange-100 rounded"
+                            title="Reset to inherited value"
+                          >
+                            <span className="text-xs font-bold">↺</span>
+                          </button>
+                        )}
                         {configType === "COMPONENT" && (
                           <button
                             onClick={() => handleDeleteProperty(propertyName)}
