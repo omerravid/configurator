@@ -516,8 +516,6 @@ class ConfigurationService {
       } else if (config.parent_id.toString && typeof config.parent_id.toString === 'function') {
         parentId = config.parent_id.toString();
       } else {
-        // Log the object structure to help debug
-        console.log("Unable to extract ID from parent_id object:", JSON.stringify(config.parent_id, null, 2));
         throw new Error(`Invalid parent_id object structure: ${JSON.stringify(config.parent_id)}`);
       }
       } else {
