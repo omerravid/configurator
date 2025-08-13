@@ -86,6 +86,12 @@ The Configuration Manager uses a hierarchical system with five main types:
 - Provenance indicators: Colored dots showing value origins
 - Import button: Available for empty components to import folder structures
 
+**Theme Toggle**
+- Dark/Light mode toggle button in the header
+- Dark mode is the default theme for better readability
+- Theme preference is automatically saved and remembered
+- All interface elements adapt to the selected theme
+
 **Structural View Mode**
 - Left tree: Shows only objects and arrays in hierarchical structure
 - Right panel: Displays scalar properties of selected structural items
