@@ -104,6 +104,15 @@ router.get("/", authenticateToken, async (req, res) => {
 
     // Non-admin users can only see their own USER configs
     if (req.user.role !== "ADMIN") {
+      // Debug: log user ID comparison for non-admin users
+      const userConfigs = configs.filter(c => c.type === "USER");
+      if (userConfigs.length > 0) {
+        console.log("🔍 [BACKEND] Non-admin filtering - User:", req.user.username, "ID:", req.user.id, "Type:", typeof req.user.id);
+        userConfigs.forEach(cfg => {
+          console.log(`🔍 [BACKEND] USER config "${cfg.name}": created_by=${cfg.created_by} (${typeof cfg.created_by}), matches=${cfg.created_by === req.user.id}`);
+        });
+      }
+
       configs = configs.filter(
         (config) => config.type !== "USER" || config.created_by === req.user.id,
       );
