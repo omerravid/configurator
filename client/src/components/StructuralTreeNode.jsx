@@ -221,19 +221,32 @@ const StructuralTreeNode = ({
       {
         label: "Copy Path",
         icon: ClipboardIcon,
-        onClick: () => {
-          // Strip "root." prefix for clean paths
-          const cleanPath = currentPath.startsWith("root.") ? currentPath.substring(5) : currentPath;
-          copyToClipboard(cleanPath);
-          showToast("Path copied to clipboard", "success");
+        onClick: async () => {
+          try {
+            // Strip "root." prefix for clean paths
+            const cleanPath = currentPath.startsWith("root.") ? currentPath.substring(5) : currentPath;
+            console.log("Copying path:", cleanPath);
+            await copyToClipboardSilent(cleanPath);
+            showToast("Path copied to clipboard", "success");
+          } catch (err) {
+            console.error("Failed to copy path:", err);
+            showToast("Failed to copy path to clipboard", "error");
+          }
         },
       },
       {
         label: "Copy JSON",
         icon: DocumentDuplicateIcon,
-        onClick: () => {
-          copyToClipboard(JSON.stringify(actualValue, null, 2));
-          showToast("JSON copied to clipboard", "success");
+        onClick: async () => {
+          try {
+            const jsonString = JSON.stringify(actualValue, null, 2);
+            console.log("Copying JSON:", jsonString);
+            await copyToClipboardSilent(jsonString);
+            showToast("JSON copied to clipboard", "success");
+          } catch (err) {
+            console.error("Failed to copy JSON:", err);
+            showToast("Failed to copy JSON to clipboard", "error");
+          }
         },
       }
     );
