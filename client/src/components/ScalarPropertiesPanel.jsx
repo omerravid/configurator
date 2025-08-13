@@ -439,7 +439,9 @@ const ScalarPropertiesPanel = ({
   };
 
   const handleArrayItemAdd = (arrayName) => {
-    const currentArray = actualSelectedValue[arrayName];
+    const arrayWithProvenance = actualSelectedValue[arrayName];
+    const { actualValue: currentArray } = getActualValueAndSource(arrayWithProvenance);
+
     if (!Array.isArray(currentArray)) return;
 
     const newArray = [...currentArray, ""];
@@ -455,7 +457,9 @@ const ScalarPropertiesPanel = ({
   };
 
   const handleArrayItemDelete = (arrayName, index) => {
-    const currentArray = actualSelectedValue[arrayName];
+    const arrayWithProvenance = actualSelectedValue[arrayName];
+    const { actualValue: currentArray } = getActualValueAndSource(arrayWithProvenance);
+
     if (!Array.isArray(currentArray)) return;
 
     const newArray = currentArray.filter((_, i) => i !== index);
