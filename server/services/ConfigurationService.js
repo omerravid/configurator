@@ -270,6 +270,21 @@ class ConfigurationService {
    * @param {string} path - Dot-separated path (e.g., "system.logging.level")
    * @returns {Object} Value with provenance
    */
+  // Helper to extract actual value from provenance wrapper
+  static extractActualValue(val) {
+    let currentVal = val;
+    while (
+      currentVal &&
+      typeof currentVal === "object" &&
+      currentVal.hasOwnProperty("value") &&
+      currentVal.hasOwnProperty("source") &&
+      Object.keys(currentVal).length === 2
+    ) {
+      currentVal = currentVal.value;
+    }
+    return currentVal;
+  }
+
   static async getValueAtPath(configIdOrName, path, minimal = false) {
     const resolved = await this.resolveConfiguration(configIdOrName, true);
 
@@ -289,11 +304,15 @@ class ConfigurationService {
         }
 
         const index = parseInt(path.slice(i + 1, bracketEnd));
-        if (!Array.isArray(current) || isNaN(index) || index < 0 || index >= current.length) {
-          throw new Error(`Array index ${index} not found at path: ${pathSoFar}`);
+
+        // Extract actual value from provenance wrapper
+        const actualCurrent = this.extractActualValue(current);
+
+        if (!Array.isArray(actualCurrent) || isNaN(index) || index < 0 || index >= actualCurrent.length) {
+          throw new Error(`Array index ${index} not found at path: ${pathSoFar} (array length: ${Array.isArray(actualCurrent) ? actualCurrent.length : 'not an array'})`);
         }
 
-        current = current[index];
+        current = actualCurrent[index];
         pathSoFar += `[${index}]`;
         i = bracketEnd + 1;
 
