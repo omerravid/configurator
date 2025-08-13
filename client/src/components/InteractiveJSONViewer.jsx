@@ -896,7 +896,7 @@ const InteractiveJSONViewer = ({
             <h3 className="text-lg font-medium text-gray-900">{title}</h3>
           )}
 
-          {/* Mode Toggle */}
+          {/* View Mode Toggle */}
           <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setViewMode("flat")}
@@ -919,6 +919,30 @@ const InteractiveJSONViewer = ({
             >
               <ViewColumnsIcon className="w-4 h-4" />
               <span>Structural</span>
+            </button>
+          </div>
+
+          {/* Data Mode Toggle */}
+          <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setDataMode("all")}
+              className={`flex items-center space-x-1 px-3 py-1 rounded text-sm font-medium transition-colors ${
+                dataMode === "all"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              <span>All</span>
+            </button>
+            <button
+              onClick={() => setDataMode("changes")}
+              className={`flex items-center space-x-1 px-3 py-1 rounded text-sm font-medium transition-colors ${
+                dataMode === "changes"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              <span>Changes</span>
             </button>
           </div>
         </div>
