@@ -617,6 +617,7 @@ const InteractiveJSONViewer = ({
   // Get current data based on mode
   const getCurrentData = useCallback(() => {
     if (dataMode === "changes") {
+      // rawData is the actual configuration data (already extracted as .data in Dashboard)
       return rawData || {};
     }
     return data;
