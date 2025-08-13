@@ -158,7 +158,6 @@ router.get("/components", authenticateToken, async (req, res) => {
 router.post("/", authenticateToken, async (req, res) => {
   try {
     // Validate input
-    console.log("Received create configuration request:", req.body);
     const { error, value } = createConfigSchema.validate(req.body);
     if (error) {
       console.error("Validation error:", error.details);
