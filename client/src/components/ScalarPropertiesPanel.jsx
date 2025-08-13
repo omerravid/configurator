@@ -520,6 +520,77 @@ const ScalarPropertiesPanel = ({
     );
   };
 
+  // Handle property changes inside array elements - updates the entire array
+  const handleArrayElementPropertyChange = (propertyName, newValue) => {
+    // Parse the selectedPath to get array path and index
+    // Example: "root.ObjArray.[0]" -> arrayPath: "root.ObjArray", index: 0
+    const pathParts = selectedPath.split('.');
+    let arrayPath = '';
+    let arrayIndex = -1;
+
+    // Find the array bracket notation
+    for (let i = 0; i < pathParts.length; i++) {
+      const part = pathParts[i];
+      if (part.startsWith('[') && part.endsWith(']')) {
+        arrayIndex = parseInt(part.slice(1, -1));
+        arrayPath = pathParts.slice(0, i).join('.');
+        break;
+      }
+    }
+
+    if (arrayIndex === -1 || !arrayPath) {
+      console.error("Could not parse array path:", selectedPath);
+      return;
+    }
+
+    console.log("Array element property change:", {
+      selectedPath,
+      arrayPath,
+      arrayIndex,
+      propertyName,
+      newValue
+    });
+
+    // Get the current array from the resolved data
+    // We need to traverse the path to get the array
+    const pathKeys = arrayPath.replace(/^root\./, '').split('.');
+    let currentData = actualSelectedValue;
+
+    // Navigate to the parent object containing the array
+    for (let i = 0; i < pathKeys.length - 1; i++) {
+      if (currentData && typeof currentData === 'object') {
+        currentData = getActualValueAndSource(currentData[pathKeys[i]]).actualValue;
+      }
+    }
+
+    // Get the array
+    const arrayKey = pathKeys[pathKeys.length - 1];
+    const arrayWithProvenance = currentData ? currentData[arrayKey] : null;
+    const { actualValue: currentArray } = getActualValueAndSource(arrayWithProvenance);
+
+    if (!Array.isArray(currentArray)) {
+      console.error("Target is not an array:", currentArray);
+      return;
+    }
+
+    // Create a new array with the updated element
+    const newArray = [...currentArray];
+    if (arrayIndex < newArray.length) {
+      // Clone the array element and update the property
+      const elementToUpdate = getActualValueAndSource(newArray[arrayIndex]).actualValue;
+      if (elementToUpdate && typeof elementToUpdate === 'object') {
+        newArray[arrayIndex] = {
+          ...elementToUpdate,
+          [propertyName]: newValue
+        };
+      }
+    }
+
+    // Update the entire array
+    onValueChange?.(arrayPath, newArray);
+    showToast(`Updated property "${propertyName}" in array element`, "success");
+  };
+
   // Reset a scalar property to inherited value
   const handlePropertyReset = (propertyName) => {
     let propertyPath;
