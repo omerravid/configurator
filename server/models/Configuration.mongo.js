@@ -177,37 +177,42 @@ class Configuration {
   static async findAll(includeArchived = false) {
     const filter = includeArchived ? {} : { archived: { $ne: true } };
     const configs = await ConfigurationModel.find(filter)
-      .populate('created_by', 'username')
       .populate('parent_id', 'name type')
       .sort({ type: 1, createdAt: -1 });
 
-    return configs.map(config => {
-      // Debug raw MongoDB document
-      console.log("🔍 [findAll] Raw MongoDB document:");
-      console.log("🔍 config._doc.created_by:", config._doc.created_by);
-      console.log("🔍 config._doc.created_by type:", typeof config._doc.created_by);
-      console.log("🔍 config._doc.created_by constructor:", config._doc.created_by?.constructor?.name);
+    // Get all unique user IDs to fetch usernames
+    const userIds = [...new Set(configs.map(config => config.created_by))];
+    const { User } = require('./index');
+    const users = {};
 
+    // Fetch all users at once
+    for (const userId of userIds) {
+      if (userId) {
+        try {
+          const user = await User.findById(userId);
+          if (user) {
+            users[userId] = user.username;
+          }
+        } catch (error) {
+          console.warn(`Failed to fetch user ${userId}:`, error.message);
+        }
+      }
+    }
+
+    return configs.map(config => {
       // Extract populated data BEFORE calling toJSON()
-      const createdByUsername = config.created_by?.username;
       const parentName = config.parent_id?.name;
       const parentType = config.parent_id?.type;
-
-      // Debug populated vs original
-      console.log("🔍 config.created_by (populated):", config.created_by);
-      console.log("🔍 config.created_by type:", typeof config.created_by);
 
       // Now call toJSON() which will convert ObjectIds to strings
       const result = config.toJSON();
 
-      // Debug result after toJSON
-      console.log("🔍 result.created_by after toJSON():", result.created_by);
-      console.log("🔍 result.created_by type:", typeof result.created_by);
+      // Add username from our user lookup
+      if (result.created_by && users[result.created_by]) {
+        result.created_by_username = users[result.created_by];
+      }
 
       // Add populated fields in expected format
-      if (createdByUsername) {
-        result.created_by_username = createdByUsername;
-      }
       if (parentName) {
         result.parent_name = parentName;
       }
