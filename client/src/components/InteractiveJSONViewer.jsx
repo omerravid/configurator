@@ -507,7 +507,7 @@ const TreeNode = ({
   return (
     <div className="group">
       <div
-        className={`flex items-center py-1 hover:bg-gray-50 rounded cursor-context-menu`}
+        className={`flex items-center py-1 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-context-menu transition-colors`}
         style={{ paddingLeft: `${depth * 20}px` }}
         onContextMenu={handleContextMenu}
       >
