@@ -678,16 +678,16 @@ const ConfigurationEditor = ({
   if (!canEdit()) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full transition-colors">
           <div className="p-6">
             <div className="text-center">
               <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
                 <XMarkIcon className="w-8 h-8 text-red-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 Cannot Edit Configuration
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 {config.status === "COMMITTED"
                   ? "This user configuration has been committed and cannot be edited."
                   : "You don't have permission to edit this configuration."}
@@ -705,7 +705,7 @@ const ConfigurationEditor = ({
   if (loadingRawData) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg shadow-xl p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 transition-colors">
           <div className="flex items-center space-x-3">
             <div className="w-6 h-6 animate-spin border-2 border-gray-300 border-t-primary-600 rounded-full"></div>
             <span>Loading configuration data...</span>
@@ -717,10 +717,10 @@ const ConfigurationEditor = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-hidden transition-colors">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">{getTitle()}</h2>
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{getTitle()}</h2>
           <div className="flex items-center space-x-2">
             {config &&
               !isCreating &&
@@ -729,7 +729,7 @@ const ConfigurationEditor = ({
               !showRename && (
                 <button
                   onClick={() => setShowRename(true)}
-                  className="text-sm text-primary-600 hover:text-primary-700"
+                  className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
                 >
                   Rename
                 </button>
@@ -737,14 +737,14 @@ const ConfigurationEditor = ({
             {showRename && (
               <button
                 onClick={() => setShowRename(false)}
-                className="text-sm text-gray-600 hover:text-gray-700"
+                className="text-sm text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
               >
                 Cancel Rename
               </button>
             )}
             <button
               onClick={() => onClose(false)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
