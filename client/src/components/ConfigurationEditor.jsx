@@ -834,12 +834,12 @@ const ConfigurationEditor = ({
                 {/* Parent (shown for context) */}
                 {parentInfo && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                       {isCreating
                         ? "Parent Configuration"
                         : "Parent Configuration"}
                     </label>
-                    <div className="mt-1 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                    <div className="mt-1 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors">
                       <div className="flex items-center space-x-2">
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -852,7 +852,7 @@ const ConfigurationEditor = ({
                         >
                           {parentInfo.type}
                         </span>
-                        <span className="text-sm font-medium">
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                           {parentInfo.name}
                         </span>
                       </div>
@@ -864,7 +864,7 @@ const ConfigurationEditor = ({
                 <div>
                   <label
                     htmlFor="description"
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-200"
                   >
                     Description (Optional)
                   </label>
@@ -872,7 +872,7 @@ const ConfigurationEditor = ({
                     id="description"
                     name="description"
                     rows={3}
-                    className="mt-1 input-field w-full"
+                    className="mt-1 input-field w-full dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
                     value={formData.description}
                     onChange={handleInputChange}
                     placeholder="Describe the purpose of this configuration..."
