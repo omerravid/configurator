@@ -226,23 +226,42 @@ class Configuration {
 
   static async findByType(type) {
     const configs = await ConfigurationModel.find({ type })
-      .populate('created_by', 'username')
       .populate('parent_id', 'name type')
       .sort({ createdAt: -1 });
 
+    // Get all unique user IDs to fetch usernames
+    const userIds = [...new Set(configs.map(config => config.created_by))];
+    const { User } = require('./index');
+    const users = {};
+
+    // Fetch all users at once
+    for (const userId of userIds) {
+      if (userId) {
+        try {
+          const user = await User.findById(userId);
+          if (user) {
+            users[userId] = user.username;
+          }
+        } catch (error) {
+          console.warn(`Failed to fetch user ${userId}:`, error.message);
+        }
+      }
+    }
+
     return configs.map(config => {
       // Extract populated data BEFORE calling toJSON()
-      const createdByUsername = config.created_by?.username;
       const parentName = config.parent_id?.name;
       const parentType = config.parent_id?.type;
 
       // Now call toJSON() which will convert ObjectIds to strings
       const result = config.toJSON();
 
-      // Add populated fields in expected format
-      if (createdByUsername) {
-        result.created_by_username = createdByUsername;
+      // Add username from our user lookup
+      if (result.created_by && users[result.created_by]) {
+        result.created_by_username = users[result.created_by];
       }
+
+      // Add populated fields in expected format
       if (parentName) {
         result.parent_name = parentName;
       }
