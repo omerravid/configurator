@@ -1105,7 +1105,7 @@ const ScalarPropertiesPanel = ({
             return (
               <div
                 key={propertyName}
-                className="group flex items-center justify-between p-2 border border-gray-200 rounded hover:bg-gray-50 cursor-context-menu"
+                className="group flex items-center justify-between p-2 border border-gray-200 dark:border-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-context-menu transition-colors"
                 onContextMenu={(e) => handlePropertyContextMenu(e, propertyName, value)}
               >
                 <div className="flex-1 min-w-0">
