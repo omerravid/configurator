@@ -116,7 +116,7 @@ router.get("/", authenticateToken, async (req, res) => {
       });
 
       configs = configs.filter(
-        (config) => config.type !== "USER" || config.created_by === req.user.id,
+        (config) => config.type !== "USER" || String(config.created_by) === String(req.user.id),
       );
 
       const userConfigsAfter = configs.filter(c => c.type === "USER");
