@@ -603,6 +603,21 @@ const InteractiveJSONViewer = ({
   const [selectedStructuralPath, setSelectedStructuralPath] = useState("root");
   const [selectedStructuralValue, setSelectedStructuralValue] = useState(data);
 
+  // Helper to extract actual value from provenance wrapper
+  const extractActualValue = useCallback((val) => {
+    let currentVal = val;
+    while (
+      currentVal &&
+      typeof currentVal === "object" &&
+      currentVal.hasOwnProperty("value") &&
+      currentVal.hasOwnProperty("source") &&
+      Object.keys(currentVal).length === 2
+    ) {
+      currentVal = currentVal.value;
+    }
+    return currentVal;
+  }, []);
+
   // Helper function to get value at a specific path
   const getValueAtPath = useCallback((obj, path) => {
     if (!obj || !path || path === "root") return obj;
@@ -624,8 +639,12 @@ const InteractiveJSONViewer = ({
         if (bracketEnd === -1) return null;
 
         const index = parseInt(cleanPath.slice(i + 1, bracketEnd));
-        if (Array.isArray(current) && index >= 0 && index < current.length) {
-          current = current[index];
+
+        // Extract actual value from provenance wrapper before checking if it's an array
+        const actualCurrent = extractActualValue(current);
+
+        if (Array.isArray(actualCurrent) && index >= 0 && index < actualCurrent.length) {
+          current = actualCurrent[index];
           i = bracketEnd + 1;
           // Skip optional dot after bracket
           if (i < cleanPath.length && cleanPath[i] === '.') {
@@ -667,7 +686,7 @@ const InteractiveJSONViewer = ({
     }
 
     return current;
-  }, []);
+  }, [extractActualValue]);
 
   // Initialize expanded paths for structural mode
   useEffect(() => {
