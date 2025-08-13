@@ -167,7 +167,6 @@ const TreeNode = ({
   selectedId,
   onSelect,
   level = 0,
-  showInheritance = false,
   onEdit,
   onRename,
   onDuplicate,
@@ -527,7 +526,7 @@ const TreeNode = ({
                 selectedId={selectedId}
                 onSelect={onSelect}
                 level={level + 1}
-                showInheritance={showInheritance}
+      
                 onEdit={onEdit}
                 onRename={onRename}
                 onDuplicate={onDuplicate}
@@ -578,7 +577,6 @@ const ConfigurationTree = ({
   const [rootConfigs, setRootConfigs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showInheritance, setShowInheritance] = useState(false);
   const [activeTab, setActiveTab] = useState('active'); // 'active' or 'archived'
 
   // Global expansion state management - persist across refreshes and per tab
@@ -710,15 +708,6 @@ const ConfigurationTree = ({
           </button>
         </div>
 
-        <label className="flex items-center space-x-2 text-xs text-gray-600">
-          <input
-            type="checkbox"
-            checked={showInheritance}
-            onChange={(e) => setShowInheritance(e.target.checked)}
-            className="rounded"
-          />
-          <span>Show inheritance details</span>
-        </label>
       </div>
 
       {/* Content Area */}
@@ -734,7 +723,7 @@ const ConfigurationTree = ({
           selectedId={selectedConfig?.id}
           onSelect={onConfigSelect}
           level={0}
-          showInheritance={showInheritance}
+
           onEdit={onEdit}
           onRename={onRename}
           onDuplicate={onDuplicate}
