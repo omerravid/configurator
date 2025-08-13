@@ -28,6 +28,7 @@
 1. After login, you'll see the main dashboard with a tree of configurations on the left
 2. The center panel shows details of the selected configuration
 3. The header contains action buttons for creating new configurations
+4. The interface starts in dark mode by default - use the theme toggle button to switch to light mode if preferred
 
 ---
 
