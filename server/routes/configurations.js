@@ -64,7 +64,7 @@ const checkConfigPermissions = async (req, res, next) => {
 
     // For USER and VERSION configs, check ownership and draft status
     if (config.type === "USER" || config.type === "VERSION") {
-      if (config.created_by !== req.user.id) {
+      if (config.created_by !== req.user.username) {
         return res
           .status(403)
           .json({ error: "You can only modify your own configurations" });
