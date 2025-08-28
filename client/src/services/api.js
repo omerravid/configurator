@@ -115,6 +115,15 @@ export const configAPI = {
     const params = includeArchived ? { includeArchived: 'true' } : {};
     return api.get(`/configs/${id}/children`, { params });
   },
+
+  // Import folder with JSON and binary files
+  importFolder: (formData) => {
+    return api.post("/folder-import", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 };
 
 // Users API
