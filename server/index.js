@@ -70,6 +70,7 @@ app.use("/api/configs", require("./routes/configurations"));
 app.use("/api/users", require("./routes/users"));
 app.use("/api/settings", require("./routes/settings"));
 app.use("/api/files", require("./routes/files"));
+app.use("/api/folder-import", require("./routes/folder-import"));
 
 // Health check
 app.get("/api/health", (req, res) => {
