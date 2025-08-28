@@ -1101,6 +1101,27 @@ const ScalarPropertiesPanel = ({
         </div>
       )}
 
+      {/* File Object Management */}
+      {isFileObject() && (
+        <div className="mb-6">
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">File Management</h4>
+          <FileManagementPanel
+            fileValue={getActualValueAndSource(selectedValue).actualValue}
+            configId={selectedConfig?.id}
+            propertyPath={selectedPath === "root" ? null : selectedPath.replace(/^root\./, "")}
+            onFileUpdated={(newFileData) => {
+              // Trigger a refresh of the configuration data
+              // The parent component should handle this by refetching the configuration
+              const propertyPath = selectedPath === "root" ? null : selectedPath.replace(/^root\./, "");
+              if (propertyPath && onValueChange) {
+                onValueChange(propertyPath, newFileData);
+              }
+            }}
+            isEditable={isEditable}
+          />
+        </div>
+      )}
+
       {/* Help text */}
       <div className="mb-4 text-xs text-gray-500 dark:text-gray-400">
         💡 Right-click on properties for more options • Click ℹ️ to see source configuration
