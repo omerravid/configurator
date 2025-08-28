@@ -180,11 +180,26 @@ class FileStorageService {
    * Generate embedded storage download URL
    */
   generateEmbeddedDownloadUrl(fileMetadata) {
-    // For deployed environments, use the actual server URL
-    const baseUrl = process.env.SERVER_BASE_URL ||
-                   process.env.FLY_APP_NAME ?
-                   `https://${process.env.FLY_APP_NAME}.fly.dev` :
-                   'https://4c7d7582c7b445d6ac2dadf6cdd558ad-c2353b8c6b2e4daeb0ef650da.fly.dev';
+    // Detect if we're in a deployed environment vs local development
+    // Check for common deployment environment indicators
+    const isDeployed = process.env.NODE_ENV === 'production' ||
+                      process.env.FLY_APP_NAME ||
+                      process.env.HEROKU_APP_NAME ||
+                      process.env.VERCEL_URL ||
+                      process.env.RENDER_EXTERNAL_HOSTNAME ||
+                      !process.env.NODE_ENV; // Default to deployed if NODE_ENV not set
+
+    let baseUrl;
+    if (isDeployed) {
+      // Use the deployed URL
+      baseUrl = process.env.SERVER_BASE_URL ||
+                'https://4c7d7582c7b445d6ac2dadf6cdd558ad-c2353b8c6b2e4daeb0ef650da.fly.dev';
+    } else {
+      // Use localhost for local development
+      baseUrl = 'http://localhost:3002';
+    }
+
+    console.log(`Generating download URL - isDeployed: ${isDeployed}, baseUrl: ${baseUrl}`);
     return `${baseUrl}/api/files/${fileMetadata.storageKey}`;
   }
 
