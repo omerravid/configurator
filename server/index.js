@@ -69,6 +69,7 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/configs", require("./routes/configurations"));
 app.use("/api/users", require("./routes/users"));
 app.use("/api/settings", require("./routes/settings"));
+app.use("/api/files", require("./routes/files"));
 
 // Health check
 app.get("/api/health", (req, res) => {
