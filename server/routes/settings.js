@@ -8,13 +8,37 @@ const FileStorageService = require("../services/FileStorageService");
 
 const router = express.Router();
 
-// Validation schema
+// Validation schemas
 const mongoSettingsSchema = Joi.object({
   connectionString: Joi.string().required(),
   options: Joi.object({
     useNewUrlParser: Joi.boolean(),
     useUnifiedTopology: Joi.boolean()
   }).optional()
+});
+
+const storageSettingsSchema = Joi.object({
+  storageType: Joi.string().valid('embedded', 's3').required(),
+  s3BucketName: Joi.when('storageType', {
+    is: 's3',
+    then: Joi.string().required(),
+    otherwise: Joi.string().optional()
+  }),
+  awsRegion: Joi.when('storageType', {
+    is: 's3',
+    then: Joi.string().required(),
+    otherwise: Joi.string().optional()
+  }),
+  awsAccessKeyId: Joi.when('storageType', {
+    is: 's3',
+    then: Joi.string().required(),
+    otherwise: Joi.string().optional()
+  }),
+  awsSecretAccessKey: Joi.when('storageType', {
+    is: 's3',
+    then: Joi.string().required(),
+    otherwise: Joi.string().optional()
+  })
 });
 
 // Get current MongoDB settings
