@@ -180,9 +180,8 @@ class FileStorageService {
    * Generate embedded storage download URL
    */
   generateEmbeddedDownloadUrl(fileMetadata) {
-    // This will be handled by a dedicated endpoint in the API
-    const baseUrl = process.env.SERVER_BASE_URL || 'http://localhost:3002';
-    return `${baseUrl}/api/files/${fileMetadata.storageKey}`;
+    // Use relative URL to avoid CORS issues and port mismatches
+    return `/api/files/${fileMetadata.storageKey}`;
   }
 
   /**
