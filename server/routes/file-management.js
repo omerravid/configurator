@@ -147,4 +147,29 @@ function getValueAtPath(obj, path) {
   return current;
 }
 
+// Helper function to set value at a specific path
+function setValueAtPath(obj, path, value) {
+  if (!path) {
+    return obj;
+  }
+
+  const keys = path.split('.');
+  let current = obj;
+
+  // Navigate to the parent of the target key
+  for (let i = 0; i < keys.length - 1; i++) {
+    const key = keys[i];
+    if (!current[key] || typeof current[key] !== 'object') {
+      current[key] = {};
+    }
+    current = current[key];
+  }
+
+  // Set the final value
+  const finalKey = keys[keys.length - 1];
+  current[finalKey] = value;
+
+  return obj;
+}
+
 module.exports = router;
