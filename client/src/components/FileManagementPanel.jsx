@@ -20,7 +20,8 @@ const FileManagementPanel = ({
   const [isDownloading, setIsDownloading] = useState(false);
 
   const metadata = fileValue._metadata || {};
-  const downloadUrl = fileValue._link;
+  // Always generate fresh download URL to avoid localhost issues
+  const downloadUrl = fileValue._link || `/api/files/${metadata.storageKey}`;
 
   const handleDownload = async () => {
     setIsDownloading(true);
