@@ -1,5 +1,6 @@
 const { Configuration } = require("../models");
 const { isPlainObject, cloneDeep } = require("lodash");
+const FileStorageService = require("./FileStorageService");
 
 class ConfigurationService {
   /**
