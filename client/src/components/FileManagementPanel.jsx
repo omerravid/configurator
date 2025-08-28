@@ -20,8 +20,8 @@ const FileManagementPanel = ({
   const [isDownloading, setIsDownloading] = useState(false);
 
   const metadata = fileValue._metadata || {};
-  // Always generate fresh download URL to avoid localhost issues
-  const downloadUrl = fileValue._link || `/api/files/${metadata.storageKey}`;
+  // We no longer need the downloadUrl since we're using authenticated fetch
+  const canDownload = metadata.storageKey;
 
   const handleDownload = async () => {
     setIsDownloading(true);
