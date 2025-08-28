@@ -342,11 +342,19 @@ const TreeNode = ({
     value.hasOwnProperty("source") &&
     Object.keys(value).length === 2; // Only has 'value' and 'source' properties
 
+  // Check if this is a binary file object
+  const isBinaryFile =
+    actualValue &&
+    typeof actualValue === "object" &&
+    actualValue._type === "file" &&
+    actualValue._link;
+
   const isObject =
     actualValue &&
     typeof actualValue === "object" &&
     !Array.isArray(actualValue) &&
-    !isProvenanceWrapper;
+    !isProvenanceWrapper &&
+    !isBinaryFile; // Treat binary files as non-objects
   const isArray = Array.isArray(actualValue);
   const isPrimitive = !isObject && !isArray;
 
