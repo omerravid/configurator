@@ -22,15 +22,25 @@ const upload = multer({
 // POST /api/folder-import - Import folder with JSON and binary files
 router.post("/", authenticateToken, upload.array('files'), async (req, res) => {
   try {
+    console.log("Folder import request received");
     const files = req.files;
     const { folderName } = req.body;
 
+    console.log(`Processing ${files ? files.length : 0} files for folder: ${folderName}`);
+
     if (!files || files.length === 0) {
+      console.log("No files uploaded");
       return res.status(400).json({ error: 'No files uploaded' });
     }
 
+    // Log file count and sizes for debugging
+    const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+    console.log(`Total files: ${files.length}, Total size: ${Math.round(totalSize / 1024)}KB`);
+
     const fileStorage = new FileStorageService();
     const result = await processFolderImport(files, folderName, fileStorage);
+
+    console.log(`Import completed: ${result.jsonFiles} JSON files, ${result.binaryFiles} binary files, ${result.errors.length} errors`);
 
     res.json({
       success: true,
@@ -47,12 +57,61 @@ router.post("/", authenticateToken, upload.array('files'), async (req, res) => {
 
   } catch (error) {
     console.error("Folder import error:", error);
-    res.status(500).json({ 
+
+    // Handle specific multer errors
+    if (error.code === 'LIMIT_FILE_COUNT') {
+      return res.status(400).json({
+        success: false,
+        error: "Too many files in upload",
+        details: `Maximum ${upload.options?.limits?.files || 1000} files allowed`
+      });
+    }
+
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({
+        success: false,
+        error: "File too large",
+        details: "Maximum file size is 50MB"
+      });
+    }
+
+    res.status(500).json({
       success: false,
       error: "Failed to import folder",
-      details: error.message 
+      details: error.message
     });
   }
+});
+
+// Handle multer errors specifically
+router.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    console.error("Multer error:", error);
+
+    if (error.code === 'LIMIT_FILE_COUNT') {
+      return res.status(400).json({
+        success: false,
+        error: "Too many files",
+        details: "Maximum 1000 files allowed per upload"
+      });
+    }
+
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({
+        success: false,
+        error: "File too large",
+        details: "Maximum file size is 50MB"
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      error: "File upload error",
+      details: error.message
+    });
+  }
+
+  next(error);
 });
 
 /**
