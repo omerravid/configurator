@@ -124,6 +124,20 @@ export const configAPI = {
       },
     });
   },
+
+  // Replace a file in a configuration
+  replaceFile: (configId, propertyPath, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('configId', configId);
+    formData.append('propertyPath', propertyPath);
+
+    return api.post("/file-management/replace", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 };
 
 // Users API
