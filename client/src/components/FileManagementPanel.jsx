@@ -26,19 +26,37 @@ const FileManagementPanel = ({
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
-      // Create a temporary link to download the file
+      // Use fetch with authentication headers instead of direct link
+      const response = await fetch(`/api/files/${metadata.storageKey}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Download failed' }));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      }
+
+      // Get the file blob
+      const blob = await response.blob();
+
+      // Create a temporary URL for the blob and download it
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = downloadUrl;
+      link.href = url;
       link.download = metadata.originalName || 'download';
-      link.target = '_blank';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
-      showToast(`Downloading ${metadata.originalName}...`, 'success');
+
+      // Clean up the blob URL
+      window.URL.revokeObjectURL(url);
+
+      showToast(`Downloaded ${metadata.originalName}`, 'success');
     } catch (error) {
       console.error('Download error:', error);
-      showToast('Failed to download file', 'error');
+      showToast(`Failed to download file: ${error.message}`, 'error');
     } finally {
       setIsDownloading(false);
     }
