@@ -446,4 +446,112 @@ router.post("/mongodb/revert-to-sqlite", authenticateToken, requireAdmin, async 
   }
 });
 
+// Storage settings endpoints
+
+// Get current storage settings
+router.get("/storage", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const fileStorage = new FileStorageService();
+    const config = fileStorage.getStorageConfig();
+
+    res.json({
+      success: true,
+      settings: {
+        storageType: config.storageType,
+        s3BucketName: config.s3BucketName,
+        s3Region: config.s3Region,
+        // Hide sensitive credentials
+        awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID ? '***hidden***' : null,
+        awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ? '***hidden***' : null,
+        embeddedStoragePath: config.embeddedStoragePath
+      }
+    });
+  } catch (error) {
+    console.error("Failed to get storage settings:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to get storage settings"
+    });
+  }
+});
+
+// Update storage settings
+router.put("/storage", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { error, value } = storageSettingsSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.details[0].message
+      });
+    }
+
+    const fileStorage = new FileStorageService();
+    await fileStorage.updateStorageConfig(value);
+
+    res.json({
+      success: true,
+      message: "Storage settings updated successfully"
+    });
+  } catch (error) {
+    console.error("Failed to update storage settings:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to update storage settings"
+    });
+  }
+});
+
+// Test storage connection
+router.post("/storage/test", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { error, value } = storageSettingsSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.details[0].message
+      });
+    }
+
+    // Create a temporary storage instance with test configuration
+    const testStorage = new FileStorageService();
+    await testStorage.updateStorageConfig(value);
+
+    const result = await testStorage.testConnection();
+
+    res.json(result);
+  } catch (error) {
+    console.error("Failed to test storage connection:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to test storage connection"
+    });
+  }
+});
+
+// Get storage status
+router.get("/storage/status", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const fileStorage = new FileStorageService();
+    const config = fileStorage.getStorageConfig();
+    const testResult = await fileStorage.testConnection();
+
+    res.json({
+      success: true,
+      status: {
+        ...config,
+        connectionTest: testResult,
+        isConfigured: config.storageType === 'embedded' ||
+          (config.storageType === 's3' && config.s3BucketName && process.env.AWS_ACCESS_KEY_ID)
+      }
+    });
+  } catch (error) {
+    console.error("Failed to get storage status:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to get storage status"
+    });
+  }
+});
+
 module.exports = router;
