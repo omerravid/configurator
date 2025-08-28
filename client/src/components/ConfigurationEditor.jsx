@@ -549,67 +549,6 @@ const ConfigurationEditor = ({
     }
   };
 
-  const buildFolderStructure = async (jsonFiles) => {
-    const structure = {};
-    const errors = [];
-
-    for (const file of jsonFiles) {
-      try {
-        const fileContent = await readFileAsText(file);
-        const jsonContent = JSON.parse(fileContent);
-
-        // Get the relative path from the file's webkitRelativePath
-        const pathParts = file.webkitRelativePath.split('/');
-
-        // Remove the first part (root folder name) to start from the content
-        const relativeParts = pathParts.slice(1);
-
-        // Skip if no relative parts (shouldn't happen with webkitdirectory)
-        if (relativeParts.length === 0) {
-          continue;
-        }
-
-        // Build nested structure
-        let currentLevel = structure;
-
-        // Process folders
-        for (let i = 0; i < relativeParts.length - 1; i++) {
-          const folderName = relativeParts[i];
-          if (!currentLevel[folderName]) {
-            currentLevel[folderName] = {};
-          }
-          currentLevel = currentLevel[folderName];
-        }
-
-        // Add the file (remove .json extension from name)
-        const fileName = relativeParts[relativeParts.length - 1];
-        const fileNameWithoutExt = fileName.replace(/\.json$/i, '');
-
-        // Validate that the file name is not empty after removing extension
-        if (!fileNameWithoutExt) {
-          errors.push({ file: file.name, error: 'Invalid filename' });
-          continue;
-        }
-
-        currentLevel[fileNameWithoutExt] = jsonContent;
-
-      } catch (error) {
-        errors.push({ file: file.name, error: error.message });
-        console.warn(`Failed to parse ${file.name}:`, error);
-      }
-    }
-
-    return { structure, errors };
-  };
-
-  const readFileAsText = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result);
-      reader.onerror = reject;
-      reader.readAsText(file);
-    });
-  };
 
   const isEmptyComponent = () => {
     // Allow import for creating components or editing existing COMPONENT type configurations
