@@ -10,7 +10,8 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 50 * 1024 * 1024, // 50MB max file size
-    files: 100 // Max 100 files per request
+    files: 1000, // Max 1000 files per request (increased from 100)
+    fieldSize: 10 * 1024 * 1024 // 10MB field size limit
   },
   fileFilter: (req, file, cb) => {
     // Accept all file types for now
