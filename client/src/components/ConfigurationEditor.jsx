@@ -456,19 +456,29 @@ const ConfigurationEditor = ({
       // Expected folder structure example:
       // MyComponent/
       //   ├── config.json
+      //   ├── icon.png
       //   ├── settings/
       //   │   ├── database.json
-      //   │   └── logging.json
+      //   │   └── logo.svg
       //   └── features/
       //       ├── auth.json
-      //       └── payment.json
-      // Results in: { "config": {...}, "settings": { "database": {...}, "logging": {...} }, "features": { "auth": {...}, "payment": {...} } }
+      //       └── payment.pdf
+      // Results in: {
+      //   "config": {...},
+      //   "icon": { _type: "file", _link: "...", _metadata: {...} },
+      //   "settings": {
+      //     "database": {...},
+      //     "logo": { _type: "file", _link: "...", _metadata: {...} }
+      //   },
+      //   "features": { "auth": {...}, "payment": { _type: "file", _link: "...", _metadata: {...} } }
+      // }
 
       const dirInput = document.createElement('input');
       dirInput.type = 'file';
       dirInput.webkitdirectory = true;
       dirInput.multiple = true;
-      dirInput.accept = '.json';
+      // Accept all file types now (not just JSON)
+      dirInput.accept = '*/*';
 
       const files = await new Promise((resolve, reject) => {
         dirInput.onchange = (e) => resolve(Array.from(e.target.files));
@@ -481,24 +491,35 @@ const ConfigurationEditor = ({
         return;
       }
 
-      // Filter for JSON files only
-      const jsonFiles = files.filter(file => file.name.toLowerCase().endsWith('.json'));
+      // Get root folder name from the first file
+      const rootFolderName = files[0].webkitRelativePath.split('/')[0];
 
-      if (jsonFiles.length === 0) {
-        showToast('No JSON files found in the selected folder.', 'error');
-        setIsImporting(false);
-        return;
+      // Use the new folder import API
+      const formData = new FormData();
+      formData.append('folderName', rootFolderName);
+
+      // Add all files to form data with their relative paths as original names
+      files.forEach(file => {
+        // Set the originalname to the relative path for proper folder structure
+        const fileWithPath = new File([file], file.webkitRelativePath, {
+          type: file.type,
+          lastModified: file.lastModified
+        });
+        formData.append('files', fileWithPath);
+      });
+
+      // Send to new folder import endpoint
+      const response = await configAPI.importFolder(formData);
+
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'Import failed');
       }
 
-      // Get root folder name from the first file
-      const rootFolderName = jsonFiles[0].webkitRelativePath.split('/')[0];
-
-      // Build folder structure
-      const { structure, errors } = await buildFolderStructure(jsonFiles);
+      const { data: structure, stats } = response.data;
 
       // Check if we have any valid data
-      if (Object.keys(structure).length === 0) {
-        showToast('No valid JSON files could be imported.', 'error');
+      if (!structure || Object.keys(structure).length === 0) {
+        showToast('No valid files could be imported.', 'error');
         setIsImporting(false);
         return;
       }
@@ -510,14 +531,14 @@ const ConfigurationEditor = ({
         data: JSON.stringify(structure, null, 2)
       }));
 
-      let message = `Successfully imported ${jsonFiles.length - errors.length} JSON files`;
-      if (errors.length > 0) {
-        message += ` (${errors.length} files had errors)`;
+      let message = `Successfully imported ${stats.totalFiles} files (${stats.jsonFiles} JSON, ${stats.binaryFiles} binary)`;
+      if (stats.errors > 0) {
+        message += ` (${stats.errors} files had errors)`;
       }
-      showToast(message, errors.length > 0 ? 'warning' : 'success');
+      showToast(message, stats.errors > 0 ? 'warning' : 'success');
 
-      if (errors.length > 0) {
-        console.warn('Import errors:', errors);
+      if (stats.errors > 0) {
+        console.warn('Import errors:', stats.errorDetails);
       }
 
     } catch (error) {
