@@ -180,8 +180,12 @@ class FileStorageService {
    * Generate embedded storage download URL
    */
   generateEmbeddedDownloadUrl(fileMetadata) {
-    // Use relative URL to avoid CORS issues and port mismatches
-    return `/api/files/${fileMetadata.storageKey}`;
+    // For deployed environments, use the actual server URL
+    const baseUrl = process.env.SERVER_BASE_URL ||
+                   process.env.FLY_APP_NAME ?
+                   `https://${process.env.FLY_APP_NAME}.fly.dev` :
+                   'https://4c7d7582c7b445d6ac2dadf6cdd558ad-c2353b8c6b2e4daeb0ef650da.fly.dev';
+    return `${baseUrl}/api/files/${fileMetadata.storageKey}`;
   }
 
   /**
