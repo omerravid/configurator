@@ -672,6 +672,59 @@ class ConfigurationService {
 
     return expandedData;
   }
+
+  /**
+   * Fix file URLs recursively in configuration data
+   * Replace localhost URLs with proper deployed URLs
+   * @param {Object} data - Configuration data to process
+   * @returns {Object} Data with corrected file URLs
+   */
+  static async fixFileUrls(data) {
+    if (!data || typeof data !== 'object') {
+      return data;
+    }
+
+    const fileStorage = new FileStorageService();
+
+    // Clone the data to avoid modifying the original
+    const result = cloneDeep(data);
+
+    // Recursive function to process objects and arrays
+    const processValue = async (value) => {
+      if (Array.isArray(value)) {
+        // Process each element in array
+        return Promise.all(value.map(processValue));
+      } else if (value && typeof value === 'object') {
+        // Check if this is a file object
+        if (value._type === 'file' && value._metadata && value._metadata.storageKey) {
+          // This is a file object - regenerate the download URL
+          try {
+            const newDownloadUrl = await fileStorage.generateDownloadUrl(value._metadata);
+            return {
+              ...value,
+              _link: newDownloadUrl
+            };
+          } catch (error) {
+            console.warn(`Failed to regenerate URL for file ${value._metadata.storageKey}:`, error.message);
+            // Return the original value if URL generation fails
+            return value;
+          }
+        } else {
+          // Regular object - process all properties
+          const processedObj = {};
+          for (const [key, val] of Object.entries(value)) {
+            processedObj[key] = await processValue(val);
+          }
+          return processedObj;
+        }
+      }
+
+      // Primitive value - return as is
+      return value;
+    };
+
+    return await processValue(result);
+  }
 }
 
 module.exports = ConfigurationService;
