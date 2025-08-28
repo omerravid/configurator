@@ -377,11 +377,14 @@ router.get("/:id/data", authenticateToken, async (req, res) => {
         !isMinimal, // Include provenance only if not minimal
       );
 
+      // Fix file URLs in resolved data
+      const fixedResolved = await ConfigurationService.fixFileUrls(result.resolved);
+
       if (isMinimal) {
         // Return just the resolved data with no metadata
-        return res.json(result.resolved);
+        return res.json(fixedResolved);
       } else {
-        return res.json({ data: result.resolved, metadata: result.metadata });
+        return res.json({ data: fixedResolved, metadata: result.metadata });
       }
     }
 
@@ -391,11 +394,14 @@ router.get("/:id/data", authenticateToken, async (req, res) => {
       isMinimal
     );
 
+    // Fix file URLs in path result
+    const fixedResult = await ConfigurationService.fixFileUrls(result);
+
     if (isMinimal) {
       // Return just the value (already minimal from service)
-      res.json(result);
+      res.json(fixedResult);
     } else {
-      res.json({ data: result });
+      res.json({ data: fixedResult });
     }
   } catch (error) {
     console.error("Get configuration path error:", error);
