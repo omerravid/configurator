@@ -170,7 +170,7 @@ const FileManagementPanel = ({
       <div className="flex items-center space-x-2">
         <button
           onClick={handleDownload}
-          disabled={isDownloading || !downloadUrl}
+          disabled={isDownloading || !canDownload}
           className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <ArrowDownTrayIcon className="w-4 h-4" />
