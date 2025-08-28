@@ -130,6 +130,15 @@ const ScalarPropertiesPanel = ({
         return false;
       }
 
+      // If it's a file object, don't show it as a scalar property
+      // (it will be shown in the File Management section instead)
+      if (actualValue &&
+          typeof actualValue === "object" &&
+          actualValue._type === "file" &&
+          actualValue._link) {
+        return false;
+      }
+
       return (
         actualValue === null ||
         actualValue === undefined ||
