@@ -181,7 +181,7 @@ class FileStorageService {
    */
   generateEmbeddedDownloadUrl(fileMetadata) {
     // This will be handled by a dedicated endpoint in the API
-    const baseUrl = process.env.SERVER_BASE_URL || 'http://localhost:3001';
+    const baseUrl = process.env.SERVER_BASE_URL || 'http://localhost:3002';
     return `${baseUrl}/api/files/${fileMetadata.storageKey}`;
   }
 
