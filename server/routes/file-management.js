@@ -99,12 +99,14 @@ router.post("/replace", authenticateToken, upload.single('file'), async (req, re
     };
 
     // Update the configuration with the new file object
+    // For nested paths, we need to build the proper nested structure
+    const dataUpdate = {};
+    setValueAtPath(dataUpdate, propertyPath, newFileObject);
+
     await ConfigurationService.updateConfiguration(
-      configId, 
-      { 
-        data: { 
-          [propertyPath]: newFileObject 
-        } 
+      configId,
+      {
+        data: dataUpdate
       },
       "system" // Use system as updater for file replacements
     );
