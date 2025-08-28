@@ -140,6 +140,17 @@ const ScalarPropertiesPanel = ({
     });
   };
 
+  // Detect if the selected item is a file object
+  const isFileObject = () => {
+    if (!selectedValue || typeof selectedValue !== "object") return false;
+    const { actualValue } = getActualValueAndSource(selectedValue);
+
+    return actualValue &&
+           typeof actualValue === "object" &&
+           actualValue._type === "file" &&
+           actualValue._link;
+  };
+
   // Detect if the selected item is a component reference
   const isComponentReference = () => {
     if (!selectedValue || typeof selectedValue !== "object") return false;
