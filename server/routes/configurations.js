@@ -224,8 +224,11 @@ router.get("/:id", authenticateToken, async (req, res) => {
         return res.status(404).json({ error: "Configuration not found" });
       }
 
+      // Fix file URLs in raw data
+      const fixedData = await ConfigurationService.fixFileUrls(config.data);
+
       res.json({
-        resolved: config.data,
+        resolved: fixedData,
         metadata: {
           configId: config.id,
           configName: config.name,
@@ -239,7 +242,14 @@ router.get("/:id", authenticateToken, async (req, res) => {
         req.params.id,
         includeProvenance,
       );
-      res.json(result);
+
+      // Fix file URLs in resolved data
+      const fixedResult = {
+        ...result,
+        resolved: await ConfigurationService.fixFileUrls(result.resolved)
+      };
+
+      res.json(fixedResult);
     }
   } catch (error) {
     console.error("Get configuration error:", error);
