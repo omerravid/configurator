@@ -172,6 +172,13 @@ const TreeNode = ({
   const [hdrLoading, setHdrLoading] = useState(false);
   const [hdrVisible, setHdrVisible] = useState(false);
 
+  // Reset inline file preview when node identity changes
+  React.useEffect(() => {
+    setHdrPreview(null);
+    setHdrVisible(false);
+    setHdrLoading(false);
+  }, [path, keyName, value]);
+
   const currentPath = path ? `${path}.${keyName}` : keyName;
 
   // Use global expand state, with default expansion for shallow depths
