@@ -1,0 +1,9 @@
+#P_IMP_OUT_L_P_IMP_IN_L
+#dependOnPlannerPrevCalc
+<lbrL>
+<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
+#P1,BaseCor/BaseWork/BaseImp,0,0,-100,-20,0,0,5,54,-140,LIN,40,ScrewInserter,fcu/tool
+P_IMPLANT_RIGHT_OUT,LIN,-140
+P_IMPLANT_RIGHT_IN,LIN,40
+#P2,BaseCor/BaseWork/BaseImp,0,0,105,-20,0,0,5,54,-140,LIN,40,ScrewInserter,fcu/tool
+#plannerSeed: 139.8332; -71.1934; -169.7652; 78.73; -17.1568; -70.7611; -87.9851
