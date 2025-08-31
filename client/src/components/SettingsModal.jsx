@@ -104,12 +104,22 @@ const SettingsModal = ({ isOpen, onClose }) => {
       const response = await fetch('/api/settings/data/backups', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
       if (data.success) {
         setBackups(data.backups || []);
+      } else {
+        console.warn('Backup loading unsuccessful:', data.error);
+        setBackups([]);
       }
     } catch (error) {
       console.error('Failed to load backups:', error);
+      // Set empty array on error so UI doesn't break
+      setBackups([]);
     }
   };
 
