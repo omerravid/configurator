@@ -175,7 +175,7 @@ async function processFolderImport(files, folderName, fileStorage, relativePaths
       try {
         const fileContent = file.buffer.toString('utf8');
         const jsonContent = JSON.parse(fileContent);
-        const propertyName = fileName.replace(/\.json$/i, '');
+        const propertyName = getSanitizedFileNameWithoutExtension(fileName);
         parent[propertyName] = jsonContent;
         jsonFiles++;
       } catch (parseError) {
@@ -210,7 +210,7 @@ async function processFolderImport(files, folderName, fileStorage, relativePaths
       const parent = ensureFolderPath(structure, folderParts);
 
       // Determine a safe property name for the file inside the parent folder
-      let propertyName = getFileNameWithoutExtension(fileName);
+      let propertyName = getSanitizedFileNameWithoutExtension(fileName);
       if (parent.hasOwnProperty(propertyName)) {
         // Avoid clobbering existing properties (e.g. a JSON with same name)
         let idx = 1;
