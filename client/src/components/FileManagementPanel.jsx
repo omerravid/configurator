@@ -20,6 +20,9 @@ const FileManagementPanel = ({
   const { showToast } = useToast();
   const [isReplacing, setIsReplacing] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showPprmEditor, setShowPprmEditor] = useState(false);
+  const [pprmContent, setPprmContent] = useState('');
+  const [loadingPprm, setLoadingPprm] = useState(false);
 
   const metadata = fileValue._metadata || {};
   // We no longer need the downloadUrl since we're using authenticated fetch
