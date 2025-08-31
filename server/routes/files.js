@@ -1,12 +1,12 @@
 const express = require("express");
-const { authenticateToken } = require("../middleware/auth");
+const { authenticateTokenOrApiKey } = require("../middleware/auth");
 const FileStorageService = require("../services/FileStorageService");
 
 const router = express.Router();
 const fileStorage = new FileStorageService();
 
 // GET /api/files/:storageKey - Serve file from embedded storage
-router.get("/:storageKey", authenticateToken, async (req, res) => {
+router.get("/:storageKey", authenticateTokenOrApiKey, async (req, res) => {
   try {
     const { storageKey } = req.params;
     
