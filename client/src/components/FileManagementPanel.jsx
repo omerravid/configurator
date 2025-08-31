@@ -28,6 +28,11 @@ const FileManagementPanel = ({
   // We no longer need the downloadUrl since we're using authenticated fetch
   const canDownload = metadata.storageKey;
 
+  // Check if this is a PPRM file
+  const isPprmFile = metadata.originalName?.toLowerCase().endsWith('.pprm') ||
+                     metadata.mimeType === 'application/octet-stream' &&
+                     metadata.originalName?.toLowerCase().includes('.pprm');
+
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
