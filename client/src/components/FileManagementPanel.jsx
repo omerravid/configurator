@@ -28,6 +28,7 @@ const FileManagementPanel = ({
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [imagePreviewUrl, setImagePreviewUrl] = useState('');
   const [imageLoadError, setImageLoadError] = useState(false);
+  const [loadingImagePreview, setLoadingImagePreview] = useState(false);
 
   // Cleanup blob URLs when component unmounts
   useEffect(() => {
