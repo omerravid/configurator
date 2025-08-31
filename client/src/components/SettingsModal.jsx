@@ -47,12 +47,21 @@ const SettingsModal = ({ isOpen, onClose }) => {
   }, [isOpen]);
 
   const loadAllStatus = async () => {
-    await Promise.all([
+    // Use Promise.allSettled to ensure all requests complete even if some fail
+    const results = await Promise.allSettled([
       loadDatabaseStatus(),
       loadStorageStatus(),
       loadBackups(),
       loadDataStats()
     ]);
+
+    // Log any rejected promises for debugging
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        const functionNames = ['loadDatabaseStatus', 'loadStorageStatus', 'loadBackups', 'loadDataStats'];
+        console.error(`${functionNames[index]} failed:`, result.reason);
+      }
+    });
   };
 
   const loadDatabaseStatus = async () => {
