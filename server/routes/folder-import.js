@@ -176,6 +176,7 @@ async function processFolderImport(files, folderName, fileStorage, relativePaths
         const fileContent = file.buffer.toString('utf8');
         const jsonContent = JSON.parse(fileContent);
         const propertyName = getSanitizedFileNameWithoutExtension(fileName);
+        console.log(`[JSON DEBUG] Original: "${fileName}", Property: "${propertyName}"`);
         parent[propertyName] = jsonContent;
         jsonFiles++;
       } catch (parseError) {
@@ -211,11 +212,14 @@ async function processFolderImport(files, folderName, fileStorage, relativePaths
 
       // Determine a safe property name for the file inside the parent folder
       let propertyName = getSanitizedFileNameWithoutExtension(fileName);
+      console.log(`[FILENAME DEBUG] Original: "${fileName}", Extension: "${fileExtension}", Property: "${propertyName}"`);
+
       if (parent.hasOwnProperty(propertyName)) {
         // Avoid clobbering existing properties (e.g. a JSON with same name)
         let idx = 1;
         while (parent.hasOwnProperty(`${propertyName}_${idx}`)) idx++;
         propertyName = `${propertyName}_${idx}`;
+        console.log(`[FILENAME DEBUG] Collision detected, using: "${propertyName}"`);
       }
 
       try {
