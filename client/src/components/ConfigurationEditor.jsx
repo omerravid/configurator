@@ -498,14 +498,16 @@ const ConfigurationEditor = ({
       const formData = new FormData();
       formData.append('folderName', rootFolderName);
 
-      // Add all files to form data with their relative paths as original names
+      // Add all files to form data with their relative paths
       files.forEach(file => {
-        // Set the originalname to the relative path for proper folder structure
-        const fileWithPath = new File([file], file.webkitRelativePath, {
+        // Preserve relative path; some browsers drop it from filename in multipart, so send it explicitly too
+        const rel = file.webkitRelativePath || file.name;
+        const fileWithPath = new File([file], rel, {
           type: file.type,
           lastModified: file.lastModified
         });
         formData.append('files', fileWithPath);
+        formData.append('relativePaths', rel);
       });
 
       // Send to new folder import endpoint
