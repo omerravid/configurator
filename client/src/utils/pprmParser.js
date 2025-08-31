@@ -45,12 +45,12 @@ export function parsePprmToJson(pprmContent) {
     } else if (scalarMatch) {
       const [, varName, value] = scalarMatch;
 
-      // For scalar values, create an array with single element at index 0
+      // For scalar values, create an array with single element at index 1 (1-based indexing)
       if (!variables[varName]) {
         variables[varName] = [];
       }
 
-      variables[varName][0] = parseValue(value);
+      variables[varName][1] = parseValue(value);
     }
   }
 
