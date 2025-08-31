@@ -527,7 +527,7 @@ const FileManagementPanel = ({
           <span>{isDownloading ? 'Downloading...' : 'Download'}</span>
         </button>
 
-        {isEditable && isPprmFile && (
+        {isEditable && isPprmFile && isAdmin && (
           <button
             onClick={handleEditPprm}
             disabled={loadingPprm || isDownloading}
