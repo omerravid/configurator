@@ -140,7 +140,7 @@ class BackupRestore {
           if (!existingUser) {
             await User.create({
               username: userData.username,
-              password: userData.password, // Already hashed in backup
+              password: userData.password_hash || userData.password, // Use password_hash if available
               role: userData.role,
               passwordIsHashed: true
             });
