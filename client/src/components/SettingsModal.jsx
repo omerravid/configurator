@@ -128,12 +128,21 @@ const SettingsModal = ({ isOpen, onClose }) => {
       const response = await fetch('/api/settings/data/status', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
       if (data.success) {
         setDataStats(data.stats);
+      } else {
+        console.warn('Data stats loading unsuccessful:', data.error);
+        setDataStats({ users: 0, configurations: 0 });
       }
     } catch (error) {
       console.error('Failed to load data stats:', error);
+      setDataStats({ users: 0, configurations: 0 });
     }
   };
 
