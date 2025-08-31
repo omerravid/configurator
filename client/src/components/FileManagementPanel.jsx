@@ -57,6 +57,7 @@ const FileManagementPanel = ({
 
   // Check if this is an HDR JSON file
   const isHdrFile = (metadata.originalName || '').toLowerCase().endsWith('.hdr');
+  const isTxtFile = (metadata.originalName || '').toLowerCase().endsWith('.txt');
 
   // Generate image preview URL
   const getImagePreviewUrl = () => {
@@ -301,8 +302,8 @@ const FileManagementPanel = ({
         </div>
       </div>
 
-      {/* HDR JSON Preview Section */}
-      {isHdrFile && (
+      {/* HDR/TXT JSON Preview Section */}
+      {(isHdrFile || isTxtFile) && (
         <div className="mt-3">
           <button
             onClick={async () => {
