@@ -579,6 +579,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                   </div>
                   
                   <button
+                    onClick={restoreBackup}
                     disabled={!selectedBackup || backupLoading}
                     className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                   >
