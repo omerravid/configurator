@@ -155,7 +155,10 @@ async function processFolderImport(files, folderName, fileStorage, relativePaths
     try {
       const rp = (relativePaths && relativePaths[idx]) || file.originalname || "";
       const relativePath = rp.replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+/, '/');
-      const pathParts = relativePath.split('/').filter(part => part.length > 0);
+      let pathParts = relativePath.split('/').filter(part => part.length > 0);
+      if (folderName && pathParts.length > 0 && pathParts[0] === folderName) {
+        pathParts.shift();
+      }
 
       if (pathParts.length === 0) {
         errors.push({ file: file.originalname, error: 'Invalid file path' });
@@ -189,7 +192,10 @@ async function processFolderImport(files, folderName, fileStorage, relativePaths
     try {
       const rp = (relativePaths && relativePaths[idx]) || file.originalname || "";
       const relativePath = rp.replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+/, '/');
-      const pathParts = relativePath.split('/').filter(part => part.length > 0);
+      let pathParts = relativePath.split('/').filter(part => part.length > 0);
+      if (folderName && pathParts.length > 0 && pathParts[0] === folderName) {
+        pathParts.shift();
+      }
 
       if (pathParts.length === 0) {
         // Already logged in first pass if invalid
