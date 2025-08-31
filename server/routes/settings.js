@@ -271,6 +271,45 @@ router.post("/data/backup", authenticateToken, requireAdmin, async (req, res) =>
   }
 });
 
+// List available backups
+router.get("/data/backups", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const br = new BackupRestore();
+    const result = await br.listBackups();
+    res.json(result);
+  } catch (error) {
+    console.error("Failed to list backups:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to list backups"
+    });
+  }
+});
+
+// Restore from backup
+router.post("/data/restore", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { backupName } = req.body;
+
+    if (!backupName) {
+      return res.status(400).json({
+        success: false,
+        error: "Backup name is required"
+      });
+    }
+
+    const br = new BackupRestore();
+    const result = await br.restoreFromBackup(backupName);
+    res.json(result);
+  } catch (error) {
+    console.error("Failed to restore from backup:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to restore from backup"
+    });
+  }
+});
+
 // Migrate to embedded MongoDB (SAFEST OPTION)
 router.post("/mongodb/migrate-embedded", authenticateToken, requireAdmin, async (req, res) => {
   try {
