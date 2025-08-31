@@ -103,16 +103,16 @@ When you save, the editor generates a clean PPRM file:
 # Generated on: 2024-01-15T10:30:00.000Z
 
 # Variable: Config.Enabled
-Config.Enabled[0]=true
+Config.Enabled=true
 
 # Variable: Config.Name
-Config.Name[0]="Primary"
-Config.Name[1]="Secondary"
+Config.Name[1]="Primary"
+Config.Name[2]="Secondary"
 
 # Variable: Motor.Speed
-Motor.Speed[0]=100
-Motor.Speed[1]=200
-Motor.Speed[2]=300
+Motor.Speed[1]=100
+Motor.Speed[2]=200
+Motor.Speed[3]=300
 ```
 
 ## Error Handling
