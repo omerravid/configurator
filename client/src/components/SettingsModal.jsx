@@ -60,25 +60,33 @@ const SettingsModal = ({ isOpen, onClose }) => {
       const response = await fetch('/api/settings/mongodb/status', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
-      const data = await response.json();
-      if (data.success) {
-        setDbStatus({
-          type: data.status?.status === 'connected' ? 'mongodb' : 'sqlite',
-          connected: data.status?.status === 'connected',
-          host: data.status?.host || ''
-        });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setDbStatus({
+            type: data.status?.status === 'connected' ? 'mongodb' : 'sqlite',
+            connected: data.status?.status === 'connected',
+            host: data.status?.host || ''
+          });
+        }
       }
-      
+
       // Load MongoDB settings
       const settingsResponse = await fetch('/api/settings/mongodb', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
-      const settingsData = await settingsResponse.json();
-      if (settingsData.success) {
-        setMongoConnectionString(settingsData.settings.connectionString || '');
+
+      if (settingsResponse.ok) {
+        const settingsData = await settingsResponse.json();
+        if (settingsData.success) {
+          setMongoConnectionString(settingsData.settings.connectionString || '');
+        }
       }
     } catch (error) {
       console.error('Failed to load database status:', error);
+      // Set default state on error
+      setDbStatus({ type: 'sqlite', connected: false, host: '' });
     }
   };
 
