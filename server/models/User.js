@@ -2,12 +2,12 @@ const db = require("./database");
 const bcrypt = require("bcryptjs");
 
 class User {
-  static async create({ username, password, role = "USER" }) {
-    const passwordHash = await bcrypt.hash(password, 10);
+  static async create({ username, password, role = "USER", passwordIsHashed = false }) {
+    const passwordHash = passwordIsHashed ? password : await bcrypt.hash(password, 10);
     const id = this.generateId();
 
     await db.query(
-      `INSERT INTO users (id, username, password_hash, role) 
+      `INSERT INTO users (id, username, password_hash, role)
        VALUES (?, ?, ?, ?)`,
       [id, username, passwordHash, role],
     );
