@@ -29,6 +29,9 @@ const FileManagementPanel = ({
   const [imagePreviewUrl, setImagePreviewUrl] = useState('');
   const [imageLoadError, setImageLoadError] = useState(false);
   const [loadingImagePreview, setLoadingImagePreview] = useState(false);
+  const [showHdrPreview, setShowHdrPreview] = useState(false);
+  const [hdrLoading, setHdrLoading] = useState(false);
+  const [hdrContent, setHdrContent] = useState(null);
 
   // Cleanup blob URLs when component unmounts
   useEffect(() => {
@@ -51,6 +54,9 @@ const FileManagementPanel = ({
   // Check if this is an image file
   const isImageFile = metadata.mimeType?.startsWith('image/') ||
                       (metadata.originalName && /\.(jpg|jpeg|png|gif|webp|bmp|svg|tiff|tif)$/i.test(metadata.originalName));
+
+  // Check if this is an HDR JSON file
+  const isHdrFile = (metadata.originalName || '').toLowerCase().endsWith('.hdr');
 
   // Generate image preview URL
   const getImagePreviewUrl = () => {
@@ -294,6 +300,56 @@ const FileManagementPanel = ({
           </div>
         </div>
       </div>
+
+      {/* HDR JSON Preview Section */}
+      {isHdrFile && (
+        <div className="mt-3">
+          <button
+            onClick={async () => {
+              if (showHdrPreview) {
+                setShowHdrPreview(false);
+                return;
+              }
+              setHdrLoading(true);
+              try {
+                const response = await fetch(`/api/files/${metadata.storageKey}`, {
+                  headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                const text = await response.text();
+                try {
+                  const json = JSON.parse(text);
+                  setHdrContent(json);
+                } catch (e) {
+                  setHdrContent({ _previewError: 'Not valid JSON', _raw: text.slice(0, 2000) });
+                }
+                setShowHdrPreview(true);
+              } catch (error) {
+                showToast('Failed to load HDR preview', 'error');
+              } finally {
+                setHdrLoading(false);
+              }
+            }}
+            className="flex items-center space-x-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors"
+          >
+            {showHdrPreview ? (
+              <EyeSlashIcon className="w-4 h-4" />
+            ) : (
+              <EyeIcon className="w-4 h-4" />
+            )}
+            <span>{showHdrPreview ? 'Hide Preview' : (hdrLoading ? 'Loading…' : 'Show Preview')}</span>
+          </button>
+
+          {showHdrPreview && (
+            <div className="mt-3 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-gray-800">
+              <div className="p-3 max-h-96 overflow-auto">
+                <pre className="text-xs text-gray-800 dark:text-gray-100 whitespace-pre-wrap">
+                  {hdrContent == null ? '' : JSON.stringify(hdrContent, null, 2)}
+                </pre>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Image Preview Section */}
       {isImageFile && (
