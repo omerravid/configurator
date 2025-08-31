@@ -145,7 +145,7 @@ async function processFolderImport(files, folderName, fileStorage) {
   // First pass: process JSON files only
   for (const file of files) {
     try {
-      const relativePath = file.originalname;
+      const relativePath = (file.originalname || "").replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+/, '/');
       const pathParts = relativePath.split('/').filter(part => part.length > 0);
 
       if (pathParts.length === 0) {
@@ -177,7 +177,7 @@ async function processFolderImport(files, folderName, fileStorage) {
   // Second pass: process non-JSON (binary) files and attach them into the existing structure
   for (const file of files) {
     try {
-      const relativePath = file.originalname;
+      const relativePath = (file.originalname || "").replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+/, '/');
       const pathParts = relativePath.split('/').filter(part => part.length > 0);
 
       if (pathParts.length === 0) {
