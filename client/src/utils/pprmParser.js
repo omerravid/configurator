@@ -144,9 +144,12 @@ export function validatePprmFormat(pprmContent) {
       continue;
     }
     
-    // Check if line matches expected format
-    if (!line.match(/^[a-zA-Z_][a-zA-Z0-9_]*\[\d+\]=.*$/)) {
-      errors.push(`Line ${lineNumber}: Invalid format. Expected "VarName[Index]=Value", got: "${line}"`);
+    // Check if line matches expected format (array or scalar)
+    const isArrayFormat = line.match(/^[a-zA-Z_][a-zA-Z0-9_.]*\[\d+\]=.*$/);
+    const isScalarFormat = line.match(/^[a-zA-Z_][a-zA-Z0-9_.]*\s*=\s*.*$/);
+
+    if (!isArrayFormat && !isScalarFormat) {
+      errors.push(`Line ${lineNumber}: Invalid format. Expected "VarName[Index]=Value" or "VarName=Value", got: "${line}"`);
     }
   }
   
