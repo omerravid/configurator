@@ -86,7 +86,7 @@ const PprmEditor = ({
       ...jsonData,
       variables: {
         ...jsonData.variables,
-        [newVariableName]: ['']
+        [newVariableName]: [undefined, ''] // Start with undefined at index 0, value at index 1
       }
     };
     
