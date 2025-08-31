@@ -81,11 +81,14 @@ const FileManagementPanel = ({
                      metadata.mimeType === 'application/octet-stream' &&
                      metadata.originalName?.toLowerCase().includes('.pprm');
 
-  // Check if this is an image file (exclude TIFF)
+  // Check if this is an image file (now includes TIFF)
+  const isTiffFile = (
+    /image\/tiff/i.test(metadata.mimeType || '') || /\.(tif|tiff)$/i.test(metadata.originalName || '')
+  );
   const isImageFile = (
-    metadata.mimeType?.startsWith('image/') && !/image\/tiff/i.test(metadata.mimeType)
+    metadata.mimeType?.startsWith('image/')
   ) || (
-    metadata.originalName && /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(metadata.originalName)
+    metadata.originalName && /\.(jpg|jpeg|png|gif|webp|bmp|svg|tif|tiff)$/i.test(metadata.originalName)
   );
 
   // Check if this is an HDR JSON file
