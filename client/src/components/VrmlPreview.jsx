@@ -15,13 +15,9 @@ const VrmlPreview = ({ storageKey, authToken }) => {
       setLoading(true);
       setError(null);
       try {
-        const THREE = await import("https://cdn.skypack.dev/three@0.159.0");
-        const { VRMLLoader } = await import(
-          "https://cdn.skypack.dev/three@0.159.0/examples/jsm/loaders/VRMLLoader.js"
-        );
-        const { OrbitControls } = await import(
-          "https://cdn.skypack.dev/three@0.159.0/examples/jsm/controls/OrbitControls.js"
-        );
+        const THREE = await import('three');
+        const { VRMLLoader } = await import('three/examples/jsm/loaders/VRMLLoader.js');
+        const { OrbitControls } = await import('three/examples/jsm/controls/OrbitControls.js');
 
         if (disposed) return;
 
