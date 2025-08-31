@@ -312,33 +312,44 @@ const FileManagementPanel = ({
 
           {showImagePreview && (
             <div className="mt-3 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-gray-800">
-              {imageLoadError ? (
-                <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+              {loadingImagePreview ? (
+                <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                  <div className="flex flex-col items-center space-y-3">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p className="text-sm">Loading image preview...</p>
+                  </div>
+                </div>
+              ) : imageLoadError ? (
+                <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                   <div className="flex flex-col items-center space-y-2">
                     <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
                     <p className="text-sm">Failed to load image preview</p>
+                    <p className="text-xs text-gray-400">The image may be corrupted or in an unsupported format</p>
                   </div>
                 </div>
-              ) : (
-                <div className="relative">
+              ) : imagePreviewUrl ? (
+                <div className="relative bg-gray-50 dark:bg-gray-700 p-4">
                   <img
                     src={imagePreviewUrl}
                     alt={metadata.originalName || 'Image preview'}
-                    className="max-w-full max-h-96 mx-auto block object-contain"
+                    className="max-w-full max-h-96 mx-auto block object-contain rounded shadow-sm"
                     onError={handleImageLoadError}
-                    onLoad={() => setImageLoadError(false)}
                     style={{
-                      backgroundColor: 'transparent',
                       maxHeight: '24rem'
                     }}
                   />
-                  <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                  <div className="absolute top-6 right-6 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
                     {metadata.originalName}
                   </div>
+                  {metadata.size && (
+                    <div className="absolute bottom-6 left-6 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+                      {formatFileSize(metadata.size)}
+                    </div>
+                  )}
                 </div>
-              )}
+              ) : null}
             </div>
           )}
         </div>
