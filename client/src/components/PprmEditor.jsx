@@ -131,11 +131,18 @@ const PprmEditor = ({
   };
 
   const addValueToVariable = (varName) => {
+    const currentArray = jsonData.variables[varName];
+    const newArray = [...currentArray];
+
+    // Find the next available index (skip undefined values)
+    let nextIndex = newArray.length;
+    newArray[nextIndex] = '';
+
     const newData = {
       ...jsonData,
       variables: {
         ...jsonData.variables,
-        [varName]: [...jsonData.variables[varName], '']
+        [varName]: newArray
       }
     };
     setJsonData(newData);
