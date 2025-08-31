@@ -1,0 +1,7 @@
+#P_SCREW_OUT_P_SCREW_IN
+<lbrR>
+<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
+#P1,BaseCor/BaseWork/BaseScrewSet/BaseScrew,-21.43,3.05,-100,26.5,0,0,3,14,-57,LIN,60,ScrewInserter,fcu/tool
+#P2,BaseCor/BaseWork/BaseScrewSet/BaseScrew,-21.43,3.05,14.0,26.5,0.0,0.0,3,14,-57,LIN,60,ScrewInserter,fcu/tool
+P_SCREW_IN,LIN,120
+#P3,BaseCor/BaseWork,-600,625,0,0,0,0,3,27,0,LIN,120,fcu,fcu

@@ -334,15 +334,22 @@ const sampleProducts = [
   }
 ];
 
-async function initializeSampleData() {
+async function initializeSampleData(force = false) {
   try {
     console.log('Checking if sample data already exists...');
-    
+
     // Check if we already have configurations
     const existingConfigs = await Configuration.findAll();
-    if (existingConfigs && existingConfigs.length > 0) {
+    if (existingConfigs && existingConfigs.length > 0 && !force) {
       console.log('Sample data already exists, skipping initialization');
       return;
+    }
+
+    // Clear existing data if force flag is set
+    if (force && existingConfigs && existingConfigs.length > 0) {
+      console.log('Force flag set - clearing existing configurations...');
+      await Configuration.deleteAll();
+      console.log('Existing configurations cleared');
     }
 
     console.log('Initializing database with sample configurations...');
@@ -552,7 +559,8 @@ module.exports = { initializeSampleData, sampleComponents, sampleVersions, sampl
 
 // Run if called directly
 if (require.main === module) {
-  initializeSampleData()
+  const force = process.env.FORCE_SAMPLE === 'true';
+  initializeSampleData(force)
     .then(() => {
       console.log('Sample data initialization script completed');
       process.exit(0);

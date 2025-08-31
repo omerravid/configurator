@@ -1,0 +1,6 @@
+#standardIKKukaPathPlanner: ARange=90
+#P_SCAN_AP_P_DYNAMIC
+<lbrL>
+<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
+#P1,BaseCor/BaseWork/BaseDynamic,0,0,0,0,0,0,5,55,-144.622143006088,PTP,0.3,detector,fcu/tool
+P_SCAN_OFFSET,PTP,0.3

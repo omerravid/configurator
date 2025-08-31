@@ -1,0 +1,8 @@
+#P_TLB_OUT_P_DET_OUT_L
+<lbrL>
+<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
+P_TLB_OUT,PTP,0.35,fcu
+#P1,BaseCor/BaseWork/BaseTLB,0,200,0,0,-90,90,5,38,-56.7902,PTP,0.35,fcu,fcu
+P_DETECTOR_OUT,PTP,0.35
+#P2,BaseCor/BaseWork/BaseDet,0,0,-400,-180,0,0,5,38,-53.48776,PTP,0.35,fcu,fcu
+#plannerSeed: 28;-12;-53;86;10;-91;154

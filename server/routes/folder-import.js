@@ -175,7 +175,8 @@ async function processFolderImport(files, folderName, fileStorage, relativePaths
       try {
         const fileContent = file.buffer.toString('utf8');
         const jsonContent = JSON.parse(fileContent);
-        const propertyName = fileName.replace(/\.json$/i, '');
+        const propertyName = getSanitizedFileNameWithoutExtension(fileName);
+        console.log(`[JSON DEBUG] Original: "${fileName}", Property: "${propertyName}"`);
         parent[propertyName] = jsonContent;
         jsonFiles++;
       } catch (parseError) {
@@ -210,12 +211,15 @@ async function processFolderImport(files, folderName, fileStorage, relativePaths
       const parent = ensureFolderPath(structure, folderParts);
 
       // Determine a safe property name for the file inside the parent folder
-      let propertyName = getFileNameWithoutExtension(fileName);
+      let propertyName = getSanitizedFileNameWithoutExtension(fileName);
+      console.log(`[FILENAME DEBUG] Original: "${fileName}", Extension: "${fileExtension}", Property: "${propertyName}"`);
+
       if (parent.hasOwnProperty(propertyName)) {
         // Avoid clobbering existing properties (e.g. a JSON with same name)
         let idx = 1;
         while (parent.hasOwnProperty(`${propertyName}_${idx}`)) idx++;
         propertyName = `${propertyName}_${idx}`;
+        console.log(`[FILENAME DEBUG] Collision detected, using: "${propertyName}"`);
       }
 
       try {
@@ -271,6 +275,42 @@ function getFileExtension(filename) {
 function getFileNameWithoutExtension(filename) {
   const lastDotIndex = filename.lastIndexOf('.');
   return lastDotIndex === -1 ? filename : filename.substring(0, lastDotIndex);
+}
+
+/**
+ * Sanitize filename for use as object property
+ * Replaces all periods except the last one (before extension) with underscores
+ * to avoid path handling issues while preserving the extension
+ */
+function sanitizeFilenameForProperty(filename) {
+  console.log(`[SANITIZE] Input: "${filename}"`);
+  const lastDotIndex = filename.lastIndexOf('.');
+
+  if (lastDotIndex === -1) {
+    // No extension, replace all periods with underscores
+    const result = filename.replace(/\./g, '_');
+    console.log(`[SANITIZE] No extension - result: "${result}"`);
+    return result;
+  }
+
+  // Split into name and extension
+  const nameWithoutExt = filename.substring(0, lastDotIndex);
+  const extension = filename.substring(lastDotIndex);
+
+  // Replace periods in the name part only
+  const sanitizedName = nameWithoutExt.replace(/\./g, '_');
+  const result = sanitizedName + extension;
+
+  console.log(`[SANITIZE] Has extension - name: "${nameWithoutExt}", ext: "${extension}", result: "${result}"`);
+  return result;
+}
+
+/**
+ * Get sanitized filename without extension for property names
+ */
+function getSanitizedFileNameWithoutExtension(filename) {
+  const sanitized = sanitizeFilenameForProperty(filename);
+  return getFileNameWithoutExtension(sanitized);
 }
 
 module.exports = router;

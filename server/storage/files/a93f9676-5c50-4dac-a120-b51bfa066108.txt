@@ -1,0 +1,8 @@
+#P_SCAN_AP_P_SCAN_P1
+<lbrB>
+<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
+#P1,BaseCor/BaseWork/BaseScan,0,0,-540,120,0,0,0,0,29.6580810546875,LIN,100,source,fcu/tool
+P_SCAN_AP,LIN,100
+P_SCAN_OBL,LIN,100
+#P2,BaseCor/BaseWork/BaseScan,0,113,-520,120,0,0,0,0,29.6580810546875,LIN,100,source,fcu/tool
+#plannerSeed: 106.8523; 75.3285; 52.6406; 83.9157; 76.2609; 52.863; -66.6318
