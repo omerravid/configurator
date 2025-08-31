@@ -168,6 +168,24 @@ const FileManagementPanel = ({
     }
   };
 
+  const toggleImagePreview = () => {
+    if (showImagePreview) {
+      setShowImagePreview(false);
+      setImagePreviewUrl('');
+      setImageLoadError(false);
+    } else {
+      const previewUrl = getImagePreviewUrl();
+      setImagePreviewUrl(previewUrl);
+      setShowImagePreview(true);
+      setImageLoadError(false);
+    }
+  };
+
+  const handleImageLoadError = () => {
+    setImageLoadError(true);
+    showToast('Failed to load image preview', 'error');
+  };
+
   const formatFileSize = (bytes) => {
     if (!bytes) return '';
     
