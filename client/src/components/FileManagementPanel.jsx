@@ -188,9 +188,11 @@ const FileManagementPanel = ({
       }
       setImagePreviewUrl('');
       setImageLoadError(false);
+      setLoadingImagePreview(false);
     } else {
       setShowImagePreview(true);
       setImageLoadError(false);
+      setLoadingImagePreview(true);
 
       try {
         // Fetch image with authentication
@@ -210,6 +212,8 @@ const FileManagementPanel = ({
       } catch (error) {
         setImageLoadError(true);
         showToast('Failed to load image preview', 'error');
+      } finally {
+        setLoadingImagePreview(false);
       }
     }
   };
