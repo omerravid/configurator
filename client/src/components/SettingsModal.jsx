@@ -95,15 +95,24 @@ const SettingsModal = ({ isOpen, onClose }) => {
       const response = await fetch('/api/settings/storage/status', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
       if (data.success) {
         setStorageStatus({
           type: data.status.storageType,
           configured: data.status.isConfigured
         });
+      } else {
+        console.warn('Storage status loading unsuccessful:', data.error);
+        setStorageStatus({ type: 'embedded', configured: false });
       }
     } catch (error) {
       console.error('Failed to load storage status:', error);
+      setStorageStatus({ type: 'embedded', configured: false });
     }
   };
 
