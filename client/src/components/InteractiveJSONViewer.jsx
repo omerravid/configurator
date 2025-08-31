@@ -366,6 +366,8 @@ const TreeNode = ({
     if (isBinaryFile) {
       const metadata = actualValue._metadata || {};
       const isHdr = (metadata.originalName || '').toLowerCase().endsWith('.hdr');
+      const isTxt = (metadata.originalName || '').toLowerCase().endsWith('.txt');
+      const canPreviewJson = isHdr || isTxt;
 
       const handleToggleHdr = async () => {
         const storageKey = metadata.storageKey;
@@ -409,7 +411,7 @@ const TreeNode = ({
             >
               {metadata.originalName || 'Download File'}
             </a>
-            {isHdr && (
+            {canPreviewJson && (
               <button
                 onClick={(e) => { e.stopPropagation(); handleToggleHdr(); }}
                 className="text-xs px-2 py-0.5 rounded bg-gray-200 hover:bg-gray-300 text-gray-700"
@@ -424,7 +426,7 @@ const TreeNode = ({
             {metadata.mimeType && metadata.size ? ' • ' : ''}
             {metadata.mimeType ? metadata.mimeType.split('/')[1]?.toUpperCase() : ''}
           </div>
-          {isHdr && hdrVisible && (
+          {canPreviewJson && hdrVisible && (
             <div className="mt-1 max-h-64 overflow-auto bg-white border border-gray-200 rounded p-2">
               <pre className="text-xs text-gray-800 whitespace-pre-wrap">
                 {hdrPreview == null ? '' : JSON.stringify(hdrPreview, null, 2)}
