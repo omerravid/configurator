@@ -11,6 +11,7 @@ import {
 import { useToast } from "../context/ToastContext";
 import { configAPI } from "../services/api";
 import PprmEditor from "./PprmEditor";
+import VrmlPreview from "./VrmlPreview";
 
 const FileManagementPanel = ({ 
   fileValue, 
@@ -32,6 +33,7 @@ const FileManagementPanel = ({
   const [showHdrPreview, setShowHdrPreview] = useState(false);
   const [hdrLoading, setHdrLoading] = useState(false);
   const [hdrContent, setHdrContent] = useState(null);
+  const [showVrmlPreview, setShowVrmlPreview] = useState(false);
 
   // Cleanup blob URLs when component unmounts
   useEffect(() => {
@@ -56,6 +58,10 @@ const FileManagementPanel = ({
     setLoadingImagePreview(false);
   }, [fileValue, propertyPath]);
 
+  useEffect(() => {
+    setShowVrmlPreview(false);
+  }, [fileValue, propertyPath]);
+
   const metadata = fileValue._metadata || {};
   // We no longer need the downloadUrl since we're using authenticated fetch
   const canDownload = metadata.storageKey;
@@ -75,6 +81,7 @@ const FileManagementPanel = ({
   // Check if this is an HDR JSON file
   const isHdrFile = (metadata.originalName || '').toLowerCase().endsWith('.hdr');
   const isTxtFile = (metadata.originalName || '').toLowerCase().endsWith('.txt');
+  const isVrmlFile = /\.(vrml|wrl)$/i.test(metadata.originalName || '');
 
   // Generate image preview URL
   const getImagePreviewUrl = () => {
@@ -318,6 +325,28 @@ const FileManagementPanel = ({
           </div>
         </div>
       </div>
+
+      {/* VRML 3D Preview Section */}
+      {isVrmlFile && (
+        <div className="mt-3">
+          <button
+            onClick={() => setShowVrmlPreview(v => !v)}
+            className="flex items-center space-x-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors"
+          >
+            {showVrmlPreview ? (
+              <EyeSlashIcon className="w-4 h-4" />
+            ) : (
+              <EyeIcon className="w-4 h-4" />
+            )}
+            <span>{showVrmlPreview ? 'Hide 3D' : 'Show 3D'}</span>
+          </button>
+          {showVrmlPreview && (
+            <div className="mt-3">
+              <VrmlPreview storageKey={metadata.storageKey} authToken={localStorage.getItem('token')} />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* HDR/TXT JSON Preview Section */}
       {(isHdrFile || isTxtFile) && (
