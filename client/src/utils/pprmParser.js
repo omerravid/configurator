@@ -20,42 +20,57 @@ export function parsePprmToJson(pprmContent) {
       continue;
     }
     
-    // Parse line format: VarName[Index]=Value
-    const match = trimmedLine.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\[(\d+)\]=(.*)$/);
-    if (match) {
-      const [, varName, index, value] = match;
+    // Parse line format: VarName[Index]=Value or VarName=Value
+    const arrayMatch = trimmedLine.match(/^([a-zA-Z_][a-zA-Z0-9_.]*)\[(\d+)\]=(.*)$/);
+    const scalarMatch = trimmedLine.match(/^([a-zA-Z_][a-zA-Z0-9_.]*)\s*=\s*(.*)$/);
+
+    if (arrayMatch) {
+      const [, varName, index, value] = arrayMatch;
       const indexNum = parseInt(index, 10);
-      
+
       // Initialize array if it doesn't exist
       if (!variables[varName]) {
         variables[varName] = [];
       }
-      
+
       // Extend array if necessary
       while (variables[varName].length <= indexNum) {
         variables[varName].push('');
       }
-      
+
       // Parse value - try to detect numbers, booleans, etc.
-      let parsedValue = value;
-      
-      // Remove quotes if present
-      if ((value.startsWith('"') && value.endsWith('"')) || 
-          (value.startsWith("'") && value.endsWith("'"))) {
-        parsedValue = value.slice(1, -1);
-      } else {
-        // Try to parse as number
-        const numValue = parseFloat(value);
-        if (!isNaN(numValue) && isFinite(numValue)) {
-          parsedValue = numValue;
-        } else if (value.toLowerCase() === 'true') {
-          parsedValue = true;
-        } else if (value.toLowerCase() === 'false') {
-          parsedValue = false;
-        }
-      }
-      
+      let parsedValue = parseValue(value);
+
       variables[varName][indexNum] = parsedValue;
+    } else if (scalarMatch) {
+      const [, varName, value] = scalarMatch;
+
+      // For scalar values, create an array with single element at index 0
+      if (!variables[varName]) {
+        variables[varName] = [];
+      }
+
+      variables[varName][0] = parseValue(value);
+    }
+  }
+
+  // Helper function to parse values
+  function parseValue(value) {
+    // Remove quotes if present
+    if ((value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))) {
+      return value.slice(1, -1);
+    } else {
+      // Try to parse as number
+      const numValue = parseFloat(value);
+      if (!isNaN(numValue) && isFinite(numValue)) {
+        return numValue;
+      } else if (value.toLowerCase() === 'true') {
+        return true;
+      } else if (value.toLowerCase() === 'false') {
+        return false;
+      }
+      return value;
     }
   }
   
