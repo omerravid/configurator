@@ -5,260 +5,127 @@ import {
   ExclamationCircleIcon,
   ArrowPathIcon,
   ServerIcon,
-  WifiIcon
+  CloudIcon,
+  ShieldCheckIcon,
+  ClockIcon,
+  DocumentArrowUpIcon,
+  DocumentArrowDownIcon,
+  CogIcon,
+  WifiIcon,
+  WifiSlashIcon
 } from "@heroicons/react/24/outline";
 import { useToast } from "../context/ToastContext";
-import { configAPI } from "../services/api";
 
 const SettingsModal = ({ isOpen, onClose }) => {
   const { showToast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [connectionString, setConnectionString] = useState('');
-  const [mongoStatus, setMongoStatus] = useState(null);
-  const [testResult, setTestResult] = useState(null);
-  const [migrationStatus, setMigrationStatus] = useState(null);
-  const [isMigrating, setIsMigrating] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(false);
+  
+  // Database state
+  const [dbStatus, setDbStatus] = useState({ type: 'unknown', connected: false, host: '' });
+  const [mongoConnectionString, setMongoConnectionString] = useState('');
+  const [dbLoading, setDbLoading] = useState(false);
+  
+  // Storage state
+  const [storageStatus, setStorageStatus] = useState({ type: 'embedded', configured: false });
+  const [s3Config, setS3Config] = useState({
+    bucketName: '',
+    region: 'us-east-1',
+    accessKeyId: '',
+    secretAccessKey: ''
+  });
+  const [storageLoading, setStorageLoading] = useState(false);
+  
+  // Backup state
+  const [backups, setBackups] = useState([]);
+  const [selectedBackup, setSelectedBackup] = useState('');
+  const [backupLoading, setBackupLoading] = useState(false);
+  const [dataStats, setDataStats] = useState({ users: 0, configurations: 0 });
 
   useEffect(() => {
     if (isOpen) {
-      loadMongoSettings();
-      loadMongoStatus();
+      loadAllStatus();
     }
   }, [isOpen]);
 
-  const loadMongoSettings = async () => {
-    try {
-      const response = await fetch('/api/settings/mongodb', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setConnectionString(data.settings.connectionString);
-          setMongoStatus(data.status);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to load MongoDB settings:', error);
-    }
+  const loadAllStatus = async () => {
+    await Promise.all([
+      loadDatabaseStatus(),
+      loadStorageStatus(),
+      loadBackups(),
+      loadDataStats()
+    ]);
   };
 
-  const loadMongoStatus = async () => {
+  const loadDatabaseStatus = async () => {
     try {
       const response = await fetch('/api/settings/mongodb/status', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
-      
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setMongoStatus(data.status);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to load MongoDB status:', error);
-    }
-  };
-
-  const testConnection = async () => {
-    if (!connectionString.trim()) {
-      showToast('Please enter a connection string', 'error');
-      return;
-    }
-
-    setLoading(true);
-    setTestResult(null);
-
-    try {
-      const response = await fetch('/api/settings/mongodb/test', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          connectionString: connectionString.trim(),
-          options: {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-          }
-        })
-      });
-
       const data = await response.json();
-      setTestResult(data);
-      
       if (data.success) {
-        showToast('Connection test successful!', 'success');
-      } else {
-        showToast(`Connection test failed: ${data.message}`, 'error');
+        setDbStatus({
+          type: data.status?.status === 'connected' ? 'mongodb' : 'sqlite',
+          connected: data.status?.status === 'connected',
+          host: data.status?.host || ''
+        });
       }
-    } catch (error) {
-      setTestResult({ success: false, message: error.message });
-      showToast('Connection test failed', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const saveSettings = async () => {
-    if (!connectionString.trim()) {
-      showToast('Please enter a connection string', 'error');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const response = await fetch('/api/settings/mongodb', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          connectionString: connectionString.trim(),
-          options: {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-          }
-        })
+      
+      // Load MongoDB settings
+      const settingsResponse = await fetch('/api/settings/mongodb', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        showToast('MongoDB settings saved successfully', 'success');
-      } else {
-        showToast(`Failed to save settings: ${data.error}`, 'error');
+      const settingsData = await settingsResponse.json();
+      if (settingsData.success) {
+        setMongoConnectionString(settingsData.settings.connectionString || '');
       }
     } catch (error) {
-      showToast('Failed to save settings', 'error');
-    } finally {
-      setLoading(false);
+      console.error('Failed to load database status:', error);
     }
   };
 
-  const connectToMongo = async () => {
-    if (!connectionString.trim()) {
-      showToast('Please enter a connection string', 'error');
-      return;
-    }
-
-    setIsConnecting(true);
-
+  const loadStorageStatus = async () => {
     try {
-      const response = await fetch('/api/settings/mongodb/connect', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          connectionString: connectionString.trim(),
-          options: {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-          }
-        })
+      const response = await fetch('/api/settings/storage/status', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
-
       const data = await response.json();
-      
       if (data.success) {
-        setMongoStatus(data.status);
-        showToast('Connected to MongoDB successfully', 'success');
-      } else {
-        showToast(`Failed to connect: ${data.error}`, 'error');
+        setStorageStatus({
+          type: data.status.storageType,
+          configured: data.status.isConfigured
+        });
       }
     } catch (error) {
-      showToast('Failed to connect to MongoDB', 'error');
-    } finally {
-      setIsConnecting(false);
+      console.error('Failed to load storage status:', error);
     }
   };
 
-  const disconnectFromMongo = async () => {
-    setLoading(true);
-
+  const loadBackups = async () => {
     try {
-      const response = await fetch('/api/settings/mongodb/disconnect', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        setMongoStatus(data.status);
-        showToast('Disconnected from MongoDB', 'success');
-      } else {
-        showToast(`Failed to disconnect: ${data.error}`, 'error');
-      }
+      // We'll need to implement this endpoint
+      setBackups([]);
     } catch (error) {
-      showToast('Failed to disconnect from MongoDB', 'error');
-    } finally {
-      setLoading(false);
+      console.error('Failed to load backups:', error);
     }
   };
 
-  const migrateData = async () => {
-    if (!connectionString.trim()) {
-      showToast('Please enter a connection string first', 'error');
-      return;
-    }
-
-    if (!window.confirm('This will migrate all data from SQLite to MongoDB. This operation cannot be undone. Continue?')) {
-      return;
-    }
-
-    setIsMigrating(true);
-    setMigrationStatus(null);
-
+  const loadDataStats = async () => {
     try {
-      const response = await fetch('/api/settings/mongodb/migrate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          connectionString: connectionString.trim()
-        })
+      const response = await fetch('/api/settings/data/status', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
-
       const data = await response.json();
-      setMigrationStatus(data);
-      
       if (data.success) {
-        showToast(`Migration completed! ${data.stats?.users || 0} users and ${data.stats?.configurations || 0} configurations migrated`, 'success');
-      } else {
-        showToast(`Migration failed: ${data.error}`, 'error');
+        setDataStats(data.stats);
       }
     } catch (error) {
-      setMigrationStatus({ success: false, error: error.message });
-      showToast('Migration failed', 'error');
-    } finally {
-      setIsMigrating(false);
+      console.error('Failed to load data stats:', error);
     }
   };
 
-  const migrateToEmbedded = async () => {
-    if (!window.confirm('This will migrate all data from SQLite to embedded MongoDB and switch the system to use MongoDB. This operation creates a backup. Continue?')) {
-      return;
-    }
-
-    setIsMigrating(true);
-    setMigrationStatus(null);
-
+  const switchToEmbeddedMongo = async () => {
+    if (!window.confirm('Switch to embedded MongoDB? This will migrate your data and restart the database.')) return;
+    
+    setDbLoading(true);
     try {
       const response = await fetch('/api/settings/mongodb/migrate-embedded', {
         method: 'POST',
@@ -267,43 +134,58 @@ const SettingsModal = ({ isOpen, onClose }) => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-
       const data = await response.json();
-      setMigrationStatus(data);
-
+      
       if (data.success) {
-        showToast(`Migration to embedded MongoDB completed! ${data.stats?.users || 0} users and ${data.stats?.configurations || 0} configurations migrated. Please restart the server.`, 'success');
+        showToast('Switched to embedded MongoDB successfully', 'success');
+        loadDatabaseStatus();
       } else {
-        showToast(`Migration failed: ${data.error}`, 'error');
+        showToast(`Failed to switch: ${data.error}`, 'error');
       }
     } catch (error) {
-      setMigrationStatus({ success: false, error: error.message });
-      showToast('Migration failed', 'error');
+      showToast('Failed to switch to embedded MongoDB', 'error');
     } finally {
-      setIsMigrating(false);
+      setDbLoading(false);
     }
   };
 
-  const revertToSQLite = async () => {
-    const shouldMigrateData = window.confirm(
-      'Do you want to migrate your MongoDB changes back to SQLite?\n\n' +
-      '• Click "OK" to migrate MongoDB data to SQLite (recommended)\n' +
-      '• Click "Cancel" to revert without migrating (you might lose recent changes)'
-    );
-
-    const confirmRevert = window.confirm(
-      `This will revert the system to use SQLite database.\n\n` +
-      `${shouldMigrateData ? '✅ MongoDB changes WILL be migrated to SQLite' : '⚠️ MongoDB changes will NOT be migrated'}\n\n` +
-      'Continue?'
-    );
-
-    if (!confirmRevert) {
+  const switchToExternalMongo = async () => {
+    if (!mongoConnectionString.trim()) {
+      showToast('Please enter a MongoDB connection string', 'error');
       return;
     }
+    
+    if (!window.confirm('Switch to external MongoDB? This will migrate your data to the new database.')) return;
+    
+    setDbLoading(true);
+    try {
+      const response = await fetch('/api/settings/mongodb/migrate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ connectionString: mongoConnectionString })
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        showToast('Switched to external MongoDB successfully', 'success');
+        loadDatabaseStatus();
+      } else {
+        showToast(`Failed to switch: ${data.error}`, 'error');
+      }
+    } catch (error) {
+      showToast('Failed to switch to external MongoDB', 'error');
+    } finally {
+      setDbLoading(false);
+    }
+  };
 
-    setIsMigrating(true);
-    setMigrationStatus(null);
-
+  const switchToSQLite = async () => {
+    if (!window.confirm('Switch to SQLite? This will migrate your MongoDB data back to SQLite.')) return;
+    
+    setDbLoading(true);
     try {
       const response = await fetch('/api/settings/mongodb/revert-to-sqlite', {
         method: 'POST',
@@ -311,57 +193,126 @@ const SettingsModal = ({ isOpen, onClose }) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({
-          migrateData: shouldMigrateData
-        })
+        body: JSON.stringify({ migrateData: true })
       });
-
       const data = await response.json();
-      setMigrationStatus(data);
-
+      
       if (data.success) {
-        const message = shouldMigrateData
-          ? 'Successfully migrated MongoDB changes to SQLite and reverted to SQLite. Please restart the server.'
-          : 'Successfully reverted to SQLite (no data migration). Please restart the server.';
-        showToast(message, 'success');
+        showToast('Switched to SQLite successfully', 'success');
+        loadDatabaseStatus();
       } else {
-        showToast(`Revert failed: ${data.error}`, 'error');
+        showToast(`Failed to switch: ${data.error}`, 'error');
       }
     } catch (error) {
-      setMigrationStatus({ success: false, error: error.message });
-      showToast('Revert failed', 'error');
+      showToast('Failed to switch to SQLite', 'error');
     } finally {
-      setIsMigrating(false);
+      setDbLoading(false);
+    }
+  };
+
+  const configureS3 = async () => {
+    if (!s3Config.bucketName || !s3Config.accessKeyId || !s3Config.secretAccessKey) {
+      showToast('Please fill in all S3 configuration fields', 'error');
+      return;
+    }
+    
+    setStorageLoading(true);
+    try {
+      const response = await fetch('/api/settings/storage', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          storageType: 's3',
+          s3BucketName: s3Config.bucketName,
+          awsRegion: s3Config.region,
+          awsAccessKeyId: s3Config.accessKeyId,
+          awsSecretAccessKey: s3Config.secretAccessKey
+        })
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        showToast('S3 storage configured successfully', 'success');
+        loadStorageStatus();
+      } else {
+        showToast(`Failed to configure S3: ${data.error}`, 'error');
+      }
+    } catch (error) {
+      showToast('Failed to configure S3 storage', 'error');
+    } finally {
+      setStorageLoading(false);
+    }
+  };
+
+  const switchToEmbeddedStorage = async () => {
+    if (!window.confirm('Switch to embedded storage? Files will be stored locally on the server.')) return;
+    
+    setStorageLoading(true);
+    try {
+      const response = await fetch('/api/settings/storage', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ storageType: 'embedded' })
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        showToast('Switched to embedded storage successfully', 'success');
+        loadStorageStatus();
+      } else {
+        showToast(`Failed to switch: ${data.error}`, 'error');
+      }
+    } catch (error) {
+      showToast('Failed to switch to embedded storage', 'error');
+    } finally {
+      setStorageLoading(false);
+    }
+  };
+
+  const createBackup = async () => {
+    setBackupLoading(true);
+    try {
+      const response = await fetch('/api/settings/data/backup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ name: `manual-${Date.now()}` })
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        showToast('Backup created successfully', 'success');
+        loadBackups();
+        loadDataStats();
+      } else {
+        showToast(`Failed to create backup: ${data.error}`, 'error');
+      }
+    } catch (error) {
+      showToast('Failed to create backup', 'error');
+    } finally {
+      setBackupLoading(false);
     }
   };
 
   if (!isOpen) return null;
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'connected': return 'text-green-600';
-      case 'connecting': return 'text-yellow-600';
-      case 'disconnecting': return 'text-orange-600';
-      case 'disconnected': return 'text-red-600';
-      default: return 'text-gray-600';
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'connected': return <WifiIcon className="w-5 h-5 text-green-600" />;
-      case 'connecting': return <ArrowPathIcon className="w-5 h-5 text-yellow-600 animate-spin" />;
-      case 'disconnecting': return <ArrowPathIcon className="w-5 h-5 text-orange-600 animate-spin" />;
-      default: return <ServerIcon className="w-5 h-5 text-gray-600" />;
-    }
-  };
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col transition-colors">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col transition-colors">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Database Settings</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center space-x-2">
+            <CogIcon className="w-6 h-6" />
+            <span>System Settings</span>
+          </h2>
           <button
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -371,198 +322,232 @@ const SettingsModal = ({ isOpen, onClose }) => {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-auto p-6 space-y-6">
+        <div className="flex-1 overflow-auto p-6 space-y-8">
           
-          {/* MongoDB Status */}
-          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 transition-colors">
-            <div className="flex items-center space-x-3">
-              {getStatusIcon(mongoStatus?.status)}
+          {/* Database Section */}
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center space-x-2">
+                <ServerIcon className="w-5 h-5" />
+                <span>Database</span>
+              </h3>
+              <div className="flex items-center space-x-2">
+                {dbStatus.connected ? (
+                  <WifiIcon className="w-5 h-5 text-green-500" />
+                ) : (
+                  <WifiSlashIcon className="w-5 h-5 text-gray-400" />
+                )}
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                  {dbStatus.type === 'mongodb' ? 'MongoDB' : 'SQLite'}
+                  {dbStatus.host && ` • ${dbStatus.host}`}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* MongoDB Connection Input */}
               <div>
-                <h3 className="font-medium text-gray-900 dark:text-gray-100">MongoDB Status</h3>
-                <p className={`text-sm ${getStatusColor(mongoStatus?.status)}`}>
-                  {mongoStatus?.status ? mongoStatus.status.charAt(0).toUpperCase() + mongoStatus.status.slice(1) : 'Unknown'}
-                  {mongoStatus?.host && ` - ${mongoStatus.host}/${mongoStatus.name}`}
-                </p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                  MongoDB Connection String
+                </label>
+                <input
+                  type="text"
+                  value={mongoConnectionString}
+                  onChange={(e) => setMongoConnectionString(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+                  placeholder="mongodb://localhost:27017/config_manager"
+                />
+              </div>
+
+              {/* Database Switch Buttons */}
+              <div className="flex space-x-3">
+                <button
+                  onClick={switchToEmbeddedMongo}
+                  disabled={dbLoading || dbStatus.type === 'mongodb'}
+                  className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                  {dbLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <ServerIcon className="w-4 h-4" />}
+                  <span>Embedded MongoDB</span>
+                </button>
+                
+                <button
+                  onClick={switchToExternalMongo}
+                  disabled={dbLoading || !mongoConnectionString.trim()}
+                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                  {dbLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <CloudIcon className="w-4 h-4" />}
+                  <span>External MongoDB</span>
+                </button>
+                
+                <button
+                  onClick={switchToSQLite}
+                  disabled={dbLoading || dbStatus.type === 'sqlite'}
+                  className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                  {dbLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <ServerIcon className="w-4 h-4" />}
+                  <span>SQLite</span>
+                </button>
               </div>
             </div>
           </div>
 
-          {/* Connection String Input */}
-          <div>
-            <label htmlFor="connectionString" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-              MongoDB Connection String
-            </label>
-            <input
-              type="text"
-              id="connectionString"
-              value={connectionString}
-              onChange={(e) => setConnectionString(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors"
-              placeholder="mongodb://localhost:27017/config_manager"
-            />
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Example: mongodb://username:password@localhost:27017/config_manager
-            </p>
-          </div>
-
-          {/* Test Result */}
-          {testResult && (
-            <div className={`rounded-lg p-4 transition-colors ${testResult.success ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'}`}>
-              <div className="flex items-start space-x-3">
-                {testResult.success ? (
-                  <CheckCircleIcon className="w-5 h-5 text-green-600 mt-0.5" />
+          {/* Storage Section */}
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center space-x-2">
+                <CloudIcon className="w-5 h-5" />
+                <span>File Storage</span>
+              </h3>
+              <div className="flex items-center space-x-2">
+                {storageStatus.configured ? (
+                  <CheckCircleIcon className="w-5 h-5 text-green-500" />
                 ) : (
-                  <ExclamationCircleIcon className="w-5 h-5 text-red-600 mt-0.5" />
+                  <ExclamationCircleIcon className="w-5 h-5 text-yellow-500" />
                 )}
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                  {storageStatus.type === 's3' ? 'Amazon S3' : 'Embedded Storage'}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* S3 Configuration */}
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h4 className={`font-medium ${testResult.success ? 'text-green-900 dark:text-green-200' : 'text-red-900 dark:text-red-200'}`}>
-                    Connection Test {testResult.success ? 'Successful' : 'Failed'}
-                  </h4>
-                  <p className={`text-sm mt-1 ${testResult.success ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
-                    {testResult.message}
-                  </p>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                    S3 Bucket Name
+                  </label>
+                  <input
+                    type="text"
+                    value={s3Config.bucketName}
+                    onChange={(e) => setS3Config({...s3Config, bucketName: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+                    placeholder="my-bucket"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                    AWS Region
+                  </label>
+                  <select
+                    value={s3Config.region}
+                    onChange={(e) => setS3Config({...s3Config, region: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+                  >
+                    <option value="us-east-1">us-east-1</option>
+                    <option value="us-west-2">us-west-2</option>
+                    <option value="eu-west-1">eu-west-1</option>
+                    <option value="eu-central-1">eu-central-1</option>
+                    <option value="ap-southeast-1">ap-southeast-1</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                    AWS Access Key ID
+                  </label>
+                  <input
+                    type="text"
+                    value={s3Config.accessKeyId}
+                    onChange={(e) => setS3Config({...s3Config, accessKeyId: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+                    placeholder="AKIA..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                    AWS Secret Access Key
+                  </label>
+                  <input
+                    type="password"
+                    value={s3Config.secretAccessKey}
+                    onChange={(e) => setS3Config({...s3Config, secretAccessKey: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+                    placeholder="••••••••"
+                  />
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* Migration Status */}
-          {migrationStatus && (
-            <div className={`rounded-lg p-4 transition-colors ${migrationStatus.success ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'}`}>
-              <div className="flex items-start space-x-3">
-                {migrationStatus.success ? (
-                  <CheckCircleIcon className="w-5 h-5 text-green-600 mt-0.5" />
-                ) : (
-                  <ExclamationCircleIcon className="w-5 h-5 text-red-600 mt-0.5" />
-                )}
-                <div>
-                  <h4 className={`font-medium ${migrationStatus.success ? 'text-green-900 dark:text-green-200' : 'text-red-900 dark:text-red-200'}`}>
-                    Migration {migrationStatus.success ? 'Successful' : 'Failed'}
-                  </h4>
-                  <p className={`text-sm mt-1 ${migrationStatus.success ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
-                    {migrationStatus.message}
-                    {migrationStatus.stats && (
-                      ` - ${migrationStatus.stats.users} users and ${migrationStatus.stats.configurations} configurations migrated`
-                    )}
-                  </p>
+              {/* Storage Switch Buttons */}
+              <div className="flex space-x-3">
+                <button
+                  onClick={configureS3}
+                  disabled={storageLoading}
+                  className="flex-1 px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                  {storageLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <CloudIcon className="w-4 h-4" />}
+                  <span>Configure S3</span>
+                </button>
+                
+                <button
+                  onClick={switchToEmbeddedStorage}
+                  disabled={storageLoading}
+                  className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                  {storageLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <ServerIcon className="w-4 h-4" />}
+                  <span>Use Embedded Storage</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Backup & Restore Section */}
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center space-x-2">
+                <ShieldCheckIcon className="w-5 h-5" />
+                <span>Backup & Restore</span>
+              </h3>
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                {dataStats.users} users • {dataStats.configurations} configurations
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Backup Actions */}
+              <div className="flex space-x-3">
+                <button
+                  onClick={createBackup}
+                  disabled={backupLoading}
+                  className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                  {backupLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <DocumentArrowUpIcon className="w-4 h-4" />}
+                  <span>Create Backup</span>
+                </button>
+              </div>
+
+              {/* Backup Selection & Restore */}
+              {backups.length > 0 && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                      Select Backup to Restore
+                    </label>
+                    <select
+                      value={selectedBackup}
+                      onChange={(e) => setSelectedBackup(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+                    >
+                      <option value="">Choose a backup...</option>
+                      {backups.map(backup => (
+                        <option key={backup.name} value={backup.name}>
+                          {backup.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <button
+                    disabled={!selectedBackup || backupLoading}
+                    className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  >
+                    {backupLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <DocumentArrowDownIcon className="w-4 h-4" />}
+                    <span>Restore from Backup</span>
+                  </button>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Action Buttons */}
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              onClick={testConnection}
-              disabled={loading || !connectionString.trim()}
-              className="btn-secondary flex items-center justify-center space-x-2 disabled:opacity-50"
-            >
-              {loading ? (
-                <ArrowPathIcon className="w-4 h-4 animate-spin" />
-              ) : (
-                <CheckCircleIcon className="w-4 h-4" />
               )}
-              <span>Test Connection</span>
-            </button>
-
-            <button
-              onClick={saveSettings}
-              disabled={loading || !connectionString.trim()}
-              className="btn-primary flex items-center justify-center space-x-2 disabled:opacity-50"
-            >
-              <span>Save Settings</span>
-            </button>
-
-            {mongoStatus?.status === 'connected' ? (
-              <button
-                onClick={disconnectFromMongo}
-                disabled={loading}
-                className="btn-secondary flex items-center justify-center space-x-2 disabled:opacity-50"
-              >
-                <span>Disconnect</span>
-              </button>
-            ) : (
-              <button
-                onClick={connectToMongo}
-                disabled={isConnecting || !connectionString.trim()}
-                className="btn-primary flex items-center justify-center space-x-2 disabled:opacity-50"
-              >
-                {isConnecting ? (
-                  <ArrowPathIcon className="w-4 h-4 animate-spin" />
-                ) : (
-                  <WifiIcon className="w-4 h-4" />
-                )}
-                <span>Connect</span>
-              </button>
-            )}
-
-            <button
-              onClick={migrateData}
-              disabled={isMigrating || !connectionString.trim()}
-              className="bg-orange-600 hover:bg-orange-700 dark:bg-orange-600 dark:hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
-            >
-              {isMigrating ? (
-                <ArrowPathIcon className="w-4 h-4 animate-spin" />
-              ) : (
-                <ArrowPathIcon className="w-4 h-4" />
-              )}
-              <span>Migrate to External MongoDB</span>
-            </button>
-
-            <button
-              onClick={migrateToEmbedded}
-              disabled={isMigrating}
-              className="bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
-            >
-              {isMigrating ? (
-                <ArrowPathIcon className="w-4 h-4 animate-spin" />
-              ) : (
-                <ServerIcon className="w-4 h-4" />
-              )}
-              <span>Migrate to Embedded MongoDB</span>
-            </button>
-
-            <button
-              onClick={revertToSQLite}
-              disabled={isMigrating}
-              className="bg-gray-600 hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50"
-            >
-              {isMigrating ? (
-                <ArrowPathIcon className="w-4 h-4 animate-spin" />
-              ) : (
-                <ExclamationCircleIcon className="w-4 h-4" />
-              )}
-              <span>Revert to SQLite (with Migration)</span>
-            </button>
-          </div>
-
-          {/* Information */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 transition-colors">
-            <h4 className="font-medium text-blue-900 dark:text-blue-200 mb-2">Migration Options</h4>
-            <div className="space-y-3 text-sm text-blue-700 dark:text-blue-300">
-              <div>
-                <strong>Embedded MongoDB (Recommended):</strong>
-                <ul className="ml-4 mt-1 space-y-1">
-                  <li>• Automatic setup - no external MongoDB needed</li>
-                  <li>• Embedded server starts/stops with the application</li>
-                  <li>• Perfect for development and single-server deployments</li>
-                  <li>• Creates automatic backup before migration</li>
-                </ul>
-              </div>
-              <div>
-                <strong>External MongoDB:</strong>
-                <ul className="ml-4 mt-1 space-y-1">
-                  <li>• Connect to your own MongoDB server</li>
-                  <li>• Suitable for production and cluster deployments</li>
-                  <li>• Test connection before migrating</li>
-                  <li>• Existing MongoDB data will be cleared before migration</li>
-                </ul>
-              </div>
-              <div className="pt-2 border-t border-blue-200 dark:border-blue-700">
-                <strong>⚠️ Important:</strong> All migrations create backups for safety
-              </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>
