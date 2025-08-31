@@ -245,7 +245,7 @@ const PprmEditor = ({
                           {varName}
                         </div>
                         <div className="text-sm text-gray-500">
-                          {jsonData.variables[varName].length} values
+                          {jsonData.variables[varName].filter((v, i) => i > 0 && v !== undefined).length} values
                         </div>
                       </div>
                       <button
