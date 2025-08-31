@@ -283,11 +283,14 @@ function getFileNameWithoutExtension(filename) {
  * to avoid path handling issues while preserving the extension
  */
 function sanitizeFilenameForProperty(filename) {
+  console.log(`[SANITIZE] Input: "${filename}"`);
   const lastDotIndex = filename.lastIndexOf('.');
 
   if (lastDotIndex === -1) {
     // No extension, replace all periods with underscores
-    return filename.replace(/\./g, '_');
+    const result = filename.replace(/\./g, '_');
+    console.log(`[SANITIZE] No extension - result: "${result}"`);
+    return result;
   }
 
   // Split into name and extension
@@ -296,8 +299,10 @@ function sanitizeFilenameForProperty(filename) {
 
   // Replace periods in the name part only
   const sanitizedName = nameWithoutExt.replace(/\./g, '_');
+  const result = sanitizedName + extension;
 
-  return sanitizedName + extension;
+  console.log(`[SANITIZE] Has extension - name: "${nameWithoutExt}", ext: "${extension}", result: "${result}"`);
+  return result;
 }
 
 /**
