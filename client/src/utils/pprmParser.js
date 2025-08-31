@@ -190,12 +190,15 @@ export function getPprmStats(jsonData) {
     stats.variableCount = Object.keys(jsonData.variables).length;
     
     for (const [varName, values] of Object.entries(jsonData.variables)) {
-      const valueCount = Array.isArray(values) ? values.length : 0;
+      // Count only non-undefined values excluding index 0
+      const validValues = Array.isArray(values) ?
+        values.filter((v, i) => i > 0 && v !== undefined && v !== null && v !== '') : [];
+      const valueCount = validValues.length;
       stats.totalValues += valueCount;
       stats.variables[varName] = {
         valueCount,
-        dataTypes: Array.isArray(values) ? 
-          [...new Set(values.map(v => typeof v))] : []
+        dataTypes: validValues.length > 0 ?
+          [...new Set(validValues.map(v => typeof v))] : []
       };
     }
   }
