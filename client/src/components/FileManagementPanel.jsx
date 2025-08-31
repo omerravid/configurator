@@ -10,6 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useToast } from "../context/ToastContext";
 import { configAPI } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 import PprmEditor from "./PprmEditor";
 import VrmlPreview from "./VrmlPreview";
 
