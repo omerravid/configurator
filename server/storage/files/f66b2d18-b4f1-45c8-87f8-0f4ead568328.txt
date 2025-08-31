@@ -1,0 +1,13 @@
+#DetSter
+<lbrL>
+<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
+#P8,BaseCor/BaseWork,347.87,529.1,-163.3,1.2,0.03,179.98,5,54,-166,LIN,40,detector,fcu
+#P1,BaseCor/BaseWork,347.87,529.1,183.3,1.2,0.03,179.98,5,54,-166,LIN,40,detector,fcu
+P_SCAN_OBL,LIN,40
+P2,BaseCor/BaseWork,374.68405,630.00008,-39.45937,-89.73206,14.99768,91.03527,5,54,-146.97552,LIN,120,detector,fcu/tool
+P3,BaseCor/BaseWork,400.04571,700.00008,138.62368,13.79167,10.31821,115.07402,5,54,-146.97552,PTP,0.3,detector,fcu/tool
+P5,BaseCor/BaseWork/BaseDet,0,-100.00011,-550,-180,0,0,5,38,-53.48776,PTP,0.3,fcu,fcu
+P_DETECTOR_OUT,LIN,120
+#P6,BaseCor/BaseWork/BaseDet,0.69,-5.39,-400,-179.97,1.0,1.87,5,38,-53.48776,LIN,120,fcu,fcu
+#plannerSeed: 42.4337; -37.9809; -98.8354; 85.3435; 36.5283; -103.5444; 129.5339
+

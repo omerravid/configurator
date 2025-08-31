@@ -1,0 +1,7 @@
+#P_TLB_OUT_P_TLB_IN
+<lbrR>
+<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
+#P1,BaseCor/BaseWork/BaseTLB,6.38,200.0,1.62,63.3,-89.5,26.35,3,31,-65,LIN,60,fcu,fcu
+P_TOOL_OUT,LIN,60
+P_TOOL_IN,LIN,60
+#P2,BaseCor/BaseWork/BaseTLB,6.38,-1.24,1.62,63.3,-89.5,26.35,3,31,-65,LIN,60,fcu,fcu
