@@ -400,6 +400,11 @@ class Configuration {
     return config;
   }
 
+  static async deleteAll() {
+    await ConfigurationModel.deleteMany({});
+    return true;
+  }
+
   static async findByCreatedBy(userId) {
     const configs = await ConfigurationModel.find({ created_by: userId })
       .populate('parent_id', 'name type')
