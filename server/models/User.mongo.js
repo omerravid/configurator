@@ -37,9 +37,9 @@ const userSchema = new mongoose.Schema({
 const UserModel = mongoose.model('User', userSchema);
 
 class User {
-  static async create({ username, password, role = "USER" }) {
-    const passwordHash = await bcrypt.hash(password, 10);
-    
+  static async create({ username, password, role = "USER", passwordIsHashed = false }) {
+    const passwordHash = passwordIsHashed ? password : await bcrypt.hash(password, 10);
+
     const user = new UserModel({
       username,
       password_hash: passwordHash,
