@@ -4,9 +4,11 @@ import {
   ArrowUpTrayIcon,
   DocumentIcon,
   XMarkIcon,
+  PencilIcon,
 } from "@heroicons/react/24/outline";
 import { useToast } from "../context/ToastContext";
 import { configAPI } from "../services/api";
+import PprmEditor from "./PprmEditor";
 
 const FileManagementPanel = ({ 
   fileValue, 
