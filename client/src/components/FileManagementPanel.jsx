@@ -317,15 +317,19 @@ const FileManagementPanel = ({
                   headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
                 });
                 const text = await response.text();
-                try {
-                  const json = JSON.parse(text);
-                  setHdrContent(json);
-                } catch (e) {
-                  setHdrContent({ _previewError: 'Not valid JSON', _raw: text.slice(0, 2000) });
+                if (isTxtFile) {
+                  setHdrContent(text);
+                } else {
+                  try {
+                    const json = JSON.parse(text);
+                    setHdrContent(json);
+                  } catch (e) {
+                    setHdrContent({ _previewError: 'Not valid JSON', _raw: text.slice(0, 2000) });
+                  }
                 }
                 setShowHdrPreview(true);
               } catch (error) {
-                showToast('Failed to load HDR preview', 'error');
+                showToast('Failed to load preview', 'error');
               } finally {
                 setHdrLoading(false);
               }
@@ -344,7 +348,7 @@ const FileManagementPanel = ({
             <div className="mt-3 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-gray-800">
               <div className="p-3 max-h-96 overflow-auto">
                 <pre className="text-xs text-gray-800 dark:text-gray-100 whitespace-pre-wrap">
-                  {hdrContent == null ? '' : JSON.stringify(hdrContent, null, 2)}
+                  {hdrContent == null ? '' : (isTxtFile ? String(hdrContent) : JSON.stringify(hdrContent, null, 2))}
                 </pre>
               </div>
             </div>
