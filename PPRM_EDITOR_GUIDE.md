@@ -62,9 +62,10 @@ The editor automatically detects and preserves value types:
 - **Booleans**: `true`, `false`
 
 #### **Array Indices**
-- Arrays are zero-based: `[0]`, `[1]`, `[2]`, etc.
+- Arrays are one-based: `[1]`, `[2]`, `[3]`, etc. (index 0 does not exist)
 - Missing indices are preserved as empty slots
-- You can have sparse arrays (e.g., values at indices 0, 2, 5 but not 1, 3, 4)
+- You can have sparse arrays (e.g., values at indices 1, 3, 6 but not 2, 4, 5)
+- Empty values are automatically excluded when saving
 
 ### 4. Saving Changes
 
