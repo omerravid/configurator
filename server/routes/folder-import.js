@@ -273,4 +273,35 @@ function getFileNameWithoutExtension(filename) {
   return lastDotIndex === -1 ? filename : filename.substring(0, lastDotIndex);
 }
 
+/**
+ * Sanitize filename for use as object property
+ * Replaces all periods except the last one (before extension) with underscores
+ * to avoid path handling issues while preserving the extension
+ */
+function sanitizeFilenameForProperty(filename) {
+  const lastDotIndex = filename.lastIndexOf('.');
+
+  if (lastDotIndex === -1) {
+    // No extension, replace all periods with underscores
+    return filename.replace(/\./g, '_');
+  }
+
+  // Split into name and extension
+  const nameWithoutExt = filename.substring(0, lastDotIndex);
+  const extension = filename.substring(lastDotIndex);
+
+  // Replace periods in the name part only
+  const sanitizedName = nameWithoutExt.replace(/\./g, '_');
+
+  return sanitizedName + extension;
+}
+
+/**
+ * Get sanitized filename without extension for property names
+ */
+function getSanitizedFileNameWithoutExtension(filename) {
+  const sanitized = sanitizeFilenameForProperty(filename);
+  return getFileNameWithoutExtension(sanitized);
+}
+
 module.exports = router;
