@@ -1,0 +1,46 @@
+#VRML V2.0 utf8
+Inline {
+url [" LBR Med 14 R820 J4.wrl "]
+bboxSize -1.000000 -1.000000 -1.000000
+bboxCenter 0.000000 0.000000 0.000000
+}
+Inline {
+url [" LBR Med 14 R820 J3.wrl "]
+bboxSize -1.000000 -1.000000 -1.000000
+bboxCenter 0.000000 0.000000 0.000000
+}
+Inline {
+url [" LBR Med 14 R820 Base-.wrl "]
+bboxSize -1.000000 -1.000000 -1.000000
+bboxCenter 0.000000 0.000000 0.000000
+}
+Inline {
+url [" LBR Med 14 R820 J6.wrl "]
+bboxSize -1.000000 -1.000000 -1.000000
+bboxCenter 0.000000 0.000000 0.000000
+}
+Inline {
+url [" LBR Med 14 R820 J5.wrl "]
+bboxSize -1.000000 -1.000000 -1.000000
+bboxCenter 0.000000 0.000000 0.000000
+}
+Inline {
+url [" LBR Med 14 R820 Base.wrl "]
+bboxSize -1.000000 -1.000000 -1.000000
+bboxCenter 0.000000 0.000000 0.000000
+}
+Inline {
+url [" LBR Med 14 R820 J0.wrl "]
+bboxSize -1.000000 -1.000000 -1.000000
+bboxCenter 0.000000 0.000000 0.000000
+}
+Inline {
+url [" LBR Med 14 R820 J1.wrl "]
+bboxSize -1.000000 -1.000000 -1.000000
+bboxCenter 0.000000 0.000000 0.000000
+}
+Inline {
+url [" LBR Med 14 R820 J2.wrl "]
+bboxSize -1.000000 -1.000000 -1.000000
+bboxCenter 0.000000 0.000000 0.000000
+}
