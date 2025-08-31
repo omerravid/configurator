@@ -122,14 +122,29 @@ router.use((error, req, res, next) => {
  * @returns {Object} Processing result with structure and stats
  */
 async function processFolderImport(files, folderName, fileStorage) {
+  // Two-stage import:
+  // 1) Import JSON files only and build the folder structure with parsed JSON preserved
+  // 2) Import non-JSON (binary) files and attach file references into the already-built structure
   const structure = {};
   const errors = [];
   let jsonFiles = 0;
   let binaryFiles = 0;
 
+  // Helper to ensure the nested folder path exists in the structure and return the leaf object
+  function ensureFolderPath(root, parts) {
+    let current = root;
+    for (const part of parts) {
+      if (!current[part] || typeof current[part] !== 'object' || Array.isArray(current[part])) {
+        current[part] = {};
+      }
+      current = current[part];
+    }
+    return current;
+  }
+
+  // First pass: process JSON files only
   for (const file of files) {
     try {
-      // Parse the file path to understand folder structure
       const relativePath = file.originalname;
       const pathParts = relativePath.split('/').filter(part => part.length > 0);
 
@@ -138,78 +153,81 @@ async function processFolderImport(files, folderName, fileStorage) {
         continue;
       }
 
-      // Build nested structure
-      let currentLevel = structure;
-
-      // Process folders (all parts except the last one which is the file)
-      for (let i = 0; i < pathParts.length - 1; i++) {
-        const folderName = pathParts[i];
-        if (!currentLevel[folderName]) {
-          currentLevel[folderName] = {};
-        }
-        currentLevel = currentLevel[folderName];
-      }
-
-      // Process the file
       const fileName = pathParts[pathParts.length - 1];
       const fileExtension = getFileExtension(fileName);
-      const isJsonFile = fileExtension === '.json';
+      if (fileExtension !== '.json') continue;
 
-      if (isJsonFile) {
-        // Handle JSON file
-        try {
-          const fileContent = file.buffer.toString('utf8');
-          const jsonContent = JSON.parse(fileContent);
-          
-          // Remove .json extension from property name
-          const propertyName = fileName.replace(/\.json$/i, '');
-          currentLevel[propertyName] = jsonContent;
-          jsonFiles++;
-        } catch (parseError) {
-          errors.push({ 
-            file: file.originalname, 
-            error: `JSON parse error: ${parseError.message}` 
-          });
-        }
-      } else {
-        // Handle binary file
-        try {
-          const fileMetadata = await fileStorage.storeFile(
-            file.buffer,
-            fileName,
-            file.mimetype || 'application/octet-stream'
-          );
+      const folderParts = pathParts.slice(0, -1);
+      const parent = ensureFolderPath(structure, folderParts);
 
-          // Generate download URL
-          const downloadUrl = await fileStorage.generateDownloadUrl(fileMetadata);
+      try {
+        const fileContent = file.buffer.toString('utf8');
+        const jsonContent = JSON.parse(fileContent);
+        const propertyName = fileName.replace(/\.json$/i, '');
+        parent[propertyName] = jsonContent;
+        jsonFiles++;
+      } catch (parseError) {
+        errors.push({ file: file.originalname, error: `JSON parse error: ${parseError.message}` });
+      }
+    } catch (error) {
+      errors.push({ file: file.originalname, error: error.message });
+    }
+  }
 
-          // Store file reference in structure (filename without extension as property name)
-          const propertyName = getFileNameWithoutExtension(fileName);
-          currentLevel[propertyName] = {
-            _type: 'file',
-            _metadata: {
-              originalName: fileName,
-              mimeType: file.mimetype || 'application/octet-stream',
-              size: file.size,
-              storageKey: fileMetadata.fileId,
-              storageType: fileMetadata.storageType
-            },
-            _link: downloadUrl
-          };
-          binaryFiles++;
-        } catch (storageError) {
-          errors.push({ 
-            file: file.originalname, 
-            error: `Storage error: ${storageError.message}` 
-          });
-        }
+  // Second pass: process non-JSON (binary) files and attach them into the existing structure
+  for (const file of files) {
+    try {
+      const relativePath = file.originalname;
+      const pathParts = relativePath.split('/').filter(part => part.length > 0);
+
+      if (pathParts.length === 0) {
+        // Already logged in first pass if invalid
+        continue;
       }
 
+      const fileName = pathParts[pathParts.length - 1];
+      const fileExtension = getFileExtension(fileName);
+      if (fileExtension === '.json') continue;
+
+      const folderParts = pathParts.slice(0, -1);
+      const parent = ensureFolderPath(structure, folderParts);
+
+      // Determine a safe property name for the file inside the parent folder
+      let propertyName = getFileNameWithoutExtension(fileName);
+      if (parent.hasOwnProperty(propertyName)) {
+        // Avoid clobbering existing properties (e.g. a JSON with same name)
+        let idx = 1;
+        while (parent.hasOwnProperty(`${propertyName}_${idx}`)) idx++;
+        propertyName = `${propertyName}_${idx}`;
+      }
+
+      try {
+        const fileMetadata = await fileStorage.storeFile(
+          file.buffer,
+          fileName,
+          file.mimetype || 'application/octet-stream'
+        );
+
+        const downloadUrl = await fileStorage.generateDownloadUrl(fileMetadata);
+
+        parent[propertyName] = {
+          _type: 'file',
+          _metadata: {
+            originalName: fileName,
+            mimeType: file.mimetype || 'application/octet-stream',
+            size: file.size,
+            storageKey: fileMetadata.fileId,
+            storageType: fileMetadata.storageType
+          },
+          _link: downloadUrl
+        };
+
+        binaryFiles++;
+      } catch (storageError) {
+        errors.push({ file: file.originalname, error: `Storage error: ${storageError.message}` });
+      }
     } catch (error) {
-      errors.push({ 
-        file: file.originalname, 
-        error: error.message 
-      });
+      errors.push({ file: file.originalname, error: error.message });
     }
   }
 
