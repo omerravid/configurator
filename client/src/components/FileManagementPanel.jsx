@@ -13,6 +13,7 @@ import { configAPI } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import PprmEditor from "./PprmEditor";
 import VrmlPreview from "./VrmlPreview";
+import * as UTIF from "utif";
 
 const FileManagementPanel = ({ 
   fileValue, 
