@@ -5,6 +5,8 @@ import {
   DocumentIcon,
   XMarkIcon,
   PencilIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from "@heroicons/react/24/outline";
 import { useToast } from "../context/ToastContext";
 import { configAPI } from "../services/api";
