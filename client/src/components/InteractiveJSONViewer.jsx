@@ -367,9 +367,9 @@ const TreeNode = ({
       const metadata = actualValue._metadata || {};
       const isHdr = (metadata.originalName || '').toLowerCase().endsWith('.hdr');
       const isTxt = (metadata.originalName || '').toLowerCase().endsWith('.txt');
-      const canPreviewJson = isHdr || isTxt;
+      const canPreview = isHdr || isTxt;
 
-      const handleToggleHdr = async () => {
+      const handleTogglePreview = async () => {
         const storageKey = metadata.storageKey;
         if (!storageKey) return setHdrVisible(v => !v);
         if (!hdrVisible && hdrPreview == null) {
@@ -379,14 +379,18 @@ const TreeNode = ({
               headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
             });
             const text = await resp.text();
-            try {
-              const json = JSON.parse(text);
-              setHdrPreview(json);
-            } catch (e) {
-              setHdrPreview({ _previewError: 'Not valid JSON', _raw: text.slice(0, 2000) });
+            if (isTxt) {
+              setHdrPreview(text);
+            } else if (isHdr) {
+              try {
+                const json = JSON.parse(text);
+                setHdrPreview(json);
+              } catch (e) {
+                setHdrPreview({ _previewError: 'Not valid JSON', _raw: text.slice(0, 2000) });
+              }
             }
           } catch (e) {
-            setHdrPreview({ _previewError: 'Failed to load preview' });
+            setHdrPreview(isTxt ? 'Failed to load preview' : { _previewError: 'Failed to load preview' });
           } finally {
             setHdrLoading(false);
             setHdrVisible(true);
@@ -411,11 +415,11 @@ const TreeNode = ({
             >
               {metadata.originalName || 'Download File'}
             </a>
-            {canPreviewJson && (
+            {canPreview && (
               <button
-                onClick={(e) => { e.stopPropagation(); handleToggleHdr(); }}
+                onClick={(e) => { e.stopPropagation(); handleTogglePreview(); }}
                 className="text-xs px-2 py-0.5 rounded bg-gray-200 hover:bg-gray-300 text-gray-700"
-                title="Toggle JSON preview"
+                title={isTxt ? 'Toggle text preview' : 'Toggle JSON preview'}
               >
                 {hdrVisible ? 'Hide Preview' : (hdrLoading ? 'Loading…' : 'Preview')}
               </button>
@@ -426,10 +430,10 @@ const TreeNode = ({
             {metadata.mimeType && metadata.size ? ' • ' : ''}
             {metadata.mimeType ? metadata.mimeType.split('/')[1]?.toUpperCase() : ''}
           </div>
-          {canPreviewJson && hdrVisible && (
+          {canPreview && hdrVisible && (
             <div className="mt-1 max-h-64 overflow-auto bg-white border border-gray-200 rounded p-2">
               <pre className="text-xs text-gray-800 whitespace-pre-wrap">
-                {hdrPreview == null ? '' : JSON.stringify(hdrPreview, null, 2)}
+                {hdrPreview == null ? '' : (isTxt ? String(hdrPreview) : JSON.stringify(hdrPreview, null, 2))}
               </pre>
             </div>
           )}

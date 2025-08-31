@@ -1,0 +1,7 @@
+#standardIKKukaPathPlanner
+#P_ACT_LEFT_P_IMP_OUT_LEF
+<lbrR>
+<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
+P_TLB_OUT,PTP,0.25
+#P3,BaseCor/BaseWork/BaseTLB,0,350,0,0,-90,90,3,31,-65.9276428222657,PTP,0.25,fcu,fcu
+#plannerSeed: -18; -63; -66; -95; -54; 94; -91

@@ -1,0 +1,7 @@
+#P_TLB_OUT_P_DET_OUT_L
+<lbrL>
+<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
+#P1,BaseCor/BaseWork/BaseTLB,6.99,200.0,0.85,88.48,-89.35,1.14,5,38,-56.7902,LIN,60,fcu,fcu
+P_TOOL_OUT,LIN,60
+P_TOOL_IN,LIN,60
+#P2,BaseCor/BaseWork/BaseTLB,6.16,-1.47,1.46,0,-89.95,89.98,5,38,-56.7902,LIN,60,fcu,fcu

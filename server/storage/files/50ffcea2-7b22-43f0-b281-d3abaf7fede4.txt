@@ -1,0 +1,5 @@
+#ScanL2Obl
+<lbrB>
+<Robot,Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
+P_SCAN_LEFT,LIN,40
+#P3,BaseCor/BaseWork/BaseScan,540,0,0,90.00001,0,-90.00008,0,33,70,LIN,40,source,fcu/tool
