@@ -23,6 +23,9 @@ const FileManagementPanel = ({
   const [showPprmEditor, setShowPprmEditor] = useState(false);
   const [pprmContent, setPprmContent] = useState('');
   const [loadingPprm, setLoadingPprm] = useState(false);
+  const [showImagePreview, setShowImagePreview] = useState(false);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState('');
+  const [imageLoadError, setImageLoadError] = useState(false);
 
   const metadata = fileValue._metadata || {};
   // We no longer need the downloadUrl since we're using authenticated fetch
