@@ -11,9 +11,9 @@ PPRM files use a simple text format where each line defines a parameter value:
 ### Examples:
 ```
 # Motor control parameters
-Motor.Speed[0]=100
-Motor.Speed[1]=200
-Motor.Speed[2]=300
+Motor.Speed[1]=100
+Motor.Speed[2]=200
+Motor.Speed[3]=300
 Config.Enabled=true
 AX1.KP[1]=7.615386
 AX1.KI[1]=1310.14514
