@@ -60,6 +60,9 @@ const FileManagementPanel = ({
     setImagePreviewUrl('');
     setImageLoadError(false);
     setLoadingImagePreview(false);
+    setShowPprmPreview(false);
+    setPprmPreviewContent('');
+    setPprmPreviewLoading(false);
   }, [fileValue, propertyPath]);
 
   useEffect(() => {
