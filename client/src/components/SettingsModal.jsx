@@ -292,7 +292,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
         body: JSON.stringify({ name: `manual-${Date.now()}` })
       });
       const data = await response.json();
-      
+
       if (data.success) {
         showToast('Backup created successfully', 'success');
         loadBackups();
@@ -302,6 +302,43 @@ const SettingsModal = ({ isOpen, onClose }) => {
       }
     } catch (error) {
       showToast('Failed to create backup', 'error');
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
+  const restoreBackup = async () => {
+    if (!selectedBackup) {
+      showToast('Please select a backup to restore', 'error');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to restore from backup "${selectedBackup}"? This will replace all current data. A backup of current data will be created first.`)) {
+      return;
+    }
+
+    setBackupLoading(true);
+    try {
+      const response = await fetch('/api/settings/data/restore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ backupName: selectedBackup })
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        showToast('Data restored successfully', 'success');
+        setSelectedBackup('');
+        loadBackups();
+        loadDataStats();
+      } else {
+        showToast(`Failed to restore backup: ${data.error}`, 'error');
+      }
+    } catch (error) {
+      showToast('Failed to restore backup', 'error');
     } finally {
       setBackupLoading(false);
     }
