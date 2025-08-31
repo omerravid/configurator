@@ -72,6 +72,8 @@ const FileManagementPanel = ({
   const metadata = fileValue._metadata || {};
   // We no longer need the downloadUrl since we're using authenticated fetch
   const canDownload = metadata.storageKey;
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
 
   // Check if this is a PPRM file
   const isPprmFile = metadata.originalName?.toLowerCase().endsWith('.pprm') ||
