@@ -14,6 +14,7 @@ import ContextMenu from "./ContextMenu";
 import StructuralTreeNode from "./StructuralTreeNode";
 import ScalarPropertiesPanel from "./ScalarPropertiesPanel";
 import { useToast } from "../context/ToastContext";
+import VrmlPreview from "./VrmlPreview";
 
 // Helper function to safely extract actual values from provenance-wrapped objects
 const extractActualValue = (val) => {
@@ -171,12 +172,14 @@ const TreeNode = ({
   const [hdrPreview, setHdrPreview] = useState(null);
   const [hdrLoading, setHdrLoading] = useState(false);
   const [hdrVisible, setHdrVisible] = useState(false);
+  const [vrmlVisible, setVrmlVisible] = useState(false);
 
   // Reset inline file preview when node identity changes
   React.useEffect(() => {
     setHdrPreview(null);
     setHdrVisible(false);
     setHdrLoading(false);
+    setVrmlVisible(false);
   }, [path, keyName, value]);
 
   const currentPath = path ? `${path}.${keyName}` : keyName;
@@ -374,7 +377,8 @@ const TreeNode = ({
       const metadata = actualValue._metadata || {};
       const isHdr = (metadata.originalName || '').toLowerCase().endsWith('.hdr');
       const isTxt = (metadata.originalName || '').toLowerCase().endsWith('.txt');
-      const canPreview = isHdr || isTxt;
+      const isVrml = /\.(vrml|wrl)$/i.test(metadata.originalName || '');
+      const canPreview = isHdr || isTxt || isVrml;
 
       const handleTogglePreview = async () => {
         const storageKey = metadata.storageKey;
@@ -422,7 +426,16 @@ const TreeNode = ({
             >
               {metadata.originalName || 'Download File'}
             </a>
-            {canPreview && (
+            {isVrml && (
+              <button
+                onClick={(e) => { e.stopPropagation(); setVrmlVisible(v => !v); }}
+                className="text-xs px-2 py-0.5 rounded bg-gray-200 hover:bg-gray-300 text-gray-700"
+                title="Toggle 3D preview"
+              >
+                {vrmlVisible ? 'Hide 3D' : '3D'}
+              </button>
+            )}
+            {(isHdr || isTxt) && (
               <button
                 onClick={(e) => { e.stopPropagation(); handleTogglePreview(); }}
                 className="text-xs px-2 py-0.5 rounded bg-gray-200 hover:bg-gray-300 text-gray-700"
@@ -437,11 +450,16 @@ const TreeNode = ({
             {metadata.mimeType && metadata.size ? ' • ' : ''}
             {metadata.mimeType ? metadata.mimeType.split('/')[1]?.toUpperCase() : ''}
           </div>
-          {canPreview && hdrVisible && (
+          {(isHdr || isTxt) && hdrVisible && (
             <div className="mt-1 max-h-64 overflow-auto bg-white border border-gray-200 rounded p-2">
               <pre className="text-xs text-gray-800 whitespace-pre-wrap">
                 {hdrPreview == null ? '' : (isTxt ? String(hdrPreview) : JSON.stringify(hdrPreview, null, 2))}
               </pre>
+            </div>
+          )}
+          {isVrml && vrmlVisible && (
+            <div className="mt-2">
+              <VrmlPreview storageKey={metadata.storageKey} authToken={localStorage.getItem('token')} />
             </div>
           )}
         </div>
