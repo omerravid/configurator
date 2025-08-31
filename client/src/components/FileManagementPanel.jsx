@@ -170,16 +170,37 @@ const FileManagementPanel = ({
     }
   };
 
-  const toggleImagePreview = () => {
+  const toggleImagePreview = async () => {
     if (showImagePreview) {
       setShowImagePreview(false);
+      if (imagePreviewUrl && imagePreviewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(imagePreviewUrl);
+      }
       setImagePreviewUrl('');
       setImageLoadError(false);
     } else {
-      const previewUrl = getImagePreviewUrl();
-      setImagePreviewUrl(previewUrl);
       setShowImagePreview(true);
       setImageLoadError(false);
+
+      try {
+        // Fetch image with authentication
+        const response = await fetch(`/api/files/${metadata.storageKey}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch image: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        setImagePreviewUrl(blobUrl);
+      } catch (error) {
+        setImageLoadError(true);
+        showToast('Failed to load image preview', 'error');
+      }
     }
   };
 
