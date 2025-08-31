@@ -150,16 +150,24 @@ const PprmEditor = ({
   };
 
   const removeValueFromVariable = (varName, index) => {
-    if (jsonData.variables[varName].length <= 1) {
+    const currentArray = jsonData.variables[varName];
+    const validValues = currentArray.filter((v, i) => i > 0 && v !== undefined);
+
+    if (validValues.length <= 1) {
       showToast('Cannot remove the last value. Delete the variable instead.', 'error');
       return;
     }
-    
+
+    // Set the value at this index to undefined instead of removing it
+    // This preserves the array structure and indices
+    const newArray = [...currentArray];
+    newArray[index] = undefined;
+
     const newData = {
       ...jsonData,
       variables: {
         ...jsonData.variables,
-        [varName]: jsonData.variables[varName].filter((_, i) => i !== index)
+        [varName]: newArray
       }
     };
     setJsonData(newData);
