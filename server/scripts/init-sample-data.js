@@ -559,7 +559,8 @@ module.exports = { initializeSampleData, sampleComponents, sampleVersions, sampl
 
 // Run if called directly
 if (require.main === module) {
-  initializeSampleData()
+  const force = process.env.FORCE_SAMPLE === 'true';
+  initializeSampleData(force)
     .then(() => {
       console.log('Sample data initialization script completed');
       process.exit(0);
