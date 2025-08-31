@@ -80,8 +80,8 @@ The editor automatically detects and preserves value types:
 ### **Supported Line Formats**
 ```
 # Comments (ignored)
-VarName=Value                    # Scalar value (becomes VarName[0]=Value)
-VarName[Index]=Value            # Array value
+VarName=Value                    # Scalar value (single value without index)
+VarName[Index]=Value            # Array value (Index starts from 1)
 Variable.Name[Index]=Value      # Variables can contain dots
 ```
 
