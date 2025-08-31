@@ -40,7 +40,7 @@ router.get("/:storageKey", authenticateTokenOrApiKey, async (req, res) => {
 });
 
 // GET /api/files/:storageKey/info - Get file metadata
-router.get("/:storageKey/info", authenticateToken, async (req, res) => {
+router.get("/:storageKey/info", authenticateTokenOrApiKey, async (req, res) => {
   try {
     const { storageKey } = req.params;
     
