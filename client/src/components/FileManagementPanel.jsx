@@ -42,6 +42,20 @@ const FileManagementPanel = ({
     };
   }, [imagePreviewUrl]);
 
+  // Reset previews when switching to a different file/selection
+  useEffect(() => {
+    setShowHdrPreview(false);
+    setHdrContent(null);
+    setHdrLoading(false);
+    if (showImagePreview && imagePreviewUrl && imagePreviewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(imagePreviewUrl);
+    }
+    setShowImagePreview(false);
+    setImagePreviewUrl('');
+    setImageLoadError(false);
+    setLoadingImagePreview(false);
+  }, [fileValue, propertyPath]);
+
   const metadata = fileValue._metadata || {};
   // We no longer need the downloadUrl since we're using authenticated fetch
   const canDownload = metadata.storageKey;
