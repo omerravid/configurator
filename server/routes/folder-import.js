@@ -26,6 +26,12 @@ router.post("/", authenticateToken, upload.array('files'), async (req, res) => {
     const files = req.files;
     const { folderName } = req.body;
 
+    // Normalize relativePaths from body (can be string or array)
+    const relativePathsBody = req.body.relativePaths;
+    const relativePaths = Array.isArray(relativePathsBody)
+      ? relativePathsBody
+      : (typeof relativePathsBody === 'string' ? [relativePathsBody] : null);
+
     console.log(`Processing ${files ? files.length : 0} files for folder: ${folderName}`);
 
     if (!files || files.length === 0) {
@@ -38,7 +44,7 @@ router.post("/", authenticateToken, upload.array('files'), async (req, res) => {
     console.log(`Total files: ${files.length}, Total size: ${Math.round(totalSize / 1024)}KB`);
 
     const fileStorage = new FileStorageService();
-    const result = await processFolderImport(files, folderName, fileStorage);
+    const result = await processFolderImport(files, folderName, fileStorage, relativePaths);
 
     console.log(`Import completed: ${result.jsonFiles} JSON files, ${result.binaryFiles} binary files, ${result.errors.length} errors`);
 
@@ -119,9 +125,10 @@ router.use((error, req, res, next) => {
  * @param {Array} files - Array of uploaded files
  * @param {string} folderName - Name of the root folder
  * @param {FileStorageService} fileStorage - File storage service instance
+ * @param {string[]|null} relativePaths - Relative paths for each file, aligned by index
  * @returns {Object} Processing result with structure and stats
  */
-async function processFolderImport(files, folderName, fileStorage) {
+async function processFolderImport(files, folderName, fileStorage, relativePaths = null) {
   // Two-stage import:
   // 1) Import JSON files only and build the folder structure with parsed JSON preserved
   // 2) Import non-JSON (binary) files and attach file references into the already-built structure
@@ -143,9 +150,11 @@ async function processFolderImport(files, folderName, fileStorage) {
   }
 
   // First pass: process JSON files only
-  for (const file of files) {
+  for (let idx = 0; idx < files.length; idx++) {
+    const file = files[idx];
     try {
-      const relativePath = (file.originalname || "").replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+/, '/');
+      const rp = (relativePaths && relativePaths[idx]) || file.originalname || "";
+      const relativePath = rp.replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+/, '/');
       const pathParts = relativePath.split('/').filter(part => part.length > 0);
 
       if (pathParts.length === 0) {
@@ -175,9 +184,11 @@ async function processFolderImport(files, folderName, fileStorage) {
   }
 
   // Second pass: process non-JSON (binary) files and attach them into the existing structure
-  for (const file of files) {
+  for (let idx = 0; idx < files.length; idx++) {
+    const file = files[idx];
     try {
-      const relativePath = (file.originalname || "").replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+/, '/');
+      const rp = (relativePaths && relativePaths[idx]) || file.originalname || "";
+      const relativePath = rp.replace(/\\/g, '/').replace(/^\/+/, '').replace(/\/+/, '/');
       const pathParts = relativePath.split('/').filter(part => part.length > 0);
 
       if (pathParts.length === 0) {
