@@ -365,6 +365,235 @@ Context menus adapt based on configuration type and permissions:
 4. Version Pinning: Use specific component versions for stability
       `
     },
+    "file-handling": {
+      title: "File Handling and Management",
+      content: `
+**File Storage Overview**
+The Configuration Manager includes powerful file handling capabilities that allow you to store, manage, and reference files within your configurations.
+
+**Storage Options**
+- **Embedded Storage**: Files stored locally on the server (default)
+- **S3 Cloud Storage**: Amazon S3 integration for scalable file storage
+- **Automatic Switching**: Administrators can configure storage backend
+
+**Supported File Types**
+✅ **Documents**: PDF, DOC, DOCX, TXT, RTF, ODT
+✅ **Images**: JPG, JPEG, PNG, GIF, BMP, WEBP, SVG, TIFF
+✅ **Videos**: MP4, AVI, MOV, WMV, FLV, WEBM, MKV
+✅ **Audio**: MP3, WAV, OGG, AAC, FLAC, WMA
+✅ **Archives**: ZIP, RAR, 7Z, TAR, GZ
+✅ **Data Files**: JSON, XML, CSV, YAML, SQL
+✅ **Code Files**: JS, TS, HTML, CSS, PHP, PY, JAVA, CPP
+✅ **Configuration**: INI, CONF, CONFIG, ENV
+✅ **3D Models**: STL, OBJ, FBX, DAE, PLY
+✅ **CAD Files**: DWG, DXF, STEP, IGS
+✅ **Other**: Any file type up to 50MB
+
+**File Upload Methods**
+
+*Drag and Drop Upload*
+1. Drag files from your computer directly into the file drop zone
+2. Multiple files can be uploaded simultaneously
+3. Visual feedback shows valid drop targets
+4. Upload progress is displayed for large files
+
+*Browse and Select*
+1. Click the "Choose Files" or "Browse" button
+2. Use your operating system's file picker
+3. Select single or multiple files
+4. Confirm upload to begin transfer
+
+*Replace Existing Files*
+1. Right-click on an existing file property
+2. Select "Replace File" from context menu
+3. Choose new file to replace the existing one
+4. Old file is automatically removed from storage
+
+**File Properties and Metadata**
+Each uploaded file creates a structured file object:
+
+{
+  "_type": "file",
+  "_metadata": {
+    "originalName": "document.pdf",
+    "mimeType": "application/pdf",
+    "size": 1048576,
+    "storageKey": "abc123-file-id",
+    "storageType": "embedded",
+    "uploadDate": "2024-01-01T12:00:00Z"
+  },
+  "_link": "https://server.com/api/files/abc123-file-id"
+}
+
+**File Preview and Viewing**
+
+*Image Preview*
+- Automatic thumbnail generation for images
+- Click to view full-size image in modal
+- Support for all common image formats
+- Zoom and pan functionality for large images
+
+*Text File Preview*
+- Inline preview for small text files
+- Syntax highlighting for code files
+- Line numbers and formatting preservation
+- Download option for large files
+
+*Document Preview*
+- PDF files display with embedded viewer
+- Navigation controls for multi-page documents
+- Search functionality within documents
+- Print and download options
+
+*Video and Audio Preview*
+- HTML5 media player integration
+- Playback controls (play, pause, seek, volume)
+- Multiple format support
+- Streaming playback for large files
+
+**File Management Operations**
+
+*Download Files*
+- Click file name or download button
+- Preserves original filename and extension
+- Secure download URLs with expiration
+- Resume capability for large files
+
+*Replace Files*
+- Maintain same property path
+- Automatic cleanup of old file versions
+- Preserve file references in configurations
+- Version history tracking
+
+*Delete Files*
+- Remove files from configurations
+- Automatic cleanup from storage
+- Cascade deletion warnings for referenced files
+- Confirmation dialogs for safety
+
+*Copy File References*
+- Copy download URLs for external use
+- Copy file metadata for debugging
+- Share files between configurations
+- Export file inventories
+
+**File Security and Access Control**
+
+*Authentication Required*
+- All file operations require valid user authentication
+- API key support for programmatic access
+- Session-based security for web interface
+- Role-based access restrictions
+
+*Permission System*
+- Admin users: Full file management access
+- Regular users: Can upload and manage own files
+- Read-only access for committed configurations
+- Inherited permissions from parent configurations
+
+*Storage Security*
+- Encrypted file transfer (HTTPS)
+- Secure storage backends
+- Access logging and auditing
+- Virus scanning integration (when configured)
+
+**Integration with Configurations**
+
+*File Properties in JSON*
+Files appear as special objects in your configuration data:
+
+"logo": {
+  "_type": "file",
+  "_metadata": { ... },
+  "_link": "download-url"
+}
+
+*Inheritance and Overrides*
+- File properties inherit like other configuration values
+- Child configurations can override parent files
+- File metadata is preserved through inheritance
+- Provenance tracking shows file origins
+
+*API Integration*
+- REST API endpoints for file operations
+- Programmatic upload and download
+- Batch file processing capabilities
+- Webhook notifications for file events
+
+**Best Practices**
+
+*File Organization*
+1. Use descriptive filenames that indicate purpose
+2. Organize files logically within configuration properties
+3. Use folder-like property paths (e.g., "assets.images.logo")
+4. Document file purposes in configuration descriptions
+
+*File Size Management*
+1. Keep files under 50MB for optimal performance
+2. Use compression for large documents and archives
+3. Consider external CDN for frequently accessed files
+4. Regular cleanup of unused or outdated files
+
+*Version Control*
+1. Replace files rather than creating new properties
+2. Use configuration versioning for file history
+3. Document file changes in version descriptions
+4. Test file accessibility after updates
+
+*Performance Optimization*
+1. Use appropriate file formats for use case
+2. Compress images and videos when possible
+3. Lazy load large files in applications
+4. Cache frequently accessed files
+
+**Troubleshooting File Issues**
+
+*Upload Failures*
+- Check file size is under 50MB limit
+- Verify file is not corrupted
+- Ensure stable internet connection
+- Try uploading files individually if batch fails
+
+*Preview Problems*
+- Check file format is supported for preview
+- Large files may not preview (download instead)
+- Browser compatibility may affect preview features
+- Clear browser cache if preview appears outdated
+
+*Download Issues*
+- Verify file still exists in storage
+- Check user permissions for file access
+- Download URLs expire - refresh page for new URL
+- Network issues may interrupt large downloads
+
+*Storage Problems*
+- Contact administrator if storage quota exceeded
+- Report missing files to system administrator
+- Check configuration inheritance if file not found
+- Verify file was not accidentally removed
+
+**File Storage Configuration (Admin)**
+Administrators can configure file storage backends:
+
+*Embedded Storage*
+- Files stored on local server filesystem
+- Good for development and small deployments
+- No additional service dependencies
+- Limited by server disk space
+
+*Amazon S3 Storage*
+- Scalable cloud file storage
+- Better for production deployments
+- Automatic backups and redundancy
+- Configurable access policies
+
+*Storage Migration*
+- Admin tools for migrating between storage types
+- Automatic URL updates during migration
+- Validation tools for file integrity
+- Rollback capabilities if issues occur
+      `
+    },
     "troubleshooting": {
       title: "Troubleshooting",
       content: `

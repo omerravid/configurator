@@ -101,7 +101,8 @@ app.listen(PORT, '0.0.0.0', async () => {
   // Initialize sample data if database is empty (with delay to ensure admin user is created)
   setTimeout(async () => {
     try {
-      await initializeSampleData();
+      const force = process.env.FORCE_SAMPLE === 'true';
+      await initializeSampleData(force);
     } catch (error) {
       console.log('Sample data initialization handled:', error.message);
     }
