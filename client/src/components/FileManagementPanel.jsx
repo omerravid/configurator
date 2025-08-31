@@ -65,9 +65,12 @@ const FileManagementPanel = ({
                      metadata.mimeType === 'application/octet-stream' &&
                      metadata.originalName?.toLowerCase().includes('.pprm');
 
-  // Check if this is an image file
-  const isImageFile = metadata.mimeType?.startsWith('image/') ||
-                      (metadata.originalName && /\.(jpg|jpeg|png|gif|webp|bmp|svg|tiff|tif)$/i.test(metadata.originalName));
+  // Check if this is an image file (exclude TIFF)
+  const isImageFile = (
+    metadata.mimeType?.startsWith('image/') && !/image\/tiff/i.test(metadata.mimeType)
+  ) || (
+    metadata.originalName && /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(metadata.originalName)
+  );
 
   // Check if this is an HDR JSON file
   const isHdrFile = (metadata.originalName || '').toLowerCase().endsWith('.hdr');
