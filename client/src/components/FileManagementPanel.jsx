@@ -411,6 +411,52 @@ const FileManagementPanel = ({
         </div>
       )}
 
+      {/* PPRM Plain Text Preview for non-admin users */}
+      {isPprmFile && !isAdmin && (
+        <div className="mt-3">
+          <button
+            onClick={async () => {
+              if (showPprmPreview) {
+                setShowPprmPreview(false);
+                return;
+              }
+              setPprmPreviewLoading(true);
+              try {
+                const response = await fetch(`/api/files/${metadata.storageKey}`, {
+                  headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const text = await response.text();
+                setPprmPreviewContent(text);
+                setShowPprmPreview(true);
+              } catch (error) {
+                showToast('Failed to load preview', 'error');
+              } finally {
+                setPprmPreviewLoading(false);
+              }
+            }}
+            className="flex items-center space-x-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors"
+          >
+            {showPprmPreview ? (
+              <EyeSlashIcon className="w-4 h-4" />
+            ) : (
+              <EyeIcon className="w-4 h-4" />
+            )}
+            <span>{showPprmPreview ? 'Hide Preview' : (pprmPreviewLoading ? 'Loading…' : 'Show Preview')}</span>
+          </button>
+
+          {showPprmPreview && (
+            <div className="mt-3 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden bg-white dark:bg-gray-800">
+              <div className="p-3 max-h-96 overflow-auto">
+                <pre className="text-xs text-gray-800 dark:text-gray-100 whitespace-pre-wrap">
+                  {pprmPreviewContent}
+                </pre>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Image Preview Section */}
       {isImageFile && (
         <div className="mt-3">
