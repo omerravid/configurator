@@ -29,6 +29,15 @@ const FileManagementPanel = ({
   const [imagePreviewUrl, setImagePreviewUrl] = useState('');
   const [imageLoadError, setImageLoadError] = useState(false);
 
+  // Cleanup blob URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl && imagePreviewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(imagePreviewUrl);
+      }
+    };
+  }, [imagePreviewUrl]);
+
   const metadata = fileValue._metadata || {};
   // We no longer need the downloadUrl since we're using authenticated fetch
   const canDownload = metadata.storageKey;
