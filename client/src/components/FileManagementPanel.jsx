@@ -250,10 +250,32 @@ const FileManagementPanel = ({
           throw new Error(`Failed to fetch image: ${response.status}`);
         }
 
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        setImagePreviewUrl(blobUrl);
+        if (isTiffFile) {
+          const arrayBuffer = await response.arrayBuffer();
+          const ifds = UTIF.decode(arrayBuffer);
+          if (!ifds || ifds.length === 0) throw new Error('No IFDs in TIFF');
+          UTIF.decodeImage(arrayBuffer, ifds[0]);
+          const rgba = UTIF.toRGBA8(ifds[0]);
+          const w = ifds[0].width || ifds[0].t256 || ifds[0].cols;
+          const h = ifds[0].height || ifds[0].t257 || ifds[0].rows;
+          if (!w || !h) throw new Error('Invalid TIFF dimensions');
+
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          const imageData = ctx.createImageData(w, h);
+          imageData.data.set(rgba);
+          ctx.putImageData(imageData, 0, 0);
+          const dataUrl = canvas.toDataURL('image/jpeg');
+          setImagePreviewUrl(dataUrl);
+        } else {
+          const blob = await response.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          setImagePreviewUrl(blobUrl);
+        }
       } catch (error) {
+        console.error('Image preview error:', error);
         setImageLoadError(true);
         showToast('Failed to load image preview', 'error');
       } finally {
