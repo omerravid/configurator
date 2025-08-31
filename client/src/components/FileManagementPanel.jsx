@@ -276,6 +276,15 @@ const FileManagementPanel = ({
           )}
         </div>
       )}
+
+      {/* PPRM Editor Modal */}
+      <PprmEditor
+        isOpen={showPprmEditor}
+        onClose={() => setShowPprmEditor(false)}
+        pprmContent={pprmContent}
+        filename={metadata.originalName}
+        onSave={handleSavePprm}
+      />
     </div>
   );
 };
