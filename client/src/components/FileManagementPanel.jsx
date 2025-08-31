@@ -105,6 +105,56 @@ const FileManagementPanel = ({
     }
   };
 
+  const handleEditPprm = async () => {
+    setLoadingPprm(true);
+    try {
+      // Fetch the PPRM file content
+      const response = await fetch(`/api/files/${metadata.storageKey}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch PPRM file: ${response.status}`);
+      }
+
+      const content = await response.text();
+      setPprmContent(content);
+      setShowPprmEditor(true);
+    } catch (error) {
+      showToast(`Failed to load PPRM file: ${error.message}`, 'error');
+    } finally {
+      setLoadingPprm(false);
+    }
+  };
+
+  const handleSavePprm = async (editedContent) => {
+    try {
+      // Create a blob from the edited content
+      const blob = new Blob([editedContent], { type: 'text/plain' });
+      const file = new File([blob], metadata.originalName, { type: 'application/octet-stream' });
+
+      // Use the existing file replacement logic
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('configId', configId);
+      formData.append('propertyPath', propertyPath);
+
+      const response = await configAPI.replaceFile(configId, propertyPath, file);
+
+      if (response.data.success) {
+        showToast('PPRM file saved successfully', 'success');
+        onFileUpdated?.(response.data.fileData);
+      } else {
+        throw new Error(response.data.error || 'Failed to save PPRM file');
+      }
+    } catch (error) {
+      console.error('PPRM save error:', error);
+      throw new Error(error.response?.data?.error || error.message || 'Failed to save PPRM file');
+    }
+  };
+
   const formatFileSize = (bytes) => {
     if (!bytes) return '';
     
