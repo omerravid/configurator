@@ -87,10 +87,10 @@ Variable.Name[Index]=Value      # Variables can contain dots
 
 ### **Value Formats**
 ```
-Motor.Speed[0]=100              # Number
-Config.Name[0]="Primary"        # String (with quotes)
-Config.Name[1]=Secondary        # String (without quotes)
-System.Enabled[0]=true          # Boolean
+Motor.Speed[1]=100              # Number
+Config.Name[1]="Primary"        # String (with quotes)
+Config.Name[2]=Secondary        # String (without quotes)
+System.Enabled[1]=true          # Boolean
 Sensor.Calibration[5]=3.14159   # Float
 Advanced.Param[10]=1.23e-06     # Scientific notation
 ```
