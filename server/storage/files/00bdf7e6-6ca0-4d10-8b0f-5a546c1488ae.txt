@@ -1,0 +1,11 @@
+#FinScanR
+<lbrB>
+<Robot,Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
+#P1,BaseCor/BaseWork,-549.91,620.0,-356.93,90.83,-40.0,88.69,0,32,-30,LIN,120,source,fcu/tool
+P_SCAN_RIGHT,LIN,120
+#P2,BaseCor/BaseWork/BaseScan,-550,100,-250,90,-40,90,0,4,-30,LIN,100,source,fcu/tool
+P3,BaseCor/BaseWork,-539.66323,629.99993,-944.33294,127.92494,-13.80079,17.02208,0,4,-30,LIN,120,source,fcu/tool
+P4,BaseCor/BaseWork,-300,630.79662,-1000,127.9249,-13.80078,17.0221,0,5,-30,LIN,120,source,fcu/tool
+P2,BaseCor/BaseWork,-80,832,-1080,90,0,0,0,0,70,PTP,0.3,source,fcu/tool
+P_SCAN_LEFT,PTP,0.3
+#P6,BaseCor/BaseWork/BaseScan,540,0,0,90.00001,0,-90.00008,0,33,70,PTP,0.3,source,fcu/tool
