@@ -36,6 +36,16 @@ const FileManagementPanel = ({
                      metadata.mimeType === 'application/octet-stream' &&
                      metadata.originalName?.toLowerCase().includes('.pprm');
 
+  // Check if this is an image file
+  const isImageFile = metadata.mimeType?.startsWith('image/') ||
+                      (metadata.originalName && /\.(jpg|jpeg|png|gif|webp|bmp|svg|tiff|tif)$/i.test(metadata.originalName));
+
+  // Generate image preview URL
+  const getImagePreviewUrl = () => {
+    if (!metadata.storageKey) return '';
+    return `/api/files/${metadata.storageKey}`;
+  };
+
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
