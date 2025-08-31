@@ -1,0 +1,7 @@
+#standardIKKukaPathPlanner: ARange=90; ZValoffsetNextTarget=140; NextTarget=P_BONECUT_IN
+#Act2ImpR
+<lbrR>
+<Robot,Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
+P_BONECUT_OUT,LIN,120
+#P2,BaseCor/BaseWork/BaseImp,0,0,-140,0,0,0,5,54,-140,LIN,120,drill,fcu/tool
+#plannerSeed: 118;-50;-158;80;-40;-67;-72

@@ -545,7 +545,10 @@ const ConfigurationEditor = ({
 
     } catch (error) {
       console.error('Import error:', error);
-      showToast('Failed to import folder structure', 'error');
+      const serverMsg = error?.response?.data?.error || error?.response?.data?.message;
+      const details = error?.response?.data?.details;
+      const msg = serverMsg ? `${serverMsg}${details ? `: ${details}` : ''}` : (error.message || 'Failed to import folder structure');
+      showToast(msg, 'error');
     } finally {
       setIsImporting(false);
     }

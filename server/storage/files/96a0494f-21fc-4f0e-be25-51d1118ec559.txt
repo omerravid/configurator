@@ -1,0 +1,8 @@
+#dependOnPlannerPrevCalc
+#ImpIn
+<lbrR>
+<Robot,Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
+P_BONECUT_OUT,LIN,120,fcu/tool
+#P1,BaseCor/BaseWork/BaseImp,0,0,-140,0,0,0,5,54,-140,LIN,120,drill,fcu/tool
+P_BONECUT_IN,LIN,40,fcu/tool
+#P2,BaseCor/BaseWork/BaseImp,0,0,-3,0,0,0,5,54,-140,LIN,40,drill,fcu/tool

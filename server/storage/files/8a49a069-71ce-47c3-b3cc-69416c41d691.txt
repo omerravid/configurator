@@ -1,0 +1,7 @@
+#standardIKKukaPathPlanner
+#P_SCAN_OFFSET_P_SCAN_AP
+<lbrB>
+<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
+#P1,BaseCor/BaseWork,391.70343,116.77935,267.01834,-124.01086,-47.2841,118.85567,5,54,-96,PTP,0.2,fcu,fcu
+P_SCAN_AP,PTP,60
+#plannerSeed: -3.2451; -51.3655; -166.2104; 39.3372; -52.9883; -111.2392; 8.2017 - what should be here?

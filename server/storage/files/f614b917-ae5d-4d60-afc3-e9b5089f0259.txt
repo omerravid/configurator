@@ -1,0 +1,6 @@
+#P_HOME_P_TLB_OUT
+<lbrR>
+<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
+P_HOME,PTP,0.25
+#P1,BaseCor/BaseWork,-447.31,98.75,263.84231,-22.42436,-48.66985,-123.51647,3,15,-96,PTP,0.25,fcu,fcu
+#plannerSeed: -97.63; -101.7; -88.74; -101.58; 24.39; 105.41; -156.19
