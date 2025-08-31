@@ -345,7 +345,7 @@ const FileManagementPanel = ({
           </div>
           <div className="min-w-0 flex-1">
             <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-              {metadata.originalName || 'Unknown File'}
+              {(metadata.originalName || 'Unknown File').replace(/\./g, '_')}
             </h4>
             <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
               {metadata.mimeType && (
@@ -521,7 +521,7 @@ const FileManagementPanel = ({
                 <div className="relative bg-gray-50 dark:bg-gray-700 p-4">
                   <img
                     src={imagePreviewUrl}
-                    alt={metadata.originalName || 'Image preview'}
+                    alt={(metadata.originalName || 'Image preview').replace(/\./g, '_')}
                     className="max-w-full max-h-96 mx-auto block object-contain rounded shadow-sm"
                     onError={handleImageLoadError}
                     style={{
@@ -529,7 +529,7 @@ const FileManagementPanel = ({
                     }}
                   />
                   <div className="absolute top-6 right-6 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
-                    {metadata.originalName}
+                    {(metadata.originalName || '').replace(/\./g, '_')}
                   </div>
                   {metadata.size && (
                     <div className="absolute bottom-6 left-6 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
