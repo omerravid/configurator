@@ -141,7 +141,8 @@ class BackupRestore {
             await User.create({
               username: userData.username,
               password: userData.password, // Already hashed in backup
-              role: userData.role
+              role: userData.role,
+              passwordIsHashed: true
             });
             restoredUsers++;
           }
