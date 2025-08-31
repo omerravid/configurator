@@ -99,11 +99,17 @@ export function jsonToPprm(jsonData) {
       
       if (Array.isArray(values)) {
         lines.push(`# Variable: ${varName}`);
-        
+
+        let hasValues = false;
         for (let i = 0; i < values.length; i++) {
           const value = values[i];
+
+          // Skip empty, undefined, or null values
+          if (value === undefined || value === null || value === '') {
+            continue;
+          }
+
           let formattedValue;
-          
           if (typeof value === 'string') {
             // Quote strings that contain spaces or special characters
             if (value.includes(' ') || value.includes('=') || value.includes('[') || value.includes(']')) {
@@ -114,11 +120,20 @@ export function jsonToPprm(jsonData) {
           } else {
             formattedValue = String(value);
           }
-          
-          lines.push(`${varName}[${i}]=${formattedValue}`);
+
+          // Handle scalar case (single value at index 1 without brackets)
+          if (i === 1 && values.length === 2 && values[0] === undefined) {
+            lines.push(`${varName}=${formattedValue}`);
+          } else {
+            lines.push(`${varName}[${i}]=${formattedValue}`);
+          }
+          hasValues = true;
         }
-        
-        lines.push(''); // Empty line between variables
+
+        // Only add empty line if we actually wrote some values
+        if (hasValues) {
+          lines.push(''); // Empty line between variables
+        }
       }
     }
   }
