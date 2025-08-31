@@ -2,7 +2,7 @@ const express = require("express");
 const Joi = require("joi");
 const { Configuration } = require("../models");
 const ConfigurationService = require("../services/ConfigurationService");
-const { authenticateToken, requireAdmin } = require("../middleware/auth");
+const { authenticateToken, authenticateTokenOrApiKey, requireAdmin } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -85,7 +85,7 @@ const checkConfigPermissions = async (req, res, next) => {
 };
 
 // GET /api/configs - List all configurations
-router.get("/", authenticateToken, async (req, res) => {
+router.get("/", authenticateTokenOrApiKey, async (req, res) => {
   try {
     const { type, status, includeArchived } = req.query;
     const showArchived = includeArchived === 'true';
@@ -121,7 +121,7 @@ router.get("/", authenticateToken, async (req, res) => {
 });
 
 // GET /api/configs/components - Get all components with their versions
-router.get("/components", authenticateToken, async (req, res) => {
+router.get("/components", authenticateTokenOrApiKey, async (req, res) => {
   try {
     const components = await Configuration.findByType("COMPONENT");
 
@@ -211,7 +211,7 @@ router.post("/", authenticateToken, async (req, res) => {
 });
 
 // GET /api/configs/:id - Get resolved configuration
-router.get("/:id", authenticateToken, async (req, res) => {
+router.get("/:id", authenticateTokenOrApiKey, async (req, res) => {
   try {
     const { provenance, raw } = req.query;
     const includeProvenance = provenance === "true";
@@ -364,7 +364,7 @@ router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
 });
 
 // GET /api/configs/:id/data - Get specific path from resolved configuration
-router.get("/:id/data", authenticateToken, async (req, res) => {
+router.get("/:id/data", authenticateTokenOrApiKey, async (req, res) => {
   try {
     const { path, minimal } = req.query;
     const isMinimal = minimal === "true";
@@ -446,7 +446,7 @@ router.post(
 );
 
 // GET /api/configs/:id/children - Get child configurations
-router.get("/:id/children", authenticateToken, async (req, res) => {
+router.get("/:id/children", authenticateTokenOrApiKey, async (req, res) => {
   try {
     const { includeArchived } = req.query;
     const children = await Configuration.findByParentId(req.params.id, includeArchived === 'true');
