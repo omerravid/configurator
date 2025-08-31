@@ -377,7 +377,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 {dbStatus.connected ? (
                   <WifiIcon className="w-5 h-5 text-green-500" />
                 ) : (
-                  <WifiSlashIcon className="w-5 h-5 text-gray-400" />
+                  <XCircleIcon className="w-5 h-5 text-gray-400" />
                 )}
                 <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
                   {dbStatus.type === 'mongodb' ? 'MongoDB' : 'SQLite'}
@@ -504,7 +504,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                     value={s3Config.secretAccessKey}
                     onChange={(e) => setS3Config({...s3Config, secretAccessKey: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
-                    placeholder="���•••••••"
+                    placeholder="••••••••"
                   />
                 </div>
               </div>
