@@ -286,6 +286,11 @@ class Configuration {
     return config;
   }
 
+  static async deleteAll() {
+    await db.query("DELETE FROM configurations");
+    return true;
+  }
+
   static async findByCreatedBy(userId) {
     const result = await db.query(
       `SELECT c.*, pc.name as parent_name, pc.type as parent_type
