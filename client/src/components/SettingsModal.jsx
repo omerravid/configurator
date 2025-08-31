@@ -101,8 +101,13 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
   const loadBackups = async () => {
     try {
-      // We'll need to implement this endpoint
-      setBackups([]);
+      const response = await fetch('/api/settings/data/backups', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setBackups(data.backups || []);
+      }
     } catch (error) {
       console.error('Failed to load backups:', error);
     }
