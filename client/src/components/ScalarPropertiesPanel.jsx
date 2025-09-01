@@ -909,7 +909,9 @@ const ScalarPropertiesPanel = ({
       let existingRules = [];
       if (response.ok) {
         const data = await response.json();
-        existingRules = Array.isArray(data) ? data : [];
+        console.log("Raw API response:", data);
+        // API returns { rules: [...] } so extract the rules array
+        existingRules = Array.isArray(data.rules) ? data.rules : (Array.isArray(data) ? data : []);
       }
       console.log("Existing rules:", existingRules);
 
