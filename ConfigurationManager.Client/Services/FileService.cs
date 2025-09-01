@@ -69,8 +69,8 @@ public interface IFileService
 /// </summary>
 public class FileService : BaseHttpService, IFileService
 {
-    public FileService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<FileService> logger)
-        : base(httpClient, options, logger)
+    public FileService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<FileService> logger, IAuthenticationManager authManager)
+        : base(httpClient, options, logger, authManager)
     {
     }
 
