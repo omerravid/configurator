@@ -350,7 +350,15 @@ const ScalarPropertiesPanel = ({
   }, [componentRef?.componentId]);
 
   const validateValue = async (propertyName, value) => {
-    if (!selectedConfig?.id) return true;
+    console.log("=== validateValue DEBUG ===");
+    console.log("propertyName:", propertyName);
+    console.log("value:", value);
+    console.log("selectedConfig:", selectedConfig);
+
+    if (!selectedConfig?.id) {
+      console.log("No selectedConfig.id, returning true");
+      return true;
+    }
 
     // Build the full property path
     let fullPropertyPath;
@@ -362,8 +370,16 @@ const ScalarPropertiesPanel = ({
       fullPropertyPath = `${cleanSelectedPath}.${propertyName}`;
     }
 
+    console.log("fullPropertyPath:", fullPropertyPath);
+    console.log("API payload:", {
+      configurationId: selectedConfig.id,
+      propertyPath: fullPropertyPath,
+      value: value
+    });
+
     try {
       setIsValidating(true);
+      console.log("Making validation request...");
       const response = await fetch('/api/rules/validate', {
         method: 'POST',
         headers: {
@@ -377,22 +393,32 @@ const ScalarPropertiesPanel = ({
         })
       });
 
+      console.log("Validation response status:", response.status);
       const result = await response.json();
+      console.log("Validation result:", result);
 
       if (!response.ok) {
+        console.log("Validation response not ok:", result);
         setValidationError(result.error || 'Validation failed');
         return false;
       }
 
       if (!result.isValid) {
+        console.log("Validation failed:", result.errors);
         setValidationError(result.errors.join(', '));
         return false;
       }
 
+      console.log("Validation passed");
       setValidationError("");
       return true;
     } catch (error) {
       console.error('Validation error:', error);
+      console.error("Error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
       setValidationError('Validation service unavailable');
       return false;
     } finally {
