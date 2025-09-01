@@ -277,7 +277,7 @@ const RuleAwareInput = ({
                 ? 'border-red-300 focus:ring-red-500 dark:border-red-500'
                 : 'border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-400'
             } ${className}`}
-            title={`Must be ${config.operator === 'greater' ? '>' : config.operator === 'greaterEquals' ? '≥' : config.operator === 'smaller' ? '<' : config.operator === 'smallerEquals' ? '≤' : '='} ${config.value}`}
+            title={`Must be ${constraints.join(' and ')}`}
           />
           {isValidating && (
             <div className="text-xs text-gray-500 dark:text-gray-400">Validating...</div>
