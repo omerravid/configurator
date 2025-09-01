@@ -216,8 +216,11 @@ const RuleDefinitionDialog = ({
         console.log("Verification fetch status:", verifyResponse.status);
         if (verifyResponse.ok) {
           const verifyData = await verifyResponse.json();
-          console.log("Verification: Rules found after save:", verifyData);
-          console.log("Number of rules found:", Array.isArray(verifyData) ? verifyData.length : 'Not an array');
+          console.log("Verification: Raw API response:", verifyData);
+          // API returns { rules: [...] } so extract the rules array
+          const verifyRules = Array.isArray(verifyData.rules) ? verifyData.rules : (Array.isArray(verifyData) ? verifyData : []);
+          console.log("Verification: Rules found after save:", verifyRules);
+          console.log("Number of rules found:", verifyRules.length);
         } else {
           console.error("Verification fetch failed:", verifyResponse.status);
         }
