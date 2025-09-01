@@ -292,22 +292,30 @@ class ConfigurationService {
 
     if (minimal) {
       // For minimal requests, skip inheritance resolution and use raw config data
-      console.log(`Minimal request - skipping inheritance resolution for: ${configIdOrName}`);
+      console.log(`Minimal request - skipping inheritance resolution for: "${configIdOrName}"`);
 
       // Find the configuration directly
       let config = await Configuration.findById(configIdOrName);
+      console.log(`findById result:`, config ? `Found config: ${config.name}` : 'Not found by ID');
+
       if (!config) {
+        console.log(`Trying findByName for: "${configIdOrName}"`);
         config = await Configuration.findByName(configIdOrName);
+        console.log(`findByName result:`, config ? `Found config: ${config.name} (ID: ${config.id})` : 'Not found by name');
       }
+
       if (!config) {
+        console.error(`Configuration not found for: "${configIdOrName}"`);
         throw new Error(`Configuration not found: ${configIdOrName}`);
       }
 
       // Use raw config data without inheritance
+      console.log(`Config data type: ${typeof config.data}, isString: ${typeof config.data === "string"}`);
       current = typeof config.data === "string" ? JSON.parse(config.data) : config.data;
-      console.log(`Using raw config data for minimal request - type: ${typeof current}`);
+      console.log(`Using raw config data for minimal request - type: ${typeof current}, keys:`, current ? Object.keys(current).slice(0, 5) : 'null/undefined');
     } else {
       // For non-minimal requests, use full inheritance resolution
+      console.log(`Non-minimal request - using inheritance resolution for: "${configIdOrName}"`);
       resolved = await this.resolveConfiguration(configIdOrName, true);
       current = resolved.resolved;
     }
