@@ -395,22 +395,21 @@ router.get("/by-name/:name/data", authenticateTokenOrApiKey, async (req, res) =>
     console.log(`Found configuration: "${config.name}" (ID: ${config.id})`);
 
     if (!path || path.trim() === "") {
-      // If no path provided, return the complete configuration
-      if (isMinimal) {
-        // For minimal requests, return raw config data without inheritance
-        console.log(`Minimal request for full config - returning raw data for: ${config.name}`);
-        const rawData = typeof config.data === "string" ? JSON.parse(config.data) : config.data;
-        const fixedRawData = await ConfigurationService.fixFileUrls(rawData);
-        return res.json(fixedRawData);
-      } else {
-        // For non-minimal requests, resolve with full inheritance
-        const result = await ConfigurationService.resolveConfiguration(
-          config.id,
-          true, // Include provenance for non-minimal
-        );
+      // If no path provided, return the complete resolved configuration
+      const result = await ConfigurationService.resolveConfiguration(
+        config.id,
+        !isMinimal, // Include provenance only if not minimal
+      );
 
-        // Fix file URLs in resolved data
-        const fixedResolved = await ConfigurationService.fixFileUrls(result.resolved);
+      // Fix file URLs in resolved data
+      const fixedResolved = await ConfigurationService.fixFileUrls(result.resolved);
+
+      if (isMinimal) {
+        // For minimal, extract actual values and return just the data
+        const actualData = ConfigurationService.extractActualValue(fixedResolved);
+        console.log(`Minimal request for full config - extracted actual data for: ${config.name}`);
+        return res.json(actualData);
+      } else {
         return res.json({ data: fixedResolved, metadata: result.metadata });
       }
     }
