@@ -259,28 +259,22 @@ public abstract class BaseHttpService
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
 
-            try
-            {
-                // Try to deserialize directly to the expected type first
-                var result = JsonSerializer.Deserialize<T>(content, options);
-                Logger.LogDebug("Successfully deserialized response to {Type}", typeof(T).Name);
-                return result ?? throw new ApiException("Failed to deserialize response");
-            }
-            catch (JsonException ex)
-            {
-                // Special handling for ConfigurationValueResponse when minimal=true
-                // Server returns raw value instead of wrapped object
-                if (typeof(T).Name == "ConfigurationValueResponse")
-                {
-                    Logger.LogInformation("Handling minimal response for ConfigurationValueResponse - Content: '{Content}', Length: {Length}",
-                        content, content?.Length ?? 0);
+            // Always use Object deserialization first since it works reliably
+            var contentObj = JsonSerializer.Deserialize<Object>(content, options);
+            Logger.LogDebug("Content deserialized as Object: {ContentType}", contentObj?.GetType().Name ?? "null");
 
-                    return CreateConfigurationValueResponse<T>(content, options);
-                }
-
-                Logger.LogError(ex, "Failed to deserialize response: {Content}", content);
-                throw new ApiException("Failed to deserialize response", ex);
+            // Special handling for ConfigurationValueResponse when minimal=true
+            if (typeof(T).Name == "ConfigurationValueResponse")
+            {
+                Logger.LogInformation("Handling ConfigurationValueResponse - Content Length: {Length}", content?.Length ?? 0);
+                return CreateConfigurationValueResponse<T>(content, options);
             }
+
+            // For other types, serialize the Object back to JSON and deserialize to T
+            var reserializedJson = JsonSerializer.Serialize(contentObj, options);
+            var result = JsonSerializer.Deserialize<T>(reserializedJson, options);
+            Logger.LogDebug("Successfully converted to {Type}", typeof(T).Name);
+            return result ?? throw new ApiException("Failed to convert response to target type");
         }
 
         await HandleErrorResponse(response);
