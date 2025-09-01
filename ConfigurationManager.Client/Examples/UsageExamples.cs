@@ -29,9 +29,7 @@ public static class UsageExamples
         // Login with username and password
         var authResponse = await loginClient.Auth.LoginAsync("admin", "admin123");
 
-        // IMPORTANT: Set the JWT token for all services after login
-        loginClient.SetJwtToken(authResponse.Token);
-
+        // JWT token is automatically set for all services after login
         Console.WriteLine($"Logged in as: {authResponse.User.Username}");
 
         // Option 3: Create client with JWT token
