@@ -20,11 +20,20 @@ public abstract class BaseHttpService
         Options = options.Value;
         Logger = logger;
 
-        ConfigureAuthenticationHeaders();
+        ConfigureHttpClient();
     }
 
-    private void ConfigureAuthenticationHeaders()
+    private void ConfigureHttpClient()
     {
+        // Ensure BaseAddress is set (fallback if DI configuration failed)
+        if (HttpClient.BaseAddress == null && !string.IsNullOrEmpty(Options.BaseUrl))
+        {
+            HttpClient.BaseAddress = new Uri(Options.BaseUrl);
+        }
+
+        // Set timeout
+        HttpClient.Timeout = Options.Timeout;
+
         // Set authentication headers
         if (!string.IsNullOrEmpty(Options.JwtToken))
         {
