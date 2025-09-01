@@ -235,7 +235,7 @@ public class ConfigurationManagerClient : IConfigurationManagerClient
     {
         try
         {
-            using var response = await _httpClient.GetAsync("/health", cancellationToken);
+            using var response = await _httpClient.GetAsync("health", cancellationToken);
             return response.IsSuccessStatusCode;
         }
         catch (Exception)
