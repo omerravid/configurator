@@ -178,7 +178,7 @@ public class ConfigurationManagerClient : IConfigurationManagerClient
         });
 
         // Configure generic HttpClient for health checks
-        services.AddHttpClient(client =>
+        services.AddHttpClient("GenericClient", client =>
         {
             client.BaseAddress = new Uri(options.BaseUrl);
             client.Timeout = options.Timeout;

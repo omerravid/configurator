@@ -30,12 +30,13 @@ public static class ServiceCollectionExtensions
         services.Configure(configure);
 
         // Configure generic HttpClient for health checks and other operations
-        services.AddHttpClient((serviceProvider, client) =>
-        {
-            var options = serviceProvider.GetRequiredService<IOptions<ConfigurationManagerClientOptions>>().Value;
-            client.BaseAddress = new Uri(options.BaseUrl);
-            client.Timeout = options.Timeout;
-        });
+        services.AddHttpClient("GenericClient")
+            .ConfigureHttpClient((serviceProvider, client) =>
+            {
+                var options = serviceProvider.GetRequiredService<IOptions<ConfigurationManagerClientOptions>>().Value;
+                client.BaseAddress = new Uri(options.BaseUrl);
+                client.Timeout = options.Timeout;
+            });
 
         // Add HttpClient for each service with proper configuration
         services.AddHttpClient<IAuthService, AuthService>((serviceProvider, client) =>
