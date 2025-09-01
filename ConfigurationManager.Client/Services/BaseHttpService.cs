@@ -281,6 +281,51 @@ public abstract class BaseHttpService
     }
 
     /// <summary>
+    /// Create ConfigurationValueResponse from raw content when minimal=true
+    /// </summary>
+    private T CreateConfigurationValueResponse<T>(string content, JsonSerializerOptions options)
+    {
+        JsonElement valueElement;
+
+        // Handle empty or whitespace content
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            valueElement = new JsonElement();
+        }
+        else
+        {
+            try
+            {
+                // First, try to parse the content as valid JSON (could be object, array, string, number, boolean, null)
+                valueElement = JsonSerializer.Deserialize<JsonElement>(content, options);
+            }
+            catch (JsonException)
+            {
+                // If it's not valid JSON, treat it as a raw string
+                // Remove surrounding quotes if present and treat as string value
+                var cleanContent = content.Trim();
+                if (cleanContent.StartsWith("\"") && cleanContent.EndsWith("\"") && cleanContent.Length >= 2)
+                {
+                    cleanContent = cleanContent.Substring(1, cleanContent.Length - 2);
+                }
+                valueElement = JsonSerializer.SerializeToElement(cleanContent, options);
+            }
+        }
+
+        // Create the ConfigurationValueResponse JSON structure
+        var responseJson = JsonSerializer.Serialize(new { value = valueElement }, options);
+
+        // Deserialize to the expected type
+        var result = JsonSerializer.Deserialize<T>(responseJson, options);
+        if (result == null)
+        {
+            throw new ApiException("Failed to create ConfigurationValueResponse from minimal response");
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// Handle error responses and throw appropriate exceptions
     /// </summary>
     private async Task HandleErrorResponse(HttpResponseMessage response)
