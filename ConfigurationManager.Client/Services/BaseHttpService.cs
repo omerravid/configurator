@@ -248,14 +248,15 @@ public abstract class BaseHttpService
                 return (T)(object)content;
             }
 
+            // Define JSON options outside try block so it's accessible in catch block
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
             try
             {
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                };
-
                 var result = JsonSerializer.Deserialize<T>(content, options);
                 return result ?? throw new ApiException("Failed to deserialize response");
             }
