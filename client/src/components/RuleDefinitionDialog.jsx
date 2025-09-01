@@ -119,7 +119,15 @@ const RuleDefinitionDialog = ({
 
       // Save new rules and update existing ones
       for (const [index, rule] of rules.entries()) {
-        console.log(`Processing rule ${index}:`, rule);
+        console.log(`\n=== Processing rule ${index} ===`);
+        console.log("Full rule object:", rule);
+        console.log("rule.isNew:", rule.isNew);
+        console.log("rule.isExisting:", rule.isExisting);
+        console.log("rule.id:", rule.id);
+        console.log("rule.id type:", typeof rule.id);
+        console.log("rule.id startsWith temp?:", rule.id?.startsWith('temp-'));
+        console.log("Condition - isNew:", rule.isNew);
+        console.log("Condition - isExisting && id && !temp:", rule.isExisting && rule.id && !rule.id.startsWith('temp-'));
 
         if (rule.isNew) {
           // Create new rule
