@@ -134,6 +134,7 @@ const RuleDefinitionDialog = ({
           };
           console.log("Create rule payload:", payload);
 
+          console.log("Making POST request to /api/rules...");
           const response = await fetch('/api/rules', {
             method: 'POST',
             headers: {
@@ -144,15 +145,18 @@ const RuleDefinitionDialog = ({
           });
 
           console.log("Create rule response status:", response.status);
+          console.log("Create rule response headers:", Object.fromEntries(response.headers.entries()));
 
           if (!response.ok) {
             const errorData = await response.text();
             console.error("Create rule failed:", errorData);
+            console.error("Response status:", response.status, response.statusText);
             throw new Error(`Failed to create rule: ${response.status} ${errorData}`);
           }
 
           const createdRule = await response.json();
           console.log("Rule created successfully:", createdRule);
+          console.log("Created rule ID:", createdRule.id);
         } else if (rule.isExisting && rule.id && !rule.id.startsWith('temp-')) {
           // Update existing rule
           const response = await fetch(`/api/rules/${rule.id}`, {
