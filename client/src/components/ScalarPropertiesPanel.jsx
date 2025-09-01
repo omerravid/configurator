@@ -349,9 +349,61 @@ const ScalarPropertiesPanel = ({
     }
   }, [componentRef?.componentId]);
 
+  const validateValue = async (propertyName, value) => {
+    if (!selectedConfig?.id) return true;
+
+    // Build the full property path
+    let fullPropertyPath;
+    if (selectedPath === "root") {
+      fullPropertyPath = propertyName;
+    } else {
+      // Remove "root." prefix from selectedPath if present
+      const cleanSelectedPath = selectedPath.startsWith("root.") ? selectedPath.substring(5) : selectedPath;
+      fullPropertyPath = `${cleanSelectedPath}.${propertyName}`;
+    }
+
+    try {
+      setIsValidating(true);
+      const response = await fetch('/api/rules/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          configurationId: selectedConfig.id,
+          propertyPath: fullPropertyPath,
+          value: value
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setValidationError(result.error || 'Validation failed');
+        return false;
+      }
+
+      if (!result.isValid) {
+        setValidationError(result.errors.join(', '));
+        return false;
+      }
+
+      setValidationError("");
+      return true;
+    } catch (error) {
+      console.error('Validation error:', error);
+      setValidationError('Validation service unavailable');
+      return false;
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
   const handleEditStart = (propertyName, value) => {
     setEditingProperty(propertyName);
     setEditValue(safeToString(value));
+    setValidationError("");
   };
 
   const handleEditSave = (propertyName) => {
