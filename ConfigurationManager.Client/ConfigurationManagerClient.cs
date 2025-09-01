@@ -179,42 +179,45 @@ public class ConfigurationManagerClient : IConfigurationManagerClient
             builder.SetMinimumLevel(LogLevel.Information);
         });
 
+        // Ensure the base URL ends with a slash for proper relative path combination
+        var baseUrl = options.BaseUrl.TrimEnd('/') + "/";
+
         // Configure generic HttpClient for health checks
         services.AddHttpClient("GenericClient", client =>
         {
-            client.BaseAddress = new Uri(options.BaseUrl);
+            client.BaseAddress = new Uri(baseUrl);
             client.Timeout = options.Timeout;
         });
 
         // Configure HttpClient with base URL
         services.AddHttpClient<IAuthService, AuthService>(client =>
         {
-            client.BaseAddress = new Uri(options.BaseUrl);
+            client.BaseAddress = new Uri(baseUrl);
             client.Timeout = options.Timeout;
         });
         services.AddHttpClient<IConfigurationService, ConfigurationService>(client =>
         {
-            client.BaseAddress = new Uri(options.BaseUrl);
+            client.BaseAddress = new Uri(baseUrl);
             client.Timeout = options.Timeout;
         });
         services.AddHttpClient<IFileService, FileService>(client =>
         {
-            client.BaseAddress = new Uri(options.BaseUrl);
+            client.BaseAddress = new Uri(baseUrl);
             client.Timeout = options.Timeout;
         });
         services.AddHttpClient<IUserService, UserService>(client =>
         {
-            client.BaseAddress = new Uri(options.BaseUrl);
+            client.BaseAddress = new Uri(baseUrl);
             client.Timeout = options.Timeout;
         });
         services.AddHttpClient<IRulesService, RulesService>(client =>
         {
-            client.BaseAddress = new Uri(options.BaseUrl);
+            client.BaseAddress = new Uri(baseUrl);
             client.Timeout = options.Timeout;
         });
         services.AddHttpClient<ISettingsService, SettingsService>(client =>
         {
-            client.BaseAddress = new Uri(options.BaseUrl);
+            client.BaseAddress = new Uri(baseUrl);
             client.Timeout = options.Timeout;
         });
 
