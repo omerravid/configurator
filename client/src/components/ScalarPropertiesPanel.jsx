@@ -514,6 +514,57 @@ const ScalarPropertiesPanel = ({
   };
 
   // Array editing handlers
+  const validateArrayItem = async (arrayName, value) => {
+    if (!selectedConfig?.id) return true;
+
+    // Build the full property path for the array
+    let fullPropertyPath;
+    if (selectedPath === "root") {
+      fullPropertyPath = arrayName;
+    } else {
+      // Remove "root." prefix from selectedPath if present
+      const cleanSelectedPath = selectedPath.startsWith("root.") ? selectedPath.substring(5) : selectedPath;
+      fullPropertyPath = `${cleanSelectedPath}.${arrayName}`;
+    }
+
+    try {
+      setIsValidating(true);
+      const response = await fetch('/api/rules/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          configurationId: selectedConfig.id,
+          propertyPath: fullPropertyPath,
+          value: value
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setValidationError(result.error || 'Validation failed');
+        return false;
+      }
+
+      if (!result.isValid) {
+        setValidationError(result.errors.join(', '));
+        return false;
+      }
+
+      setValidationError("");
+      return true;
+    } catch (error) {
+      console.error('Array validation error:', error);
+      setValidationError('Validation service unavailable');
+      return false;
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
   const handleArrayValueChange = (arrayName, index, newValue) => {
     console.log("Array value change:", { arrayName, index, newValue, selectedPath });
 
