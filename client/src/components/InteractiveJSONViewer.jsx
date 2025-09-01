@@ -381,7 +381,7 @@ const TreeNode = ({
         isOpen: true,
         configurationId: selectedConfig.id,
         propertyPath: cleanPath,
-        existingRules: []
+        existingRules: [] // Explicitly ensure it's an empty array
       });
     }
   };
@@ -427,7 +427,7 @@ const TreeNode = ({
       if (source && !isRoot) {
         menuItems.push({
           label: "Reset to Inherited",
-          icon: () => <span className="text-orange-500 text-sm font-bold">↺</span>,
+          icon: () => <span className="text-orange-500 text-sm font-bold">���</span>,
           onClick: handleReset,
         });
       }
@@ -560,7 +560,7 @@ const TreeNode = ({
                 className="text-xs px-2 py-0.5 rounded bg-gray-200 hover:bg-gray-300 text-gray-700"
                 title={isTxt ? 'Toggle text preview' : 'Toggle JSON preview'}
               >
-                {hdrVisible ? 'Hide Preview' : (hdrLoading ? 'Loading…' : 'Preview')}
+                {hdrVisible ? 'Hide Preview' : (hdrLoading ? 'Loading���' : 'Preview')}
               </button>
             )}
           </div>
