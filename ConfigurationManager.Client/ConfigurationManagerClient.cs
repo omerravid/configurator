@@ -102,7 +102,8 @@ public class ConfigurationManagerClient : IConfigurationManagerClient
         _serviceProvider = services.BuildServiceProvider();
 
         // Get HttpClient instance
-        _httpClient = _serviceProvider.GetRequiredService<HttpClient>();
+        var httpClientFactory = _serviceProvider.GetRequiredService<IHttpClientFactory>();
+        _httpClient = httpClientFactory.CreateClient("GenericClient");
 
         // Initialize all services
         Auth = _serviceProvider.GetRequiredService<IAuthService>();
