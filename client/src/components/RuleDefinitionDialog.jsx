@@ -201,6 +201,11 @@ const RuleDefinitionDialog = ({
             console.error("Update failed status:", response.status, response.statusText);
             throw new Error(`Failed to update rule: ${response.status} ${errorText}`);
           }
+        } else {
+          // This shouldn't happen - log for debugging
+          console.warn("=== UNHANDLED RULE CONDITION ===");
+          console.warn("Rule doesn't match create or update conditions:", rule);
+          console.warn("This rule will be skipped!");
         }
       }
 
