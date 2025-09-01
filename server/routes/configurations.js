@@ -377,6 +377,18 @@ router.get("/by-name/:name/data", authenticateTokenOrApiKey, async (req, res) =>
     const config = await Configuration.findByName(configName);
     if (!config) {
       console.log(`Configuration not found with name: "${configName}"`);
+
+      // Debug: List all available configuration names
+      try {
+        const allConfigs = await Configuration.findAll(false);
+        console.log(`Available configurations (${allConfigs.length}):`);
+        allConfigs.forEach((c, index) => {
+          console.log(`  ${index + 1}. "${c.name}" (Type: ${c.type})`);
+        });
+      } catch (debugError) {
+        console.log(`Error listing configurations for debug: ${debugError.message}`);
+      }
+
       return res.status(404).json({ error: "Configuration not found" });
     }
 
