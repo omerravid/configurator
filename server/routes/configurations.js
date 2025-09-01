@@ -363,6 +363,62 @@ router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
   }
 });
 
+// GET /api/configs/by-name/:name/data - Get specific path from resolved configuration by name
+router.get("/by-name/:name/data", authenticateTokenOrApiKey, async (req, res) => {
+  try {
+    const { path, minimal } = req.query;
+    const isMinimal = minimal === "true";
+
+    // First find the configuration by name
+    const config = await Configuration.findByName(req.params.name);
+    if (!config) {
+      return res.status(404).json({ error: "Configuration not found" });
+    }
+
+    if (!path || path.trim() === "") {
+      // If no path provided, return the complete resolved configuration
+      const result = await ConfigurationService.resolveConfiguration(
+        config.id,
+        !isMinimal, // Include provenance only if not minimal
+      );
+
+      // Fix file URLs in resolved data
+      const fixedResolved = await ConfigurationService.fixFileUrls(result.resolved);
+
+      if (isMinimal) {
+        // Return just the resolved data with no metadata
+        return res.json(fixedResolved);
+      } else {
+        return res.json({ data: fixedResolved, metadata: result.metadata });
+      }
+    }
+
+    const result = await ConfigurationService.getValueAtPath(
+      config.id,
+      path,
+      isMinimal
+    );
+
+    // Fix file URLs in path result
+    const fixedResult = await ConfigurationService.fixFileUrls(result);
+
+    if (isMinimal) {
+      // Return just the value (already minimal from service)
+      res.json(fixedResult);
+    } else {
+      res.json({ data: fixedResult });
+    }
+  } catch (error) {
+    console.error("Get configuration path by name error:", error);
+
+    if (error.message.includes("not found")) {
+      return res.status(404).json({ error: error.message });
+    }
+
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // GET /api/configs/:id/data - Get specific path from resolved configuration
 router.get("/:id/data", authenticateTokenOrApiKey, async (req, res) => {
   try {
