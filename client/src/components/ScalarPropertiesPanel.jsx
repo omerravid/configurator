@@ -51,7 +51,6 @@ const ScalarPropertiesPanel = ({
   // Validation state
   const [validationError, setValidationError] = useState("");
   const [isValidating, setIsValidating] = useState(false);
-  const validateTimeoutRef = React.useRef(null);
 
   // Extract actual value and source from provenance wrapper
   const getActualValueAndSource = (val) => {
