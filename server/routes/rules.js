@@ -176,8 +176,17 @@ router.get("/configuration/:configId/path/:path(*)", authenticateToken, async (r
   try {
     const { configId, path } = req.params;
     const decodedPath = decodeURIComponent(path);
-    
-    const rules = await Rule.findByConfigurationAndPath(configId, decodedPath);
+    const { includeInherited = 'true' } = req.query;
+
+    let rules;
+    if (includeInherited === 'true') {
+      // Get rules from inheritance chain (default behavior)
+      rules = await Rule.findByConfigurationAndPathWithInheritance(configId, decodedPath);
+    } else {
+      // Get only rules defined at this specific configuration level
+      rules = await Rule.findByConfigurationAndPath(configId, decodedPath);
+    }
+
     res.json({ rules });
   } catch (error) {
     console.error("Failed to fetch rules for path:", error);
