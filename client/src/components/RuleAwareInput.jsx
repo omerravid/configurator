@@ -212,31 +212,49 @@ const RuleAwareInput = ({
   }
 
   // For numeric rules, render a number input with constraints
-  if (numericRule) {
-    const config = numericRule.ruleConfig;
-    let min, max, step;
+  if (numericRules.length > 0) {
+    let min, max, step = 1;
+    let constraints = [];
+    let allIntegerValues = true;
 
-    // Determine constraints based on the operator
-    switch (config.operator) {
-      case 'greater':
-        min = config.value + (Number.isInteger(config.value) ? 1 : 0.001);
-        break;
-      case 'greaterEquals':
-        min = config.value;
-        break;
-      case 'smaller':
-        max = config.value - (Number.isInteger(config.value) ? 1 : 0.001);
-        break;
-      case 'smallerEquals':
-        max = config.value;
-        break;
-      case 'equals':
-        min = max = config.value;
-        break;
-    }
+    // Process all numeric rules to determine combined constraints
+    numericRules.forEach(rule => {
+      const config = rule.ruleConfig;
 
-    // Set step based on whether the constraint value is an integer
-    step = Number.isInteger(config.value) ? 1 : 0.001;
+      // Track if all values are integers for step calculation
+      if (!Number.isInteger(config.value)) {
+        allIntegerValues = false;
+      }
+
+      // Determine constraints based on the operator
+      switch (config.operator) {
+        case 'greater':
+          const greaterMin = config.value + (Number.isInteger(config.value) ? 1 : 0.001);
+          min = min === undefined ? greaterMin : Math.max(min, greaterMin);
+          constraints.push(`> ${config.value}`);
+          break;
+        case 'greaterEquals':
+          min = min === undefined ? config.value : Math.max(min, config.value);
+          constraints.push(`≥ ${config.value}`);
+          break;
+        case 'smaller':
+          const smallerMax = config.value - (Number.isInteger(config.value) ? 1 : 0.001);
+          max = max === undefined ? smallerMax : Math.min(max, smallerMax);
+          constraints.push(`< ${config.value}`);
+          break;
+        case 'smallerEquals':
+          max = max === undefined ? config.value : Math.min(max, config.value);
+          constraints.push(`≤ ${config.value}`);
+          break;
+        case 'equals':
+          min = max = config.value;
+          constraints.push(`= ${config.value}`);
+          break;
+      }
+    });
+
+    // Set step based on whether all constraint values are integers
+    step = allIntegerValues ? 1 : 0.001;
 
     return (
       <div className="flex flex-col space-y-1">
