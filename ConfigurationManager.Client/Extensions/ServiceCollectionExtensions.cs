@@ -1,6 +1,7 @@
 namespace ConfigurationManager.Client.Extensions;
 
 using ConfigurationManager.Client.Services;
+using Microsoft.Extensions.Configuration;
 
 /// <summary>
 /// Extension methods for configuring Configuration Manager client in dependency injection
