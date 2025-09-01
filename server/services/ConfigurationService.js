@@ -356,8 +356,8 @@ class ConfigurationService {
     }
 
     if (minimal) {
-      // Return just the raw value
-      return current;
+      // Return just the raw value, extracting from provenance wrapper
+      return this.extractActualValue(current);
     }
 
     // Return with metadata (legacy format)
