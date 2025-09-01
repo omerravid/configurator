@@ -145,7 +145,7 @@ public class ConfigurationValueRetriever
             var valueResponse = await _client.Configurations.GetConfigurationValueByNameAsync(
                 configurationName, path, minimal);
 
-            return valueResponse.Value?.ToString();
+            return ExtractJsonElementValue(valueResponse.Value)?.ToString();
         }
         catch (Exception ex)
         {
