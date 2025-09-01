@@ -406,7 +406,7 @@ const ScalarPropertiesPanel = ({
     setValidationError("");
   };
 
-  const handleEditSave = (propertyName) => {
+  const handleEditSave = async (propertyName) => {
     let newValue = editValue;
 
     // Try to parse as JSON for numbers, booleans, etc.
@@ -420,6 +420,12 @@ const ScalarPropertiesPanel = ({
       }
     } catch (e) {
       // Keep as string if parsing fails
+    }
+
+    // Validate the value before saving
+    const isValid = await validateValue(propertyName, newValue);
+    if (!isValid) {
+      return; // Don't save if validation fails
     }
 
     // Check if we're editing a property inside an array element
@@ -442,6 +448,7 @@ const ScalarPropertiesPanel = ({
     }
 
     setEditingProperty(null);
+    setValidationError("");
   };
 
   const handleEditCancel = () => {
