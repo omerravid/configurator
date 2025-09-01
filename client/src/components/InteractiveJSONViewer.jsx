@@ -312,8 +312,12 @@ const TreeNode = ({
   };
 
   const handleEditCancel = () => {
+    if (validateTimeoutRef.current) {
+      clearTimeout(validateTimeoutRef.current);
+    }
     setIsEditing(false);
     setEditValue(safeToString(actualValue));
+    setValidationError("");
   };
 
   const handleReset = () => {
