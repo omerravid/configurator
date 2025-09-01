@@ -250,8 +250,8 @@ const RuleAwareInput = ({
               handleInputChange(newValue);
             }}
             onKeyDown={handleKeyDown}
-            min={min}
-            max={max}
+            {...(min !== undefined && { min })}
+            {...(max !== undefined && { max })}
             step={step}
             autoFocus={autoFocus}
             className={`px-2 py-1 border rounded text-sm focus:outline-none focus:ring-2 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600 ${
