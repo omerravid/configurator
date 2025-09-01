@@ -76,18 +76,55 @@ class Rule {
     const { Configuration } = require('./index');
 
     try {
+      console.log("=== RULE INHERITANCE DEBUG (SQLite) ===");
+      console.log("Looking for rules for configId:", configurationId, "path:", propertyPath);
+
       // Get the full inheritance chain
       const inheritanceChain = await Configuration.getInheritanceChain(configurationId);
+      console.log("Inheritance chain:", inheritanceChain.map(c => ({ id: c.id, name: c.name, type: c.type })));
 
       // Extract configuration IDs from the chain
       const configIds = inheritanceChain.map(config => config.id);
 
-      if (configIds.length === 0) {
+      // Additional logic for instances and products: also check component references
+      const allConfigIds = [...configIds];
+
+      // For each configuration in the chain, check if it has component references
+      for (const config of inheritanceChain) {
+        if (config.data && typeof config.data === 'object') {
+          // Look for component references in the data
+          const pathParts = propertyPath.split('.');
+          if (pathParts.length > 0) {
+            const componentName = pathParts[0]; // e.g., "Battery" from "Battery.charging.maxWatts"
+
+            if (config.data[componentName] && config.data[componentName].componentId) {
+              const componentRef = config.data[componentName];
+              console.log(`Found component reference in ${config.name}:`, componentRef);
+
+              // Add the referenced component and version to our search
+              if (componentRef.componentId) {
+                allConfigIds.push(componentRef.componentId);
+                console.log("Added componentId:", componentRef.componentId);
+              }
+              if (componentRef.versionId && componentRef.versionId !== componentRef.componentId) {
+                allConfigIds.push(componentRef.versionId);
+                console.log("Added versionId:", componentRef.versionId);
+              }
+            }
+          }
+        }
+      }
+
+      // Remove duplicates
+      const uniqueConfigIds = [...new Set(allConfigIds)];
+      console.log("Final unique config IDs to search:", uniqueConfigIds);
+
+      if (uniqueConfigIds.length === 0) {
         return [];
       }
 
       // Create placeholders for the IN clause
-      const placeholders = configIds.map(() => '?').join(',');
+      const placeholders = uniqueConfigIds.map(() => '?').join(',');
 
       const { db } = require('./database');
       const result = await db.query(
@@ -96,11 +133,13 @@ class Rule {
          AND property_path = ?
          AND enabled = 1
          ORDER BY configuration_id, created_at`,
-        [...configIds, propertyPath]
+        [...uniqueConfigIds, propertyPath]
       );
 
       if (result.success) {
-        return result.rows.map(this.formatRule);
+        const rules = result.rows.map(this.formatRule);
+        console.log("Found rules:", rules.map(r => ({ id: r.id, configId: r.configurationId, type: r.ruleType, config: r.ruleConfig })));
+        return rules;
       }
       return [];
     } catch (error) {
