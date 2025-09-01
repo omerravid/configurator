@@ -20,14 +20,11 @@ public abstract class BaseHttpService
         Options = options.Value;
         Logger = logger;
 
-        ConfigureHttpClient();
+        ConfigureAuthenticationHeaders();
     }
 
-    private void ConfigureHttpClient()
+    private void ConfigureAuthenticationHeaders()
     {
-        HttpClient.BaseAddress = new Uri(Options.BaseUrl);
-        HttpClient.Timeout = Options.Timeout;
-
         // Set authentication headers
         if (!string.IsNullOrEmpty(Options.JwtToken))
         {
