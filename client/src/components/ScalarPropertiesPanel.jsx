@@ -876,7 +876,7 @@ const ScalarPropertiesPanel = ({
     }
   };
 
-  // Handle opening the rules dialog for a property
+  // Handle opening the rules dialog for a property or array
   const handleRulesClick = async (propertyName) => {
     console.log("=== handleRulesClick DEBUG ===");
     console.log("propertyName:", propertyName);
@@ -932,6 +932,76 @@ const ScalarPropertiesPanel = ({
       });
     } catch (error) {
       console.error("Failed to fetch existing rules:", error);
+      console.error("Error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      setRulesDialog({
+        isOpen: true,
+        configurationId: selectedConfig.id,
+        propertyPath: fullPropertyPath,
+        existingRules: [] // Explicitly ensure it's an empty array
+      });
+    }
+  };
+
+  // Handle opening the rules dialog for an array
+  const handleArrayRulesClick = async (arrayName) => {
+    console.log("=== handleArrayRulesClick DEBUG ===");
+    console.log("arrayName:", arrayName);
+    console.log("selectedConfig:", selectedConfig);
+    console.log("selectedPath:", selectedPath);
+    console.log("localStorage token:", localStorage.getItem('token') ? 'Present' : 'Missing');
+
+    if (!selectedConfig?.id) {
+      console.warn("No configuration ID available for array rules");
+      return;
+    }
+
+    // Build the full property path for the array (without index notation)
+    let fullPropertyPath;
+    if (selectedPath === "root") {
+      fullPropertyPath = arrayName;
+    } else {
+      // Remove "root." prefix from selectedPath if present
+      const cleanSelectedPath = selectedPath.startsWith("root.") ? selectedPath.substring(5) : selectedPath;
+      fullPropertyPath = `${cleanSelectedPath}.${arrayName}`;
+    }
+
+    console.log("fullPropertyPath:", fullPropertyPath);
+    const apiUrl = `/api/rules/configuration/${selectedConfig.id}/path/${encodeURIComponent(fullPropertyPath)}`;
+    console.log("API URL:", apiUrl);
+
+    try {
+      // Fetch existing rules for this array
+      console.log("Making fetch request...");
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+
+      let existingRules = [];
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Raw API response:", data);
+        // API returns { rules: [...] } so extract the rules array
+        existingRules = Array.isArray(data.rules) ? data.rules : (Array.isArray(data) ? data : []);
+      }
+      console.log("Existing array rules:", existingRules);
+
+      setRulesDialog({
+        isOpen: true,
+        configurationId: selectedConfig.id,
+        propertyPath: fullPropertyPath,
+        existingRules
+      });
+    } catch (error) {
+      console.error("Failed to fetch existing array rules:", error);
       console.error("Error details:", {
         name: error.name,
         message: error.message,
@@ -1505,6 +1575,16 @@ const ScalarPropertiesPanel = ({
                   <span className="font-medium text-gray-700 dark:text-gray-300">{arrayName}:</span>
                   {isEditable && configType !== "PRODUCT" && (
                     <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => handleArrayRulesClick(arrayName)}
+                        className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                        title="Configure rules for all array items"
+                      >
+                        <svg className="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Rules
+                      </button>
                       <button
                         onClick={() => handleArrayItemAdd(arrayName)}
                         className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
