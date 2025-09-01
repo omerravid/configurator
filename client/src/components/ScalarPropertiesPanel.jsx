@@ -16,6 +16,7 @@ import ContextMenu from "./ContextMenu";
 import { configAPI } from "../services/api";
 import FileManagementPanel from "./FileManagementPanel";
 import RuleDefinitionDialog from "./RuleDefinitionDialog";
+import RuleAwareInput from "./RuleAwareInput";
 
 const ScalarPropertiesPanel = ({
   selectedPath,
