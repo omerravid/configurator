@@ -65,6 +65,27 @@ ruleSchema.statics.findByConfigurationAndPath = function(configurationId, proper
   return this.find({ configurationId, propertyPath, enabled: true });
 };
 
+// Update rule by ID
+ruleSchema.statics.update = async function(id, updateData) {
+  try {
+    const updatedRule = await this.findByIdAndUpdate(
+      id,
+      {
+        ...updateData,
+        updatedAt: new Date()
+      },
+      {
+        new: true,  // Return the updated document
+        runValidators: true  // Run schema validators
+      }
+    );
+    return updatedRule;
+  } catch (error) {
+    console.error('Failed to update rule:', error);
+    return null;
+  }
+};
+
 ruleSchema.statics.validateValue = async function(configurationId, propertyPath, value) {
   const rules = await this.findByConfigurationAndPath(configurationId, propertyPath);
   const errors = [];
