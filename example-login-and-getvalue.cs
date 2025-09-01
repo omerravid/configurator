@@ -22,6 +22,10 @@ class Program
             // Step 2: Login with username and password
             Console.WriteLine("Logging in...");
             var authResponse = await client.Auth.LoginAsync(username, password);
+
+            // IMPORTANT: Set the JWT token for all services after login
+            client.SetJwtToken(authResponse.Token);
+
             Console.WriteLine($"✓ Logged in successfully as: {authResponse.User.Username}");
             Console.WriteLine($"✓ Role: {authResponse.User.Role}");
             
