@@ -270,17 +270,31 @@ public abstract class BaseHttpService
         Logger.LogError("API error: {StatusCode} - {Error}", statusCode, errorMessage);
 
         // Throw specific exceptions based on status code
-        ConfigurationManagerException exception = response.StatusCode switch
+        ConfigurationManagerException exception;
+        switch (response.StatusCode)
         {
-            HttpStatusCode.Unauthorized => new AuthenticationException(errorMessage, statusCode),
-            HttpStatusCode.Forbidden => new AuthorizationException(errorMessage, statusCode),
-            HttpStatusCode.NotFound => new NotFoundException(errorMessage, statusCode),
-            HttpStatusCode.BadRequest => new ValidationException(errorMessage, statusCode),
-            HttpStatusCode.Conflict => new ConflictException(errorMessage, statusCode),
-            HttpStatusCode.TooManyRequests => new RateLimitException(errorMessage,
-                DateTime.UtcNow.Add(TimeSpan.FromMinutes(1)), statusCode), // Default retry after 1 minute
-            _ => new ApiException(errorMessage, errorResponse, statusCode)
-        };
+            case HttpStatusCode.Unauthorized:
+                exception = new AuthenticationException(errorMessage, statusCode);
+                break;
+            case HttpStatusCode.Forbidden:
+                exception = new AuthorizationException(errorMessage, statusCode);
+                break;
+            case HttpStatusCode.NotFound:
+                exception = new NotFoundException(errorMessage, statusCode);
+                break;
+            case HttpStatusCode.BadRequest:
+                exception = new ValidationException(errorMessage, statusCode);
+                break;
+            case HttpStatusCode.Conflict:
+                exception = new ConflictException(errorMessage, statusCode);
+                break;
+            case HttpStatusCode.TooManyRequests:
+                exception = new RateLimitException(errorMessage, DateTime.UtcNow.Add(TimeSpan.FromMinutes(1)), statusCode);
+                break;
+            default:
+                exception = new ApiException(errorMessage, errorResponse, statusCode);
+                break;
+        }
 
         throw exception;
     }
