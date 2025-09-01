@@ -357,7 +357,11 @@ const TreeNode = ({
       console.log("Response status:", response.status);
       console.log("Response ok:", response.ok);
 
-      const existingRules = response.ok ? await response.json() : [];
+      let existingRules = [];
+      if (response.ok) {
+        const data = await response.json();
+        existingRules = Array.isArray(data) ? data : [];
+      }
       console.log("Existing rules:", existingRules);
 
       setRulesDialog({
