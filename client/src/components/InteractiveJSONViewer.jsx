@@ -268,6 +268,42 @@ const TreeNode = ({
     console.log("Reset property:", currentPath);
   };
 
+  const handleRulesClick = async () => {
+    if (!selectedConfig?.id) {
+      console.warn("No configuration ID available for rules");
+      return;
+    }
+
+    // Clean the path - remove root prefix and convert to dot notation
+    const cleanPath = currentPath.startsWith("root.") ? currentPath.substring(5) : currentPath;
+
+    try {
+      // Fetch existing rules for this property
+      const response = await fetch(`/api/rules/configuration/${selectedConfig.id}/path/${encodeURIComponent(cleanPath)}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      const existingRules = response.ok ? await response.json() : [];
+
+      setRulesDialog({
+        isOpen: true,
+        configurationId: selectedConfig.id,
+        propertyPath: cleanPath,
+        existingRules
+      });
+    } catch (error) {
+      console.error("Failed to fetch existing rules:", error);
+      setRulesDialog({
+        isOpen: true,
+        configurationId: selectedConfig.id,
+        propertyPath: cleanPath,
+        existingRules: []
+      });
+    }
+  };
+
   const handleContextMenu = (e) => {
     e.preventDefault();
     const fullPath = isRoot ? "" : currentPath;
