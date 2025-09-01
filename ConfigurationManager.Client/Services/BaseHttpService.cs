@@ -298,7 +298,7 @@ public abstract class BaseHttpService
         if (string.IsNullOrWhiteSpace(content))
         {
             Logger.LogWarning("Content is null or whitespace, creating response with null value");
-            var nullJson = """{"value": null}""";
+            var nullJson = "{\"value\": null}";
             var nullResult = JsonSerializer.Deserialize<T>(nullJson, options);
             return nullResult ?? throw new ApiException("Failed to create null ConfigurationValueResponse");
         }
@@ -307,7 +307,7 @@ public abstract class BaseHttpService
         if (content.Trim() == "null")
         {
             Logger.LogDebug("Content is explicit null, creating response with null value");
-            var nullJson = """{"value": null}""";
+            var nullJson = "{\"value\": null}";
             var nullResult = JsonSerializer.Deserialize<T>(nullJson, options);
             return nullResult ?? throw new ApiException("Failed to create null ConfigurationValueResponse");
         }
