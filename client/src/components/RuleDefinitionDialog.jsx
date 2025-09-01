@@ -101,39 +101,61 @@ const RuleDefinitionDialog = ({
   };
 
   const saveRules = async () => {
+    console.log("=== saveRules DEBUG ===");
+    console.log("configurationId:", configurationId);
+    console.log("propertyPath:", propertyPath);
+    console.log("rules:", rules);
+    console.log("localStorage token:", localStorage.getItem('token') ? 'Present' : 'Missing');
+
     setLoading(true);
     try {
       // Validate rules before saving
+      console.log("Validating rules...");
       const invalidRules = rules.filter(rule => !validateRule(rule));
       if (invalidRules.length > 0) {
+        console.log("Invalid rules found:", invalidRules);
         showToast("Please fix invalid rule configurations", "error");
         setLoading(false);
         return;
       }
+      console.log("All rules valid");
 
       // Save new rules and update existing ones
-      for (const rule of rules) {
+      for (const [index, rule] of rules.entries()) {
+        console.log(`Processing rule ${index}:`, rule);
+
         if (rule.isNew) {
           // Create new rule
+          console.log("Creating new rule...");
+          const payload = {
+            configurationId,
+            propertyPath: rule.propertyPath,
+            ruleType: rule.ruleType,
+            ruleConfig: rule.ruleConfig,
+            errorMessage: rule.errorMessage,
+            enabled: rule.enabled
+          };
+          console.log("Create rule payload:", payload);
+
           const response = await fetch('/api/rules', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({
-              configurationId,
-              propertyPath: rule.propertyPath,
-              ruleType: rule.ruleType,
-              ruleConfig: rule.ruleConfig,
-              errorMessage: rule.errorMessage,
-              enabled: rule.enabled
-            })
+            body: JSON.stringify(payload)
           });
 
+          console.log("Create rule response status:", response.status);
+
           if (!response.ok) {
-            throw new Error('Failed to create rule');
+            const errorData = await response.text();
+            console.error("Create rule failed:", errorData);
+            throw new Error(`Failed to create rule: ${response.status} ${errorData}`);
           }
+
+          const createdRule = await response.json();
+          console.log("Rule created successfully:", createdRule);
         } else if (rule.isExisting && rule.id && !rule.id.startsWith('temp-')) {
           // Update existing rule
           const response = await fetch(`/api/rules/${rule.id}`, {
