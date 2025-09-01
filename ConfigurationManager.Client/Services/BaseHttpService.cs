@@ -4,7 +4,6 @@ using ConfigurationManager.Client.Exceptions;
 using ConfigurationManager.Client.Models.Common;
 using System.Net;
 using System.Net.Http.Headers;
-using System.Reflection;
 
 /// <summary>
 /// Base HTTP service with common functionality
