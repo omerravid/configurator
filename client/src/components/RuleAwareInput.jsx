@@ -151,8 +151,8 @@ const RuleAwareInput = ({
     );
   }
 
-  // Find the first applicable rule to determine input type
-  const numericRule = rules.find(rule => rule.ruleType === 'numeric');
+  // Find all applicable rules to determine input type
+  const numericRules = rules.filter(rule => rule.ruleType === 'numeric');
   const collectionRule = rules.find(rule => rule.ruleType === 'collection');
 
   // For collection rules, render a select dropdown
