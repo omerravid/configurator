@@ -165,7 +165,8 @@ class Rule {
 
   // Validate value against rules
   static async validateValue(configurationId, propertyPath, value) {
-    const rules = await this.findByConfigurationAndPath(configurationId, propertyPath);
+    // Use inheritance-aware rule finding to check rules from parent configurations too
+    const rules = await this.findByConfigurationAndPathWithInheritance(configurationId, propertyPath);
     const errors = [];
 
     for (const rule of rules) {
