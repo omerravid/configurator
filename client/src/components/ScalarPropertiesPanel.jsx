@@ -596,28 +596,32 @@ const ScalarPropertiesPanel = ({
     }
   };
 
-  const handleArrayItemSave = async (arrayName, index) => {
-    let newValue = editValue;
+  const handleArrayItemSave = async (arrayName, index, newValue = null) => {
+    // If newValue is provided (from RuleAwareInput), use it directly
+    // Otherwise, use the old parsing logic for backwards compatibility
+    if (newValue === null) {
+      newValue = editValue;
 
-    // Parse the value appropriately
-    try {
-      if (editValue === "true" || editValue === "false") {
-        newValue = editValue === "true";
-      } else if (editValue === "null") {
-        newValue = null;
-      } else if (editValue === "" || editValue === undefined) {
-        newValue = "";
-      } else if (!isNaN(editValue) && editValue !== "" && editValue !== null) {
-        newValue = Number(editValue);
+      // Parse the value appropriately
+      try {
+        if (editValue === "true" || editValue === "false") {
+          newValue = editValue === "true";
+        } else if (editValue === "null") {
+          newValue = null;
+        } else if (editValue === "" || editValue === undefined) {
+          newValue = "";
+        } else if (!isNaN(editValue) && editValue !== "" && editValue !== null) {
+          newValue = Number(editValue);
+        }
+      } catch (e) {
+        // Keep as string if parsing fails
       }
-    } catch (e) {
-      // Keep as string if parsing fails
-    }
 
-    // Validate the array item value
-    const isValid = await validateArrayItem(arrayName, newValue);
-    if (!isValid) {
-      return; // Don't save if validation fails
+      // Validate the array item value for backward compatibility
+      const isValid = await validateArrayItem(arrayName, newValue);
+      if (!isValid) {
+        return; // Don't save if validation fails
+      }
     }
 
     handleArrayValueChange(arrayName, index, editValue);
