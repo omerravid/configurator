@@ -81,23 +81,9 @@ const RuleDefinitionDialog = ({
     setRules(updatedRules);
   };
 
-  const addValidValue = (ruleIndex) => {
-    const updatedRules = [...rules];
-    updatedRules[ruleIndex].ruleConfig.validValues.push('');
-    setRules(updatedRules);
-  };
-
-  const removeValidValue = (ruleIndex, valueIndex) => {
-    const updatedRules = [...rules];
-    updatedRules[ruleIndex].ruleConfig.validValues = 
-      updatedRules[ruleIndex].ruleConfig.validValues.filter((_, i) => i !== valueIndex);
-    setRules(updatedRules);
-  };
-
-  const updateValidValue = (ruleIndex, valueIndex, value) => {
-    const updatedRules = [...rules];
-    updatedRules[ruleIndex].ruleConfig.validValues[valueIndex] = value;
-    setRules(updatedRules);
+  const updateCollectionValues = (index, valuesString) => {
+    const validValues = valuesString.split(',').map(v => v.trim()).filter(v => v !== '');
+    updateRuleConfig(index, 'validValues', validValues);
   };
 
   const saveRules = async () => {
@@ -226,84 +212,61 @@ const RuleDefinitionDialog = ({
     }
   };
 
-  const renderRuleConfig = (rule, index) => {
+  const renderCompactRuleConfig = (rule, index) => {
     switch (rule.ruleType) {
       case 'numeric':
         return (
-          <div className="grid grid-cols-2 gap-3">
+          <>
             <select
               value={rule.ruleConfig.operator || 'greater'}
               onChange={(e) => updateRuleConfig(index, 'operator', e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              className="w-20 px-1 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
             >
-              <option value="greater">Greater than</option>
-              <option value="greaterEquals">Greater than or equal</option>
-              <option value="smaller">Less than</option>
-              <option value="smallerEquals">Less than or equal</option>
-              <option value="equals">Equals</option>
+              <option value="greater">&gt;</option>
+              <option value="greaterEquals">≥</option>
+              <option value="smaller">&lt;</option>
+              <option value="smallerEquals">≤</option>
+              <option value="equals">=</option>
             </select>
             <input
               type="number"
               value={rule.ruleConfig.value || 0}
               onChange={(e) => updateRuleConfig(index, 'value', parseFloat(e.target.value))}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              placeholder="Value"
+              className="w-16 px-1 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
+              placeholder="0"
             />
-          </div>
+          </>
         );
 
       case 'pattern':
         return (
-          <div className="space-y-3">
+          <>
             <input
               type="text"
               value={rule.ruleConfig.pattern || ''}
               onChange={(e) => updateRuleConfig(index, 'pattern', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              placeholder="Regular expression pattern"
+              className="w-32 px-1 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
+              placeholder="regex pattern"
             />
             <input
               type="text"
               value={rule.ruleConfig.flags || ''}
               onChange={(e) => updateRuleConfig(index, 'flags', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              placeholder="Regex flags (optional, e.g., 'i' for case-insensitive)"
+              className="w-12 px-1 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
+              placeholder="flags"
             />
-          </div>
+          </>
         );
 
       case 'collection':
         return (
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Valid Values:
-            </label>
-            {rule.ruleConfig.validValues?.map((value, valueIndex) => (
-              <div key={valueIndex} className="flex gap-2">
-                <input
-                  type="text"
-                  value={value}
-                  onChange={(e) => updateValidValue(index, valueIndex, e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="Valid value"
-                />
-                <button
-                  onClick={() => removeValidValue(index, valueIndex)}
-                  className="px-2 py-2 text-red-600 hover:text-red-700 transition-colors"
-                  disabled={rule.ruleConfig.validValues.length === 1}
-                >
-                  <TrashIcon className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-            <button
-              onClick={() => addValidValue(index)}
-              className="flex items-center gap-1 px-3 py-2 text-blue-600 hover:text-blue-700 transition-colors"
-            >
-              <PlusIcon className="w-4 h-4" />
-              Add Value
-            </button>
-          </div>
+          <input
+            type="text"
+            value={rule.ruleConfig.validValues?.join(', ') || ''}
+            onChange={(e) => updateCollectionValues(index, e.target.value)}
+            className="w-40 px-1 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
+            placeholder="value1, value2, value3"
+          />
         );
 
       default:
@@ -315,99 +278,116 @@ const RuleDefinitionDialog = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[80vh] overflow-hidden">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
             Rules for {propertyPath}
           </h2>
           <button
             onClick={handleClose}
             className="text-gray-400 hover:text-gray-500 transition-colors"
           >
-            <XMarkIcon className="w-6 h-6" />
+            <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 max-h-[60vh] overflow-y-auto">
+        <div className="p-4">
           {rules.length === 0 ? (
-            <div className="text-center py-8">
-              <ExclamationTriangleIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500 dark:text-gray-400">
+            <div className="text-center py-6">
+              <ExclamationTriangleIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 No rules defined for this property
               </p>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-1">
+              {/* Header row */}
+              <div className="grid grid-cols-12 gap-2 text-xs text-gray-500 dark:text-gray-400 font-medium pb-1 border-b border-gray-200">
+                <div className="col-span-2">Type</div>
+                <div className="col-span-4">Configuration</div>
+                <div className="col-span-4">Error Message</div>
+                <div className="col-span-1">On</div>
+                <div className="col-span-1">Actions</div>
+              </div>
+
+              {/* Rule rows */}
               {rules.map((rule, index) => (
-                <div key={rule.id || index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                  <div className="flex items-center gap-3 mb-4">
+                <div key={rule.id || index} className={`grid grid-cols-12 gap-2 items-center py-1 px-1 rounded text-xs ${!validateRule(rule) ? 'bg-red-50 border border-red-200' : 'hover:bg-gray-50'}`}>
+                  {/* Rule Type */}
+                  <div className="col-span-2">
                     <select
                       value={rule.ruleType}
                       onChange={(e) => updateRule(index, 'ruleType', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                      className="w-full px-1 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
                     >
                       <option value="numeric">Numeric</option>
-                      <option value="pattern">Pattern (Regex)</option>
-                      <option value="collection">Valid Values</option>
+                      <option value="pattern">Pattern</option>
+                      <option value="collection">Collection</option>
                     </select>
-                    
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={rule.enabled}
-                        onChange={(e) => updateRule(index, 'enabled', e.target.checked)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">Enabled</span>
-                    </label>
-
-                    <button
-                      onClick={() => removeRule(index)}
-                      className="ml-auto text-red-600 hover:text-red-700 transition-colors"
-                    >
-                      <TrashIcon className="w-5 h-5" />
-                    </button>
                   </div>
 
-                  {renderRuleConfig(rule, index)}
+                  {/* Rule Configuration */}
+                  <div className="col-span-4 flex gap-1 items-center">
+                    {renderCompactRuleConfig(rule, index)}
+                  </div>
 
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Error Message (optional):
-                    </label>
+                  {/* Error Message */}
+                  <div className="col-span-4">
                     <input
                       type="text"
                       value={rule.errorMessage || ''}
                       onChange={(e) => updateRule(index, 'errorMessage', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                      placeholder="Custom error message for this rule"
+                      className="w-full px-1 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
+                      placeholder="Custom error message"
                     />
                   </div>
 
-                  {!validateRule(rule) && (
-                    <div className="mt-2 text-sm text-red-600 dark:text-red-400">
-                      ⚠ This rule configuration is incomplete
-                    </div>
-                  )}
+                  {/* Enabled Checkbox */}
+                  <div className="col-span-1 text-center">
+                    <input
+                      type="checkbox"
+                      checked={rule.enabled}
+                      onChange={(e) => updateRule(index, 'enabled', e.target.checked)}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  {/* Actions */}
+                  <div className="col-span-1 text-center">
+                    <button
+                      onClick={() => removeRule(index)}
+                      className="text-red-600 hover:text-red-700 transition-colors"
+                      title="Delete rule"
+                    >
+                      <TrashIcon className="w-3 h-3" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
+
+          {/* Helper text for rule types */}
+          <div className="mt-3 text-xs text-gray-500 space-y-1">
+            <div><strong>Numeric:</strong> Choose operator (&gt;, ≥, &lt;, ≤, =) and comparison value</div>
+            <div><strong>Pattern:</strong> Enter regex pattern and optional flags (e.g., 'i' for case-insensitive)</div>
+            <div><strong>Collection:</strong> Enter comma-separated list of valid values</div>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={addRule}
-            className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-700 transition-colors"
+            className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 hover:text-blue-700 transition-colors"
           >
             <PlusIcon className="w-4 h-4" />
             Add Rule
           </button>
 
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               onClick={handleClose}
-              className="px-4 py-2 text-gray-600 hover:text-gray-700 transition-colors"
+              className="px-3 py-1 text-sm text-gray-600 hover:text-gray-700 transition-colors"
               disabled={loading}
             >
               Cancel
@@ -415,11 +395,11 @@ const RuleDefinitionDialog = ({
             <button
               onClick={saveRules}
               disabled={loading || rules.some(rule => !validateRule(rule))}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   Saving...
                 </>
               ) : (
