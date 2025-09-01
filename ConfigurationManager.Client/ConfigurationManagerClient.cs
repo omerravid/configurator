@@ -1,6 +1,8 @@
 namespace ConfigurationManager.Client;
 
 using ConfigurationManager.Client.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// Main Configuration Manager client that provides access to all services
