@@ -48,13 +48,38 @@ class Program
             var actualValue = ExtractJsonElementValue(valueResponse.Value);
             Console.WriteLine($"✓ Value retrieved: {actualValue}");
             
-            // Step 4: Additional examples - Get entire configuration
-            Console.WriteLine($"\nGetting entire configuration '{configurationName}'...");
+            // Step 4: Additional examples - Get different value types
+            Console.WriteLine("\n--- Testing different value types ---");
+
+            // Example 1: Get object at path (ScrewInserter.220002.ScrewInserterParams)
+            try
+            {
+                var objectPath = "ScrewInserter.220002.ScrewInserterParams";
+                var objectResponse = await client.Configurations.GetConfigurationValueByNameAsync(
+                    configurationName: configurationName,
+                    path: objectPath,
+                    minimal: true);
+
+                var objectValue = ExtractJsonElementValue(objectResponse.Value);
+                Console.WriteLine($"✓ Object at '{objectPath}': {objectValue?.GetType().Name ?? "null"}");
+                if (objectValue != null)
+                {
+                    Console.WriteLine($"  Content: {objectValue}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"⚠ Could not get object at path: {ex.Message}");
+            }
+
+            // Example 2: Get entire configuration (minimal=false for metadata)
+            Console.WriteLine($"\nGetting entire configuration '{configurationName}' with metadata...");
             var fullConfigResponse = await client.Configurations.GetConfigurationValueByNameAsync(
                 configurationName: configurationName,
                 minimal: false);
-            
-            Console.WriteLine($"✓ Full configuration data retrieved (length: {fullConfigResponse.Value?.ToString()?.Length ?? 0} characters)");
+
+            var fullValue = ExtractJsonElementValue(fullConfigResponse.Value);
+            Console.WriteLine($"✓ Full configuration retrieved: {fullValue?.GetType().Name ?? "null"}");
             
             // Step 5: List all configurations (optional)
             Console.WriteLine("\nListing all configurations...");
