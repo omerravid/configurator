@@ -174,7 +174,7 @@ public class RulesService : BaseHttpService, IRulesService
         if (string.IsNullOrWhiteSpace(path))
             throw new ArgumentException("Path cannot be empty", nameof(path));
 
-        var encodedPath = HttpUtility.UrlEncode(path);
+        var encodedPath = Uri.EscapeDataString(path);
         var endpoint = $"rules/configuration/{configId}/path/{encodedPath}";
 
         if (!includeInherited)
