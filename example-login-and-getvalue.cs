@@ -41,8 +41,10 @@ class Program
                 configurationName: configurationName,
                 path: path,
                 minimal: minimal);
-            
-            Console.WriteLine($"✓ Value retrieved: {valueResponse.Value}");
+
+            // Extract the actual value from JsonElement
+            var actualValue = ExtractJsonElementValue(valueResponse.Value);
+            Console.WriteLine($"✓ Value retrieved: {actualValue}");
             
             // Step 4: Additional examples - Get entire configuration
             Console.WriteLine($"\nGetting entire configuration '{configurationName}'...");
