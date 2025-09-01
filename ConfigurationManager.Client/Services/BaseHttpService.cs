@@ -268,41 +268,7 @@ public abstract class BaseHttpService
                 {
                     Logger.LogDebug("Handling minimal response for ConfigurationValueResponse: {Content}", content);
 
-                    try
-                    {
-                        // Parse the raw value as JsonElement
-                        var rawValue = JsonSerializer.Deserialize<JsonElement>(content, options);
-
-                        // Create JSON for ConfigurationValueResponse with the raw value
-                        var wrappedJson = JsonSerializer.Serialize(new { value = rawValue }, options);
-
-                        // Try to deserialize the wrapped JSON
-                        var wrappedResult = JsonSerializer.Deserialize<T>(wrappedJson, options);
-                        if (wrappedResult != null)
-                        {
-                            return wrappedResult;
-                        }
-                    }
-                    catch (JsonException innerEx)
-                    {
-                        Logger.LogDebug(innerEx, "Failed to parse as JSON, treating as string value");
-
-                        // Fallback: treat as string and wrap in response object
-                        try
-                        {
-                            var stringValue = content.Trim('"'); // Remove surrounding quotes if present
-                            var wrappedJson = JsonSerializer.Serialize(new { value = stringValue }, options);
-                            var wrappedResult = JsonSerializer.Deserialize<T>(wrappedJson, options);
-                            if (wrappedResult != null)
-                            {
-                                return wrappedResult;
-                            }
-                        }
-                        catch (Exception fallbackEx)
-                        {
-                            Logger.LogError(fallbackEx, "Failed to create fallback ConfigurationValueResponse");
-                        }
-                    }
+                    return CreateConfigurationValueResponse<T>(content, options);
                 }
 
                 Logger.LogError(ex, "Failed to deserialize response: {Content}", content);
