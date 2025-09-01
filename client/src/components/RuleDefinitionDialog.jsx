@@ -482,6 +482,9 @@ const RuleDefinitionDialog = ({
             <div><strong>Numeric:</strong> Choose operator (&gt;, ≥, &lt;, ≤, =) and comparison value</div>
             <div><strong>Pattern:</strong> Enter regex pattern and optional flags (e.g., 'i' for case-insensitive)</div>
             <div><strong>Collection:</strong> Enter comma-separated list of valid values</div>
+            <div className="mt-2 pt-2 border-t border-gray-300">
+              <div><strong>💡 Rule Inheritance:</strong> Rules defined in parent configurations (components, products) automatically apply to child configurations (versions, instances). Inherited rules are shown in <span className="bg-blue-100 px-1 rounded">blue</span> and cannot be edited here.</div>
+            </div>
           </div>
         </div>
 
