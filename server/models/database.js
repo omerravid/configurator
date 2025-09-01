@@ -41,6 +41,20 @@ class Database {
           created_by TEXT NOT NULL REFERENCES users(id),
           description TEXT
       );
+
+      -- Rules table
+      CREATE TABLE IF NOT EXISTS rules (
+          id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+          configuration_id TEXT NOT NULL REFERENCES configurations(id) ON DELETE CASCADE,
+          property_path TEXT NOT NULL,
+          rule_type TEXT NOT NULL CHECK (rule_type IN ('numeric', 'pattern', 'collection')),
+          rule_config TEXT NOT NULL,
+          error_message TEXT DEFAULT '',
+          enabled BOOLEAN NOT NULL DEFAULT 1,
+          created_by TEXT NOT NULL REFERENCES users(id),
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
     `;
 
     return new Promise((resolve, reject) => {
