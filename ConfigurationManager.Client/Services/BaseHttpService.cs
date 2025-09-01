@@ -243,6 +243,10 @@ public abstract class BaseHttpService
         {
             var content = await response.Content.ReadAsStringAsync();
 
+            // Log all responses for debugging
+            Logger.LogDebug("Response received - Type: {Type}, Content: '{Content}', Length: {Length}",
+                typeof(T).Name, content, content?.Length ?? 0);
+
             if (typeof(T) == typeof(string))
             {
                 return (T)(object)content;
@@ -258,6 +262,7 @@ public abstract class BaseHttpService
             try
             {
                 var result = JsonSerializer.Deserialize<T>(content, options);
+                Logger.LogDebug("Successfully deserialized response to {Type}", typeof(T).Name);
                 return result ?? throw new ApiException("Failed to deserialize response");
             }
             catch (JsonException ex)
@@ -266,7 +271,8 @@ public abstract class BaseHttpService
                 // Server returns raw value instead of wrapped object
                 if (typeof(T).Name == "ConfigurationValueResponse")
                 {
-                    Logger.LogDebug("Handling minimal response for ConfigurationValueResponse: {Content}", content);
+                    Logger.LogInformation("Handling minimal response for ConfigurationValueResponse - Content: '{Content}', Length: {Length}",
+                        content, content?.Length ?? 0);
 
                     return CreateConfigurationValueResponse<T>(content, options);
                 }
