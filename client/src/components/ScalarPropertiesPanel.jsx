@@ -843,6 +843,12 @@ const ScalarPropertiesPanel = ({
 
   // Handle opening the rules dialog for a property
   const handleRulesClick = async (propertyName) => {
+    console.log("=== handleRulesClick DEBUG ===");
+    console.log("propertyName:", propertyName);
+    console.log("selectedConfig:", selectedConfig);
+    console.log("selectedPath:", selectedPath);
+    console.log("localStorage token:", localStorage.getItem('token') ? 'Present' : 'Missing');
+
     if (!selectedConfig?.id) {
       console.warn("No configuration ID available for rules");
       return;
@@ -858,15 +864,24 @@ const ScalarPropertiesPanel = ({
       fullPropertyPath = `${cleanSelectedPath}.${propertyName}`;
     }
 
+    console.log("fullPropertyPath:", fullPropertyPath);
+    const apiUrl = `/api/rules/configuration/${selectedConfig.id}/path/${encodeURIComponent(fullPropertyPath)}`;
+    console.log("API URL:", apiUrl);
+
     try {
       // Fetch existing rules for this property
-      const response = await fetch(`/api/rules/configuration/${selectedConfig.id}/path/${encodeURIComponent(fullPropertyPath)}`, {
+      console.log("Making fetch request...");
+      const response = await fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+
       const existingRules = response.ok ? await response.json() : [];
+      console.log("Existing rules:", existingRules);
 
       setRulesDialog({
         isOpen: true,
@@ -876,6 +891,11 @@ const ScalarPropertiesPanel = ({
       });
     } catch (error) {
       console.error("Failed to fetch existing rules:", error);
+      console.error("Error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
       setRulesDialog({
         isOpen: true,
         configurationId: selectedConfig.id,
