@@ -143,6 +143,13 @@ const RuleDefinitionDialog = ({
 
     setLoading(true);
     try {
+      // Parse any pending collection input values before saving
+      rules.forEach((rule, index) => {
+        if (rule.ruleType === 'collection' && collectionInputValues[index] !== undefined) {
+          parseAndUpdateCollectionValues(index, collectionInputValues[index]);
+        }
+      });
+
       // Validate rules before saving
       console.log("Validating rules...");
       const invalidRules = rules.filter(rule => !validateRule(rule));
