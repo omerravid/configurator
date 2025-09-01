@@ -291,62 +291,73 @@ public abstract class BaseHttpService
     /// </summary>
     private T CreateConfigurationValueResponse<T>(string content, JsonSerializerOptions options)
     {
-        Logger.LogDebug("CreateConfigurationValueResponse called with content: '{Content}', IsNullOrWhite: {IsEmpty}",
-            content, string.IsNullOrWhiteSpace(content));
-
-        JsonElement valueElement;
+        Logger.LogInformation("CreateConfigurationValueResponse called with content length: {Length}", content?.Length ?? 0);
+        Logger.LogDebug("Raw content: {Content}", content);
 
         // Handle empty or whitespace content
         if (string.IsNullOrWhiteSpace(content))
         {
-            Logger.LogWarning("Content is null or whitespace, creating null JsonElement");
-            valueElement = JsonSerializer.SerializeToElement((string?)null, options);
+            Logger.LogWarning("Content is null or whitespace, creating response with null value");
+            var nullJson = """{"value": null}""";
+            var nullResult = JsonSerializer.Deserialize<T>(nullJson, options);
+            return nullResult ?? throw new ApiException("Failed to create null ConfigurationValueResponse");
         }
+
         // Handle explicit null response
-        else if (content.Trim() == "null")
+        if (content.Trim() == "null")
         {
-            Logger.LogDebug("Content is explicit null, creating null JsonElement");
-            valueElement = JsonSerializer.SerializeToElement((string?)null, options);
+            Logger.LogDebug("Content is explicit null, creating response with null value");
+            var nullJson = """{"value": null}""";
+            var nullResult = JsonSerializer.Deserialize<T>(nullJson, options);
+            return nullResult ?? throw new ApiException("Failed to create null ConfigurationValueResponse");
         }
-        else
+
+        try
         {
-            try
+            // The content should be valid JSON - let's validate it first
+            using var document = JsonDocument.Parse(content);
+            var rootElement = document.RootElement;
+            Logger.LogDebug("Content parsed successfully - ValueKind: {ValueKind}", rootElement.ValueKind);
+
+            // Create the wrapped response directly as a string
+            // We need to embed the original JSON as the value property
+            var wrappedJson = $"""
+                {{
+                    "value": {content}
+                }}
+                """;
+
+            Logger.LogDebug("Created wrapped JSON: {WrappedJson}", wrappedJson);
+
+            // Deserialize the wrapped JSON to the expected type
+            var result = JsonSerializer.Deserialize<T>(wrappedJson, options);
+            if (result == null)
             {
-                // First, try to parse the content as valid JSON (could be object, array, string, number, boolean, null)
-                valueElement = JsonSerializer.Deserialize<JsonElement>(content, options);
-                Logger.LogDebug("Successfully parsed content as JsonElement - ValueKind: {ValueKind}", valueElement.ValueKind);
+                Logger.LogError("Failed to deserialize wrapped JSON to type {Type}", typeof(T).Name);
+                throw new ApiException("Failed to create ConfigurationValueResponse from minimal response");
             }
-            catch (JsonException jsonEx)
-            {
-                Logger.LogDebug(jsonEx, "Content is not valid JSON, treating as raw string");
 
-                // If it's not valid JSON, treat it as a raw string
-                // Remove surrounding quotes if present and treat as string value
-                var cleanContent = content.Trim();
-                if (cleanContent.StartsWith("\"") && cleanContent.EndsWith("\"") && cleanContent.Length >= 2)
-                {
-                    cleanContent = cleanContent.Substring(1, cleanContent.Length - 2);
-                    Logger.LogDebug("Removed surrounding quotes, clean content: '{CleanContent}'", cleanContent);
-                }
-                valueElement = JsonSerializer.SerializeToElement(cleanContent, options);
-                Logger.LogDebug("Created JsonElement from string - ValueKind: {ValueKind}", valueElement.ValueKind);
-            }
+            Logger.LogDebug("Successfully created ConfigurationValueResponse of type {Type}", typeof(T).Name);
+            return result;
         }
-
-        // Create the ConfigurationValueResponse JSON structure
-        var responseJson = JsonSerializer.Serialize(new { value = valueElement }, options);
-        Logger.LogDebug("Generated response JSON: {ResponseJson}", responseJson);
-
-        // Deserialize to the expected type
-        var result = JsonSerializer.Deserialize<T>(responseJson, options);
-        if (result == null)
+        catch (JsonException jsonEx)
         {
-            Logger.LogError("Failed to deserialize response JSON to type {Type}", typeof(T).Name);
-            throw new ApiException("Failed to create ConfigurationValueResponse from minimal response");
-        }
+            Logger.LogError(jsonEx, "Content is not valid JSON: {Content}", content);
 
-        Logger.LogDebug("Successfully created ConfigurationValueResponse of type {Type}", typeof(T).Name);
-        return result;
+            // Fallback: treat as a string value
+            var stringValue = content.Trim('"'); // Remove surrounding quotes if present
+            var escapedString = JsonSerializer.Serialize(stringValue);
+            var stringWrappedJson = $"""
+                {{
+                    "value": {escapedString}
+                }}
+                """;
+
+            Logger.LogDebug("Created fallback string JSON: {StringJson}", stringWrappedJson);
+
+            var stringResult = JsonSerializer.Deserialize<T>(stringWrappedJson, options);
+            return stringResult ?? throw new ApiException("Failed to create fallback ConfigurationValueResponse");
+        }
     }
 
     /// <summary>
