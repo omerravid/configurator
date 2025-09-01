@@ -306,7 +306,7 @@ const RuleAwareInput = ({
           </div>
         )}
         <div className="text-xs text-gray-500 dark:text-gray-400">
-          Rule: {config.operator === 'greater' ? '>' : config.operator === 'greaterEquals' ? '≥' : config.operator === 'smaller' ? '<' : config.operator === 'smallerEquals' ? '≤' : '='} {config.value}
+          Rules: {constraints.join(', ')}
         </div>
       </div>
     );
