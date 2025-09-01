@@ -385,59 +385,95 @@ const RuleDefinitionDialog = ({
               </div>
 
               {/* Rule rows */}
-              {rules.map((rule, index) => (
-                <div key={rule.id || index} className={`grid grid-cols-12 gap-2 items-center py-1 px-1 rounded text-xs ${!validateRule(rule) ? 'bg-red-50 border border-red-200' : 'hover:bg-gray-50'}`}>
-                  {/* Rule Type */}
-                  <div className="col-span-2">
-                    <select
-                      value={rule.ruleType}
-                      onChange={(e) => updateRule(index, 'ruleType', e.target.value)}
-                      className="w-full px-1 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
-                    >
-                      <option value="numeric">Numeric</option>
-                      <option value="pattern">Pattern</option>
-                      <option value="collection">Collection</option>
-                    </select>
-                  </div>
+              {rules.map((rule, index) => {
+                const isInherited = rule.configurationId && rule.configurationId !== configurationId;
+                const isEditable = !isInherited;
 
-                  {/* Rule Configuration */}
-                  <div className="col-span-4 flex gap-1 items-center">
-                    {renderCompactRuleConfig(rule, index)}
-                  </div>
+                return (
+                  <div key={rule.id || index} className={`grid grid-cols-12 gap-2 items-center py-1 px-1 rounded text-xs ${
+                    !validateRule(rule) ? 'bg-red-50 border border-red-200' :
+                    isInherited ? 'bg-blue-50 hover:bg-blue-100' :
+                    'hover:bg-gray-50'
+                  }`}>
+                    {/* Rule Type */}
+                    <div className="col-span-2">
+                      <select
+                        value={rule.ruleType}
+                        onChange={(e) => updateRule(index, 'ruleType', e.target.value)}
+                        disabled={!isEditable}
+                        className={`w-full px-1 py-1 text-xs border border-gray-300 rounded ${
+                          isEditable ? 'bg-white text-gray-900' : 'bg-gray-100 text-gray-600 cursor-not-allowed'
+                        }`}
+                        title={isInherited ? 'Inherited rule - cannot be edited' : ''}
+                      >
+                        <option value="numeric">Numeric</option>
+                        <option value="pattern">Pattern</option>
+                        <option value="collection">Collection</option>
+                      </select>
+                      {isInherited && (
+                        <div className="text-xs text-blue-600 mt-1">Inherited</div>
+                      )}
+                    </div>
 
-                  {/* Error Message */}
-                  <div className="col-span-4">
-                    <input
-                      type="text"
-                      value={rule.errorMessage || ''}
-                      onChange={(e) => updateRule(index, 'errorMessage', e.target.value)}
-                      className="w-full px-1 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
-                      placeholder="Custom error message"
-                    />
-                  </div>
+                    {/* Rule Configuration */}
+                    <div className="col-span-4 flex gap-1 items-center">
+                      {isEditable ? renderCompactRuleConfig(rule, index) : (
+                        <div className="text-xs text-gray-600">
+                          {rule.ruleType === 'numeric' && (
+                            `${rule.ruleConfig.operator} ${rule.ruleConfig.value}`
+                          )}
+                          {rule.ruleType === 'pattern' && (
+                            `Pattern: ${rule.ruleConfig.pattern}`
+                          )}
+                          {rule.ruleType === 'collection' && (
+                            `Values: ${rule.ruleConfig.validValues?.join(', ')}`
+                          )}
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Enabled Checkbox */}
-                  <div className="col-span-1 text-center">
-                    <input
-                      type="checkbox"
-                      checked={rule.enabled}
-                      onChange={(e) => updateRule(index, 'enabled', e.target.checked)}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                  </div>
+                    {/* Error Message */}
+                    <div className="col-span-4">
+                      <input
+                        type="text"
+                        value={rule.errorMessage || ''}
+                        onChange={(e) => updateRule(index, 'errorMessage', e.target.value)}
+                        disabled={!isEditable}
+                        className={`w-full px-1 py-1 text-xs border border-gray-300 rounded ${
+                          isEditable ? 'bg-white text-gray-900' : 'bg-gray-100 text-gray-600 cursor-not-allowed'
+                        }`}
+                        placeholder={isEditable ? "Custom error message" : "Inherited error message"}
+                      />
+                    </div>
 
-                  {/* Actions */}
-                  <div className="col-span-1 text-center">
-                    <button
-                      onClick={() => removeRule(index)}
-                      className="text-red-600 hover:text-red-700 transition-colors"
-                      title="Delete rule"
-                    >
-                      <TrashIcon className="w-3 h-3" />
-                    </button>
+                    {/* Enabled Checkbox */}
+                    <div className="col-span-1 text-center">
+                      <input
+                        type="checkbox"
+                        checked={rule.enabled}
+                        onChange={(e) => updateRule(index, 'enabled', e.target.checked)}
+                        disabled={!isEditable}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      />
+                    </div>
+
+                    {/* Actions */}
+                    <div className="col-span-1 text-center">
+                      {isEditable ? (
+                        <button
+                          onClick={() => removeRule(index)}
+                          className="text-red-600 hover:text-red-700 transition-colors"
+                          title="Delete rule"
+                        >
+                          <TrashIcon className="w-3 h-3" />
+                        </button>
+                      ) : (
+                        <span className="text-xs text-gray-400" title="Inherited rule cannot be deleted">-</span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
