@@ -99,28 +99,31 @@ ruleSchema.statics.findByConfigurationAndPathWithInheritance = async function(co
 
     // Additional logic for instances and products: also check component references
     const allConfigIds = [...configIds];
+    let searchPath = propertyPath;
 
-    // For each configuration in the chain, check if it has component references
-    for (const config of inheritanceChain) {
-      if (config.data && typeof config.data === 'object') {
-        // Look for component references in the data
-        const pathParts = propertyPath.split('.');
-        if (pathParts.length > 0) {
-          const componentName = pathParts[0]; // e.g., "Battery" from "Battery.charging.maxWatts"
+    // Handle component reference paths
+    const pathParts = propertyPath.split('.');
+    if (pathParts.length > 1) {
+      const componentName = pathParts[0]; // e.g., "Battery" from "Battery.charging.maxWatts"
+      const componentPath = pathParts.slice(1).join('.'); // e.g., "charging.maxWatts"
 
-          if (config.data[componentName] && config.data[componentName].componentId) {
-            const componentRef = config.data[componentName];
+      // Check if this is a component reference path
+      for (const config of inheritanceChain) {
+        if (config.data && typeof config.data === 'object' && config.data[componentName]) {
+          const componentRef = config.data[componentName];
+          if (componentRef.componentId) {
             console.log(`Found component reference in ${config.name}:`, componentRef);
 
-            // Add the referenced component and version to our search
-            if (componentRef.componentId) {
-              allConfigIds.push(componentRef.componentId);
-              console.log("Added componentId:", componentRef.componentId);
-            }
+            // For component references, we need to search the component with the sub-path
+            allConfigIds.push(componentRef.componentId);
             if (componentRef.versionId && componentRef.versionId !== componentRef.componentId) {
               allConfigIds.push(componentRef.versionId);
-              console.log("Added versionId:", componentRef.versionId);
             }
+
+            // Update search path to remove component prefix
+            searchPath = componentPath;
+            console.log("Updated search path to:", searchPath);
+            break;
           }
         }
       }
@@ -129,11 +132,12 @@ ruleSchema.statics.findByConfigurationAndPathWithInheritance = async function(co
     // Remove duplicates
     const uniqueConfigIds = [...new Set(allConfigIds)];
     console.log("Final unique config IDs to search:", uniqueConfigIds);
+    console.log("Using search path:", searchPath);
 
     // Find rules from all configurations in the inheritance chain and referenced components
     const rules = await this.find({
       configurationId: { $in: uniqueConfigIds },
-      propertyPath,
+      propertyPath: searchPath,
       enabled: true
     }).sort({ configurationId: 1 }); // Sort to apply rules from root to current
 
