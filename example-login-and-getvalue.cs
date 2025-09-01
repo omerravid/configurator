@@ -101,6 +101,24 @@ class Program
         Console.WriteLine("\nPress any key to exit...");
         Console.ReadKey();
     }
+
+    /// <summary>
+    /// Helper method to extract actual value from JsonElement
+    /// </summary>
+    static object? ExtractJsonElementValue(JsonElement element)
+    {
+        return element.ValueKind switch
+        {
+            JsonValueKind.String => element.GetString(),
+            JsonValueKind.Number => element.TryGetInt32(out var intVal) ? intVal : element.GetDouble(),
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            JsonValueKind.Null => null,
+            JsonValueKind.Array => element.EnumerateArray().Select(ExtractJsonElementValue).ToArray(),
+            JsonValueKind.Object => element.GetRawText(), // Return JSON string for objects
+            _ => element.GetRawText()
+        };
+    }
 }
 
 // Alternative example using async/await with proper error handling
