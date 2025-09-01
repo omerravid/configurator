@@ -81,6 +81,32 @@ ruleSchema.statics.findByConfigurationAndPath = function(configurationId, proper
   return this.find({ configurationId, propertyPath, enabled: true });
 };
 
+// Find rules by configuration and path, including inherited rules from parent configurations
+ruleSchema.statics.findByConfigurationAndPathWithInheritance = async function(configurationId, propertyPath) {
+  const { Configuration } = require('./index');
+
+  try {
+    // Get the full inheritance chain
+    const inheritanceChain = await Configuration.getInheritanceChain(configurationId);
+
+    // Extract configuration IDs from the chain
+    const configIds = inheritanceChain.map(config => config.id || config._id);
+
+    // Find rules from all configurations in the inheritance chain
+    const rules = await this.find({
+      configurationId: { $in: configIds },
+      propertyPath,
+      enabled: true
+    }).sort({ configurationId: 1 }); // Sort to apply rules from root to current
+
+    return rules;
+  } catch (error) {
+    console.error('Error finding rules with inheritance:', error);
+    // Fallback to just the current configuration
+    return this.findByConfigurationAndPath(configurationId, propertyPath);
+  }
+};
+
 // Update rule by ID
 ruleSchema.statics.update = async function(id, updateData) {
   try {
