@@ -72,12 +72,19 @@ public static class UsageExamples
 
         Console.WriteLine($"Configuration data: {resolvedConfig.Data}");
 
-        // Get specific value from configuration
+        // Get specific value from configuration by ID
         var valueResponse = await client.Configurations.GetConfigurationValueAsync(
-            newConfig.Config.Id, 
+            newConfig.Config.Id,
             path: "setting1");
 
         Console.WriteLine($"Setting1 value: {valueResponse.Value}");
+
+        // Get specific value from configuration by name
+        var valueByNameResponse = await client.Configurations.GetConfigurationValueByNameAsync(
+            "My New Component",
+            path: "setting1");
+
+        Console.WriteLine($"Setting1 value by name: {valueByNameResponse.Value}");
 
         // Update configuration
         var updateRequest = new UpdateConfigurationRequest
