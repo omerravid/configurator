@@ -72,6 +72,7 @@ app.use("/api/settings", require("./routes/settings"));
 app.use("/api/files", require("./routes/files"));
 app.use("/api/folder-import", require("./routes/folder-import"));
 app.use("/api/file-management", require("./routes/file-management"));
+app.use("/api/rules", require("./routes/rules"));
 
 // Health check
 app.get("/api/health", (req, res) => {
