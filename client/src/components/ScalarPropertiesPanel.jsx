@@ -693,6 +693,50 @@ const ScalarPropertiesPanel = ({
     }
   };
 
+  // Handle opening the rules dialog for a property
+  const handleRulesClick = async (propertyName) => {
+    if (!selectedConfig?.id) {
+      console.warn("No configuration ID available for rules");
+      return;
+    }
+
+    // Build the full property path
+    let fullPropertyPath;
+    if (selectedPath === "root") {
+      fullPropertyPath = propertyName;
+    } else {
+      // Remove "root." prefix from selectedPath if present
+      const cleanSelectedPath = selectedPath.startsWith("root.") ? selectedPath.substring(5) : selectedPath;
+      fullPropertyPath = `${cleanSelectedPath}.${propertyName}`;
+    }
+
+    try {
+      // Fetch existing rules for this property
+      const response = await fetch(`/api/rules/configuration/${selectedConfig.id}/path/${encodeURIComponent(fullPropertyPath)}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      const existingRules = response.ok ? await response.json() : [];
+
+      setRulesDialog({
+        isOpen: true,
+        configurationId: selectedConfig.id,
+        propertyPath: fullPropertyPath,
+        existingRules
+      });
+    } catch (error) {
+      console.error("Failed to fetch existing rules:", error);
+      setRulesDialog({
+        isOpen: true,
+        configurationId: selectedConfig.id,
+        propertyPath: fullPropertyPath,
+        existingRules: []
+      });
+    }
+  };
+
   // Reset all properties and arrays at current level to inherited values
   const handleResetAll = () => {
     if (!selectedValue || typeof selectedValue !== "object") return;
