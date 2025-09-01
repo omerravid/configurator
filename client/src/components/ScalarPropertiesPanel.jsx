@@ -15,6 +15,7 @@ import { useToast } from "../context/ToastContext";
 import ContextMenu from "./ContextMenu";
 import { configAPI } from "../services/api";
 import FileManagementPanel from "./FileManagementPanel";
+import RuleDefinitionDialog from "./RuleDefinitionDialog";
 
 const ScalarPropertiesPanel = ({
   selectedPath,
