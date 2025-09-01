@@ -375,45 +375,20 @@ const RuleDefinitionDialog = ({
         );
 
       case 'collection':
+        const inputValue = collectionInputValues[index] !== undefined
+          ? collectionInputValues[index]
+          : (rule.ruleConfig.validValues?.join(', ') || '');
+
         return (
           <input
             type="text"
-            value={rule.ruleConfig.validValues?.join(', ') || ''}
+            value={inputValue}
             onChange={(e) => {
-              console.log("=== Collection input onChange ===");
-              console.log("Event target value:", e.target.value);
-              console.log("Event type:", e.type);
-              updateCollectionValues(index, e.target.value);
+              updateCollectionInputValue(index, e.target.value);
             }}
-            onInput={(e) => {
-              console.log("=== Collection input onInput ===");
-              console.log("Input event value:", e.target.value);
-            }}
-            onKeyDown={(e) => {
-              console.log("=== Collection input onKeyDown ===");
-              console.log("Key pressed:", e.key);
-              console.log("KeyCode:", e.keyCode);
-              console.log("Which:", e.which);
-              console.log("Code:", e.code);
-              console.log("Char code:", e.charCode);
-              console.log("Default prevented:", e.defaultPrevented);
-              console.log("Propagation stopped:", e.isPropagationStopped ? e.isPropagationStopped() : 'N/A');
-            }}
-            onKeyPress={(e) => {
-              console.log("=== Collection input onKeyPress ===");
-              console.log("Key pressed:", e.key);
-              console.log("Char code:", e.charCode);
-            }}
-            onKeyUp={(e) => {
-              console.log("=== Collection input onKeyUp ===");
-              console.log("Key released:", e.key);
-              console.log("Input value after keyup:", e.target.value);
-            }}
-            onFocus={() => {
-              console.log("=== Collection input focused ===");
-            }}
-            onBlur={() => {
-              console.log("=== Collection input blurred ===");
+            onBlur={(e) => {
+              // Parse and update the rule config when focus is lost
+              parseAndUpdateCollectionValues(index, e.target.value);
             }}
             className="w-48 px-2 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
             placeholder="Type: red, blue, green"
