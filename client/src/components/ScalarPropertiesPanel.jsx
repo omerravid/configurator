@@ -624,7 +624,7 @@ const ScalarPropertiesPanel = ({
       }
     }
 
-    handleArrayValueChange(arrayName, index, editValue);
+    handleArrayValueChange(arrayName, index, newValue);
     setEditingProperty(null);
     setValidationError("");
   };
