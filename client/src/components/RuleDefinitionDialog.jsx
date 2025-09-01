@@ -97,7 +97,13 @@ const RuleDefinitionDialog = ({
   };
 
   const updateCollectionValues = (index, valuesString) => {
+    console.log("=== updateCollectionValues DEBUG ===");
+    console.log("Input string:", valuesString);
+    console.log("Contains commas:", valuesString.includes(','));
+
     const validValues = valuesString.split(',').map(v => v.trim()).filter(v => v !== '');
+    console.log("Parsed values:", validValues);
+
     updateRuleConfig(index, 'validValues', validValues);
   };
 
