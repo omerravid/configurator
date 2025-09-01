@@ -177,13 +177,37 @@ public class ConfigurationManagerClient : IConfigurationManagerClient
             builder.SetMinimumLevel(LogLevel.Information);
         });
 
-        // Configure HttpClient
-        services.AddHttpClient<IAuthService, AuthService>();
-        services.AddHttpClient<IConfigurationService, ConfigurationService>();
-        services.AddHttpClient<IFileService, FileService>();
-        services.AddHttpClient<IUserService, UserService>();
-        services.AddHttpClient<IRulesService, RulesService>();
-        services.AddHttpClient<ISettingsService, SettingsService>();
+        // Configure HttpClient with base URL
+        services.AddHttpClient<IAuthService, AuthService>(client =>
+        {
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = options.Timeout;
+        });
+        services.AddHttpClient<IConfigurationService, ConfigurationService>(client =>
+        {
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = options.Timeout;
+        });
+        services.AddHttpClient<IFileService, FileService>(client =>
+        {
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = options.Timeout;
+        });
+        services.AddHttpClient<IUserService, UserService>(client =>
+        {
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = options.Timeout;
+        });
+        services.AddHttpClient<IRulesService, RulesService>(client =>
+        {
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = options.Timeout;
+        });
+        services.AddHttpClient<ISettingsService, SettingsService>(client =>
+        {
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = options.Timeout;
+        });
 
         // Register services
         services.AddTransient<IAuthService, AuthService>();
