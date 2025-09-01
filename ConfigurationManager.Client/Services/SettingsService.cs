@@ -120,8 +120,8 @@ public interface ISettingsService
 /// </summary>
 public class SettingsService : BaseHttpService, ISettingsService
 {
-    public SettingsService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<SettingsService> logger)
-        : base(httpClient, options, logger)
+    public SettingsService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<SettingsService> logger, IAuthenticationManager authManager)
+        : base(httpClient, options, logger, authManager)
     {
     }
 
