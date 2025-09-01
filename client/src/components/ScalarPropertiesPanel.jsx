@@ -647,23 +647,8 @@ const ScalarPropertiesPanel = ({
     // Create a new array with the updated value
     const newArray = [...currentArray];
 
-    // Parse the value appropriately
-    let parsedValue = newValue;
-    try {
-      if (newValue === "true" || newValue === "false") {
-        parsedValue = newValue === "true";
-      } else if (newValue === "null") {
-        parsedValue = null;
-      } else if (newValue === "" || newValue === undefined) {
-        parsedValue = "";
-      } else if (!isNaN(newValue) && newValue !== "" && newValue !== null) {
-        parsedValue = Number(newValue);
-      }
-    } catch (e) {
-      // Keep as string if parsing fails
-    }
-
-    newArray[index] = parsedValue;
+    // Use the already-parsed value directly
+    newArray[index] = newValue;
 
     // Create the full path for the array
     let arrayPath;
