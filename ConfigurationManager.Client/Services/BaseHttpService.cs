@@ -13,12 +13,14 @@ public abstract class BaseHttpService
     protected readonly HttpClient HttpClient;
     protected readonly ILogger Logger;
     protected readonly ConfigurationManagerClientOptions Options;
+    protected readonly IAuthenticationManager AuthManager;
 
-    protected BaseHttpService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger logger)
+    protected BaseHttpService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger logger, IAuthenticationManager authManager)
     {
         HttpClient = httpClient;
         Options = options.Value;
         Logger = logger;
+        AuthManager = authManager;
 
         ConfigureHttpClient();
     }
@@ -36,15 +38,8 @@ public abstract class BaseHttpService
         // Set timeout
         HttpClient.Timeout = Options.Timeout;
 
-        // Set authentication headers
-        if (!string.IsNullOrEmpty(Options.JwtToken))
-        {
-            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Options.JwtToken);
-        }
-        else if (!string.IsNullOrEmpty(Options.ApiKey))
-        {
-            HttpClient.DefaultRequestHeaders.Add("X-API-Key", Options.ApiKey);
-        }
+        // Use authentication manager to configure auth headers
+        AuthManager.ConfigureHttpClient(HttpClient);
 
         // Set common headers
         HttpClient.DefaultRequestHeaders.Accept.Clear();
