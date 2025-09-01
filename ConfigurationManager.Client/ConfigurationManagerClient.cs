@@ -250,7 +250,20 @@ public class ConfigurationManagerClient : IConfigurationManagerClient
         if (string.IsNullOrWhiteSpace(token))
             throw new ArgumentException("Token cannot be empty", nameof(token));
 
+        // Update token for all services
         Auth.SetJwtToken(token);
+
+        // If services implement token setting, update them too
+        if (Configurations is BaseHttpService configService)
+            configService.SetJwtToken(token);
+        if (Files is BaseHttpService fileService)
+            fileService.SetJwtToken(token);
+        if (Users is BaseHttpService userService)
+            userService.SetJwtToken(token);
+        if (Rules is BaseHttpService rulesService)
+            rulesService.SetJwtToken(token);
+        if (Settings is BaseHttpService settingsService)
+            settingsService.SetJwtToken(token);
     }
 
     /// <inheritdoc />
