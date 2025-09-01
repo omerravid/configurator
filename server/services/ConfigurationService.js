@@ -378,10 +378,9 @@ class ConfigurationService {
     }
 
     if (minimal) {
-      // Return just the raw value, extracting from provenance wrapper
-      const actualValue = this.extractActualValue(current);
-      console.log(`Minimal value extracted - Original type: ${typeof current}, Final type: ${typeof actualValue}, Final value:`, actualValue);
-      return actualValue;
+      // Return the raw value directly (no provenance wrappers in minimal mode)
+      console.log(`Minimal value returned - Type: ${typeof current}, Value:`, current);
+      return current;
     }
 
     // Return with metadata (legacy format)
