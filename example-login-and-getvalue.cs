@@ -110,18 +110,21 @@ public class ConfigurationValueRetriever
         _client = ConfigurationManagerClientFactory.CreateForLogin(baseUrl);
     }
     
-    public async Task<string?> LoginAndGetValueAsync(string username, string password, 
+    public async Task<string?> LoginAndGetValueAsync(string username, string password,
         string configurationName, string path, bool minimal = true)
     {
         try
         {
             // Login
             var authResponse = await _client.Auth.LoginAsync(username, password);
-            
+
+            // IMPORTANT: Set the JWT token for all services after login
+            _client.SetJwtToken(authResponse.Token);
+
             // Get value
             var valueResponse = await _client.Configurations.GetConfigurationValueByNameAsync(
                 configurationName, path, minimal);
-                
+
             return valueResponse.Value?.ToString();
         }
         catch (Exception ex)
