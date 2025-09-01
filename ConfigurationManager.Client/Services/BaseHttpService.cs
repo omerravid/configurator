@@ -270,14 +270,14 @@ public abstract class BaseHttpService
         Logger.LogError("API error: {StatusCode} - {Error}", statusCode, errorMessage);
 
         // Throw specific exceptions based on status code
-        var exception = response.StatusCode switch
+        ConfigurationManagerException exception = response.StatusCode switch
         {
             HttpStatusCode.Unauthorized => new AuthenticationException(errorMessage, statusCode),
             HttpStatusCode.Forbidden => new AuthorizationException(errorMessage, statusCode),
             HttpStatusCode.NotFound => new NotFoundException(errorMessage, statusCode),
             HttpStatusCode.BadRequest => new ValidationException(errorMessage, statusCode),
             HttpStatusCode.Conflict => new ConflictException(errorMessage, statusCode),
-            HttpStatusCode.TooManyRequests => new RateLimitException(errorMessage, 
+            HttpStatusCode.TooManyRequests => new RateLimitException(errorMessage,
                 DateTime.UtcNow.Add(TimeSpan.FromMinutes(1)), statusCode), // Default retry after 1 minute
             _ => new ApiException(errorMessage, errorResponse, statusCode)
         };
