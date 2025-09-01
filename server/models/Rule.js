@@ -88,28 +88,31 @@ class Rule {
 
       // Additional logic for instances and products: also check component references
       const allConfigIds = [...configIds];
+      let searchPath = propertyPath;
 
-      // For each configuration in the chain, check if it has component references
-      for (const config of inheritanceChain) {
-        if (config.data && typeof config.data === 'object') {
-          // Look for component references in the data
-          const pathParts = propertyPath.split('.');
-          if (pathParts.length > 0) {
-            const componentName = pathParts[0]; // e.g., "Battery" from "Battery.charging.maxWatts"
+      // Handle component reference paths
+      const pathParts = propertyPath.split('.');
+      if (pathParts.length > 1) {
+        const componentName = pathParts[0]; // e.g., "Battery" from "Battery.charging.maxWatts"
+        const componentPath = pathParts.slice(1).join('.'); // e.g., "charging.maxWatts"
 
-            if (config.data[componentName] && config.data[componentName].componentId) {
-              const componentRef = config.data[componentName];
+        // Check if this is a component reference path
+        for (const config of inheritanceChain) {
+          if (config.data && typeof config.data === 'object' && config.data[componentName]) {
+            const componentRef = config.data[componentName];
+            if (componentRef.componentId) {
               console.log(`Found component reference in ${config.name}:`, componentRef);
 
-              // Add the referenced component and version to our search
-              if (componentRef.componentId) {
-                allConfigIds.push(componentRef.componentId);
-                console.log("Added componentId:", componentRef.componentId);
-              }
+              // For component references, we need to search the component with the sub-path
+              allConfigIds.push(componentRef.componentId);
               if (componentRef.versionId && componentRef.versionId !== componentRef.componentId) {
                 allConfigIds.push(componentRef.versionId);
-                console.log("Added versionId:", componentRef.versionId);
               }
+
+              // Update search path to remove component prefix
+              searchPath = componentPath;
+              console.log("Updated search path to:", searchPath);
+              break;
             }
           }
         }
@@ -118,6 +121,7 @@ class Rule {
       // Remove duplicates
       const uniqueConfigIds = [...new Set(allConfigIds)];
       console.log("Final unique config IDs to search:", uniqueConfigIds);
+      console.log("Using search path:", searchPath);
 
       if (uniqueConfigIds.length === 0) {
         return [];
@@ -133,7 +137,7 @@ class Rule {
          AND property_path = ?
          AND enabled = 1
          ORDER BY configuration_id, created_at`,
-        [...uniqueConfigIds, propertyPath]
+        [...uniqueConfigIds, searchPath]
       );
 
       if (result.success) {
