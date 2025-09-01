@@ -84,7 +84,7 @@ public class FileService : BaseHttpService, IFileService
 
         Logger.LogInformation("Downloading file with storage key: {StorageKey}", storageKey);
 
-        var endpoint = $"/files/{storageKey}";
+        var endpoint = $"files/{storageKey}";
 
         try
         {
@@ -139,7 +139,7 @@ public class FileService : BaseHttpService, IFileService
 
         Logger.LogDebug("Getting file info for storage key: {StorageKey}", storageKey);
 
-        return await GetAsync<FileInfoResponse>($"/files/{storageKey}/info", cancellationToken);
+        return await GetAsync<FileInfoResponse>($"files/{storageKey}/info", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -185,7 +185,7 @@ public class FileService : BaseHttpService, IFileService
         content.Add(new StringContent(request.ConfigId), "configId");
         content.Add(new StringContent(request.PropertyPath), "propertyPath");
 
-        return await PostMultipartAsync<ReplaceFileResponse>("/file-management/replace", content, cancellationToken);
+        return await PostMultipartAsync<ReplaceFileResponse>("file-management/replace", content, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -297,7 +297,7 @@ public class FileService : BaseHttpService, IFileService
             }
         }
 
-        return await PostMultipartAsync<FolderImportResponse>("/folder-import", content, cancellationToken);
+        return await PostMultipartAsync<FolderImportResponse>("folder-import", content, cancellationToken);
     }
 
     /// <inheritdoc />
