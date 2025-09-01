@@ -196,6 +196,38 @@ class ConfigurationService:
         response = self.client.get(f"/configs/{config_id}/data", params=params)
         return from_dict(ConfigurationValueResponse, response.json())
 
+    def get_value_by_name(
+        self,
+        configuration_name: str,
+        options: Optional[GetConfigurationValueOptions] = None
+    ) -> ConfigurationValueResponse:
+        """Get configuration data at a specific path by configuration name.
+
+        Args:
+            configuration_name: Configuration name
+            options: Options for getting configuration value
+
+        Returns:
+            ConfigurationValueResponse containing value data
+
+        Raises:
+            ValidationError: If configuration_name is empty
+        """
+        if not configuration_name:
+            raise ValidationError("Configuration name cannot be empty")
+
+        params = {}
+        if options:
+            if options.path:
+                params["path"] = options.path
+            if options.minimal:
+                params["minimal"] = "true"
+
+        # URL-encode the configuration name to handle special characters
+        encoded_name = quote(configuration_name)
+        response = self.client.get(f"/configs/by-name/{encoded_name}/data", params=params)
+        return from_dict(ConfigurationValueResponse, response.json())
+
     def commit(self, config_id: str) -> ConfigurationResponse:
         """Commit a draft configuration.
         
