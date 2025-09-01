@@ -53,7 +53,7 @@ func (c *ConfigurationService) Get(ctx context.Context, id string, options *GetC
 		}
 	}
 
-	path := fmt.Sprintf("/configs/%s", id)
+	path := fmt.Sprintf("configs/%s", id)
 	resp, err := c.client.GetWithQuery(ctx, path, params)
 	if err != nil {
 		return nil, fmt.Errorf("get configuration request failed: %w", err)
@@ -102,7 +102,7 @@ func (c *ConfigurationService) Update(ctx context.Context, id string, request *U
 		return nil, NewValidationError("update request cannot be nil", 0)
 	}
 
-	path := fmt.Sprintf("/configs/%s", id)
+	path := fmt.Sprintf("configs/%s", id)
 	resp, err := c.client.Put(ctx, path, request)
 	if err != nil {
 		return nil, fmt.Errorf("update configuration request failed: %w", err)
@@ -123,7 +123,7 @@ func (c *ConfigurationService) Delete(ctx context.Context, id string) (*Configur
 		return nil, NewValidationError("configuration ID cannot be empty", 0)
 	}
 
-	path := fmt.Sprintf("/configs/%s", id)
+	path := fmt.Sprintf("configs/%s", id)
 	resp, err := c.client.Delete(ctx, path)
 	if err != nil {
 		return nil, fmt.Errorf("delete configuration request failed: %w", err)
@@ -154,7 +154,7 @@ func (c *ConfigurationService) GetValue(ctx context.Context, id string, options 
 		}
 	}
 
-	path := fmt.Sprintf("/configs/%s/data", id)
+	path := fmt.Sprintf("configs/%s/data", id)
 	resp, err := c.client.GetWithQuery(ctx, path, params)
 	if err != nil {
 		return nil, fmt.Errorf("get configuration value request failed: %w", err)
@@ -185,7 +185,7 @@ func (c *ConfigurationService) GetValueByName(ctx context.Context, configuration
 		}
 	}
 
-	path := fmt.Sprintf("/configs/by-name/%s/data", url.PathEscape(configurationName))
+	path := fmt.Sprintf("configs/by-name/%s/data", url.PathEscape(configurationName))
 	resp, err := c.client.GetWithQuery(ctx, path, params)
 	if err != nil {
 		return nil, fmt.Errorf("get configuration value by name request failed: %w", err)
@@ -206,7 +206,7 @@ func (c *ConfigurationService) Commit(ctx context.Context, id string) (*Configur
 		return nil, NewValidationError("configuration ID cannot be empty", 0)
 	}
 
-	path := fmt.Sprintf("/configs/%s/commit", id)
+	path := fmt.Sprintf("configs/%s/commit", id)
 	resp, err := c.client.Post(ctx, path, nil)
 	if err != nil {
 		return nil, fmt.Errorf("commit configuration request failed: %w", err)
@@ -232,7 +232,7 @@ func (c *ConfigurationService) GetChildren(ctx context.Context, id string, optio
 		params.Set("includeArchived", "true")
 	}
 
-	path := fmt.Sprintf("/configs/%s/children", id)
+	path := fmt.Sprintf("configs/%s/children", id)
 	resp, err := c.client.GetWithQuery(ctx, path, params)
 	if err != nil {
 		return nil, fmt.Errorf("get child configurations request failed: %w", err)
@@ -249,7 +249,7 @@ func (c *ConfigurationService) GetChildren(ctx context.Context, id string, optio
 
 // GetComponents gets all components with their versions
 func (c *ConfigurationService) GetComponents(ctx context.Context) (*ComponentsResponse, error) {
-	resp, err := c.client.Get(ctx, "/configs/components")
+	resp, err := c.client.Get(ctx, "configs/components")
 	if err != nil {
 		return nil, fmt.Errorf("get components request failed: %w", err)
 	}
@@ -275,7 +275,7 @@ func (c *ConfigurationService) Rename(ctx context.Context, id, newName string) (
 
 	request := &RenameConfigurationRequest{Name: newName}
 
-	path := fmt.Sprintf("/configs/%s/rename", id)
+	path := fmt.Sprintf("configs/%s/rename", id)
 	resp, err := c.client.Put(ctx, path, request)
 	if err != nil {
 		return nil, fmt.Errorf("rename configuration request failed: %w", err)
@@ -301,7 +301,7 @@ func (c *ConfigurationService) Archive(ctx context.Context, id string, archiveCh
 		request.ArchiveChildren = archiveChildren
 	}
 
-	path := fmt.Sprintf("/configs/%s/archive", id)
+	path := fmt.Sprintf("configs/%s/archive", id)
 	resp, err := c.client.Post(ctx, path, request)
 	if err != nil {
 		return nil, fmt.Errorf("archive configuration request failed: %w", err)
@@ -322,7 +322,7 @@ func (c *ConfigurationService) Restore(ctx context.Context, id string) (*Configu
 		return nil, NewValidationError("configuration ID cannot be empty", 0)
 	}
 
-	path := fmt.Sprintf("/configs/%s/restore", id)
+	path := fmt.Sprintf("configs/%s/restore", id)
 	resp, err := c.client.Post(ctx, path, nil)
 	if err != nil {
 		return nil, fmt.Errorf("restore configuration request failed: %w", err)
