@@ -23,7 +23,7 @@ func (c *ConfigurationService) GetAll(ctx context.Context, options *GetConfigura
 		}
 	}
 
-	resp, err := c.client.GetWithQuery(ctx, "/configs", params)
+	resp, err := c.client.GetWithQuery(ctx, "configs", params)
 	if err != nil {
 		return nil, fmt.Errorf("get configurations request failed: %w", err)
 	}
@@ -78,7 +78,7 @@ func (c *ConfigurationService) Create(ctx context.Context, request *CreateConfig
 		return nil, NewValidationError("configuration name cannot be empty", 0)
 	}
 
-	resp, err := c.client.Post(ctx, "/configs", request)
+	resp, err := c.client.Post(ctx, "configs", request)
 	if err != nil {
 		return nil, fmt.Errorf("create configuration request failed: %w", err)
 	}
