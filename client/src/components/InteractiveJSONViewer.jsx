@@ -15,6 +15,7 @@ import StructuralTreeNode from "./StructuralTreeNode";
 import ScalarPropertiesPanel from "./ScalarPropertiesPanel";
 import { useToast } from "../context/ToastContext";
 import VrmlPreview from "./VrmlPreview";
+import RuleDefinitionDialog from "./RuleDefinitionDialog";
 
 // Helper function to safely extract actual values from provenance-wrapped objects
 const extractActualValue = (val) => {
