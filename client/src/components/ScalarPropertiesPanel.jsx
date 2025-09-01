@@ -930,7 +930,7 @@ const ScalarPropertiesPanel = ({
         isOpen: true,
         configurationId: selectedConfig.id,
         propertyPath: fullPropertyPath,
-        existingRules: []
+        existingRules: [] // Explicitly ensure it's an empty array
       });
     }
   };
