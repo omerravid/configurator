@@ -35,7 +35,8 @@ public static class ServiceCollectionExtensions
             .ConfigureHttpClient((serviceProvider, client) =>
             {
                 var options = serviceProvider.GetRequiredService<IOptions<ConfigurationManagerClientOptions>>().Value;
-                client.BaseAddress = new Uri(options.BaseUrl);
+                var baseUrl = options.BaseUrl.TrimEnd('/') + "/";
+                client.BaseAddress = new Uri(baseUrl);
                 client.Timeout = options.Timeout;
             });
 
