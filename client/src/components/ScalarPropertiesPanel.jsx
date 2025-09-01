@@ -15,6 +15,8 @@ import { useToast } from "../context/ToastContext";
 import ContextMenu from "./ContextMenu";
 import { configAPI } from "../services/api";
 import FileManagementPanel from "./FileManagementPanel";
+import RuleDefinitionDialog from "./RuleDefinitionDialog";
+import RuleAwareInput from "./RuleAwareInput";
 
 const ScalarPropertiesPanel = ({
   selectedPath,
@@ -42,6 +44,13 @@ const ScalarPropertiesPanel = ({
   // Component version management state
   const [availableVersions, setAvailableVersions] = useState([]);
   const [loadingVersions, setLoadingVersions] = useState(false);
+
+  // Rules dialog state
+  const [rulesDialog, setRulesDialog] = useState({ isOpen: false, configurationId: null, propertyPath: null, existingRules: [] });
+
+  // Validation state
+  const [validationError, setValidationError] = useState("");
+  const [isValidating, setIsValidating] = useState(false);
 
   // Extract actual value and source from provenance wrapper
   const getActualValueAndSource = (val) => {
@@ -340,25 +349,113 @@ const ScalarPropertiesPanel = ({
     }
   }, [componentRef?.componentId]);
 
+  const validateValue = async (propertyName, value) => {
+    console.log("=== validateValue DEBUG ===");
+    console.log("propertyName:", propertyName);
+    console.log("value:", value);
+    console.log("selectedConfig:", selectedConfig);
+
+    if (!selectedConfig?.id) {
+      console.log("No selectedConfig.id, returning true");
+      return true;
+    }
+
+    // Build the full property path
+    let fullPropertyPath;
+    if (selectedPath === "root") {
+      fullPropertyPath = propertyName;
+    } else {
+      // Remove "root." prefix from selectedPath if present
+      const cleanSelectedPath = selectedPath.startsWith("root.") ? selectedPath.substring(5) : selectedPath;
+      fullPropertyPath = `${cleanSelectedPath}.${propertyName}`;
+    }
+
+    console.log("fullPropertyPath:", fullPropertyPath);
+    console.log("API payload:", {
+      configurationId: selectedConfig.id,
+      propertyPath: fullPropertyPath,
+      value: value
+    });
+
+    try {
+      setIsValidating(true);
+      console.log("Making validation request...");
+      const response = await fetch('/api/rules/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          configurationId: selectedConfig.id,
+          propertyPath: fullPropertyPath,
+          value: value
+        })
+      });
+
+      console.log("Validation response status:", response.status);
+      const result = await response.json();
+      console.log("Validation result:", result);
+
+      if (!response.ok) {
+        console.log("Validation response not ok:", result);
+        setValidationError(result.error || 'Validation failed');
+        return false;
+      }
+
+      if (!result.isValid) {
+        console.log("Validation failed:", result.errors);
+        setValidationError(result.errors.join(', '));
+        return false;
+      }
+
+      console.log("Validation passed");
+      setValidationError("");
+      return true;
+    } catch (error) {
+      console.error('Validation error:', error);
+      console.error("Error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      setValidationError('Validation service unavailable');
+      return false;
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
   const handleEditStart = (propertyName, value) => {
     setEditingProperty(propertyName);
     setEditValue(safeToString(value));
+    setValidationError("");
   };
 
-  const handleEditSave = (propertyName) => {
-    let newValue = editValue;
+  const handleEditSave = async (propertyName, newValue = null) => {
+    // If newValue is provided (from RuleAwareInput), use it directly
+    // Otherwise, use the old parsing logic for backwards compatibility
+    if (newValue === null) {
+      newValue = editValue;
 
-    // Try to parse as JSON for numbers, booleans, etc.
-    try {
-      if (editValue === "true" || editValue === "false") {
-        newValue = editValue === "true";
-      } else if (!isNaN(editValue) && editValue !== "" && editValue !== null) {
-        newValue = Number(editValue);
-      } else if (editValue === "null") {
-        newValue = null;
+      // Try to parse as JSON for numbers, booleans, etc.
+      try {
+        if (editValue === "true" || editValue === "false") {
+          newValue = editValue === "true";
+        } else if (!isNaN(editValue) && editValue !== "" && editValue !== null) {
+          newValue = Number(editValue);
+        } else if (editValue === "null") {
+          newValue = null;
+        }
+      } catch (e) {
+        // Keep as string if parsing fails
       }
-    } catch (e) {
-      // Keep as string if parsing fails
+
+      // Validate the value before saving for backward compatibility
+      const isValid = await validateValue(propertyName, newValue);
+      if (!isValid) {
+        return; // Don't save if validation fails
+      }
     }
 
     // Check if we're editing a property inside an array element
@@ -381,11 +478,13 @@ const ScalarPropertiesPanel = ({
     }
 
     setEditingProperty(null);
+    setValidationError("");
   };
 
   const handleEditCancel = () => {
     setEditingProperty(null);
     setEditValue("");
+    setValidationError("");
   };
 
   const handleAddProperty = () => {
@@ -442,6 +541,90 @@ const ScalarPropertiesPanel = ({
   };
 
   // Array editing handlers
+  const validateArrayItem = async (arrayName, value) => {
+    if (!selectedConfig?.id) return true;
+
+    // Build the full property path for the array
+    let fullPropertyPath;
+    if (selectedPath === "root") {
+      fullPropertyPath = arrayName;
+    } else {
+      // Remove "root." prefix from selectedPath if present
+      const cleanSelectedPath = selectedPath.startsWith("root.") ? selectedPath.substring(5) : selectedPath;
+      fullPropertyPath = `${cleanSelectedPath}.${arrayName}`;
+    }
+
+    try {
+      setIsValidating(true);
+      const response = await fetch('/api/rules/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          configurationId: selectedConfig.id,
+          propertyPath: fullPropertyPath,
+          value: value
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setValidationError(result.error || 'Validation failed');
+        return false;
+      }
+
+      if (!result.isValid) {
+        setValidationError(result.errors.join(', '));
+        return false;
+      }
+
+      setValidationError("");
+      return true;
+    } catch (error) {
+      console.error('Array validation error:', error);
+      setValidationError('Validation service unavailable');
+      return false;
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  const handleArrayItemSave = async (arrayName, index, newValue = null) => {
+    // If newValue is provided (from RuleAwareInput), use it directly
+    // Otherwise, use the old parsing logic for backwards compatibility
+    if (newValue === null) {
+      newValue = editValue;
+
+      // Parse the value appropriately
+      try {
+        if (editValue === "true" || editValue === "false") {
+          newValue = editValue === "true";
+        } else if (editValue === "null") {
+          newValue = null;
+        } else if (editValue === "" || editValue === undefined) {
+          newValue = "";
+        } else if (!isNaN(editValue) && editValue !== "" && editValue !== null) {
+          newValue = Number(editValue);
+        }
+      } catch (e) {
+        // Keep as string if parsing fails
+      }
+
+      // Validate the array item value for backward compatibility
+      const isValid = await validateArrayItem(arrayName, newValue);
+      if (!isValid) {
+        return; // Don't save if validation fails
+      }
+    }
+
+    handleArrayValueChange(arrayName, index, newValue);
+    setEditingProperty(null);
+    setValidationError("");
+  };
+
   const handleArrayValueChange = (arrayName, index, newValue) => {
     console.log("Array value change:", { arrayName, index, newValue, selectedPath });
 
@@ -460,23 +643,8 @@ const ScalarPropertiesPanel = ({
     // Create a new array with the updated value
     const newArray = [...currentArray];
 
-    // Parse the value appropriately
-    let parsedValue = newValue;
-    try {
-      if (newValue === "true" || newValue === "false") {
-        parsedValue = newValue === "true";
-      } else if (newValue === "null") {
-        parsedValue = null;
-      } else if (newValue === "" || newValue === undefined) {
-        parsedValue = "";
-      } else if (!isNaN(newValue) && newValue !== "" && newValue !== null) {
-        parsedValue = Number(newValue);
-      }
-    } catch (e) {
-      // Keep as string if parsing fails
-    }
-
-    newArray[index] = parsedValue;
+    // Use the already-parsed value directly
+    newArray[index] = newValue;
 
     // Create the full path for the array
     let arrayPath;
@@ -686,6 +854,146 @@ const ScalarPropertiesPanel = ({
       console.log("Resetting property to default:", propertyPath);
       onValueChange?.(propertyPath, null); // null removes the override
       showToast(`Property "${propertyName}" reset to inherited value`, "success");
+    }
+  };
+
+  // Handle opening the rules dialog for a property or array
+  const handleRulesClick = async (propertyName) => {
+    console.log("=== handleRulesClick DEBUG ===");
+    console.log("propertyName:", propertyName);
+    console.log("selectedConfig:", selectedConfig);
+    console.log("selectedPath:", selectedPath);
+    console.log("localStorage token:", localStorage.getItem('token') ? 'Present' : 'Missing');
+
+    if (!selectedConfig?.id) {
+      console.warn("No configuration ID available for rules");
+      return;
+    }
+
+    // Build the full property path
+    let fullPropertyPath;
+    if (selectedPath === "root") {
+      fullPropertyPath = propertyName;
+    } else {
+      // Remove "root." prefix from selectedPath if present
+      const cleanSelectedPath = selectedPath.startsWith("root.") ? selectedPath.substring(5) : selectedPath;
+      fullPropertyPath = `${cleanSelectedPath}.${propertyName}`;
+    }
+
+    console.log("fullPropertyPath:", fullPropertyPath);
+    const apiUrl = `/api/rules/configuration/${selectedConfig.id}/path/${encodeURIComponent(fullPropertyPath)}`;
+    console.log("API URL:", apiUrl);
+
+    try {
+      // Fetch existing rules for this property
+      console.log("Making fetch request...");
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+
+      let existingRules = [];
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Raw API response:", data);
+        // API returns { rules: [...] } so extract the rules array
+        existingRules = Array.isArray(data.rules) ? data.rules : (Array.isArray(data) ? data : []);
+      }
+      console.log("Existing rules:", existingRules);
+
+      setRulesDialog({
+        isOpen: true,
+        configurationId: selectedConfig.id,
+        propertyPath: fullPropertyPath,
+        existingRules
+      });
+    } catch (error) {
+      console.error("Failed to fetch existing rules:", error);
+      console.error("Error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      setRulesDialog({
+        isOpen: true,
+        configurationId: selectedConfig.id,
+        propertyPath: fullPropertyPath,
+        existingRules: [] // Explicitly ensure it's an empty array
+      });
+    }
+  };
+
+  // Handle opening the rules dialog for an array
+  const handleArrayRulesClick = async (arrayName) => {
+    console.log("=== handleArrayRulesClick DEBUG ===");
+    console.log("arrayName:", arrayName);
+    console.log("selectedConfig:", selectedConfig);
+    console.log("selectedPath:", selectedPath);
+    console.log("localStorage token:", localStorage.getItem('token') ? 'Present' : 'Missing');
+
+    if (!selectedConfig?.id) {
+      console.warn("No configuration ID available for array rules");
+      return;
+    }
+
+    // Build the full property path for the array (without index notation)
+    let fullPropertyPath;
+    if (selectedPath === "root") {
+      fullPropertyPath = arrayName;
+    } else {
+      // Remove "root." prefix from selectedPath if present
+      const cleanSelectedPath = selectedPath.startsWith("root.") ? selectedPath.substring(5) : selectedPath;
+      fullPropertyPath = `${cleanSelectedPath}.${arrayName}`;
+    }
+
+    console.log("fullPropertyPath:", fullPropertyPath);
+    const apiUrl = `/api/rules/configuration/${selectedConfig.id}/path/${encodeURIComponent(fullPropertyPath)}`;
+    console.log("API URL:", apiUrl);
+
+    try {
+      // Fetch existing rules for this array
+      console.log("Making fetch request...");
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+
+      let existingRules = [];
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Raw API response:", data);
+        // API returns { rules: [...] } so extract the rules array
+        existingRules = Array.isArray(data.rules) ? data.rules : (Array.isArray(data) ? data : []);
+      }
+      console.log("Existing array rules:", existingRules);
+
+      setRulesDialog({
+        isOpen: true,
+        configurationId: selectedConfig.id,
+        propertyPath: fullPropertyPath,
+        existingRules
+      });
+    } catch (error) {
+      console.error("Failed to fetch existing array rules:", error);
+      console.error("Error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      setRulesDialog({
+        isOpen: true,
+        configurationId: selectedConfig.id,
+        propertyPath: fullPropertyPath,
+        existingRules: [] // Explicitly ensure it's an empty array
+      });
     }
   };
 
@@ -1154,31 +1462,14 @@ const ScalarPropertiesPanel = ({
                   <div className="flex items-center space-x-2">
                     <span className="font-medium text-gray-700 dark:text-gray-300">{propertyName}:</span>
                     {isEditing ? (
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="text"
-                          value={editValue}
-                          onChange={(e) => setEditValue(e.target.value)}
-                          className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") handleEditSave(propertyName);
-                            if (e.key === "Escape") handleEditCancel();
-                          }}
-                          autoFocus
-                        />
-                        <button
-                          onClick={() => handleEditSave(propertyName)}
-                          className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
-                        >
-                          ✓
-                        </button>
-                        <button
-                          onClick={handleEditCancel}
-                          className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600"
-                        >
-                          ✕
-                        </button>
-                      </div>
+                      <RuleAwareInput
+                        value={getActualValueAndSource(value).actualValue}
+                        configurationId={selectedConfig?.id}
+                        propertyPath={selectedPath === "root" ? propertyName : `${selectedPath.replace(/^root\./, "")}.${propertyName}`}
+                        onSave={(newValue) => handleEditSave(propertyName, newValue)}
+                        onCancel={handleEditCancel}
+                        className="flex-1"
+                      />
                     ) : (
                       <div className="flex items-center space-x-2">
                         {renderPropertyValue(value)}
@@ -1214,6 +1505,15 @@ const ScalarPropertiesPanel = ({
                           title="Edit value"
                         >
                           <PencilIcon className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => handleRulesClick(propertyName)}
+                          className="p-1 text-blue-400 hover:text-blue-600 hover:bg-blue-100 rounded"
+                          title="Configure rules"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
                         </button>
                         {propertyHasLocalOverride(value) && (
                           <button
@@ -1257,6 +1557,16 @@ const ScalarPropertiesPanel = ({
                   {isEditable && configType !== "PRODUCT" && (
                     <div className="flex items-center space-x-2">
                       <button
+                        onClick={() => handleArrayRulesClick(arrayName)}
+                        className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                        title="Configure rules for all array items"
+                      >
+                        <svg className="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Rules
+                      </button>
+                      <button
                         onClick={() => handleArrayItemAdd(arrayName)}
                         className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
                         title="Add array item"
@@ -1291,36 +1601,15 @@ const ScalarPropertiesPanel = ({
                           <div className="flex items-center space-x-2">
                             <span className="text-sm text-gray-500 dark:text-gray-400 min-w-0">[{index}]:</span>
                             {isEditingItem ? (
-                              <div className="flex items-center space-x-2 flex-1">
-                                <input
-                                  type="text"
-                                  value={editValue}
-                                  onChange={(e) => setEditValue(e.target.value)}
-                                  className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                      handleArrayValueChange(arrayName, index, editValue);
-                                      setEditingProperty(null);
-                                    }
-                                    if (e.key === "Escape") handleEditCancel();
-                                  }}
-                                  autoFocus
+                              <div className="flex-1">
+                                <RuleAwareInput
+                                  value={getActualValueAndSource(item).actualValue}
+                                  configurationId={selectedConfig?.id}
+                                  propertyPath={`${selectedPath === "root" ? arrayName : `${selectedPath.replace(/^root\./, "")}.${arrayName}`}[${index}]`}
+                                  onSave={(newValue) => handleArrayItemSave(arrayName, index, newValue)}
+                                  onCancel={handleEditCancel}
+                                  className="flex-1"
                                 />
-                                <button
-                                  onClick={() => {
-                                    handleArrayValueChange(arrayName, index, editValue);
-                                    setEditingProperty(null);
-                                  }}
-                                  className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
-                                >
-                                  ✓
-                                </button>
-                                <button
-                                  onClick={handleEditCancel}
-                                  className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600"
-                                >
-                                  ✕
-                                </button>
                               </div>
                             ) : (
                               <div className="flex items-center space-x-2 flex-1">
@@ -1421,6 +1710,19 @@ const ScalarPropertiesPanel = ({
           onClose={() => setContextMenu(null)}
         />
       )}
+
+      {/* Rules Dialog */}
+      <RuleDefinitionDialog
+        isOpen={rulesDialog.isOpen}
+        onClose={() => setRulesDialog({ isOpen: false, configurationId: null, propertyPath: null, existingRules: [] })}
+        configurationId={rulesDialog.configurationId}
+        propertyPath={rulesDialog.propertyPath}
+        existingRules={rulesDialog.existingRules}
+        onRulesUpdated={(updatedRules) => {
+          console.log("Rules updated:", updatedRules);
+          showToast("Rules updated successfully", "success");
+        }}
+      />
     </div>
   );
 };
