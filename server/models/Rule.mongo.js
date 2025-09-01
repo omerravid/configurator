@@ -72,6 +72,11 @@ ruleSchema.statics.create = async function(ruleData) {
   }
 };
 
+// Find rule by ID
+ruleSchema.statics.findById = function(id) {
+  return this.findOne({ _id: id });
+};
+
 ruleSchema.statics.findByConfigurationAndPath = function(configurationId, propertyPath) {
   return this.find({ configurationId, propertyPath, enabled: true });
 };
