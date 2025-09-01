@@ -2,6 +2,7 @@ namespace ConfigurationManager.Client;
 
 using ConfigurationManager.Client.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
