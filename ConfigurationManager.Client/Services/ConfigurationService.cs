@@ -253,6 +253,34 @@ public class ConfigurationService : BaseHttpService, IConfigurationService
     }
 
     /// <inheritdoc />
+    public async Task<ConfigurationValueResponse> GetConfigurationValueByNameAsync(
+        string configurationName,
+        string? path = null,
+        bool minimal = false,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(configurationName))
+            throw new ArgumentException("Configuration name cannot be empty", nameof(configurationName));
+
+        var queryParams = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(path))
+            queryParams.Add($"path={HttpUtility.UrlEncode(path)}");
+
+        if (minimal)
+            queryParams.Add("minimal=true");
+
+        var endpoint = $"configs/by-name/{HttpUtility.UrlEncode(configurationName)}/data";
+        if (queryParams.Count > 0)
+            endpoint += "?" + string.Join("&", queryParams);
+
+        Logger.LogDebug("Getting configuration value by name: {Name} at path={Path}, minimal={Minimal}",
+            configurationName, path, minimal);
+
+        return await GetAsync<ConfigurationValueResponse>(endpoint, cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<ConfigurationResponse> CommitConfigurationAsync(
         string id,
         CancellationToken cancellationToken = default)
