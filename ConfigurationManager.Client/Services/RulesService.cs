@@ -75,7 +75,7 @@ public class RulesService : BaseHttpService, IRulesService
         if (string.IsNullOrWhiteSpace(configurationId))
             throw new ArgumentException("Configuration ID cannot be empty", nameof(configurationId));
 
-        var endpoint = $"/rules?configurationId={HttpUtility.UrlEncode(configurationId)}";
+        var endpoint = $"rules?configurationId={HttpUtility.UrlEncode(configurationId)}";
 
         Logger.LogDebug("Getting rules for configuration: {ConfigurationId}", configurationId);
 
@@ -99,7 +99,7 @@ public class RulesService : BaseHttpService, IRulesService
         Logger.LogInformation("Creating rule for configuration {ConfigurationId} at path {PropertyPath}", 
             request.ConfigurationId, request.PropertyPath);
 
-        return await PostAsync<RuleResponse>("/rules", request, cancellationToken);
+        return await PostAsync<RuleResponse>("rules", request, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -110,7 +110,7 @@ public class RulesService : BaseHttpService, IRulesService
 
         Logger.LogDebug("Getting rule: {RuleId}", id);
 
-        return await GetAsync<RuleResponse>($"/rules/{id}", cancellationToken);
+        return await GetAsync<RuleResponse>($"rules/{id}", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -127,7 +127,7 @@ public class RulesService : BaseHttpService, IRulesService
 
         Logger.LogInformation("Updating rule: {RuleId}", id);
 
-        return await PutAsync<RuleResponse>($"/rules/{id}", request, cancellationToken);
+        return await PutAsync<RuleResponse>($"rules/{id}", request, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -138,7 +138,7 @@ public class RulesService : BaseHttpService, IRulesService
 
         Logger.LogInformation("Deleting rule: {RuleId}", id);
 
-        await DeleteAsync<object>($"/rules/{id}", cancellationToken);
+        await DeleteAsync<object>($"rules/{id}", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -158,7 +158,7 @@ public class RulesService : BaseHttpService, IRulesService
         Logger.LogDebug("Validating value for configuration {ConfigurationId} at path {PropertyPath}", 
             request.ConfigurationId, request.PropertyPath);
 
-        return await PostAsync<RuleValidationResponse>("/rules/validate", request, cancellationToken);
+        return await PostAsync<RuleValidationResponse>("rules/validate", request, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -175,7 +175,7 @@ public class RulesService : BaseHttpService, IRulesService
             throw new ArgumentException("Path cannot be empty", nameof(path));
 
         var encodedPath = HttpUtility.UrlEncode(path);
-        var endpoint = $"/rules/configuration/{configId}/path/{encodedPath}";
+        var endpoint = $"rules/configuration/{configId}/path/{encodedPath}";
 
         if (!includeInherited)
             endpoint += "?includeInherited=false";

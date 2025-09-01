@@ -131,7 +131,7 @@ public class ConfigurationService : BaseHttpService, IConfigurationService
         if (includeArchived)
             queryParams.Add("includeArchived=true");
 
-        var endpoint = "/configs";
+        var endpoint = "configs";
         if (queryParams.Count > 0)
             endpoint += "?" + string.Join("&", queryParams);
 
@@ -159,7 +159,7 @@ public class ConfigurationService : BaseHttpService, IConfigurationService
         if (raw)
             queryParams.Add("raw=true");
 
-        var endpoint = $"/configs/{id}";
+        var endpoint = $"configs/{id}";
         if (queryParams.Count > 0)
             endpoint += "?" + string.Join("&", queryParams);
 
@@ -182,7 +182,7 @@ public class ConfigurationService : BaseHttpService, IConfigurationService
 
         Logger.LogInformation("Creating configuration: {Name} of type {Type}", request.Name, request.Type);
 
-        return await PostAsync<ConfigurationResponse>("/configs", request, cancellationToken);
+        return await PostAsync<ConfigurationResponse>("configs", request, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -199,7 +199,7 @@ public class ConfigurationService : BaseHttpService, IConfigurationService
 
         Logger.LogInformation("Updating configuration: {Id}", id);
 
-        return await PutAsync<ConfigurationResponse>($"/configs/{id}", request, cancellationToken);
+        return await PutAsync<ConfigurationResponse>($"configs/{id}", request, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -212,7 +212,7 @@ public class ConfigurationService : BaseHttpService, IConfigurationService
 
         Logger.LogInformation("Deleting configuration: {Id}", id);
 
-        return await DeleteAsync<ConfigurationResponse>($"/configs/{id}", cancellationToken);
+        return await DeleteAsync<ConfigurationResponse>($"configs/{id}", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -233,7 +233,7 @@ public class ConfigurationService : BaseHttpService, IConfigurationService
         if (minimal)
             queryParams.Add("minimal=true");
 
-        var endpoint = $"/configs/{id}/data";
+        var endpoint = $"configs/{id}/data";
         if (queryParams.Count > 0)
             endpoint += "?" + string.Join("&", queryParams);
 
@@ -253,7 +253,7 @@ public class ConfigurationService : BaseHttpService, IConfigurationService
 
         Logger.LogInformation("Committing configuration: {Id}", id);
 
-        return await PostAsync<ConfigurationResponse>($"/configs/{id}/commit", cancellationToken: cancellationToken);
+        return await PostAsync<ConfigurationResponse>($"configs/{id}/commit", cancellationToken: cancellationToken);
     }
 
     /// <inheritdoc />
@@ -265,7 +265,7 @@ public class ConfigurationService : BaseHttpService, IConfigurationService
         if (string.IsNullOrWhiteSpace(id))
             throw new ArgumentException("Configuration ID cannot be empty", nameof(id));
 
-        var endpoint = $"/configs/{id}/children";
+        var endpoint = $"configs/{id}/children";
         if (includeArchived)
             endpoint += "?includeArchived=true";
 
@@ -280,7 +280,7 @@ public class ConfigurationService : BaseHttpService, IConfigurationService
     {
         Logger.LogDebug("Getting all components with versions");
 
-        return await GetAsync<ComponentsResponse>("/configs/components", cancellationToken);
+        return await GetAsync<ComponentsResponse>("configs/components", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -299,7 +299,7 @@ public class ConfigurationService : BaseHttpService, IConfigurationService
 
         Logger.LogInformation("Renaming configuration: {Id} to {NewName}", id, newName);
 
-        return await PutAsync<ConfigurationResponse>($"/configs/{id}/rename", request, cancellationToken);
+        return await PutAsync<ConfigurationResponse>($"configs/{id}/rename", request, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -316,7 +316,7 @@ public class ConfigurationService : BaseHttpService, IConfigurationService
         Logger.LogInformation("Archiving configuration: {Id}, archiveChildren={ArchiveChildren}", 
             id, archiveChildren);
 
-        return await PostAsync<ConfigurationResponse>($"/configs/{id}/archive", request, cancellationToken);
+        return await PostAsync<ConfigurationResponse>($"configs/{id}/archive", request, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -329,6 +329,6 @@ public class ConfigurationService : BaseHttpService, IConfigurationService
 
         Logger.LogInformation("Restoring configuration: {Id}", id);
 
-        return await PostAsync<ConfigurationResponse>($"/configs/{id}/restore", cancellationToken: cancellationToken);
+        return await PostAsync<ConfigurationResponse>($"configs/{id}/restore", cancellationToken: cancellationToken);
     }
 }
