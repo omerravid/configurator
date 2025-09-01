@@ -482,9 +482,6 @@ const ScalarPropertiesPanel = ({
   };
 
   const handleEditCancel = () => {
-    if (validateTimeoutRef.current) {
-      clearTimeout(validateTimeoutRef.current);
-    }
     setEditingProperty(null);
     setEditValue("");
     setValidationError("");
