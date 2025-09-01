@@ -237,7 +237,7 @@ public class ConfigurationService : BaseHttpService, IConfigurationService
         var queryParams = new List<string>();
 
         if (!string.IsNullOrWhiteSpace(path))
-            queryParams.Add($"path={HttpUtility.UrlEncode(path)}");
+            queryParams.Add($"path={Uri.EscapeDataString(path)}");
 
         if (minimal)
             queryParams.Add("minimal=true");
