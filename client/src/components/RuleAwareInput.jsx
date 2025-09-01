@@ -16,6 +16,10 @@ const RuleAwareInput = ({
   const [validationError, setValidationError] = useState('');
   const [isValidating, setIsValidating] = useState(false);
 
+  // Refs for debouncing
+  const validationTimeoutRef = useRef(null);
+  const abortControllerRef = useRef(null);
+
   // Parse value for display
   const displayValue = typeof value === 'string' ? value : String(value);
 
@@ -90,6 +94,10 @@ const RuleAwareInput = ({
   const validateValue = async (val) => {
     if (!configurationId || !propertyPath) return true;
 
+    // Create abort controller for this validation request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     setIsValidating(true);
     try {
       // Check if this is an array item path (contains [index])
@@ -107,7 +115,8 @@ const RuleAwareInput = ({
           configurationId,
           propertyPath,
           value: val
-        })
+        }),
+        signal: abortController.signal
       });
 
       const result = await response.json();
@@ -139,7 +148,8 @@ const RuleAwareInput = ({
               configurationId,
               propertyPath: arrayPath,
               value: val
-            })
+            }),
+            signal: abortController.signal
           });
 
           const arrayResult = await arrayResponse.json();
@@ -165,13 +175,23 @@ const RuleAwareInput = ({
       onValidation?.(true, '');
       return true;
     } catch (error) {
+      // Don't show errors if request was aborted (user is still typing)
+      if (error.name === 'AbortError') {
+        console.log('Validation request aborted - user is still typing');
+        return false;
+      }
+
       console.error('Validation error:', error);
       const errorMsg = 'Validation service unavailable';
       setValidationError(errorMsg);
       onValidation?.(false, errorMsg);
       return false;
     } finally {
-      setIsValidating(false);
+      // Only clear validation state if this request wasn't aborted
+      if (abortControllerRef.current === abortController) {
+        setIsValidating(false);
+        abortControllerRef.current = null;
+      }
     }
   };
 
@@ -190,18 +210,41 @@ const RuleAwareInput = ({
 
   const handleInputChange = async (newValue) => {
     setInputValue(newValue);
-    
-    // Debounced validation
-    setTimeout(async () => {
+
+    // Cancel previous validation timeout
+    if (validationTimeoutRef.current) {
+      clearTimeout(validationTimeoutRef.current);
+      validationTimeoutRef.current = null;
+    }
+
+    // Cancel previous validation request if still in progress
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+
+    // Clear validation state while typing
+    setValidationError('');
+    setIsValidating(false);
+
+    // Debounced validation - only run after user stops typing for 500ms
+    validationTimeoutRef.current = setTimeout(async () => {
       const parsedValue = parseInputValue(newValue);
       await validateValue(parsedValue);
-    }, 300);
+      validationTimeoutRef.current = null;
+    }, 500);
   };
 
   const handleSave = async () => {
+    // Cancel any pending validation
+    if (validationTimeoutRef.current) {
+      clearTimeout(validationTimeoutRef.current);
+      validationTimeoutRef.current = null;
+    }
+
     const parsedValue = parseInputValue(inputValue);
     const isValid = await validateValue(parsedValue);
-    
+
     if (isValid) {
       onSave(parsedValue);
     }
@@ -214,6 +257,15 @@ const RuleAwareInput = ({
     }
     if (e.key === "Escape") {
       e.preventDefault();
+      // Cancel any pending validation
+      if (validationTimeoutRef.current) {
+        clearTimeout(validationTimeoutRef.current);
+        validationTimeoutRef.current = null;
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
       onCancel();
     }
   };
