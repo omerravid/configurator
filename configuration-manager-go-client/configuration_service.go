@@ -169,6 +169,37 @@ func (c *ConfigurationService) GetValue(ctx context.Context, id string, options 
 	return &response, nil
 }
 
+// GetValueByName gets configuration data at a specific path by configuration name
+func (c *ConfigurationService) GetValueByName(ctx context.Context, configurationName string, options *GetConfigurationValueOptions) (*ConfigurationValueResponse, error) {
+	if configurationName == "" {
+		return nil, NewValidationError("configuration name cannot be empty", 0)
+	}
+
+	params := url.Values{}
+	if options != nil {
+		if options.Path != nil {
+			params.Set("path", *options.Path)
+		}
+		if options.Minimal != nil && *options.Minimal {
+			params.Set("minimal", "true")
+		}
+	}
+
+	path := fmt.Sprintf("/configs/by-name/%s/data", url.PathEscape(configurationName))
+	resp, err := c.client.GetWithQuery(ctx, path, params)
+	if err != nil {
+		return nil, fmt.Errorf("get configuration value by name request failed: %w", err)
+	}
+	defer c.client.CloseResponse(resp)
+
+	var response ConfigurationValueResponse
+	if err := c.client.DecodeJSON(resp, &response); err != nil {
+		return nil, fmt.Errorf("failed to decode configuration value by name response: %w", err)
+	}
+
+	return &response, nil
+}
+
 // Commit commits a draft configuration
 func (c *ConfigurationService) Commit(ctx context.Context, id string) (*ConfigurationResponse, error) {
 	if id == "" {
