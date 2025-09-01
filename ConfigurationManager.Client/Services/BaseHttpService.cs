@@ -81,8 +81,9 @@ public abstract class BaseHttpService
     {
         try
         {
+            EnsureAuthentication();
             Logger.LogDebug("Sending GET request to {Endpoint}", endpoint);
-            
+
             using var response = await HttpClient.GetAsync(endpoint, cancellationToken);
             return await HandleResponse<T>(response);
         }
