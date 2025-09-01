@@ -314,13 +314,11 @@ public abstract class BaseHttpService
 
         try
         {
-            // The content should be valid JSON - let's validate it first
-            using var document = JsonDocument.Parse(content);
-            var rootElement = document.RootElement;
-            Logger.LogDebug("Content parsed successfully - ValueKind: {ValueKind}", rootElement.ValueKind);
+            // First, deserialize the content to Object to ensure it's valid JSON
+            var contentObj = JsonSerializer.Deserialize<Object>(content, options);
+            Logger.LogDebug("Content parsed successfully as Object: {ContentType}", contentObj?.GetType().Name ?? "null");
 
-            // Create the wrapped response directly as a string
-            // We need to embed the original JSON as the value property
+            // Now create the wrapped response with the validated content
             var wrappedJson = "{\"value\": " + content + "}";
 
             Logger.LogDebug("Created wrapped JSON: {WrappedJson}", wrappedJson);
