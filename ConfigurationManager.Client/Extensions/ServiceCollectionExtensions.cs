@@ -3,6 +3,7 @@ namespace ConfigurationManager.Client.Extensions;
 using ConfigurationManager.Client.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 /// <summary>
 /// Extension methods for configuring Configuration Manager client in dependency injection
