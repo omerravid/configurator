@@ -60,6 +60,15 @@ public interface IConfigurationService
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Get configuration data at a specific path by configuration name
+    /// </summary>
+    Task<ConfigurationValueResponse> GetConfigurationValueByNameAsync(
+        string configurationName,
+        string? path = null,
+        bool minimal = false,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Commit a draft configuration
     /// </summary>
     Task<ConfigurationResponse> CommitConfigurationAsync(
