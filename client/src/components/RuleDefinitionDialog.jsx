@@ -121,8 +121,17 @@ const RuleDefinitionDialog = ({
       }
       console.log("All rules valid");
 
+      // Filter out inherited rules - only process rules for this configuration
+      const localRules = rules.filter(rule => {
+        const isInherited = rule.configurationId && rule.configurationId !== configurationId;
+        return !isInherited;
+      });
+
+      console.log("Local rules to process:", localRules);
+      console.log("Total rules:", rules.length, "Local rules:", localRules.length);
+
       // Save new rules and update existing ones
-      for (const [index, rule] of rules.entries()) {
+      for (const [index, rule] of localRules.entries()) {
         console.log(`\n=== Processing rule ${index} ===`);
         console.log("Full rule object:", rule);
         console.log("rule.isNew:", rule.isNew);
