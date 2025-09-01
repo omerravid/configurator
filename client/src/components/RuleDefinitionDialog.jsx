@@ -31,7 +31,11 @@ const RuleDefinitionDialog = ({
       // Ensure existingRules is an array before mapping
       const rulesArray = Array.isArray(existingRules) ? existingRules : [];
       console.log("rulesArray:", rulesArray);
-      const mappedRules = rulesArray.map(rule => ({ ...rule, isExisting: true }));
+      const mappedRules = rulesArray.map(rule => ({
+        ...rule,
+        isExisting: true,
+        isNew: false
+      }));
       console.log("mappedRules:", mappedRules);
       setRules(mappedRules);
     }
