@@ -51,7 +51,8 @@ public abstract class BaseHttpService
     /// </summary>
     protected void UpdateJwtToken(string token)
     {
-        HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        AuthManager.SetJwtToken(token);
+        AuthManager.ConfigureHttpClient(HttpClient);
     }
 
     /// <summary>
@@ -63,6 +64,14 @@ public abstract class BaseHttpService
             throw new ArgumentException("Token cannot be empty", nameof(token));
 
         UpdateJwtToken(token);
+    }
+
+    /// <summary>
+    /// Ensure HttpClient has latest authentication before making request
+    /// </summary>
+    private void EnsureAuthentication()
+    {
+        AuthManager.ConfigureHttpClient(HttpClient);
     }
 
     /// <summary>
