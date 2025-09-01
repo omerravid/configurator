@@ -62,8 +62,8 @@ public interface IRulesService
 /// </summary>
 public class RulesService : BaseHttpService, IRulesService
 {
-    public RulesService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<RulesService> logger)
-        : base(httpClient, options, logger)
+    public RulesService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<RulesService> logger, IAuthenticationManager authManager)
+        : base(httpClient, options, logger, authManager)
     {
     }
 
