@@ -31,6 +31,11 @@ const RuleAwareInput = ({
     }
 
     try {
+      // Check if this is an array item path (contains [index])
+      const isArrayItemPath = propertyPath.includes('[') && propertyPath.includes(']');
+      let allRules = [];
+
+      // Fetch rules for the specific property path
       const response = await fetch(
         `/api/rules/configuration/${configurationId}/path/${encodeURIComponent(propertyPath)}`,
         {
@@ -43,8 +48,38 @@ const RuleAwareInput = ({
       if (response.ok) {
         const data = await response.json();
         const rulesArray = Array.isArray(data.rules) ? data.rules : [];
-        setRules(rulesArray.filter(rule => rule.enabled));
+        allRules.push(...rulesArray);
       }
+
+      // If this is an array item, also fetch rules for the parent array
+      if (isArrayItemPath) {
+        // Extract the array path by removing the [index] part
+        const arrayPath = propertyPath.replace(/\[\d+\]$/, '');
+        console.log('Fetching array-level rules for:', arrayPath);
+
+        try {
+          const arrayResponse = await fetch(
+            `/api/rules/configuration/${configurationId}/path/${encodeURIComponent(arrayPath)}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              }
+            }
+          );
+
+          if (arrayResponse.ok) {
+            const arrayData = await arrayResponse.json();
+            const arrayRulesArray = Array.isArray(arrayData.rules) ? arrayData.rules : [];
+            console.log('Found array-level rules:', arrayRulesArray);
+            allRules.push(...arrayRulesArray);
+          }
+        } catch (arrayError) {
+          console.error('Failed to fetch array-level rules:', arrayError);
+          // Continue with just the item-specific rules
+        }
+      }
+
+      setRules(allRules.filter(rule => rule.enabled));
     } catch (error) {
       console.error('Failed to fetch rules:', error);
     } finally {
@@ -57,6 +92,11 @@ const RuleAwareInput = ({
 
     setIsValidating(true);
     try {
+      // Check if this is an array item path (contains [index])
+      const isArrayItemPath = propertyPath.includes('[') && propertyPath.includes(']');
+      let allErrors = [];
+
+      // Validate against the specific property path
       const response = await fetch('/api/rules/validate', {
         method: 'POST',
         headers: {
@@ -79,7 +119,43 @@ const RuleAwareInput = ({
       }
 
       if (!result.isValid) {
-        const errorMsg = result.errors.join(', ');
+        allErrors.push(...result.errors);
+      }
+
+      // If this is an array item, also validate against array-level rules
+      if (isArrayItemPath) {
+        // Extract the array path by removing the [index] part
+        const arrayPath = propertyPath.replace(/\[\d+\]$/, '');
+        console.log('Validating against array-level rules for:', arrayPath);
+
+        try {
+          const arrayResponse = await fetch('/api/rules/validate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({
+              configurationId,
+              propertyPath: arrayPath,
+              value: val
+            })
+          });
+
+          const arrayResult = await arrayResponse.json();
+
+          if (arrayResponse.ok && !arrayResult.isValid) {
+            console.log('Array-level validation failed:', arrayResult.errors);
+            allErrors.push(...arrayResult.errors);
+          }
+        } catch (arrayError) {
+          console.error('Failed to validate against array-level rules:', arrayError);
+          // Continue with just the item-specific validation
+        }
+      }
+
+      if (allErrors.length > 0) {
+        const errorMsg = allErrors.join(', ');
         setValidationError(errorMsg);
         onValidation?.(false, errorMsg);
         return false;
@@ -216,6 +292,8 @@ const RuleAwareInput = ({
     let min, max, step = 1;
     let constraints = [];
     let allIntegerValues = true;
+
+    console.log('Processing numeric rules for array item:', propertyPath, 'rules:', numericRules);
 
     // Process all numeric rules to determine combined constraints
     numericRules.forEach(rule => {
