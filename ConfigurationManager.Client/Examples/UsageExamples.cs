@@ -3,6 +3,10 @@ namespace ConfigurationManager.Client.Examples;
 using ConfigurationManager.Client.Models.Configuration;
 using ConfigurationManager.Client.Models.Files;
 using ConfigurationManager.Client.Models.Common;
+using ConfigurationManager.Client.Exceptions;
+using ConfigurationManager.Client.Extensions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
 /// <summary>
 /// Usage examples for the Configuration Manager client
@@ -24,6 +28,8 @@ public static class UsageExamples
 
         // Login with username and password
         var authResponse = await loginClient.Auth.LoginAsync("admin", "admin123");
+
+        // JWT token is automatically set for all services after login
         Console.WriteLine($"Logged in as: {authResponse.User.Username}");
 
         // Option 3: Create client with JWT token
@@ -68,12 +74,19 @@ public static class UsageExamples
 
         Console.WriteLine($"Configuration data: {resolvedConfig.Data}");
 
-        // Get specific value from configuration
+        // Get specific value from configuration by ID
         var valueResponse = await client.Configurations.GetConfigurationValueAsync(
-            newConfig.Config.Id, 
+            newConfig.Config.Id,
             path: "setting1");
 
         Console.WriteLine($"Setting1 value: {valueResponse.Value}");
+
+        // Get specific value from configuration by name
+        var valueByNameResponse = await client.Configurations.GetConfigurationValueByNameAsync(
+            "My New Component",
+            path: "setting1");
+
+        Console.WriteLine($"Setting1 value by name: {valueByNameResponse.Value}");
 
         // Update configuration
         var updateRequest = new UpdateConfigurationRequest

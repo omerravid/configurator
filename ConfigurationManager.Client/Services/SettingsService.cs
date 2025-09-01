@@ -1,6 +1,7 @@
 namespace ConfigurationManager.Client.Services;
 
 using ConfigurationManager.Client.Models.Settings;
+using ConfigurationManager.Client.Models.Common;
 
 /// <summary>
 /// Settings and administration service client
@@ -119,8 +120,8 @@ public interface ISettingsService
 /// </summary>
 public class SettingsService : BaseHttpService, ISettingsService
 {
-    public SettingsService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<SettingsService> logger)
-        : base(httpClient, options, logger)
+    public SettingsService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<SettingsService> logger, IAuthenticationManager authManager)
+        : base(httpClient, options, logger, authManager)
     {
     }
 
@@ -131,7 +132,7 @@ public class SettingsService : BaseHttpService, ISettingsService
     {
         Logger.LogDebug("Getting MongoDB settings");
 
-        return await GetAsync<MongoDbSettingsResponse>("/settings/mongodb", cancellationToken);
+        return await GetAsync<MongoDbSettingsResponse>("settings/mongodb", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -147,7 +148,7 @@ public class SettingsService : BaseHttpService, ISettingsService
 
         Logger.LogInformation("Updating MongoDB settings");
 
-        return await PutAsync<MigrationResponse>("/settings/mongodb", settings, cancellationToken);
+        return await PutAsync<MigrationResponse>("settings/mongodb", settings, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -163,7 +164,7 @@ public class SettingsService : BaseHttpService, ISettingsService
 
         Logger.LogInformation("Testing MongoDB connection");
 
-        return await PostAsync<MongoDbTestResponse>("/settings/mongodb/test", request, cancellationToken);
+        return await PostAsync<MongoDbTestResponse>("settings/mongodb/test", request, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -176,7 +177,7 @@ public class SettingsService : BaseHttpService, ISettingsService
 
         Logger.LogInformation("Connecting to MongoDB");
 
-        return await PostAsync<MongoDbTestResponse>("/settings/mongodb/connect", settings, cancellationToken);
+        return await PostAsync<MongoDbTestResponse>("settings/mongodb/connect", settings, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -184,7 +185,7 @@ public class SettingsService : BaseHttpService, ISettingsService
     {
         Logger.LogInformation("Disconnecting from MongoDB");
 
-        return await PostAsync<MongoDbTestResponse>("/settings/mongodb/disconnect", cancellationToken: cancellationToken);
+        return await PostAsync<MongoDbTestResponse>("settings/mongodb/disconnect", cancellationToken: cancellationToken);
     }
 
     /// <inheritdoc />
@@ -200,7 +201,7 @@ public class SettingsService : BaseHttpService, ISettingsService
 
         Logger.LogInformation("Migrating data to MongoDB");
 
-        return await PostAsync<MigrationResponse>("/settings/mongodb/migrate", request, cancellationToken);
+        return await PostAsync<MigrationResponse>("settings/mongodb/migrate", request, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -208,7 +209,7 @@ public class SettingsService : BaseHttpService, ISettingsService
     {
         Logger.LogDebug("Getting MongoDB status");
 
-        return await GetAsync<MongoDbStatus>("/settings/mongodb/status", cancellationToken);
+        return await GetAsync<MongoDbStatus>("settings/mongodb/status", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -216,7 +217,7 @@ public class SettingsService : BaseHttpService, ISettingsService
     {
         Logger.LogInformation("Migrating to embedded MongoDB");
 
-        return await PostAsync<MigrationResponse>("/settings/mongodb/migrate-embedded", cancellationToken: cancellationToken);
+        return await PostAsync<MigrationResponse>("settings/mongodb/migrate-embedded", cancellationToken: cancellationToken);
     }
 
     /// <inheritdoc />
@@ -229,7 +230,7 @@ public class SettingsService : BaseHttpService, ISettingsService
 
         Logger.LogInformation("Reverting to SQLite, migrateData={MigrateData}", request.MigrateData);
 
-        return await PostAsync<MigrationResponse>("/settings/mongodb/revert-to-sqlite", request, cancellationToken);
+        return await PostAsync<MigrationResponse>("settings/mongodb/revert-to-sqlite", request, cancellationToken);
     }
 
     #endregion
@@ -241,7 +242,7 @@ public class SettingsService : BaseHttpService, ISettingsService
     {
         Logger.LogDebug("Getting data statistics");
 
-        return await GetAsync<DataStatisticsResponse>("/settings/data/status", cancellationToken);
+        return await GetAsync<DataStatisticsResponse>("settings/data/status", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -254,7 +255,7 @@ public class SettingsService : BaseHttpService, ISettingsService
 
         Logger.LogInformation("Creating backup: {BackupName}", request.Name ?? "auto-generated");
 
-        return await PostAsync<MigrationResponse>("/settings/data/backup", request, cancellationToken);
+        return await PostAsync<MigrationResponse>("settings/data/backup", request, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -262,7 +263,7 @@ public class SettingsService : BaseHttpService, ISettingsService
     {
         Logger.LogDebug("Getting backup list");
 
-        return await GetAsync<BackupListResponse>("/settings/data/backups", cancellationToken);
+        return await GetAsync<BackupListResponse>("settings/data/backups", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -278,7 +279,7 @@ public class SettingsService : BaseHttpService, ISettingsService
 
         Logger.LogInformation("Restoring from backup: {BackupName}", request.BackupName);
 
-        return await PostAsync<RestoreResponse>("/settings/data/restore", request, cancellationToken);
+        return await PostAsync<RestoreResponse>("settings/data/restore", request, cancellationToken);
     }
 
     #endregion
@@ -290,7 +291,7 @@ public class SettingsService : BaseHttpService, ISettingsService
     {
         Logger.LogDebug("Getting storage settings");
 
-        return await GetAsync<StorageSettingsResponse>("/settings/storage", cancellationToken);
+        return await GetAsync<StorageSettingsResponse>("settings/storage", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -319,7 +320,7 @@ public class SettingsService : BaseHttpService, ISettingsService
 
         Logger.LogInformation("Updating storage settings to {StorageType}", settings.StorageType);
 
-        return await PutAsync<StorageTestResponse>("/settings/storage", settings, cancellationToken);
+        return await PutAsync<StorageTestResponse>("settings/storage", settings, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -332,7 +333,7 @@ public class SettingsService : BaseHttpService, ISettingsService
 
         Logger.LogInformation("Testing storage connection for {StorageType}", settings.StorageType);
 
-        return await PostAsync<StorageTestResponse>("/settings/storage/test", settings, cancellationToken);
+        return await PostAsync<StorageTestResponse>("settings/storage/test", settings, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -340,7 +341,7 @@ public class SettingsService : BaseHttpService, ISettingsService
     {
         Logger.LogDebug("Getting storage status");
 
-        return await GetAsync<StorageStatusResponse>("/settings/storage/status", cancellationToken);
+        return await GetAsync<StorageStatusResponse>("settings/storage/status", cancellationToken);
     }
 
     #endregion

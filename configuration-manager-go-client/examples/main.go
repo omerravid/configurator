@@ -135,7 +135,7 @@ func configurationManagementExample() {
 
 	fmt.Printf("Configuration data: %s\n", string(resolvedConfig.Data))
 
-	// Get specific value from configuration
+	// Get specific value from configuration by ID
 	valueResponse, err := client.Configurations.GetValue(ctx, newConfig.Config.ID, &configmanager.GetConfigurationValueOptions{
 		Path: configmanager.Ptr("setting1"),
 	})
@@ -145,6 +145,17 @@ func configurationManagementExample() {
 	}
 
 	fmt.Printf("Setting1 value: %s\n", string(valueResponse.Value))
+
+	// Get specific value from configuration by name
+	valueByNameResponse, err := client.Configurations.GetValueByName(ctx, "My New Component", &configmanager.GetConfigurationValueOptions{
+		Path: configmanager.Ptr("setting1"),
+	})
+	if err != nil {
+		log.Printf("Failed to get configuration value by name: %v", err)
+		return
+	}
+
+	fmt.Printf("Setting1 value by name: %s\n", string(valueByNameResponse.Value))
 
 	// Update configuration
 	updateRequest := &configmanager.UpdateConfigurationRequest{

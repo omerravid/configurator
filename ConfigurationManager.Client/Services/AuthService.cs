@@ -38,8 +38,8 @@ public interface IAuthService
 /// </summary>
 public class AuthService : BaseHttpService, IAuthService
 {
-    public AuthService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<AuthService> logger)
-        : base(httpClient, options, logger)
+    public AuthService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<AuthService> logger, IAuthenticationManager authManager)
+        : base(httpClient, options, logger, authManager)
     {
     }
 
@@ -60,7 +60,7 @@ public class AuthService : BaseHttpService, IAuthService
 
         Logger.LogInformation("Logging in user: {Username}", username);
 
-        var response = await PostAsync<AuthResponse>("/auth/login", request, cancellationToken);
+        var response = await PostAsync<AuthResponse>("auth/login", request, cancellationToken);
 
         // Update the HTTP client with the new token
         if (!string.IsNullOrEmpty(response.Token))
@@ -93,7 +93,7 @@ public class AuthService : BaseHttpService, IAuthService
 
         Logger.LogInformation("Registering new user: {Username} with role: {Role}", username, role);
 
-        var response = await PostAsync<AuthResponse>("/auth/register", request, cancellationToken);
+        var response = await PostAsync<AuthResponse>("auth/register", request, cancellationToken);
 
         // Update the HTTP client with the new token
         if (!string.IsNullOrEmpty(response.Token))
@@ -110,7 +110,7 @@ public class AuthService : BaseHttpService, IAuthService
     {
         Logger.LogDebug("Getting current user information");
 
-        var response = await GetAsync<CurrentUserResponse>("/auth/me", cancellationToken);
+        var response = await GetAsync<CurrentUserResponse>("auth/me", cancellationToken);
 
         Logger.LogDebug("Retrieved current user: {Username}", response.User?.Username);
 
@@ -122,7 +122,7 @@ public class AuthService : BaseHttpService, IAuthService
     {
         Logger.LogInformation("Refreshing JWT token");
 
-        var response = await PostAsync<TokenRefreshResponse>("/auth/refresh", cancellationToken: cancellationToken);
+        var response = await PostAsync<TokenRefreshResponse>("auth/refresh", cancellationToken: cancellationToken);
 
         // Update the HTTP client with the new token
         if (!string.IsNullOrEmpty(response.Token))

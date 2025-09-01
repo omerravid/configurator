@@ -43,8 +43,8 @@ public interface IUserService
 /// </summary>
 public class UserService : BaseHttpService, IUserService
 {
-    public UserService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<UserService> logger)
-        : base(httpClient, options, logger)
+    public UserService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<UserService> logger, IAuthenticationManager authManager)
+        : base(httpClient, options, logger, authManager)
     {
     }
 
@@ -53,7 +53,7 @@ public class UserService : BaseHttpService, IUserService
     {
         Logger.LogDebug("Getting all users");
 
-        return await GetAsync<UsersListResponse>("/users", cancellationToken);
+        return await GetAsync<UsersListResponse>("users", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -64,7 +64,7 @@ public class UserService : BaseHttpService, IUserService
 
         Logger.LogDebug("Getting user: {UserId}", id);
 
-        return await GetAsync<UserResponse>($"/users/{id}", cancellationToken);
+        return await GetAsync<UserResponse>($"users/{id}", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -86,7 +86,7 @@ public class UserService : BaseHttpService, IUserService
 
         Logger.LogInformation("Updating user {UserId} role to {Role}", id, role);
 
-        return await PutAsync<UserRoleUpdateResponse>($"/users/{id}/role", request, cancellationToken);
+        return await PutAsync<UserRoleUpdateResponse>($"users/{id}/role", request, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -97,7 +97,7 @@ public class UserService : BaseHttpService, IUserService
 
         Logger.LogInformation("Deleting user: {UserId}", id);
 
-        return await DeleteAsync<UserDeletionResponse>($"/users/{id}", cancellationToken);
+        return await DeleteAsync<UserDeletionResponse>($"users/{id}", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -110,6 +110,6 @@ public class UserService : BaseHttpService, IUserService
 
         Logger.LogDebug("Getting configurations for user: {UserId}", id);
 
-        return await GetAsync<UserConfigurationsResponse>($"/users/{id}/configurations", cancellationToken);
+        return await GetAsync<UserConfigurationsResponse>($"users/{id}/configurations", cancellationToken);
     }
 }

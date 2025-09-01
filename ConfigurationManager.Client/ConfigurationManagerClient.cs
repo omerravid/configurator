@@ -1,6 +1,10 @@
 namespace ConfigurationManager.Client;
 
 using ConfigurationManager.Client.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 /// <summary>
 /// Main Configuration Manager client that provides access to all services
@@ -99,7 +103,8 @@ public class ConfigurationManagerClient : IConfigurationManagerClient
         _serviceProvider = services.BuildServiceProvider();
 
         // Get HttpClient instance
-        _httpClient = _serviceProvider.GetRequiredService<HttpClient>();
+        var httpClientFactory = _serviceProvider.GetRequiredService<IHttpClientFactory>();
+        _httpClient = httpClientFactory.CreateClient("GenericClient");
 
         // Initialize all services
         Auth = _serviceProvider.GetRequiredService<IAuthService>();
@@ -167,6 +172,24 @@ public class ConfigurationManagerClient : IConfigurationManagerClient
             opt.IncludeDetailedErrors = options.IncludeDetailedErrors;
         });
 
+        // Register authentication manager as singleton to share state across all services
+        services.AddSingleton<IAuthenticationManager>(serviceProvider =>
+        {
+            var authManager = new AuthenticationManager();
+
+            // Set initial authentication from options
+            if (!string.IsNullOrEmpty(options.JwtToken))
+            {
+                authManager.SetJwtToken(options.JwtToken);
+            }
+            else if (!string.IsNullOrEmpty(options.ApiKey))
+            {
+                authManager.SetApiKey(options.ApiKey);
+            }
+
+            return authManager;
+        });
+
         // Configure logging
         services.AddLogging(builder =>
         {
@@ -174,13 +197,47 @@ public class ConfigurationManagerClient : IConfigurationManagerClient
             builder.SetMinimumLevel(LogLevel.Information);
         });
 
-        // Configure HttpClient
-        services.AddHttpClient<IAuthService, AuthService>();
-        services.AddHttpClient<IConfigurationService, ConfigurationService>();
-        services.AddHttpClient<IFileService, FileService>();
-        services.AddHttpClient<IUserService, UserService>();
-        services.AddHttpClient<IRulesService, RulesService>();
-        services.AddHttpClient<ISettingsService, SettingsService>();
+        // Ensure the base URL ends with a slash for proper relative path combination
+        var baseUrl = options.BaseUrl.TrimEnd('/') + "/";
+
+        // Configure generic HttpClient for health checks
+        services.AddHttpClient("GenericClient", client =>
+        {
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = options.Timeout;
+        });
+
+        // Configure HttpClient with base URL
+        services.AddHttpClient<IAuthService, AuthService>(client =>
+        {
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = options.Timeout;
+        });
+        services.AddHttpClient<IConfigurationService, ConfigurationService>(client =>
+        {
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = options.Timeout;
+        });
+        services.AddHttpClient<IFileService, FileService>(client =>
+        {
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = options.Timeout;
+        });
+        services.AddHttpClient<IUserService, UserService>(client =>
+        {
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = options.Timeout;
+        });
+        services.AddHttpClient<IRulesService, RulesService>(client =>
+        {
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = options.Timeout;
+        });
+        services.AddHttpClient<ISettingsService, SettingsService>(client =>
+        {
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = options.Timeout;
+        });
 
         // Register services
         services.AddTransient<IAuthService, AuthService>();
@@ -196,7 +253,7 @@ public class ConfigurationManagerClient : IConfigurationManagerClient
     {
         try
         {
-            using var response = await _httpClient.GetAsync("/health", cancellationToken);
+            using var response = await _httpClient.GetAsync("health", cancellationToken);
             return response.IsSuccessStatusCode;
         }
         catch (Exception)
@@ -211,7 +268,10 @@ public class ConfigurationManagerClient : IConfigurationManagerClient
         if (string.IsNullOrWhiteSpace(token))
             throw new ArgumentException("Token cannot be empty", nameof(token));
 
-        Auth.SetJwtToken(token);
+        // Get the authentication manager and set the token - this will automatically
+        // update all services since they all use the same authentication manager instance
+        var authManager = _serviceProvider.GetRequiredService<IAuthenticationManager>();
+        authManager.SetJwtToken(token);
     }
 
     /// <inheritdoc />

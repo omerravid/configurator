@@ -287,9 +287,12 @@ class ConfigurationService {
   }
 
   static async getValueAtPath(configIdOrName, path, minimal = false) {
-    const resolved = await this.resolveConfiguration(configIdOrName, true);
+    // Always use inheritance resolution to find paths, but handle return value differently for minimal
+    console.log(`Getting value at path "${path}" for "${configIdOrName}", minimal: ${minimal}`);
 
+    const resolved = await this.resolveConfiguration(configIdOrName, !minimal); // Skip provenance for minimal
     let current = resolved.resolved;
+
     let i = 0;
     let pathSoFar = "";
 
@@ -306,7 +309,7 @@ class ConfigurationService {
 
         const index = parseInt(path.slice(i + 1, bracketEnd));
 
-        // Extract actual value from provenance wrapper
+        // Extract actual value from provenance wrapper (for both minimal and non-minimal since we always resolve)
         const actualCurrent = this.extractActualValue(current);
 
         if (!Array.isArray(actualCurrent) || isNaN(index) || index < 0 || index >= actualCurrent.length) {
@@ -356,8 +359,10 @@ class ConfigurationService {
     }
 
     if (minimal) {
-      // Return just the raw value
-      return current;
+      // Return the simple extracted value (unwrap from any provenance structure)
+      const actualValue = this.extractActualValue(current);
+      console.log(`Minimal value returned - Original type: ${typeof current}, Final type: ${typeof actualValue}, Final value:`, actualValue);
+      return actualValue;
     }
 
     // Return with metadata (legacy format)
