@@ -203,6 +203,28 @@ const RuleDefinitionDialog = ({
       }
 
       showToast("Rules saved successfully", "success");
+
+      // Verify save by immediately fetching the rules back
+      console.log("=== VERIFICATION: Fetching rules immediately after save ===");
+      try {
+        const verifyResponse = await fetch(`/api/rules/configuration/${configurationId}/path/${encodeURIComponent(propertyPath)}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        console.log("Verification fetch status:", verifyResponse.status);
+        if (verifyResponse.ok) {
+          const verifyData = await verifyResponse.json();
+          console.log("Verification: Rules found after save:", verifyData);
+          console.log("Number of rules found:", Array.isArray(verifyData) ? verifyData.length : 'Not an array');
+        } else {
+          console.error("Verification fetch failed:", verifyResponse.status);
+        }
+      } catch (verifyError) {
+        console.error("Verification fetch error:", verifyError);
+      }
+
       onRulesUpdated();
       handleClose();
     } catch (error) {
