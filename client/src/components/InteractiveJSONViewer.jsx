@@ -328,6 +328,11 @@ const TreeNode = ({
   };
 
   const handleRulesClick = async () => {
+    console.log("=== TreeNode handleRulesClick DEBUG ===");
+    console.log("currentPath:", currentPath);
+    console.log("selectedConfig:", selectedConfig);
+    console.log("localStorage token:", localStorage.getItem('token') ? 'Present' : 'Missing');
+
     if (!selectedConfig?.id) {
       console.warn("No configuration ID available for rules");
       return;
@@ -336,15 +341,24 @@ const TreeNode = ({
     // Clean the path - remove root prefix and convert to dot notation
     const cleanPath = currentPath.startsWith("root.") ? currentPath.substring(5) : currentPath;
 
+    console.log("cleanPath:", cleanPath);
+    const apiUrl = `/api/rules/configuration/${selectedConfig.id}/path/${encodeURIComponent(cleanPath)}`;
+    console.log("API URL:", apiUrl);
+
     try {
+      console.log("Making fetch request...");
       // Fetch existing rules for this property
-      const response = await fetch(`/api/rules/configuration/${selectedConfig.id}/path/${encodeURIComponent(cleanPath)}`, {
+      const response = await fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+
       const existingRules = response.ok ? await response.json() : [];
+      console.log("Existing rules:", existingRules);
 
       setRulesDialog({
         isOpen: true,
@@ -354,6 +368,11 @@ const TreeNode = ({
       });
     } catch (error) {
       console.error("Failed to fetch existing rules:", error);
+      console.error("Error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
       setRulesDialog({
         isOpen: true,
         configurationId: selectedConfig.id,
