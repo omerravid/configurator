@@ -118,6 +118,7 @@ class Program
             JsonValueKind.Null => null,
             JsonValueKind.Array => element.EnumerateArray().Select(ExtractJsonElementValue).ToArray(),
             JsonValueKind.Object => element.GetRawText(), // Return JSON string for objects
+            JsonValueKind.Undefined => null, // Handle undefined JsonElement
             _ => element.GetRawText()
         };
     }
