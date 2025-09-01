@@ -39,6 +39,15 @@ const RuleDefinitionDialog = ({
       }));
       console.log("mappedRules:", mappedRules);
       setRules(mappedRules);
+
+      // Initialize collection input values
+      const inputValues = {};
+      mappedRules.forEach((rule, index) => {
+        if (rule.ruleType === 'collection' && rule.ruleConfig.validValues) {
+          inputValues[index] = rule.ruleConfig.validValues.join(', ');
+        }
+      });
+      setCollectionInputValues(inputValues);
     }
   }, [isOpen, existingRules]);
 
