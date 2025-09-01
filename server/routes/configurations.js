@@ -371,7 +371,12 @@ router.get("/by-name/:name/data", authenticateTokenOrApiKey, async (req, res) =>
 
     // Decode the configuration name from URL encoding
     const configName = decodeURIComponent(req.params.name);
-    console.log(`Looking for configuration by name: "${configName}" (original param: "${req.params.name}")`);
+    console.log(`[Route] Original param: "${req.params.name}"`);
+    console.log(`[Route] Decoded name: "${configName}"`);
+    console.log(`[Route] Name length: ${configName.length}`);
+    console.log(`[Route] Name char codes:`, [...configName].map(c => `${c}(${c.charCodeAt(0)})`));
+    console.log(`[Route] Has spaces: ${configName.includes(' ')}`);
+    console.log(`[Route] Trimmed name: "${configName.trim()}" (length: ${configName.trim().length})`);
 
     // First find the configuration by name
     const config = await Configuration.findByName(configName);
