@@ -268,37 +268,39 @@ public abstract class BaseHttpService
                 {
                     Logger.LogDebug("Handling minimal response for ConfigurationValueResponse: {Content}", content);
 
-                    // Try to parse the content as raw JSON value
                     try
                     {
-                        var rawValue = JsonSerializer.Deserialize<JsonElement>(content);
+                        // Parse the raw value as JsonElement
+                        var rawValue = JsonSerializer.Deserialize<JsonElement>(content, options);
 
-                        // Create a ConfigurationValueResponse object using reflection
-                        var responseType = typeof(T);
-                        var responseInstance = Activator.CreateInstance(responseType);
+                        // Create JSON for ConfigurationValueResponse with the raw value
+                        var wrappedJson = JsonSerializer.Serialize(new { value = rawValue }, options);
 
-                        // Set the Value property
-                        var valueProperty = responseType.GetProperty("Value");
-                        if (valueProperty != null && responseInstance != null)
+                        // Try to deserialize the wrapped JSON
+                        var wrappedResult = JsonSerializer.Deserialize<T>(wrappedJson, options);
+                        if (wrappedResult != null)
                         {
-                            valueProperty.SetValue(responseInstance, rawValue);
-                            return (T)responseInstance;
+                            return wrappedResult;
                         }
                     }
-                    catch (JsonException)
+                    catch (JsonException innerEx)
                     {
-                        // If it's not valid JSON, treat it as a string value
-                        var responseType = typeof(T);
-                        var responseInstance = Activator.CreateInstance(responseType);
+                        Logger.LogDebug(innerEx, "Failed to parse as JSON, treating as string value");
 
-                        // Set the Value property to the raw string
-                        var valueProperty = responseType.GetProperty("Value");
-                        if (valueProperty != null && responseInstance != null)
+                        // Fallback: treat as string and wrap in response object
+                        try
                         {
-                            // Create a JsonElement from the string
-                            var stringValue = JsonSerializer.SerializeToElement(content.Trim('"'));
-                            valueProperty.SetValue(responseInstance, stringValue);
-                            return (T)responseInstance;
+                            var stringValue = content.Trim('"'); // Remove surrounding quotes if present
+                            var wrappedJson = JsonSerializer.Serialize(new { value = stringValue }, options);
+                            var wrappedResult = JsonSerializer.Deserialize<T>(wrappedJson, options);
+                            if (wrappedResult != null)
+                            {
+                                return wrappedResult;
+                            }
+                        }
+                        catch (Exception fallbackEx)
+                        {
+                            Logger.LogError(fallbackEx, "Failed to create fallback ConfigurationValueResponse");
                         }
                     }
                 }
