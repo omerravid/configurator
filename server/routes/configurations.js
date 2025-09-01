@@ -415,13 +415,16 @@ router.get("/by-name/:name/data", authenticateTokenOrApiKey, async (req, res) =>
       }
     }
 
-    console.log(`Getting value at path: ${path} for config: ${config.name} (ID: ${config.id}), minimal: ${isMinimal}`);
+    console.log(`Getting value at path: "${path}" for config: "${config.name}" (ID: ${config.id}), minimal: ${isMinimal}`);
+    console.log(`Calling getValueAtPath with configId: "${config.id}", path: "${path}", minimal: ${isMinimal}`);
 
     const result = await ConfigurationService.getValueAtPath(
       config.id,
       path,
       isMinimal
     );
+
+    console.log(`getValueAtPath completed successfully, result type: ${typeof result}`);
 
     console.log(`getValueAtPath returned:`, typeof result, result);
 
