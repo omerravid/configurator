@@ -133,6 +133,9 @@ const RuleDefinitionDialog = ({
             enabled: rule.enabled
           };
           console.log("Create rule payload:", payload);
+          console.log("Dialog propertyPath prop:", propertyPath);
+          console.log("Rule propertyPath:", rule.propertyPath);
+          console.log("Are they equal?", propertyPath === rule.propertyPath);
 
           console.log("Making POST request to /api/rules...");
           const response = await fetch('/api/rules', {
