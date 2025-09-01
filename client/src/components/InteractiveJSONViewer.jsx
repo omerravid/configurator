@@ -579,30 +579,72 @@ const TreeNode = ({
   const renderEditableValue = () => {
     if (isEditing) {
       return (
-        <div className="flex items-center space-x-2">
-          <input
-            type="text"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleEditSave();
-              if (e.key === "Escape") handleEditCancel();
-            }}
-            autoFocus
-          />
-          <button
-            onClick={handleEditSave}
-            className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
-          >
-            ✓
-          </button>
-          <button
-            onClick={handleEditCancel}
-            className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600"
-          >
-            ✕
-          </button>
+        <div className="flex flex-col space-y-1">
+          <div className="flex items-center space-x-2">
+            <input
+              type="text"
+              value={editValue}
+              onChange={async (e) => {
+                const newValue = e.target.value;
+                setEditValue(newValue);
+
+                // Debounced validation - only validate if user pauses typing
+                if (validateTimeoutRef.current) {
+                  clearTimeout(validateTimeoutRef.current);
+                }
+                validateTimeoutRef.current = setTimeout(async () => {
+                  let parsedValue = newValue;
+                  try {
+                    if (newValue === "true" || newValue === "false") {
+                      parsedValue = newValue === "true";
+                    } else if (!isNaN(newValue) && newValue !== "" && newValue !== null) {
+                      parsedValue = Number(newValue);
+                    } else if (newValue === "null") {
+                      parsedValue = null;
+                    }
+                  } catch (e) {
+                    // Keep as string if parsing fails
+                  }
+                  await validateValue(parsedValue);
+                }, 500); // Wait 500ms after user stops typing
+              }}
+              className={`px-2 py-1 border rounded text-sm focus:outline-none focus:ring-2 ${
+                validationError
+                  ? 'border-red-300 focus:ring-red-500'
+                  : 'border-gray-300 focus:ring-primary-500'
+              }`}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleEditSave();
+                if (e.key === "Escape") handleEditCancel();
+              }}
+              autoFocus
+            />
+            {isValidating && (
+              <div className="text-xs text-gray-500">Validating...</div>
+            )}
+            <button
+              onClick={handleEditSave}
+              className={`px-2 py-1 text-white text-xs rounded ${
+                validationError
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-green-600 hover:bg-green-700'
+              }`}
+              disabled={!!validationError || isValidating}
+            >
+              ✓
+            </button>
+            <button
+              onClick={handleEditCancel}
+              className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600"
+            >
+              ✕
+            </button>
+          </div>
+          {validationError && (
+            <div className="text-xs text-red-600 ml-2">
+              {validationError}
+            </div>
+          )}
         </div>
       );
     }
