@@ -8,17 +8,18 @@ import {
 } from "@heroicons/react/24/outline";
 import { useToast } from "../context/ToastContext";
 
-const RuleDefinitionDialog = ({ 
-  isOpen, 
-  onClose, 
-  configurationId, 
-  propertyPath, 
+const RuleDefinitionDialog = ({
+  isOpen,
+  onClose,
+  configurationId,
+  propertyPath,
   existingRules = [],
-  onRulesUpdated 
+  onRulesUpdated
 }) => {
   const { showToast } = useToast();
   const [rules, setRules] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [collectionInputValues, setCollectionInputValues] = useState({});
 
   useEffect(() => {
     console.log("=== RuleDefinitionDialog useEffect ===");
