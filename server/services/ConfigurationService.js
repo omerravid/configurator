@@ -287,9 +287,31 @@ class ConfigurationService {
   }
 
   static async getValueAtPath(configIdOrName, path, minimal = false) {
-    const resolved = await this.resolveConfiguration(configIdOrName, true);
+    let resolved;
+    let current;
 
-    let current = resolved.resolved;
+    if (minimal) {
+      // For minimal requests, skip inheritance resolution and use raw config data
+      console.log(`Minimal request - skipping inheritance resolution for: ${configIdOrName}`);
+
+      // Find the configuration directly
+      let config = await Configuration.findById(configIdOrName);
+      if (!config) {
+        config = await Configuration.findByName(configIdOrName);
+      }
+      if (!config) {
+        throw new Error(`Configuration not found: ${configIdOrName}`);
+      }
+
+      // Use raw config data without inheritance
+      current = typeof config.data === "string" ? JSON.parse(config.data) : config.data;
+      console.log(`Using raw config data for minimal request - type: ${typeof current}`);
+    } else {
+      // For non-minimal requests, use full inheritance resolution
+      resolved = await this.resolveConfiguration(configIdOrName, true);
+      current = resolved.resolved;
+    }
+
     let i = 0;
     let pathSoFar = "";
 
