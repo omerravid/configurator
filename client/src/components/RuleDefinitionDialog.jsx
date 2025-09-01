@@ -353,22 +353,11 @@ const RuleDefinitionDialog = ({
             type="text"
             value={rule.ruleConfig.validValues?.join(', ') || ''}
             onChange={(e) => {
-              console.log("Collection input onChange called with:", e.target.value);
               updateCollectionValues(index, e.target.value);
             }}
             className="w-48 px-2 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
             placeholder="Type: red, blue, green"
-            title="Enter comma-separated values (you can type commas)"
-            onKeyDown={(e) => {
-              console.log("Key pressed:", e.key, "Code:", e.code);
-              // Explicitly allow commas and prevent any interference
-              if (e.key === ',' || e.key === 'Comma' || e.code === 'Comma') {
-                e.stopPropagation();
-                console.log("Comma key allowed");
-              }
-            }}
-            onFocus={() => console.log("Collection input focused")}
-            onBlur={() => console.log("Collection input blurred")}
+            title="Enter comma-separated values"
           />
         );
 
