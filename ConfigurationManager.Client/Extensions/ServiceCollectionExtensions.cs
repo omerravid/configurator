@@ -29,13 +29,43 @@ public static class ServiceCollectionExtensions
         // Configure options
         services.Configure(configure);
 
-        // Add HttpClient for each service
-        services.AddHttpClient<IAuthService, AuthService>();
-        services.AddHttpClient<IConfigurationService, ConfigurationService>();
-        services.AddHttpClient<IFileService, FileService>();
-        services.AddHttpClient<IUserService, UserService>();
-        services.AddHttpClient<IRulesService, RulesService>();
-        services.AddHttpClient<ISettingsService, SettingsService>();
+        // Add HttpClient for each service with proper configuration
+        services.AddHttpClient<IAuthService, AuthService>((serviceProvider, client) =>
+        {
+            var options = serviceProvider.GetRequiredService<IOptions<ConfigurationManagerClientOptions>>().Value;
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = options.Timeout;
+        });
+        services.AddHttpClient<IConfigurationService, ConfigurationService>((serviceProvider, client) =>
+        {
+            var options = serviceProvider.GetRequiredService<IOptions<ConfigurationManagerClientOptions>>().Value;
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = options.Timeout;
+        });
+        services.AddHttpClient<IFileService, FileService>((serviceProvider, client) =>
+        {
+            var options = serviceProvider.GetRequiredService<IOptions<ConfigurationManagerClientOptions>>().Value;
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = options.Timeout;
+        });
+        services.AddHttpClient<IUserService, UserService>((serviceProvider, client) =>
+        {
+            var options = serviceProvider.GetRequiredService<IOptions<ConfigurationManagerClientOptions>>().Value;
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = options.Timeout;
+        });
+        services.AddHttpClient<IRulesService, RulesService>((serviceProvider, client) =>
+        {
+            var options = serviceProvider.GetRequiredService<IOptions<ConfigurationManagerClientOptions>>().Value;
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = options.Timeout;
+        });
+        services.AddHttpClient<ISettingsService, SettingsService>((serviceProvider, client) =>
+        {
+            var options = serviceProvider.GetRequiredService<IOptions<ConfigurationManagerClientOptions>>().Value;
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = options.Timeout;
+        });
 
         // Register services
         services.AddScoped<IAuthService, AuthService>();
