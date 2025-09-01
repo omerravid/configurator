@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>ConfigurationManager.Client</PackageId>
+    <PackageVersion>2.0.0</PackageVersion>
+    <Authors>Configuration Manager Team</Authors>
+    <Description>C# .NET 7 client library for Configuration Manager service including authentication, REST API usage and file management</Description>
+    <Copyright>© 2024 Configuration Manager Team</Copyright>
+    <PackageTags>configuration;management;client;api;files</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <AssemblyTitle>Configuration Manager Client</AssemblyTitle>
+    <AssemblyDescription>C# client library for Configuration Manager service</AssemblyDescription>
+    <RootNamespace>ConfigurationManager.Client</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+    <PackageReference Include="System.Text.Json" Version="7.0.3" />
+  </ItemGroup>
+
+</Project>
