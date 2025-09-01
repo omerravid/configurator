@@ -67,7 +67,16 @@ const RuleDefinitionDialog = ({
       isExisting: false,
       isNew: true
     };
-    setRules([...rules, newRule]);
+    const newRules = [...rules, newRule];
+    setRules(newRules);
+
+    // Initialize collection input value for new rule
+    if (newRule.ruleType === 'collection') {
+      setCollectionInputValues(prev => ({
+        ...prev,
+        [newRules.length - 1]: ''
+      }));
+    }
   };
 
   const removeRule = (index) => {
