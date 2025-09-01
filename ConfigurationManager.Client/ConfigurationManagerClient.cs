@@ -172,6 +172,24 @@ public class ConfigurationManagerClient : IConfigurationManagerClient
             opt.IncludeDetailedErrors = options.IncludeDetailedErrors;
         });
 
+        // Register authentication manager as singleton to share state across all services
+        services.AddSingleton<IAuthenticationManager>(serviceProvider =>
+        {
+            var authManager = new AuthenticationManager();
+
+            // Set initial authentication from options
+            if (!string.IsNullOrEmpty(options.JwtToken))
+            {
+                authManager.SetJwtToken(options.JwtToken);
+            }
+            else if (!string.IsNullOrEmpty(options.ApiKey))
+            {
+                authManager.SetApiKey(options.ApiKey);
+            }
+
+            return authManager;
+        });
+
         // Configure logging
         services.AddLogging(builder =>
         {
