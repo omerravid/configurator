@@ -1540,76 +1540,15 @@ const ScalarPropertiesPanel = ({
                           <div className="flex items-center space-x-2">
                             <span className="text-sm text-gray-500 dark:text-gray-400 min-w-0">[{index}]:</span>
                             {isEditingItem ? (
-                              <div className="flex flex-col space-y-1 flex-1">
-                                <div className="flex items-center space-x-2">
-                                  <input
-                                    type="text"
-                                    value={editValue}
-                                    onChange={async (e) => {
-                                      const newValue = e.target.value;
-                                      setEditValue(newValue);
-
-                                      // Debounced validation
-                                      if (validateTimeoutRef.current) {
-                                        clearTimeout(validateTimeoutRef.current);
-                                      }
-                                      validateTimeoutRef.current = setTimeout(async () => {
-                                        let parsedValue = newValue;
-                                        try {
-                                          if (newValue === "true" || newValue === "false") {
-                                            parsedValue = newValue === "true";
-                                          } else if (newValue === "null") {
-                                            parsedValue = null;
-                                          } else if (newValue === "" || newValue === undefined) {
-                                            parsedValue = "";
-                                          } else if (!isNaN(newValue) && newValue !== "" && newValue !== null) {
-                                            parsedValue = Number(newValue);
-                                          }
-                                        } catch (e) {
-                                          // Keep as string if parsing fails
-                                        }
-                                        await validateArrayItem(arrayName, parsedValue);
-                                      }, 500);
-                                    }}
-                                    className={`flex-1 px-2 py-1 border rounded text-sm focus:outline-none focus:ring-2 ${
-                                      validationError
-                                        ? 'border-red-300 focus:ring-red-500'
-                                        : 'border-gray-300 focus:ring-blue-500'
-                                    }`}
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter") {
-                                        handleArrayItemSave(arrayName, index);
-                                      }
-                                      if (e.key === "Escape") handleEditCancel();
-                                    }}
-                                    autoFocus
-                                  />
-                                  {isValidating && (
-                                    <div className="text-xs text-gray-500">Validating...</div>
-                                  )}
-                                  <button
-                                    onClick={() => handleArrayItemSave(arrayName, index)}
-                                    className={`px-2 py-1 text-white text-xs rounded ${
-                                      validationError
-                                        ? 'bg-gray-400 cursor-not-allowed'
-                                        : 'bg-green-600 hover:bg-green-700'
-                                    }`}
-                                    disabled={!!validationError || isValidating}
-                                  >
-                                    ✓
-                                  </button>
-                                  <button
-                                    onClick={handleEditCancel}
-                                    className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600"
-                                  >
-                                    ✕
-                                  </button>
-                                </div>
-                                {validationError && (
-                                  <div className="text-xs text-red-600 ml-2">
-                                    {validationError}
-                                  </div>
-                                )}
+                              <div className="flex-1">
+                                <RuleAwareInput
+                                  value={getActualValueAndSource(item).actualValue}
+                                  configurationId={selectedConfig?.id}
+                                  propertyPath={`${selectedPath === "root" ? arrayName : `${selectedPath.replace(/^root\./, "")}.${arrayName}`}[${index}]`}
+                                  onSave={(newValue) => handleArrayItemSave(arrayName, index, newValue)}
+                                  onCancel={handleEditCancel}
+                                  className="flex-1"
+                                />
                               </div>
                             ) : (
                               <div className="flex items-center space-x-2 flex-1">
