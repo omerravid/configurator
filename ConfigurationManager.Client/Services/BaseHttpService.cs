@@ -106,6 +106,7 @@ public abstract class BaseHttpService
     {
         try
         {
+            EnsureAuthentication();
             Logger.LogDebug("Sending POST request to {Endpoint}", endpoint);
 
             using var response = data == null
@@ -133,6 +134,7 @@ public abstract class BaseHttpService
     {
         try
         {
+            EnsureAuthentication();
             Logger.LogDebug("Sending POST multipart request to {Endpoint}", endpoint);
 
             using var response = await HttpClient.PostAsync(endpoint, content, cancellationToken);
@@ -157,6 +159,7 @@ public abstract class BaseHttpService
     {
         try
         {
+            EnsureAuthentication();
             Logger.LogDebug("Sending PUT request to {Endpoint}", endpoint);
 
             using var response = await HttpClient.PutAsJsonAsync(endpoint, data, cancellationToken);
@@ -181,6 +184,7 @@ public abstract class BaseHttpService
     {
         try
         {
+            EnsureAuthentication();
             Logger.LogDebug("Sending DELETE request to {Endpoint}", endpoint);
 
             using var response = await HttpClient.DeleteAsync(endpoint, cancellationToken);
@@ -205,6 +209,7 @@ public abstract class BaseHttpService
     {
         try
         {
+            EnsureAuthentication();
             Logger.LogDebug("Downloading file from {Endpoint}", endpoint);
 
             var response = await HttpClient.GetAsync(endpoint, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
