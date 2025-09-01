@@ -299,8 +299,14 @@ public abstract class BaseHttpService
         // Handle empty or whitespace content
         if (string.IsNullOrWhiteSpace(content))
         {
-            Logger.LogWarning("Content is null or whitespace, creating empty JsonElement");
-            valueElement = new JsonElement();
+            Logger.LogWarning("Content is null or whitespace, creating null JsonElement");
+            valueElement = JsonSerializer.SerializeToElement((string?)null, options);
+        }
+        // Handle explicit null response
+        else if (content.Trim() == "null")
+        {
+            Logger.LogDebug("Content is explicit null, creating null JsonElement");
+            valueElement = JsonSerializer.SerializeToElement((string?)null, options);
         }
         else
         {
