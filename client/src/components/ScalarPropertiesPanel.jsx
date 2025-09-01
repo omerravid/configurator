@@ -1478,6 +1478,19 @@ const ScalarPropertiesPanel = ({
           onClose={() => setContextMenu(null)}
         />
       )}
+
+      {/* Rules Dialog */}
+      <RuleDefinitionDialog
+        isOpen={rulesDialog.isOpen}
+        onClose={() => setRulesDialog({ isOpen: false, configurationId: null, propertyPath: null, existingRules: [] })}
+        configurationId={rulesDialog.configurationId}
+        propertyPath={rulesDialog.propertyPath}
+        existingRules={rulesDialog.existingRules}
+        onRulesUpdated={(updatedRules) => {
+          console.log("Rules updated:", updatedRules);
+          showToast("Rules updated successfully", "success");
+        }}
+      />
     </div>
   );
 };
