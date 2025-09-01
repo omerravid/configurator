@@ -265,12 +265,12 @@ public class ConfigurationService : BaseHttpService, IConfigurationService
         var queryParams = new List<string>();
 
         if (!string.IsNullOrWhiteSpace(path))
-            queryParams.Add($"path={HttpUtility.UrlEncode(path)}");
+            queryParams.Add($"path={Uri.EscapeDataString(path)}");
 
         if (minimal)
             queryParams.Add("minimal=true");
 
-        var endpoint = $"configs/by-name/{HttpUtility.UrlEncode(configurationName)}/data";
+        var endpoint = $"configs/by-name/{Uri.EscapeDataString(configurationName)}/data";
         if (queryParams.Count > 0)
             endpoint += "?" + string.Join("&", queryParams);
 
