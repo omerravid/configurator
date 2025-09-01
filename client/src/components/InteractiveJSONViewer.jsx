@@ -15,6 +15,8 @@ import StructuralTreeNode from "./StructuralTreeNode";
 import ScalarPropertiesPanel from "./ScalarPropertiesPanel";
 import { useToast } from "../context/ToastContext";
 import VrmlPreview from "./VrmlPreview";
+import RuleDefinitionDialog from "./RuleDefinitionDialog";
+import RuleAwareInput from "./RuleAwareInput";
 
 // Helper function to safely extract actual values from provenance-wrapped objects
 const extractActualValue = (val) => {
@@ -169,6 +171,9 @@ const TreeNode = ({
   const [editValue, setEditValue] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
+  const [validationError, setValidationError] = useState("");
+  const [isValidating, setIsValidating] = useState(false);
+  const validateTimeoutRef = React.useRef(null);
   const [hdrPreview, setHdrPreview] = useState(null);
   const [hdrLoading, setHdrLoading] = useState(false);
   const [hdrVisible, setHdrVisible] = useState(false);
@@ -230,34 +235,94 @@ const TreeNode = ({
     }
   };
 
+  const validateValue = async (value) => {
+    if (!selectedConfig?.id) return true;
+
+    // Clean the path - remove root prefix
+    const cleanPath = currentPath.startsWith("root.") ? currentPath.substring(5) : currentPath;
+
+    try {
+      setIsValidating(true);
+      const response = await fetch('/api/rules/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          configurationId: selectedConfig.id,
+          propertyPath: cleanPath,
+          value: value
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setValidationError(result.error || 'Validation failed');
+        return false;
+      }
+
+      if (!result.isValid) {
+        setValidationError(result.errors.join(', '));
+        return false;
+      }
+
+      setValidationError("");
+      return true;
+    } catch (error) {
+      console.error('Validation error:', error);
+      setValidationError('Validation service unavailable');
+      return false;
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
   const handleEditStart = () => {
     setEditValue(safeToString(actualValue));
     setIsEditing(true);
+    setValidationError("");
   };
 
-  const handleEditSave = () => {
-    let newValue = editValue;
+  const handleEditSave = async (newValue = null) => {
+    // If newValue is provided (from RuleAwareInput), use it directly
+    // Otherwise, use the old parsing logic for backwards compatibility
+    if (newValue === null) {
+      newValue = editValue;
 
-    // Try to parse as JSON for numbers, booleans, etc.
-    try {
-      if (editValue === "true" || editValue === "false") {
-        newValue = editValue === "true";
-      } else if (!isNaN(editValue) && editValue !== "" && editValue !== null) {
-        newValue = Number(editValue);
-      } else if (editValue === "null") {
-        newValue = null;
+      // Try to parse as JSON for numbers, booleans, etc.
+      try {
+        if (editValue === "true" || editValue === "false") {
+          newValue = editValue === "true";
+        } else if (!isNaN(editValue) && editValue !== "" && editValue !== null) {
+          newValue = Number(editValue);
+        } else if (editValue === "null") {
+          newValue = null;
+        }
+      } catch (e) {
+        // Keep as string if parsing fails
       }
-    } catch (e) {
-      // Keep as string if parsing fails
+
+      // Validate the value before saving for backward compatibility
+      const isValid = await validateValue(newValue);
+      if (!isValid) {
+        return; // Don't save if validation fails
+      }
     }
 
     onValueChange?.(currentPath, newValue);
     setIsEditing(false);
+    setValidationError("");
   };
 
   const handleEditCancel = () => {
+    if (validateTimeoutRef.current) {
+      clearTimeout(validateTimeoutRef.current);
+    }
     setIsEditing(false);
     setEditValue(safeToString(actualValue));
+    setValidationError("");
   };
 
   const handleReset = () => {
@@ -265,6 +330,67 @@ const TreeNode = ({
 
     onValueChange?.(currentPath, null); // null removes the override
     console.log("Reset property:", currentPath);
+  };
+
+  const handleRulesClick = async () => {
+    console.log("=== TreeNode handleRulesClick DEBUG ===");
+    console.log("currentPath:", currentPath);
+    console.log("selectedConfig:", selectedConfig);
+    console.log("localStorage token:", localStorage.getItem('token') ? 'Present' : 'Missing');
+
+    if (!selectedConfig?.id) {
+      console.warn("No configuration ID available for rules");
+      return;
+    }
+
+    // Clean the path - remove root prefix and convert to dot notation
+    const cleanPath = currentPath.startsWith("root.") ? currentPath.substring(5) : currentPath;
+
+    console.log("cleanPath:", cleanPath);
+    const apiUrl = `/api/rules/configuration/${selectedConfig.id}/path/${encodeURIComponent(cleanPath)}`;
+    console.log("API URL:", apiUrl);
+
+    try {
+      console.log("Making fetch request...");
+      // Fetch existing rules for this property
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+
+      let existingRules = [];
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Raw API response:", data);
+        // API returns { rules: [...] } so extract the rules array
+        existingRules = Array.isArray(data.rules) ? data.rules : (Array.isArray(data) ? data : []);
+      }
+      console.log("Existing rules:", existingRules);
+
+      setRulesDialog({
+        isOpen: true,
+        configurationId: selectedConfig.id,
+        propertyPath: cleanPath,
+        existingRules
+      });
+    } catch (error) {
+      console.error("Failed to fetch existing rules:", error);
+      console.error("Error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+      setRulesDialog({
+        isOpen: true,
+        configurationId: selectedConfig.id,
+        propertyPath: cleanPath,
+        existingRules: [] // Explicitly ensure it's an empty array
+      });
+    }
   };
 
   const handleContextMenu = (e) => {
@@ -488,31 +614,13 @@ const TreeNode = ({
   const renderEditableValue = () => {
     if (isEditing) {
       return (
-        <div className="flex items-center space-x-2">
-          <input
-            type="text"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleEditSave();
-              if (e.key === "Escape") handleEditCancel();
-            }}
-            autoFocus
-          />
-          <button
-            onClick={handleEditSave}
-            className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
-          >
-            ✓
-          </button>
-          <button
-            onClick={handleEditCancel}
-            className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600"
-          >
-            ✕
-          </button>
-        </div>
+        <RuleAwareInput
+          value={actualValue}
+          configurationId={selectedConfig?.id}
+          propertyPath={currentPath.startsWith("root.") ? currentPath.substring(5) : currentPath}
+          onSave={handleEditSave}
+          onCancel={handleEditCancel}
+        />
       );
     }
 
@@ -520,13 +628,24 @@ const TreeNode = ({
       <div className="flex items-center space-x-2">
         {renderPrimitiveValue()}
         {isEditable && (
-          <button
-            onClick={handleEditStart}
-            className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded transition-all"
-            title="Edit value"
-          >
-            <PencilIcon className="w-3 h-3" />
-          </button>
+          <>
+            <button
+              onClick={handleEditStart}
+              className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded transition-all"
+              title="Edit value"
+            >
+              <PencilIcon className="w-3 h-3" />
+            </button>
+            <button
+              onClick={handleRulesClick}
+              className="opacity-0 group-hover:opacity-100 p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-200 rounded transition-all"
+              title="Configure rules"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+          </>
         )}
       </div>
     );
@@ -707,6 +826,8 @@ const InteractiveJSONViewer = ({
   const [hoveredPath, setHoveredPath] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
+  // Rules dialog state
+  const [rulesDialog, setRulesDialog] = useState({ isOpen: false, configurationId: null, propertyPath: null, existingRules: [] });
   const [showInheritanceChain, setShowInheritanceChain] = useState(false);
   // Global state to preserve expand/collapse states across data updates
   const [expandedPaths, setExpandedPaths] = useState(new Set());
@@ -1321,12 +1442,25 @@ const InteractiveJSONViewer = ({
         path={hoveredPath}
       />
 
+      {/* Rules Dialog */}
+      <RuleDefinitionDialog
+        isOpen={rulesDialog.isOpen}
+        onClose={() => setRulesDialog({ isOpen: false, configurationId: null, propertyPath: null, existingRules: [] })}
+        configurationId={rulesDialog.configurationId}
+        propertyPath={rulesDialog.propertyPath}
+        existingRules={rulesDialog.existingRules}
+        onRulesUpdated={(updatedRules) => {
+          console.log("Rules updated:", updatedRules);
+          showToast("Rules updated successfully", "success");
+        }}
+      />
+
       {/* Help text */}
       <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
         {viewMode === "flat" ? (
-          <>💡 Click ℹ️ to see source configuration • Colored dots indicate inheritance level{isEditable && " • Click ✏️ to edit values"} • Use "All"/"Changes" toggle to view resolved vs raw data</>
+          <>💡 Click ℹ️ to see source configuration • Colored dots indicate inheritance level{isEditable && " • Click ✏️ to edit values • Click ✓ to configure rules"} • Use "All"/"Changes" toggle to view resolved vs raw data</>
         ) : (
-          <>💡 Select items in structure tree to view properties • {isEditable && "Right-click for structure editing • "} Click ℹ️ to see source configuration • Use "All"/"Changes" toggle to view resolved vs raw data</>
+          <>💡 Select items in structure tree to view properties • {isEditable && "Right-click for structure editing • "} Click ℹ️ to see source configuration{isEditable && " • Click ✓ to configure rules"} • Use "All"/"Changes" toggle to view resolved vs raw data</>
         )}
       </div>
     </div>
