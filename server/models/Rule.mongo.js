@@ -61,6 +61,17 @@ ruleSchema.statics.findByConfigurationId = function(configurationId) {
   return this.find({ configurationId }).sort({ propertyPath: 1 });
 };
 
+// Create new rule
+ruleSchema.statics.create = async function(ruleData) {
+  try {
+    const rule = new this(ruleData);
+    return await rule.save();
+  } catch (error) {
+    console.error('Failed to create rule:', error);
+    throw error;
+  }
+};
+
 ruleSchema.statics.findByConfigurationAndPath = function(configurationId, propertyPath) {
   return this.find({ configurationId, propertyPath, enabled: true });
 };
