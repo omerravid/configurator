@@ -47,6 +47,11 @@ const ScalarPropertiesPanel = ({
   // Rules dialog state
   const [rulesDialog, setRulesDialog] = useState({ isOpen: false, configurationId: null, propertyPath: null, existingRules: [] });
 
+  // Validation state
+  const [validationError, setValidationError] = useState("");
+  const [isValidating, setIsValidating] = useState(false);
+  const validateTimeoutRef = React.useRef(null);
+
   // Extract actual value and source from provenance wrapper
   const getActualValueAndSource = (val) => {
     let currentVal = val;
