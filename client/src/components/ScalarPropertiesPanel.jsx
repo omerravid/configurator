@@ -433,26 +433,30 @@ const ScalarPropertiesPanel = ({
     setValidationError("");
   };
 
-  const handleEditSave = async (propertyName) => {
-    let newValue = editValue;
+  const handleEditSave = async (propertyName, newValue = null) => {
+    // If newValue is provided (from RuleAwareInput), use it directly
+    // Otherwise, use the old parsing logic for backwards compatibility
+    if (newValue === null) {
+      newValue = editValue;
 
-    // Try to parse as JSON for numbers, booleans, etc.
-    try {
-      if (editValue === "true" || editValue === "false") {
-        newValue = editValue === "true";
-      } else if (!isNaN(editValue) && editValue !== "" && editValue !== null) {
-        newValue = Number(editValue);
-      } else if (editValue === "null") {
-        newValue = null;
+      // Try to parse as JSON for numbers, booleans, etc.
+      try {
+        if (editValue === "true" || editValue === "false") {
+          newValue = editValue === "true";
+        } else if (!isNaN(editValue) && editValue !== "" && editValue !== null) {
+          newValue = Number(editValue);
+        } else if (editValue === "null") {
+          newValue = null;
+        }
+      } catch (e) {
+        // Keep as string if parsing fails
       }
-    } catch (e) {
-      // Keep as string if parsing fails
-    }
 
-    // Validate the value before saving
-    const isValid = await validateValue(propertyName, newValue);
-    if (!isValid) {
-      return; // Don't save if validation fails
+      // Validate the value before saving for backward compatibility
+      const isValid = await validateValue(propertyName, newValue);
+      if (!isValid) {
+        return; // Don't save if validation fails
+      }
     }
 
     // Check if we're editing a property inside an array element
