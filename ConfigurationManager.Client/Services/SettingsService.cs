@@ -1,6 +1,7 @@
 namespace ConfigurationManager.Client.Services;
 
 using ConfigurationManager.Client.Models.Settings;
+using ConfigurationManager.Client.Models.Common;
 
 /// <summary>
 /// Settings and administration service client

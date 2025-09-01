@@ -3,6 +3,9 @@ namespace ConfigurationManager.Client.Examples;
 using ConfigurationManager.Client.Models.Configuration;
 using ConfigurationManager.Client.Models.Files;
 using ConfigurationManager.Client.Models.Common;
+using ConfigurationManager.Client.Exceptions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
 /// <summary>
 /// Usage examples for the Configuration Manager client

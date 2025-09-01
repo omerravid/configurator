@@ -1,6 +1,7 @@
 namespace ConfigurationManager.Client.Services;
 
 using ConfigurationManager.Client.Models.Files;
+using ConfigurationManager.Client.Exceptions;
 using System.Net.Http.Headers;
 
 /// <summary>
