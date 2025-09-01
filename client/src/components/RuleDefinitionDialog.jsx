@@ -22,7 +22,9 @@ const RuleDefinitionDialog = ({
 
   useEffect(() => {
     if (isOpen) {
-      setRules(existingRules.map(rule => ({ ...rule, isExisting: true })));
+      // Ensure existingRules is an array before mapping
+      const rulesArray = Array.isArray(existingRules) ? existingRules : [];
+      setRules(rulesArray.map(rule => ({ ...rule, isExisting: true })));
     }
   }, [isOpen, existingRules]);
 
