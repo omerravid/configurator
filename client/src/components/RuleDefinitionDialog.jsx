@@ -347,8 +347,15 @@ const RuleDefinitionDialog = ({
             type="text"
             value={rule.ruleConfig.validValues?.join(', ') || ''}
             onChange={(e) => updateCollectionValues(index, e.target.value)}
-            className="w-40 px-1 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
+            className="w-48 px-2 py-1 text-xs border border-gray-300 rounded bg-white text-gray-900"
             placeholder="value1, value2, value3"
+            title="Enter comma-separated values"
+            onKeyDown={(e) => {
+              // Explicitly allow commas
+              if (e.key === ',' || e.key === 'Comma') {
+                e.stopPropagation();
+              }
+            }}
           />
         );
 
