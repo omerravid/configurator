@@ -56,7 +56,7 @@ class ConfigurationService:
             if options.include_archived is not None:
                 params["includeArchived"] = "true" if options.include_archived else "false"
 
-        response = self.client.get("/configs", params=params)
+        response = self.client.get("configs", params=params)
         return from_dict(ConfigurationListResponse, response.json())
 
     def get(
@@ -86,7 +86,7 @@ class ConfigurationService:
             if options.raw:
                 params["raw"] = "true"
 
-        response = self.client.get(f"/configs/{config_id}", params=params)
+        response = self.client.get(f"configs/{config_id}", params=params)
         return from_dict(ResolvedConfigurationResponse, response.json())
 
     def create(self, request: CreateConfigurationRequest) -> ConfigurationResponse:
@@ -116,7 +116,7 @@ class ConfigurationService:
         if request.description:
             data["description"] = request.description
 
-        response = self.client.post("/configs", json_data=data)
+        response = self.client.post("configs", json_data=data)
         return from_dict(ConfigurationResponse, response.json())
 
     def update(
@@ -145,7 +145,7 @@ class ConfigurationService:
         if request.description is not None:
             data["description"] = request.description
 
-        response = self.client.put(f"/configs/{config_id}", json_data=data)
+        response = self.client.put(f"configs/{config_id}", json_data=data)
         return from_dict(ConfigurationResponse, response.json())
 
     def delete(self, config_id: str) -> ConfigurationResponse:
@@ -163,7 +163,7 @@ class ConfigurationService:
         if not config_id:
             raise ValidationError("Configuration ID cannot be empty")
 
-        response = self.client.delete(f"/configs/{config_id}")
+        response = self.client.delete(f"configs/{config_id}")
         return from_dict(ConfigurationResponse, response.json())
 
     def get_value(
@@ -193,7 +193,7 @@ class ConfigurationService:
             if options.minimal:
                 params["minimal"] = "true"
 
-        response = self.client.get(f"/configs/{config_id}/data", params=params)
+        response = self.client.get(f"configs/{config_id}/data", params=params)
         return from_dict(ConfigurationValueResponse, response.json())
 
     def get_value_by_name(
@@ -225,7 +225,7 @@ class ConfigurationService:
 
         # URL-encode the configuration name to handle special characters
         encoded_name = quote(configuration_name)
-        response = self.client.get(f"/configs/by-name/{encoded_name}/data", params=params)
+        response = self.client.get(f"configs/by-name/{encoded_name}/data", params=params)
         return from_dict(ConfigurationValueResponse, response.json())
 
     def commit(self, config_id: str) -> ConfigurationResponse:
@@ -243,7 +243,7 @@ class ConfigurationService:
         if not config_id:
             raise ValidationError("Configuration ID cannot be empty")
 
-        response = self.client.post(f"/configs/{config_id}/commit")
+        response = self.client.post(f"configs/{config_id}/commit")
         return from_dict(ConfigurationResponse, response.json())
 
     def get_children(
@@ -270,7 +270,7 @@ class ConfigurationService:
         if options and options.include_archived:
             params["includeArchived"] = "true"
 
-        response = self.client.get(f"/configs/{config_id}/children", params=params)
+        response = self.client.get(f"configs/{config_id}/children", params=params)
         return from_dict(ChildrenConfigurationResponse, response.json())
 
     def get_components(self) -> ComponentsResponse:
@@ -279,7 +279,7 @@ class ConfigurationService:
         Returns:
             ComponentsResponse containing components and versions
         """
-        response = self.client.get("/configs/components")
+        response = self.client.get("configs/components")
         return from_dict(ComponentsResponse, response.json())
 
     def rename(self, config_id: str, new_name: str) -> ConfigurationResponse:
@@ -302,7 +302,7 @@ class ConfigurationService:
             raise ValidationError("New name cannot be empty")
 
         data = {"name": new_name}
-        response = self.client.put(f"/configs/{config_id}/rename", json_data=data)
+        response = self.client.put(f"configs/{config_id}/rename", json_data=data)
         return from_dict(ConfigurationResponse, response.json())
 
     def archive(
@@ -329,7 +329,7 @@ class ConfigurationService:
         if archive_children is not None:
             data["archiveChildren"] = archive_children
 
-        response = self.client.post(f"/configs/{config_id}/archive", json_data=data)
+        response = self.client.post(f"configs/{config_id}/archive", json_data=data)
         return from_dict(ConfigurationResponse, response.json())
 
     def restore(self, config_id: str) -> ConfigurationResponse:
@@ -347,5 +347,5 @@ class ConfigurationService:
         if not config_id:
             raise ValidationError("Configuration ID cannot be empty")
 
-        response = self.client.post(f"/configs/{config_id}/restore")
+        response = self.client.post(f"configs/{config_id}/restore")
         return from_dict(ConfigurationResponse, response.json())
