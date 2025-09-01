@@ -177,6 +177,13 @@ public class ConfigurationManagerClient : IConfigurationManagerClient
             builder.SetMinimumLevel(LogLevel.Information);
         });
 
+        // Configure generic HttpClient for health checks
+        services.AddHttpClient(client =>
+        {
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = options.Timeout;
+        });
+
         // Configure HttpClient with base URL
         services.AddHttpClient<IAuthService, AuthService>(client =>
         {
