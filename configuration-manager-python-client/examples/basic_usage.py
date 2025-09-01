@@ -124,9 +124,9 @@ def configuration_management_example():
         )
         print(f"Configuration data: {resolved_config.data}")
 
-        # Get specific value from configuration
+        # Get specific value from configuration by ID
         from configuration_manager_client.models.configuration import GetConfigurationValueOptions
-        
+
         value_response = client.configurations.get_value(
             new_config.config.id,
             GetConfigurationValueOptions(
@@ -135,6 +135,16 @@ def configuration_management_example():
             )
         )
         print(f"Setting1 value: {value_response.value}")
+
+        # Get specific value from configuration by name
+        value_by_name_response = client.configurations.get_value_by_name(
+            "My New Component",
+            GetConfigurationValueOptions(
+                path="setting1",
+                minimal=True
+            )
+        )
+        print(f"Setting1 value by name: {value_by_name_response.value}")
 
         # Update configuration
         update_request = UpdateConfigurationRequest(
