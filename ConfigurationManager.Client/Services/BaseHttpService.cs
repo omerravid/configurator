@@ -291,11 +291,15 @@ public abstract class BaseHttpService
     /// </summary>
     private T CreateConfigurationValueResponse<T>(string content, JsonSerializerOptions options)
     {
+        Logger.LogDebug("CreateConfigurationValueResponse called with content: '{Content}', IsNullOrWhite: {IsEmpty}",
+            content, string.IsNullOrWhiteSpace(content));
+
         JsonElement valueElement;
 
         // Handle empty or whitespace content
         if (string.IsNullOrWhiteSpace(content))
         {
+            Logger.LogWarning("Content is null or whitespace, creating empty JsonElement");
             valueElement = new JsonElement();
         }
         else
@@ -304,30 +308,38 @@ public abstract class BaseHttpService
             {
                 // First, try to parse the content as valid JSON (could be object, array, string, number, boolean, null)
                 valueElement = JsonSerializer.Deserialize<JsonElement>(content, options);
+                Logger.LogDebug("Successfully parsed content as JsonElement - ValueKind: {ValueKind}", valueElement.ValueKind);
             }
-            catch (JsonException)
+            catch (JsonException jsonEx)
             {
+                Logger.LogDebug(jsonEx, "Content is not valid JSON, treating as raw string");
+
                 // If it's not valid JSON, treat it as a raw string
                 // Remove surrounding quotes if present and treat as string value
                 var cleanContent = content.Trim();
                 if (cleanContent.StartsWith("\"") && cleanContent.EndsWith("\"") && cleanContent.Length >= 2)
                 {
                     cleanContent = cleanContent.Substring(1, cleanContent.Length - 2);
+                    Logger.LogDebug("Removed surrounding quotes, clean content: '{CleanContent}'", cleanContent);
                 }
                 valueElement = JsonSerializer.SerializeToElement(cleanContent, options);
+                Logger.LogDebug("Created JsonElement from string - ValueKind: {ValueKind}", valueElement.ValueKind);
             }
         }
 
         // Create the ConfigurationValueResponse JSON structure
         var responseJson = JsonSerializer.Serialize(new { value = valueElement }, options);
+        Logger.LogDebug("Generated response JSON: {ResponseJson}", responseJson);
 
         // Deserialize to the expected type
         var result = JsonSerializer.Deserialize<T>(responseJson, options);
         if (result == null)
         {
+            Logger.LogError("Failed to deserialize response JSON to type {Type}", typeof(T).Name);
             throw new ApiException("Failed to create ConfigurationValueResponse from minimal response");
         }
 
+        Logger.LogDebug("Successfully created ConfigurationValueResponse of type {Type}", typeof(T).Name);
         return result;
     }
 
