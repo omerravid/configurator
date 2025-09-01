@@ -64,11 +64,50 @@ class Rule {
       'SELECT * FROM rules WHERE configuration_id = ? AND property_path = ? AND enabled = 1',
       [configurationId, propertyPath]
     );
-    
+
     if (result.success) {
       return result.rows.map(this.formatRule);
     }
     return [];
+  }
+
+  // Find rules by configuration and path, including inherited rules from parent configurations
+  static async findByConfigurationAndPathWithInheritance(configurationId, propertyPath) {
+    const { Configuration } = require('./index');
+
+    try {
+      // Get the full inheritance chain
+      const inheritanceChain = await Configuration.getInheritanceChain(configurationId);
+
+      // Extract configuration IDs from the chain
+      const configIds = inheritanceChain.map(config => config.id);
+
+      if (configIds.length === 0) {
+        return [];
+      }
+
+      // Create placeholders for the IN clause
+      const placeholders = configIds.map(() => '?').join(',');
+
+      const { db } = require('./database');
+      const result = await db.query(
+        `SELECT * FROM rules
+         WHERE configuration_id IN (${placeholders})
+         AND property_path = ?
+         AND enabled = 1
+         ORDER BY configuration_id, created_at`,
+        [...configIds, propertyPath]
+      );
+
+      if (result.success) {
+        return result.rows.map(this.formatRule);
+      }
+      return [];
+    } catch (error) {
+      console.error('Error finding rules with inheritance:', error);
+      // Fallback to just the current configuration
+      return this.findByConfigurationAndPath(configurationId, propertyPath);
+    }
   }
 
   // Update rule
