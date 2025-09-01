@@ -233,9 +233,54 @@ const TreeNode = ({
     }
   };
 
+  const validateValue = async (value) => {
+    if (!selectedConfig?.id) return true;
+
+    // Clean the path - remove root prefix
+    const cleanPath = currentPath.startsWith("root.") ? currentPath.substring(5) : currentPath;
+
+    try {
+      setIsValidating(true);
+      const response = await fetch('/api/rules/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          configurationId: selectedConfig.id,
+          propertyPath: cleanPath,
+          value: value
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setValidationError(result.error || 'Validation failed');
+        return false;
+      }
+
+      if (!result.isValid) {
+        setValidationError(result.errors.join(', '));
+        return false;
+      }
+
+      setValidationError("");
+      return true;
+    } catch (error) {
+      console.error('Validation error:', error);
+      setValidationError('Validation service unavailable');
+      return false;
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
   const handleEditStart = () => {
     setEditValue(safeToString(actualValue));
     setIsEditing(true);
+    setValidationError("");
   };
 
   const handleEditSave = () => {
