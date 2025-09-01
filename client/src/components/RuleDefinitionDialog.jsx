@@ -126,7 +126,7 @@ const RuleDefinitionDialog = ({
           console.log("Creating new rule...");
           const payload = {
             configurationId,
-            propertyPath: rule.propertyPath,
+            propertyPath: propertyPath, // Use dialog propertyPath prop, not rule.propertyPath
             ruleType: rule.ruleType,
             ruleConfig: rule.ruleConfig,
             errorMessage: rule.errorMessage,
