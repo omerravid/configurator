@@ -117,8 +117,8 @@ public interface IConfigurationService
 /// </summary>
 public class ConfigurationService : BaseHttpService, IConfigurationService
 {
-    public ConfigurationService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<ConfigurationService> logger)
-        : base(httpClient, options, logger)
+    public ConfigurationService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<ConfigurationService> logger, IAuthenticationManager authManager)
+        : base(httpClient, options, logger, authManager)
     {
     }
 
