@@ -28,7 +28,9 @@ public abstract class BaseHttpService
         // Ensure BaseAddress is set (fallback if DI configuration failed)
         if (HttpClient.BaseAddress == null && !string.IsNullOrEmpty(Options.BaseUrl))
         {
-            HttpClient.BaseAddress = new Uri(Options.BaseUrl);
+            // Ensure the base URL ends with a slash for proper relative path combination
+            var baseUrl = Options.BaseUrl.TrimEnd('/') + "/";
+            HttpClient.BaseAddress = new Uri(baseUrl);
         }
 
         // Set timeout
