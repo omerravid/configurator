@@ -283,7 +283,7 @@ const TreeNode = ({
     setValidationError("");
   };
 
-  const handleEditSave = () => {
+  const handleEditSave = async () => {
     let newValue = editValue;
 
     // Try to parse as JSON for numbers, booleans, etc.
@@ -299,8 +299,15 @@ const TreeNode = ({
       // Keep as string if parsing fails
     }
 
+    // Validate the value before saving
+    const isValid = await validateValue(newValue);
+    if (!isValid) {
+      return; // Don't save if validation fails
+    }
+
     onValueChange?.(currentPath, newValue);
     setIsEditing(false);
+    setValidationError("");
   };
 
   const handleEditCancel = () => {
