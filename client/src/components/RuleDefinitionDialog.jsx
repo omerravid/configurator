@@ -87,7 +87,7 @@ const RuleDefinitionDialog = ({
   const updateRule = (index, field, value) => {
     const updatedRules = [...rules];
     updatedRules[index] = { ...updatedRules[index], [field]: value };
-    
+
     // Reset ruleConfig when ruleType changes
     if (field === 'ruleType') {
       switch (value) {
@@ -99,10 +99,15 @@ const RuleDefinitionDialog = ({
           break;
         case 'collection':
           updatedRules[index].ruleConfig = { validValues: [''] };
+          // Initialize collection input value
+          setCollectionInputValues(prev => ({
+            ...prev,
+            [index]: ''
+          }));
           break;
       }
     }
-    
+
     setRules(updatedRules);
   };
 
@@ -115,14 +120,17 @@ const RuleDefinitionDialog = ({
     setRules(updatedRules);
   };
 
-  const updateCollectionValues = (index, valuesString) => {
-    console.log("=== updateCollectionValues DEBUG ===");
-    console.log("Input string:", valuesString);
-    console.log("Contains commas:", valuesString.includes(','));
+  const updateCollectionInputValue = (index, inputValue) => {
+    // Update local input state without parsing
+    setCollectionInputValues(prev => ({
+      ...prev,
+      [index]: inputValue
+    }));
+  };
 
-    const validValues = valuesString.split(',').map(v => v.trim()).filter(v => v !== '');
-    console.log("Parsed values:", validValues);
-
+  const parseAndUpdateCollectionValues = (index, inputValue) => {
+    // Parse the input value and update the rule config
+    const validValues = inputValue.split(',').map(v => v.trim()).filter(v => v !== '');
     updateRuleConfig(index, 'validValues', validValues);
   };
 
