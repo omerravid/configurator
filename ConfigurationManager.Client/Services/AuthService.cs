@@ -38,8 +38,8 @@ public interface IAuthService
 /// </summary>
 public class AuthService : BaseHttpService, IAuthService
 {
-    public AuthService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<AuthService> logger)
-        : base(httpClient, options, logger)
+    public AuthService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<AuthService> logger, IAuthenticationManager authManager)
+        : base(httpClient, options, logger, authManager)
     {
     }
 
