@@ -321,11 +321,7 @@ public abstract class BaseHttpService
 
             // Create the wrapped response directly as a string
             // We need to embed the original JSON as the value property
-            var wrappedJson = $"""
-                {{
-                    "value": {content}
-                }}
-                """;
+            var wrappedJson = "{\"value\": " + content + "}";
 
             Logger.LogDebug("Created wrapped JSON: {WrappedJson}", wrappedJson);
 
