@@ -172,6 +172,7 @@ const TreeNode = ({
   const [contextMenu, setContextMenu] = useState(null);
   const [validationError, setValidationError] = useState("");
   const [isValidating, setIsValidating] = useState(false);
+  const validateTimeoutRef = React.useRef(null);
   const [hdrPreview, setHdrPreview] = useState(null);
   const [hdrLoading, setHdrLoading] = useState(false);
   const [hdrVisible, setHdrVisible] = useState(false);
