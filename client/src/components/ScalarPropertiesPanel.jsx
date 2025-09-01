@@ -44,6 +44,9 @@ const ScalarPropertiesPanel = ({
   const [availableVersions, setAvailableVersions] = useState([]);
   const [loadingVersions, setLoadingVersions] = useState(false);
 
+  // Rules dialog state
+  const [rulesDialog, setRulesDialog] = useState({ isOpen: false, configurationId: null, propertyPath: null, existingRules: [] });
+
   // Extract actual value and source from provenance wrapper
   const getActualValueAndSource = (val) => {
     let currentVal = val;
