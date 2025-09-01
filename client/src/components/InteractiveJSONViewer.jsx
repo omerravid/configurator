@@ -557,13 +557,24 @@ const TreeNode = ({
       <div className="flex items-center space-x-2">
         {renderPrimitiveValue()}
         {isEditable && (
-          <button
-            onClick={handleEditStart}
-            className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded transition-all"
-            title="Edit value"
-          >
-            <PencilIcon className="w-3 h-3" />
-          </button>
+          <>
+            <button
+              onClick={handleEditStart}
+              className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded transition-all"
+              title="Edit value"
+            >
+              <PencilIcon className="w-3 h-3" />
+            </button>
+            <button
+              onClick={handleRulesClick}
+              className="opacity-0 group-hover:opacity-100 p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-200 rounded transition-all"
+              title="Configure rules"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+          </>
         )}
       </div>
     );
