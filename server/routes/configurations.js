@@ -393,19 +393,27 @@ router.get("/by-name/:name/data", authenticateTokenOrApiKey, async (req, res) =>
       }
     }
 
+    console.log(`Getting value at path: ${path} for config: ${config.name} (ID: ${config.id}), minimal: ${isMinimal}`);
+
     const result = await ConfigurationService.getValueAtPath(
       config.id,
       path,
       isMinimal
     );
 
+    console.log(`getValueAtPath returned:`, typeof result, result);
+
     // Fix file URLs in path result
     const fixedResult = await ConfigurationService.fixFileUrls(result);
 
+    console.log(`After fixFileUrls:`, typeof fixedResult, fixedResult);
+
     if (isMinimal) {
       // Return just the value (already minimal from service)
+      console.log(`Returning minimal result:`, fixedResult);
       res.json(fixedResult);
     } else {
+      console.log(`Returning non-minimal result:`, { data: fixedResult });
       res.json({ data: fixedResult });
     }
   } catch (error) {
