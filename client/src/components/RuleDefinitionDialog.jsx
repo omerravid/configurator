@@ -21,10 +21,19 @@ const RuleDefinitionDialog = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    console.log("=== RuleDefinitionDialog useEffect ===");
+    console.log("isOpen:", isOpen);
+    console.log("existingRules:", existingRules);
+    console.log("existingRules type:", typeof existingRules);
+    console.log("existingRules isArray:", Array.isArray(existingRules));
+
     if (isOpen) {
       // Ensure existingRules is an array before mapping
       const rulesArray = Array.isArray(existingRules) ? existingRules : [];
-      setRules(rulesArray.map(rule => ({ ...rule, isExisting: true })));
+      console.log("rulesArray:", rulesArray);
+      const mappedRules = rulesArray.map(rule => ({ ...rule, isExisting: true }));
+      console.log("mappedRules:", mappedRules);
+      setRules(mappedRules);
     }
   }, [isOpen, existingRules]);
 
