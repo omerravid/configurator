@@ -53,6 +53,7 @@ const RuleDefinitionDialog = ({
 
   const handleClose = () => {
     setRules([]);
+    setCollectionInputValues({});
     onClose();
   };
 
