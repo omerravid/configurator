@@ -60,6 +60,17 @@ public abstract class BaseHttpService
     }
 
     /// <summary>
+    /// Set JWT token for authentication (public method)
+    /// </summary>
+    public void SetJwtToken(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            throw new ArgumentException("Token cannot be empty", nameof(token));
+
+        UpdateJwtToken(token);
+    }
+
+    /// <summary>
     /// Send GET request and deserialize response
     /// </summary>
     protected async Task<T> GetAsync<T>(string endpoint, CancellationToken cancellationToken = default)
