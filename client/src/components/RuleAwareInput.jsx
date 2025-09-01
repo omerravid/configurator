@@ -196,6 +196,14 @@ const RuleAwareInput = ({
   };
 
   const parseInputValue = (val) => {
+    // If there's a collection rule, don't auto-convert types - use the values as defined in the rule
+    const collectionRule = rules.find(rule => rule.ruleType === 'collection');
+    if (collectionRule && collectionRule.ruleConfig.validValues?.length > 0) {
+      // For collection rules, return the value as-is to match the rule's expected types
+      return val;
+    }
+
+    // Only auto-convert types if there's no collection rule constraining the values
     if (val === "true" || val === "false") {
       return val === "true";
     } else if (val === "null") {
