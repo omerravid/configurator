@@ -309,8 +309,8 @@ class ConfigurationService {
 
         const index = parseInt(path.slice(i + 1, bracketEnd));
 
-        // For minimal requests, use current directly; for non-minimal, extract from provenance wrapper
-        const actualCurrent = minimal ? current : this.extractActualValue(current);
+        // Extract actual value from provenance wrapper (for both minimal and non-minimal since we always resolve)
+        const actualCurrent = this.extractActualValue(current);
 
         if (!Array.isArray(actualCurrent) || isNaN(index) || index < 0 || index >= actualCurrent.length) {
           throw new Error(`Array index ${index} not found at path: ${pathSoFar} (array length: ${Array.isArray(actualCurrent) ? actualCurrent.length : 'not an array'})`);
