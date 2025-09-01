@@ -43,8 +43,8 @@ public interface IUserService
 /// </summary>
 public class UserService : BaseHttpService, IUserService
 {
-    public UserService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<UserService> logger)
-        : base(httpClient, options, logger)
+    public UserService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<UserService> logger, IAuthenticationManager authManager)
+        : base(httpClient, options, logger, authManager)
     {
     }
 
