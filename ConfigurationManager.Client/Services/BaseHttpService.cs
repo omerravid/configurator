@@ -343,11 +343,7 @@ public abstract class BaseHttpService
             // Fallback: treat as a string value
             var stringValue = content.Trim('"'); // Remove surrounding quotes if present
             var escapedString = JsonSerializer.Serialize(stringValue);
-            var stringWrappedJson = $"""
-                {{
-                    "value": {escapedString}
-                }}
-                """;
+            var stringWrappedJson = "{\"value\": " + escapedString + "}";
 
             Logger.LogDebug("Created fallback string JSON: {StringJson}", stringWrappedJson);
 
