@@ -1371,6 +1371,19 @@ const InteractiveJSONViewer = ({
         path={hoveredPath}
       />
 
+      {/* Rules Dialog */}
+      <RuleDefinitionDialog
+        isOpen={rulesDialog.isOpen}
+        onClose={() => setRulesDialog({ isOpen: false, configurationId: null, propertyPath: null, existingRules: [] })}
+        configurationId={rulesDialog.configurationId}
+        propertyPath={rulesDialog.propertyPath}
+        existingRules={rulesDialog.existingRules}
+        onRulesUpdated={(updatedRules) => {
+          console.log("Rules updated:", updatedRules);
+          showToast("Rules updated successfully", "success");
+        }}
+      />
+
       {/* Help text */}
       <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
         {viewMode === "flat" ? (
