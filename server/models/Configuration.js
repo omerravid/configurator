@@ -61,6 +61,8 @@ class Configuration {
   }
 
   static async findByName(name) {
+    console.log(`[Configuration.findByName] Searching for name: "${name}" (length: ${name?.length}, has spaces: ${name?.includes(' ')})`);
+
     const result = await db.query(
       `SELECT c.*, u.username as created_by_username,
               pc.name as parent_name, pc.type as parent_type
@@ -71,9 +73,22 @@ class Configuration {
       [name],
     );
 
+    console.log(`[Configuration.findByName] Query returned ${result.rows.length} rows`);
+    if (result.rows.length === 0) {
+      // Debug: Show similar names to help identify the issue
+      const allConfigsResult = await db.query(
+        `SELECT name FROM configurations WHERE name LIKE ?`,
+        [`%${name.split(' ')[0]}%`] // Search for partial match
+      );
+      console.log(`[Configuration.findByName] Similar names found:`, allConfigsResult.rows.map(r => `"${r.name}"`));
+    }
+
     const config = result.rows[0];
-    if (config && config.data) {
-      config.data = JSON.parse(config.data);
+    if (config) {
+      console.log(`[Configuration.findByName] Found config: "${config.name}" (ID: ${config.id})`);
+      if (config.data) {
+        config.data = JSON.parse(config.data);
+      }
     }
     return config;
   }
