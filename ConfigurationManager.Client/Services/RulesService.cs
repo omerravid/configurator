@@ -75,7 +75,7 @@ public class RulesService : BaseHttpService, IRulesService
         if (string.IsNullOrWhiteSpace(configurationId))
             throw new ArgumentException("Configuration ID cannot be empty", nameof(configurationId));
 
-        var endpoint = $"rules?configurationId={HttpUtility.UrlEncode(configurationId)}";
+        var endpoint = $"rules?configurationId={Uri.EscapeDataString(configurationId)}";
 
         Logger.LogDebug("Getting rules for configuration: {ConfigurationId}", configurationId);
 
