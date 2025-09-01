@@ -86,6 +86,28 @@ ruleSchema.statics.update = async function(id, updateData) {
   }
 };
 
+// Delete rule by ID
+ruleSchema.statics.delete = async function(id) {
+  try {
+    const result = await this.findByIdAndDelete(id);
+    return result !== null;
+  } catch (error) {
+    console.error('Failed to delete rule:', error);
+    return false;
+  }
+};
+
+// Delete all rules for a configuration
+ruleSchema.statics.deleteByConfigurationId = async function(configurationId) {
+  try {
+    const result = await this.deleteMany({ configurationId });
+    return true;
+  } catch (error) {
+    console.error('Failed to delete rules by configuration ID:', error);
+    return false;
+  }
+};
+
 ruleSchema.statics.validateValue = async function(configurationId, propertyPath, value) {
   const rules = await this.findByConfigurationAndPath(configurationId, propertyPath);
   const errors = [];
