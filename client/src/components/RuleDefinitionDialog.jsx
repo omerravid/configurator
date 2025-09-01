@@ -82,6 +82,21 @@ const RuleDefinitionDialog = ({
   const removeRule = (index) => {
     const updatedRules = rules.filter((_, i) => i !== index);
     setRules(updatedRules);
+
+    // Clean up collection input values and reindex
+    const newCollectionInputValues = {};
+    Object.keys(collectionInputValues).forEach(key => {
+      const oldIndex = parseInt(key);
+      if (oldIndex < index) {
+        // Keep same index for rules before the removed one
+        newCollectionInputValues[oldIndex] = collectionInputValues[key];
+      } else if (oldIndex > index) {
+        // Shift index down for rules after the removed one
+        newCollectionInputValues[oldIndex - 1] = collectionInputValues[key];
+      }
+      // Skip the removed index
+    });
+    setCollectionInputValues(newCollectionInputValues);
   };
 
   const updateRule = (index, field, value) => {
