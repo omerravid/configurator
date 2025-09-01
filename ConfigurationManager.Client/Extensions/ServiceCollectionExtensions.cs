@@ -116,7 +116,7 @@ public static class ServiceCollectionExtensions
     /// <returns>Service collection for chaining</returns>
     public static IServiceCollection AddConfigurationManagerClient(
         this IServiceCollection services,
-        IConfiguration configuration,
+        Microsoft.Extensions.Configuration.IConfiguration configuration,
         string sectionName = "ConfigurationManagerClient")
     {
         if (services == null)
