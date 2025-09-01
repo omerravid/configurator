@@ -23,11 +23,12 @@ class Program
             Console.WriteLine("Logging in...");
             var authResponse = await client.Auth.LoginAsync(username, password);
 
-            // IMPORTANT: Set the JWT token for all services after login
-            client.SetJwtToken(authResponse.Token);
-
             Console.WriteLine($"✓ Logged in successfully as: {authResponse.User.Username}");
             Console.WriteLine($"✓ Role: {authResponse.User.Role}");
+
+            // The JWT token should now be automatically set for all services
+            // by the shared authentication manager
+            Console.WriteLine($"✓ JWT token received (length: {authResponse.Token?.Length ?? 0})");
             
             // Step 3: Get configuration value by name
             string configurationName = "Tools";
