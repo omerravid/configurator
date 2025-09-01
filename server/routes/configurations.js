@@ -369,11 +369,18 @@ router.get("/by-name/:name/data", authenticateTokenOrApiKey, async (req, res) =>
     const { path, minimal } = req.query;
     const isMinimal = minimal === "true";
 
+    // Decode the configuration name from URL encoding
+    const configName = decodeURIComponent(req.params.name);
+    console.log(`Looking for configuration by name: "${configName}" (original param: "${req.params.name}")`);
+
     // First find the configuration by name
-    const config = await Configuration.findByName(req.params.name);
+    const config = await Configuration.findByName(configName);
     if (!config) {
+      console.log(`Configuration not found with name: "${configName}"`);
       return res.status(404).json({ error: "Configuration not found" });
     }
+
+    console.log(`Found configuration: "${config.name}" (ID: ${config.id})`);
 
     if (!path || path.trim() === "") {
       // If no path provided, return the complete resolved configuration
