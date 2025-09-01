@@ -116,11 +116,8 @@ public class ConfigurationValueRetriever
     {
         try
         {
-            // Login
+            // Login - JWT token is automatically set for all services
             var authResponse = await _client.Auth.LoginAsync(username, password);
-
-            // IMPORTANT: Set the JWT token for all services after login
-            _client.SetJwtToken(authResponse.Token);
 
             // Get value
             var valueResponse = await _client.Configurations.GetConfigurationValueByNameAsync(
