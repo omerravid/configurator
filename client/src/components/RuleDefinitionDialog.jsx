@@ -170,22 +170,36 @@ const RuleDefinitionDialog = ({
           console.log("Created rule ID:", createdRule.id);
         } else if (rule.isExisting && rule.id && !rule.id.startsWith('temp-')) {
           // Update existing rule
-          const response = await fetch(`/api/rules/${rule.id}`, {
+          console.log("=== UPDATING EXISTING RULE ===");
+          console.log("Rule ID to update:", rule.id);
+          const updatePayload = {
+            ruleType: rule.ruleType,
+            ruleConfig: rule.ruleConfig,
+            errorMessage: rule.errorMessage,
+            enabled: rule.enabled
+          };
+          console.log("Update payload:", updatePayload);
+
+          const updateUrl = `/api/rules/${rule.id}`;
+          console.log("Update URL:", updateUrl);
+
+          const response = await fetch(updateUrl, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({
-              ruleType: rule.ruleType,
-              ruleConfig: rule.ruleConfig,
-              errorMessage: rule.errorMessage,
-              enabled: rule.enabled
-            })
+            body: JSON.stringify(updatePayload)
           });
 
+          console.log("Update response status:", response.status);
+          console.log("Update response ok:", response.ok);
+
           if (!response.ok) {
-            throw new Error('Failed to update rule');
+            const errorText = await response.text();
+            console.error("Update failed response:", errorText);
+            console.error("Update failed status:", response.status, response.statusText);
+            throw new Error(`Failed to update rule: ${response.status} ${errorText}`);
           }
         }
       }
