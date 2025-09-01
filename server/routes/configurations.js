@@ -363,6 +363,99 @@ router.delete("/:id", authenticateToken, requireAdmin, async (req, res) => {
   }
 });
 
+// GET /api/configs/by-name/:name/data - Get specific path from resolved configuration by name
+router.get("/by-name/:name/data", authenticateTokenOrApiKey, async (req, res) => {
+  try {
+    const { path, minimal } = req.query;
+    const isMinimal = minimal === "true";
+
+    // Decode the configuration name from URL encoding
+    const configName = decodeURIComponent(req.params.name);
+    console.log(`[Route] Original param: "${req.params.name}"`);
+    console.log(`[Route] Decoded name: "${configName}"`);
+    console.log(`[Route] Name length: ${configName.length}`);
+    console.log(`[Route] Name char codes:`, [...configName].map(c => `${c}(${c.charCodeAt(0)})`));
+    console.log(`[Route] Has spaces: ${configName.includes(' ')}`);
+    console.log(`[Route] Trimmed name: "${configName.trim()}" (length: ${configName.trim().length})`);
+
+    // First find the configuration by name
+    const config = await Configuration.findByName(configName);
+    if (!config) {
+      console.log(`Configuration not found with name: "${configName}"`);
+
+      // Debug: List all available configuration names
+      try {
+        const allConfigs = await Configuration.findAll(false);
+        console.log(`Available configurations (${allConfigs.length}):`);
+        allConfigs.forEach((c, index) => {
+          console.log(`  ${index + 1}. "${c.name}" (Type: ${c.type})`);
+        });
+      } catch (debugError) {
+        console.log(`Error listing configurations for debug: ${debugError.message}`);
+      }
+
+      return res.status(404).json({ error: "Configuration not found" });
+    }
+
+    console.log(`Found configuration: "${config.name}" (ID: ${config.id})`);
+
+    if (!path || path.trim() === "") {
+      // If no path provided, return the complete resolved configuration
+      const result = await ConfigurationService.resolveConfiguration(
+        config.id,
+        !isMinimal, // Include provenance only if not minimal
+      );
+
+      // Fix file URLs in resolved data
+      const fixedResolved = await ConfigurationService.fixFileUrls(result.resolved);
+
+      if (isMinimal) {
+        // For minimal, extract actual values and return just the data
+        const actualData = ConfigurationService.extractActualValue(fixedResolved);
+        console.log(`Minimal request for full config - extracted actual data for: ${config.name}`);
+        return res.json(actualData);
+      } else {
+        return res.json({ data: fixedResolved, metadata: result.metadata });
+      }
+    }
+
+    console.log(`Getting value at path: "${path}" for config: "${config.name}" (ID: ${config.id}), minimal: ${isMinimal}`);
+    console.log(`Calling getValueAtPath with configId: "${config.id}", path: "${path}", minimal: ${isMinimal}`);
+
+    const result = await ConfigurationService.getValueAtPath(
+      config.id,
+      path,
+      isMinimal
+    );
+
+    console.log(`getValueAtPath completed successfully, result type: ${typeof result}`);
+
+    console.log(`getValueAtPath returned:`, typeof result, result);
+
+    // Fix file URLs in path result
+    const fixedResult = await ConfigurationService.fixFileUrls(result);
+
+    console.log(`After fixFileUrls:`, typeof fixedResult, fixedResult);
+
+    if (isMinimal) {
+      // Return just the value (already minimal from service)
+      console.log(`Returning minimal result:`, fixedResult);
+      res.json(fixedResult);
+    } else {
+      console.log(`Returning non-minimal result:`, { data: fixedResult });
+      res.json({ data: fixedResult });
+    }
+  } catch (error) {
+    console.error("Get configuration path by name error:", error);
+
+    if (error.message.includes("not found")) {
+      return res.status(404).json({ error: error.message });
+    }
+
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // GET /api/configs/:id/data - Get specific path from resolved configuration
 router.get("/:id/data", authenticateTokenOrApiKey, async (req, res) => {
   try {
