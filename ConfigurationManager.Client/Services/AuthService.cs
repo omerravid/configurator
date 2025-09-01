@@ -38,22 +38,9 @@ public interface IAuthService
 /// </summary>
 public class AuthService : BaseHttpService, IAuthService
 {
-    private readonly IConfigurationManagerClient? _client;
-
     public AuthService(HttpClient httpClient, IOptions<ConfigurationManagerClientOptions> options, ILogger<AuthService> logger)
         : base(httpClient, options, logger)
     {
-        // Try to get the main client to update all services with token
-        try
-        {
-            var serviceProvider = httpClient.GetType().GetProperty("ServiceProvider")?.GetValue(httpClient) as IServiceProvider;
-            _client = serviceProvider?.GetService<IConfigurationManagerClient>();
-        }
-        catch
-        {
-            // If we can't get the client, just continue without it
-            _client = null;
-        }
     }
 
     /// <inheritdoc />
