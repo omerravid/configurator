@@ -242,7 +242,7 @@ public abstract class BaseHttpService
         if (response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync();
-            
+
             if (typeof(T) == typeof(string))
             {
                 return (T)(object)content;
@@ -261,6 +261,47 @@ public abstract class BaseHttpService
             }
             catch (JsonException ex)
             {
+                // Special handling for ConfigurationValueResponse when minimal=true
+                // Server returns raw value instead of wrapped object
+                if (typeof(T).Name == "ConfigurationValueResponse")
+                {
+                    Logger.LogDebug("Handling minimal response for ConfigurationValueResponse: {Content}", content);
+
+                    // Try to parse the content as raw JSON value
+                    try
+                    {
+                        var rawValue = JsonSerializer.Deserialize<JsonElement>(content);
+
+                        // Create a ConfigurationValueResponse object using reflection
+                        var responseType = typeof(T);
+                        var responseInstance = Activator.CreateInstance(responseType);
+
+                        // Set the Value property
+                        var valueProperty = responseType.GetProperty("Value");
+                        if (valueProperty != null && responseInstance != null)
+                        {
+                            valueProperty.SetValue(responseInstance, rawValue);
+                            return (T)responseInstance;
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                        // If it's not valid JSON, treat it as a string value
+                        var responseType = typeof(T);
+                        var responseInstance = Activator.CreateInstance(responseType);
+
+                        // Set the Value property to the raw string
+                        var valueProperty = responseType.GetProperty("Value");
+                        if (valueProperty != null && responseInstance != null)
+                        {
+                            // Create a JsonElement from the string
+                            var stringValue = JsonSerializer.SerializeToElement(content.Trim('"'));
+                            valueProperty.SetValue(responseInstance, stringValue);
+                            return (T)responseInstance;
+                        }
+                    }
+                }
+
                 Logger.LogError(ex, "Failed to deserialize response: {Content}", content);
                 throw new ApiException("Failed to deserialize response", ex);
             }
