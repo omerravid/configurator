@@ -261,11 +261,7 @@ public abstract class BaseHttpService
 
             try
             {
-                // First validate it's proper JSON by deserializing to Object
-                var contentObj = JsonSerializer.Deserialize<Object>(content, options);
-                Logger.LogDebug("Content validated as proper JSON: {ContentType}", contentObj?.GetType().Name ?? "null");
-
-                // Now deserialize to the expected type
+                // Try to deserialize directly to the expected type first
                 var result = JsonSerializer.Deserialize<T>(content, options);
                 Logger.LogDebug("Successfully deserialized response to {Type}", typeof(T).Name);
                 return result ?? throw new ApiException("Failed to deserialize response");
