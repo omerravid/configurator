@@ -43,37 +43,43 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient<IAuthService, AuthService>((serviceProvider, client) =>
         {
             var options = serviceProvider.GetRequiredService<IOptions<ConfigurationManagerClientOptions>>().Value;
-            client.BaseAddress = new Uri(options.BaseUrl);
+            var baseUrl = options.BaseUrl.TrimEnd('/') + "/";
+            client.BaseAddress = new Uri(baseUrl);
             client.Timeout = options.Timeout;
         });
         services.AddHttpClient<IConfigurationService, ConfigurationService>((serviceProvider, client) =>
         {
             var options = serviceProvider.GetRequiredService<IOptions<ConfigurationManagerClientOptions>>().Value;
-            client.BaseAddress = new Uri(options.BaseUrl);
+            var baseUrl = options.BaseUrl.TrimEnd('/') + "/";
+            client.BaseAddress = new Uri(baseUrl);
             client.Timeout = options.Timeout;
         });
         services.AddHttpClient<IFileService, FileService>((serviceProvider, client) =>
         {
             var options = serviceProvider.GetRequiredService<IOptions<ConfigurationManagerClientOptions>>().Value;
-            client.BaseAddress = new Uri(options.BaseUrl);
+            var baseUrl = options.BaseUrl.TrimEnd('/') + "/";
+            client.BaseAddress = new Uri(baseUrl);
             client.Timeout = options.Timeout;
         });
         services.AddHttpClient<IUserService, UserService>((serviceProvider, client) =>
         {
             var options = serviceProvider.GetRequiredService<IOptions<ConfigurationManagerClientOptions>>().Value;
-            client.BaseAddress = new Uri(options.BaseUrl);
+            var baseUrl = options.BaseUrl.TrimEnd('/') + "/";
+            client.BaseAddress = new Uri(baseUrl);
             client.Timeout = options.Timeout;
         });
         services.AddHttpClient<IRulesService, RulesService>((serviceProvider, client) =>
         {
             var options = serviceProvider.GetRequiredService<IOptions<ConfigurationManagerClientOptions>>().Value;
-            client.BaseAddress = new Uri(options.BaseUrl);
+            var baseUrl = options.BaseUrl.TrimEnd('/') + "/";
+            client.BaseAddress = new Uri(baseUrl);
             client.Timeout = options.Timeout;
         });
         services.AddHttpClient<ISettingsService, SettingsService>((serviceProvider, client) =>
         {
             var options = serviceProvider.GetRequiredService<IOptions<ConfigurationManagerClientOptions>>().Value;
-            client.BaseAddress = new Uri(options.BaseUrl);
+            var baseUrl = options.BaseUrl.TrimEnd('/') + "/";
+            client.BaseAddress = new Uri(baseUrl);
             client.Timeout = options.Timeout;
         });
 
