@@ -45,6 +45,12 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const [selectedDatabase, setSelectedDatabase] = useState(null);
   const [showAddDatabase, setShowAddDatabase] = useState(false);
   const [showCopyData, setShowCopyData] = useState(false);
+
+  // Re-authentication state for database switching
+  const [showReAuthModal, setShowReAuthModal] = useState(false);
+  const [reAuthPassword, setReAuthPassword] = useState('');
+  const [reAuthLoading, setReAuthLoading] = useState(false);
+  const [pendingDatabaseSwitch, setPendingDatabaseSwitch] = useState(null);
   const [newDatabase, setNewDatabase] = useState({ name: '', connectionString: '', description: '' });
   const [copyDataConfig, setCopyDataConfig] = useState({
     sourceDatabase: '',
@@ -429,8 +435,10 @@ const SettingsModal = ({ isOpen, onClose }) => {
     } catch (error) {
       console.error('Failed to activate database:', error);
       if (error.response?.status === 401) {
-        showToast('Authentication failed after database switch. Please login again.', 'error');
-        forceLogout();
+        // Instead of logging out, prompt for re-authentication
+        showToast('Authentication required for database switch. Please confirm your password.', 'info');
+        setPendingDatabaseSwitch(name);
+        setShowReAuthModal(true);
       } else {
         const errorMessage = error.response?.data?.error || error.message || 'Failed to activate database';
         showToast(`Failed to activate database: ${errorMessage}`, 'error');
@@ -500,6 +508,45 @@ const SettingsModal = ({ isOpen, onClose }) => {
     } finally {
       setDbLoading(false);
     }
+  };
+
+  // Re-authentication for database switching
+  const handleReAuthentication = async () => {
+    if (!reAuthPassword.trim()) {
+      showToast('Please enter your password', 'error');
+      return;
+    }
+
+    setReAuthLoading(true);
+    try {
+      // Attempt to login with current username and provided password
+      const loginResult = await login(user.username, reAuthPassword);
+
+      if (loginResult.success) {
+        // Authentication successful, now try the database switch again
+        showToast('Re-authentication successful. Switching database...', 'success');
+        setShowReAuthModal(false);
+        setReAuthPassword('');
+
+        // Retry the database switch
+        await setActiveDatabase(pendingDatabaseSwitch);
+        setPendingDatabaseSwitch(null);
+      } else {
+        showToast('Authentication failed. Please check your password.', 'error');
+      }
+    } catch (error) {
+      console.error('Re-authentication failed:', error);
+      showToast('Authentication failed. Please try again.', 'error');
+    } finally {
+      setReAuthLoading(false);
+    }
+  };
+
+  const cancelReAuthentication = () => {
+    setShowReAuthModal(false);
+    setReAuthPassword('');
+    setPendingDatabaseSwitch(null);
+    showToast('Database switch cancelled', 'info');
   };
 
   const migrateDatabase = async (sourceDb, targetDb) => {
