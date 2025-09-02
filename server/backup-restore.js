@@ -194,10 +194,12 @@ class BackupRestore {
 
       for (const userData of backupData.data.users) {
         try {
-          const newUser = await this.createUserFromBackup(userData);
-          userIdMapping.set(userData.id, newUser.id || newUser._id?.toString() || newUser.id);
+          // Try to preserve original user ID if possible (especially for admin)
+          const newUser = await this.createUserFromBackupWithId(userData);
+          const newUserId = newUser.id || newUser._id?.toString() || newUser.id;
+          userIdMapping.set(userData.id, newUserId);
           restoredUsers++;
-          console.log(`✅ Restored user: ${userData.username} (${userData.role})`);
+          console.log(`✅ Restored user: ${userData.username} (${userData.role}) - ID: ${newUserId}`);
         } catch (error) {
           console.warn(`Warning: Could not restore user ${userData.username}:`, error.message);
         }
@@ -281,21 +283,42 @@ class BackupRestore {
 
   // Create operations for restore
   async createUserFromBackup(userData) {
+    return this.createUserFromBackupWithId(userData);
+  }
+
+  async createUserFromBackupWithId(userData) {
     if (this.isMongoDb) {
       const mongoose = require('mongoose');
       const UserModel = mongoose.model('User');
-      
+
+      try {
+        // Try to preserve the original MongoDB ObjectId for admin users
+        if (userData.role === 'ADMIN' && userData.id && userData.id.length === 24) {
+          const user = new UserModel({
+            _id: new mongoose.Types.ObjectId(userData.id),
+            username: userData.username,
+            password_hash: userData.password_hash,
+            role: userData.role
+          });
+
+          return await user.save();
+        }
+      } catch (error) {
+        console.warn(`Could not preserve ID ${userData.id} for ${userData.username}, creating with new ID`);
+      }
+
+      // Fall back to creating with new ID
       const user = new UserModel({
         username: userData.username,
         password_hash: userData.password_hash,
         role: userData.role
       });
-      
+
       return await user.save();
     } else {
       const db = require('./models/database');
       const { User } = require('./models');
-      
+
       await db.query(
         `INSERT INTO users (id, username, password_hash, role, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?)`,

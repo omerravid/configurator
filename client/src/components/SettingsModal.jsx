@@ -408,10 +408,14 @@ const SettingsModal = ({ isOpen, onClose }) => {
       });
 
       if (response.data.success) {
-        showToast('Data restored successfully', 'success');
+        showToast('Data restored successfully. You will be redirected to login due to session changes.', 'success');
         setSelectedBackup('');
-        loadBackups();
-        loadDataStats();
+
+        // Clear token and redirect to login after restore (user IDs changed)
+        setTimeout(() => {
+          localStorage.removeItem("token");
+          window.location.replace("/login");
+        }, 2000);
       } else {
         showToast(`Failed to restore backup: ${response.data.error}`, 'error');
       }

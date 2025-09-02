@@ -24,8 +24,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      console.log('401 Unauthorized - clearing token and redirecting to login');
       localStorage.removeItem("token");
-      window.location.href = "/login";
+      // Force a full page reload to login
+      window.location.replace("/login");
     }
     return Promise.reject(error);
   },
