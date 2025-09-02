@@ -325,6 +325,8 @@ class DatabaseManager {
       configurationsProcessed: 0,
       configurationsUpdated: 0,
       configurationsSkipped: 0,
+      usersProcessed: 0,
+      usersUpdated: 0,
       errors: []
     };
 
