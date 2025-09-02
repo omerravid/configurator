@@ -47,9 +47,14 @@ class BackupRestore {
       console.log(`Found ${userRows.length} users`);
 
       // Get all configurations
-      const configurations = await Configuration.find ? 
-        await Configuration.find({}).lean() : // MongoDB
-        await Configuration.findAll(); // SQLite
+      let configurations;
+      if (this.isMongoDb) {
+        const mongoose = require('mongoose');
+        const ConfigurationModel = mongoose.model('Configuration');
+        configurations = await ConfigurationModel.find({}).lean();
+      } else {
+        configurations = await Configuration.findAll();
+      }
       console.log(`Found ${configurations.length} configurations`);
 
       const backupData = {
@@ -86,21 +91,18 @@ class BackupRestore {
   // Get users with password_hash for backup
   async getAllUsersForBackup() {
     const { User } = this.getModels();
-    
+
     if (this.isMongoDb) {
-      // MongoDB - get users with password field
-      const users = await User.find({}, { 
-        username: 1, 
-        password: 1, 
-        role: 1, 
-        createdAt: 1, 
-        updatedAt: 1 
-      }).lean();
-      
+      // MongoDB - use the findAll method and get users with passwords
+      const mongoose = require('mongoose');
+      const UserModel = mongoose.model('User');
+
+      const users = await UserModel.find({}).lean();
+
       return users.map(user => ({
         id: user._id.toString(),
         username: user.username,
-        password_hash: user.password,
+        password_hash: user.password_hash,
         role: user.role,
         created_at: user.createdAt,
         updated_at: user.updatedAt
@@ -165,7 +167,9 @@ class BackupRestore {
       // Delete all configurations first (to avoid foreign key issues)
       try {
         if (this.isMongoDb) {
-          await Configuration.deleteMany({});
+          const mongoose = require('mongoose');
+          const ConfigurationModel = mongoose.model('Configuration');
+          await ConfigurationModel.deleteMany({});
         } else {
           await Configuration.deleteAll();
         }
@@ -177,7 +181,9 @@ class BackupRestore {
       // Delete ALL users (we'll restore from backup including admin)
       try {
         if (this.isMongoDb) {
-          await User.deleteMany({});
+          const mongoose = require('mongoose');
+          const UserModel = mongoose.model('User');
+          await UserModel.deleteMany({});
         } else {
           await this.deleteAllUsers();
         }
@@ -268,32 +274,28 @@ class BackupRestore {
   // MongoDB specific operations
   async createUserDirectMongoDB(userData) {
     const { User } = this.getModels();
-    
-    const user = new User({
+
+    return await User.create({
       username: userData.username,
       password: userData.password_hash,
-      role: userData.role
+      role: userData.role,
+      passwordIsHashed: true
     });
-    
-    return await user.save();
   }
 
   async createConfigurationDirectMongoDB(configData, created_by, updated_by) {
     const { Configuration } = this.getModels();
-    
-    const config = new Configuration({
+
+    return await Configuration.create({
       name: configData.name,
       type: configData.type,
       parentId: configData.parent_id || configData.parentId,
       data: configData.data || {},
       status: configData.status || 'DRAFT',
       createdBy: created_by,
-      updatedBy: updated_by,
       description: configData.description || '',
       archived: configData.archived || false
     });
-    
-    return await config.save();
   }
 
   // SQLite specific operations
@@ -351,12 +353,14 @@ class BackupRestore {
   async getCurrentStats() {
     try {
       const { User, Configuration } = this.getModels();
-      
+
       let users, configurations;
-      
+
       if (this.isMongoDb) {
-        users = await User.find({}).lean();
-        configurations = await Configuration.find({}).lean();
+        users = await User.findAll();
+        const mongoose = require('mongoose');
+        const ConfigurationModel = mongoose.model('Configuration');
+        configurations = await ConfigurationModel.find({}).lean();
       } else {
         users = await User.findAll();
         configurations = await Configuration.findAll();
