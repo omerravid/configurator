@@ -350,16 +350,22 @@ class BackupRestore {
 
   async getCurrentStats() {
     try {
-      const { User, Configuration } = this.getModels();
-
       let users, configurations;
 
       if (this.isMongoDb) {
-        users = await User.findAll();
         const mongoose = require('mongoose');
+        const UserModel = mongoose.model('User');
         const ConfigurationModel = mongoose.model('Configuration');
+
+        const userDocs = await UserModel.find({}).lean();
+        users = userDocs.map(user => ({
+          username: user.username,
+          role: user.role
+        }));
+
         configurations = await ConfigurationModel.find({}).lean();
       } else {
+        const { User, Configuration } = this.getModels();
         users = await User.findAll();
         configurations = await Configuration.findAll();
       }
