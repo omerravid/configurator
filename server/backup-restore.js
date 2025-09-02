@@ -1,10 +1,25 @@
 const fs = require('fs').promises;
 const path = require('path');
-const { User, Configuration } = require('./models');
 
 class BackupRestore {
   constructor() {
     this.backupDir = path.join(__dirname, 'backups');
+    this.isMongoDb = process.env.USE_MONGODB === 'true';
+  }
+
+  // Load appropriate models based on database type
+  getModels() {
+    if (this.isMongoDb) {
+      return {
+        User: require('./models/User.mongo'),
+        Configuration: require('./models/Configuration.mongo')
+      };
+    } else {
+      return {
+        User: require('./models/User'),
+        Configuration: require('./models/Configuration')
+      };
+    }
   }
 
   async ensureBackupDir() {
@@ -23,19 +38,24 @@ class BackupRestore {
       const backupName = name || `backup-${timestamp}`;
       const backupFile = path.join(this.backupDir, `${backupName}.json`);
 
-      console.log(`Creating backup: ${backupName}`);
+      console.log(`Creating backup: ${backupName} (${this.isMongoDb ? 'MongoDB' : 'SQLite'})`);
+
+      const { User, Configuration } = this.getModels();
 
       // Get all users with their full data including password_hash
       const userRows = await this.getAllUsersForBackup();
       console.log(`Found ${userRows.length} users`);
 
       // Get all configurations
-      const configurations = await Configuration.findAll();
+      const configurations = await Configuration.find ? 
+        await Configuration.find({}).lean() : // MongoDB
+        await Configuration.findAll(); // SQLite
       console.log(`Found ${configurations.length} configurations`);
 
       const backupData = {
         timestamp: new Date().toISOString(),
         version: '1.0',
+        databaseType: this.isMongoDb ? 'mongodb' : 'sqlite',
         data: {
           users: userRows,
           configurations
@@ -65,11 +85,34 @@ class BackupRestore {
 
   // Get users with password_hash for backup
   async getAllUsersForBackup() {
-    const db = require('./models/database');
-    const result = await db.query(
-      "SELECT id, username, password_hash, role, created_at, updated_at FROM users ORDER BY created_at DESC"
-    );
-    return result.rows;
+    const { User } = this.getModels();
+    
+    if (this.isMongoDb) {
+      // MongoDB - get users with password field
+      const users = await User.find({}, { 
+        username: 1, 
+        password: 1, 
+        role: 1, 
+        createdAt: 1, 
+        updatedAt: 1 
+      }).lean();
+      
+      return users.map(user => ({
+        id: user._id.toString(),
+        username: user.username,
+        password_hash: user.password,
+        role: user.role,
+        created_at: user.createdAt,
+        updated_at: user.updatedAt
+      }));
+    } else {
+      // SQLite - direct database query
+      const db = require('./models/database');
+      const result = await db.query(
+        "SELECT id, username, password_hash, role, created_at, updated_at FROM users ORDER BY created_at DESC"
+      );
+      return result.rows;
+    }
   }
 
   async listBackups() {
@@ -105,6 +148,7 @@ class BackupRestore {
       }
 
       console.log(`Backup contains ${backupData.data.users.length} users and ${backupData.data.configurations.length} configurations`);
+      console.log(`Current system: ${this.isMongoDb ? 'MongoDB' : 'SQLite'}, Backup from: ${backupData.databaseType || 'unknown'}`);
 
       // Create a current backup before restoring
       const preRestoreBackup = await this.createBackup(`pre-restore-${Date.now()}`);
@@ -113,12 +157,18 @@ class BackupRestore {
       }
       console.log(`✅ Pre-restore backup created: ${preRestoreBackup.file}`);
 
+      const { User, Configuration } = this.getModels();
+
       // Clear existing data completely
       console.log('⚠️ Clearing existing data...');
 
       // Delete all configurations first (to avoid foreign key issues)
       try {
-        await Configuration.deleteAll();
+        if (this.isMongoDb) {
+          await Configuration.deleteMany({});
+        } else {
+          await Configuration.deleteAll();
+        }
         console.log('✅ Cleared existing configurations');
       } catch (error) {
         console.warn('Warning: Could not clear configurations:', error.message);
@@ -126,7 +176,11 @@ class BackupRestore {
 
       // Delete ALL users (we'll restore from backup including admin)
       try {
-        await this.deleteAllUsers();
+        if (this.isMongoDb) {
+          await User.deleteMany({});
+        } else {
+          await this.deleteAllUsers();
+        }
         console.log('✅ Cleared all existing users');
       } catch (error) {
         console.warn('Warning: Could not clear users:', error.message);
@@ -139,35 +193,18 @@ class BackupRestore {
 
       for (const userData of backupData.data.users) {
         try {
-          const newUser = await this.createUserDirect({
-            id: userData.id, // Try to preserve original ID
-            username: userData.username,
-            password_hash: userData.password_hash,
-            role: userData.role,
-            created_at: userData.created_at,
-            updated_at: userData.updated_at
-          });
+          let newUser;
+          if (this.isMongoDb) {
+            newUser = await this.createUserDirectMongoDB(userData);
+          } else {
+            newUser = await this.createUserDirectSQLite(userData);
+          }
           
-          userIdMapping.set(userData.id, newUser.id);
+          userIdMapping.set(userData.id, newUser.id || newUser._id.toString());
           restoredUsers++;
           console.log(`✅ Restored user: ${userData.username} (${userData.role})`);
         } catch (error) {
           console.warn(`Warning: Could not restore user ${userData.username}:`, error.message);
-          
-          // If ID conflict, try without preserving ID
-          try {
-            const newUser = await User.create({
-              username: userData.username,
-              password: userData.password_hash,
-              role: userData.role,
-              passwordIsHashed: true
-            });
-            userIdMapping.set(userData.id, newUser.id);
-            restoredUsers++;
-            console.log(`✅ Restored user with new ID: ${userData.username} (${userData.role})`);
-          } catch (secondError) {
-            console.error(`Failed to restore user ${userData.username}:`, secondError.message);
-          }
         }
       }
       console.log(`✅ Restored ${restoredUsers} users`);
@@ -186,30 +223,21 @@ class BackupRestore {
       for (const configData of sortedConfigs) {
         try {
           // Update user references if they changed
-          let created_by = configData.created_by;
-          let updated_by = configData.updated_by;
+          let created_by = configData.created_by || configData.createdBy;
+          let updated_by = configData.updated_by || configData.updatedBy;
           
-          if (userIdMapping.has(configData.created_by)) {
-            created_by = userIdMapping.get(configData.created_by);
+          if (userIdMapping.has(created_by)) {
+            created_by = userIdMapping.get(created_by);
           }
-          if (configData.updated_by && userIdMapping.has(configData.updated_by)) {
-            updated_by = userIdMapping.get(configData.updated_by);
+          if (updated_by && userIdMapping.has(updated_by)) {
+            updated_by = userIdMapping.get(updated_by);
           }
 
-          await this.createConfigurationDirect({
-            id: configData.id,
-            name: configData.name,
-            type: configData.type,
-            parent_id: configData.parent_id,
-            data: configData.data,
-            status: configData.status || 'DRAFT',
-            created_by: created_by,
-            updated_by: updated_by,
-            description: configData.description || '',
-            created_at: configData.created_at,
-            updated_at: configData.updated_at,
-            archived: configData.archived || 0
-          });
+          if (this.isMongoDb) {
+            await this.createConfigurationDirectMongoDB(configData, created_by, updated_by);
+          } else {
+            await this.createConfigurationDirectSQLite(configData, created_by, updated_by);
+          }
           restoredConfigs++;
         } catch (error) {
           console.warn(`Warning: Could not restore configuration ${configData.name}:`, error.message);
@@ -237,14 +265,46 @@ class BackupRestore {
     }
   }
 
-  // Direct database operations for restore
+  // MongoDB specific operations
+  async createUserDirectMongoDB(userData) {
+    const { User } = this.getModels();
+    
+    const user = new User({
+      username: userData.username,
+      password: userData.password_hash,
+      role: userData.role
+    });
+    
+    return await user.save();
+  }
+
+  async createConfigurationDirectMongoDB(configData, created_by, updated_by) {
+    const { Configuration } = this.getModels();
+    
+    const config = new Configuration({
+      name: configData.name,
+      type: configData.type,
+      parentId: configData.parent_id || configData.parentId,
+      data: configData.data || {},
+      status: configData.status || 'DRAFT',
+      createdBy: created_by,
+      updatedBy: updated_by,
+      description: configData.description || '',
+      archived: configData.archived || false
+    });
+    
+    return await config.save();
+  }
+
+  // SQLite specific operations
   async deleteAllUsers() {
     const db = require('./models/database');
     await db.query("DELETE FROM users");
   }
 
-  async createUserDirect(userData) {
+  async createUserDirectSQLite(userData) {
     const db = require('./models/database');
+    const { User } = this.getModels();
     
     await db.query(
       `INSERT INTO users (id, username, password_hash, role, created_at, updated_at)
@@ -262,35 +322,45 @@ class BackupRestore {
     return await User.findById(userData.id);
   }
 
-  async createConfigurationDirect(configData) {
+  async createConfigurationDirectSQLite(configData, created_by, updated_by) {
     const db = require('./models/database');
+    const { Configuration } = this.getModels();
     
     await db.query(
       `INSERT INTO configurations (id, name, type, parent_id, data, created_by, updated_by, description, status, archived, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        configData.id,
+        configData.id || configData._id,
         configData.name,
         configData.type,
-        configData.parent_id,
+        configData.parent_id || configData.parentId,
         JSON.stringify(configData.data || {}),
-        configData.created_by,
-        configData.updated_by,
-        configData.description,
-        configData.status,
+        created_by,
+        updated_by,
+        configData.description || '',
+        configData.status || 'DRAFT',
         configData.archived ? 1 : 0,
-        configData.created_at || new Date().toISOString(),
-        configData.updated_at || new Date().toISOString()
+        configData.created_at || configData.createdAt || new Date().toISOString(),
+        configData.updated_at || configData.updatedAt || new Date().toISOString()
       ]
     );
 
-    return await Configuration.findById(configData.id);
+    return await Configuration.findById(configData.id || configData._id);
   }
 
   async getCurrentStats() {
     try {
-      const users = await User.findAll();
-      const configurations = await Configuration.findAll();
+      const { User, Configuration } = this.getModels();
+      
+      let users, configurations;
+      
+      if (this.isMongoDb) {
+        users = await User.find({}).lean();
+        configurations = await Configuration.find({}).lean();
+      } else {
+        users = await User.findAll();
+        configurations = await Configuration.findAll();
+      }
       
       return {
         success: true,
