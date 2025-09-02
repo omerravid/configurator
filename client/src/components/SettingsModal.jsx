@@ -447,6 +447,95 @@ const SettingsModal = ({ isOpen, onClose }) => {
     }
   };
 
+  const downloadBackup = async (backupName) => {
+    try {
+      setBackupLoading(true);
+
+      const response = await api.get(`/settings/data/backup/${backupName}`, {
+        responseType: 'blob' // Important for file downloads
+      });
+
+      // Create blob link to download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${backupName}.json`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      showToast('Backup downloaded successfully', 'success');
+    } catch (error) {
+      console.error('Failed to download backup:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to download backup';
+      showToast(`Failed to download backup: ${errorMessage}`, 'error');
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (!file.name.endsWith('.json')) {
+        showToast('Please select a JSON file', 'error');
+        return;
+      }
+      if (file.size > 100 * 1024 * 1024) { // 100MB limit
+        showToast('File size must be less than 100MB', 'error');
+        return;
+      }
+      setUploadedFile(file);
+    }
+  };
+
+  const uploadAndRestore = async () => {
+    if (!uploadedFile) {
+      showToast('Please select a backup file to upload', 'error');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to restore from the uploaded file "${uploadedFile.name}"? This will replace all current data. A backup of current data will be created first.`)) {
+      return;
+    }
+
+    setUploadLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('backupFile', uploadedFile);
+
+      const response = await api.post('/settings/data/upload-restore', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data.success) {
+        showToast('Data restored from uploaded file successfully. You will be redirected to login due to session changes.', 'success');
+        setUploadedFile(null);
+
+        // Reset file input
+        const fileInput = document.querySelector('input[type="file"]');
+        if (fileInput) fileInput.value = '';
+
+        // Clear token and redirect to login after restore (user IDs changed)
+        setTimeout(() => {
+          localStorage.removeItem("token");
+          window.location.replace("/login");
+        }, 2000);
+      } else {
+        showToast(`Failed to restore from uploaded file: ${response.data.error}`, 'error');
+      }
+    } catch (error) {
+      console.error('Failed to restore from uploaded file:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to restore from uploaded file';
+      showToast(`Failed to restore from uploaded file: ${errorMessage}`, 'error');
+    } finally {
+      setUploadLoading(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   const tabs = [
