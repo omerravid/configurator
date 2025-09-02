@@ -383,31 +383,31 @@ class BackupRestore {
   async getCurrentStats() {
     try {
       let users, configurations;
-      
+
       if (this.isMongoDb) {
         const mongoose = require('mongoose');
-        
+
         // Check if we're connected to MongoDB
         if (mongoose.connection.readyState !== 1) {
           throw new Error('MongoDB is not connected');
         }
-        
+
         const UserModel = mongoose.model('User');
         const ConfigurationModel = mongoose.model('Configuration');
-        
+
         const userDocs = await UserModel.find({}).lean();
         users = userDocs.map(user => ({
           username: user.username,
           role: user.role
         }));
-        
+
         configurations = await ConfigurationModel.find({}).lean();
       } else {
         const { User, Configuration } = require('./models');
         users = await User.findAll();
         configurations = await Configuration.findAll();
       }
-      
+
       return {
         success: true,
         stats: {
@@ -418,6 +418,145 @@ class BackupRestore {
         }
       };
     } catch (error) {
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  async getBackupFile(backupName) {
+    try {
+      await this.ensureBackupDir();
+
+      const backupFile = path.join(this.backupDir, `${backupName}.json`);
+
+      // Check if file exists
+      try {
+        await fs.access(backupFile);
+      } catch (error) {
+        return {
+          success: false,
+          error: `Backup file not found: ${backupName}`
+        };
+      }
+
+      return {
+        success: true,
+        filePath: path.resolve(backupFile)
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  async restoreFromUploadedFile(uploadedFilePath) {
+    try {
+      console.log(`Restoring from uploaded file: ${uploadedFilePath}`);
+
+      // Read and validate the uploaded file
+      const backupData = JSON.parse(await fs.readFile(uploadedFilePath, 'utf8'));
+
+      if (!backupData.data || !backupData.data.users || !backupData.data.configurations) {
+        throw new Error('Invalid backup file format - missing required data sections');
+      }
+
+      console.log(`Uploaded backup contains ${backupData.data.users.length} users and ${backupData.data.configurations.length} configurations`);
+      console.log(`Current system: ${this.isMongoDb ? 'MongoDB' : 'SQLite'}, Backup from: ${backupData.databaseType || 'unknown'}`);
+
+      // Create a current backup before restoring
+      const preRestoreBackup = await this.createBackup(this.generateBackupName('pre-upload-restore'));
+      if (!preRestoreBackup.success) {
+        throw new Error(`Failed to create pre-restore backup: ${preRestoreBackup.error}`);
+      }
+      console.log(`✅ Pre-restore backup created: ${preRestoreBackup.file}`);
+
+      // Clear existing data completely
+      console.log('⚠️ Clearing existing data...');
+
+      // Delete all configurations first (to avoid foreign key issues)
+      try {
+        await this.clearAllConfigurations();
+        console.log('✅ Cleared existing configurations');
+      } catch (error) {
+        console.warn('Warning: Could not clear configurations:', error.message);
+      }
+
+      // Delete ALL users (we'll restore from backup including admin)
+      try {
+        await this.clearAllUsers();
+        console.log('✅ Cleared all existing users');
+      } catch (error) {
+        console.warn('Warning: Could not clear users:', error.message);
+      }
+
+      // Restore users first (to maintain referential integrity)
+      console.log('📥 Restoring users...');
+      let restoredUsers = 0;
+      const userIdMapping = new Map(); // Track old ID to new ID mapping
+
+      for (const userData of backupData.data.users) {
+        try {
+          // Try to preserve original user ID if possible (especially for admin)
+          const newUser = await this.createUserFromBackupWithId(userData);
+          const newUserId = newUser.id || newUser._id?.toString() || newUser.id;
+          userIdMapping.set(userData.id, newUserId);
+          restoredUsers++;
+          console.log(`✅ Restored user: ${userData.username} (${userData.role}) - ID: ${newUserId}`);
+        } catch (error) {
+          console.warn(`Warning: Could not restore user ${userData.username}:`, error.message);
+        }
+      }
+      console.log(`✅ Restored ${restoredUsers} users`);
+
+      // Restore configurations with updated user references
+      console.log('📥 Restoring configurations...');
+      let restoredConfigs = 0;
+
+      // Sort configurations by hierarchy (parents first)
+      const sortedConfigs = [...backupData.data.configurations].sort((a, b) => {
+        if (!a.parent_id && b.parent_id) return -1; // a is parent, b is child
+        if (a.parent_id && !b.parent_id) return 1;  // a is child, b is parent
+        return 0; // same level
+      });
+
+      for (const configData of sortedConfigs) {
+        try {
+          // Update user references if they changed
+          let created_by = configData.created_by || configData.createdBy;
+          let updated_by = configData.updated_by || configData.updatedBy;
+
+          if (userIdMapping.has(created_by)) {
+            created_by = userIdMapping.get(created_by);
+          }
+          if (updated_by && userIdMapping.has(updated_by)) {
+            updated_by = userIdMapping.get(updated_by);
+          }
+
+          await this.createConfigurationFromBackup(configData, created_by, updated_by);
+          restoredConfigs++;
+        } catch (error) {
+          console.warn(`Warning: Could not restore configuration ${configData.name}:`, error.message);
+        }
+      }
+      console.log(`✅ Restored ${restoredConfigs} configurations`);
+
+      console.log('✅ Restore from uploaded file completed successfully');
+      return {
+        success: true,
+        message: `Restore completed from uploaded file. ${restoredUsers} users and ${restoredConfigs} configurations restored. Pre-restore backup saved.`,
+        stats: {
+          users: restoredUsers,
+          configurations: restoredConfigs
+        },
+        preRestoreBackup: preRestoreBackup.file
+      };
+
+    } catch (error) {
+      console.error('❌ Restore from uploaded file failed:', error);
       return {
         success: false,
         error: error.message
