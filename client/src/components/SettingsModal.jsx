@@ -541,6 +541,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const tabs = [
     { id: 'users', label: 'Users', icon: UsersIcon },
     { id: 'database', label: 'Database', icon: ServerIcon },
+    { id: 'backup', label: 'Backup & Restore', icon: ShieldCheckIcon },
     { id: 'filesystem', label: 'File System', icon: CloudIcon }
   ];
 
@@ -779,7 +780,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
               {dbLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <ServerIcon className="w-4 h-4" />}
               <span>Embedded MongoDB</span>
             </button>
-            
+
             <button
               onClick={switchToExternalMongo}
               disabled={dbLoading || !mongoConnectionString.trim()}
@@ -788,7 +789,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
               {dbLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <CloudIcon className="w-4 h-4" />}
               <span>External MongoDB</span>
             </button>
-            
+
             <button
               onClick={switchToSQLite}
               disabled={dbLoading || dbStatus.type === 'sqlite'}
@@ -800,7 +801,11 @@ const SettingsModal = ({ isOpen, onClose }) => {
           </div>
         </div>
       </div>
+    </div>
+  );
 
+  const renderBackupTab = () => (
+    <div className="space-y-6">
       {/* Backup & Restore Section */}
       <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
@@ -1069,6 +1074,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
         <div className="flex-1 overflow-auto p-6">
           {activeTab === 'users' && renderUsersTab()}
           {activeTab === 'database' && renderDatabaseTab()}
+          {activeTab === 'backup' && renderBackupTab()}
           {activeTab === 'filesystem' && renderFileSystemTab()}
         </div>
       </div>
