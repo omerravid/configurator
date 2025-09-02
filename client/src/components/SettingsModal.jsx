@@ -55,6 +55,8 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const [selectedBackup, setSelectedBackup] = useState('');
   const [backupLoading, setBackupLoading] = useState(false);
   const [dataStats, setDataStats] = useState({ users: 0, configurations: 0 });
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadLoading, setUploadLoading] = useState(false);
 
   // Users state
   const [users, setUsers] = useState([]);
