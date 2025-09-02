@@ -476,7 +476,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
       const response = await api.post('/settings/databases/copy-data', copyDataConfig);
 
       if (response.data.success) {
-        showToast(response.data.message, 'success');
+        showToast(`${response.data.message}. Admin users were copied to ensure authentication works.`, 'success');
         setShowCopyData(false);
         setCopyDataConfig({
           sourceDatabase: '',
