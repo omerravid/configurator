@@ -335,13 +335,14 @@ class DatabaseManager {
       await this.connectToDatabase(sourceDbName);
       const Configuration = require('../models/Configuration.mongo');
 
-      // Step 2: Get admin-created configurations from source
+      // Step 2: Get admin users from source (always copy admin users to ensure authentication works)
+      const adminUsers = await mongoose.model('User').find({ role: 'ADMIN' }).lean();
+      console.log(`Found ${adminUsers.length} admin users to copy`);
+
+      // Step 2a: Get admin-created configurations from source
       let configQuery = {};
 
       if (adminOnly) {
-        // Get admin users from source to filter by
-        const User = require('../models/User.mongo');
-        const adminUsers = await mongoose.model('User').find({ role: 'ADMIN' }).lean();
         const adminUsernames = adminUsers.map(user => user.username);
 
         if (adminUsernames.length === 0) {
