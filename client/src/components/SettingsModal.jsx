@@ -226,26 +226,21 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
   const switchToEmbeddedMongo = async () => {
     if (!window.confirm('Switch to embedded MongoDB? This will migrate your data and restart the database.')) return;
-    
+
     setDbLoading(true);
     try {
-      const response = await fetch('/api/settings/mongodb/migrate-embedded', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const data = await response.json();
-      
-      if (data.success) {
+      const response = await api.post('/settings/mongodb/migrate-embedded');
+
+      if (response.data.success) {
         showToast('Switched to embedded MongoDB successfully', 'success');
         loadDatabaseStatus();
       } else {
-        showToast(`Failed to switch: ${data.error}`, 'error');
+        showToast(`Failed to switch: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      showToast('Failed to switch to embedded MongoDB', 'error');
+      console.error('Failed to switch to embedded MongoDB:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to switch to embedded MongoDB';
+      showToast(`Failed to switch: ${errorMessage}`, 'error');
     } finally {
       setDbLoading(false);
     }
@@ -256,29 +251,25 @@ const SettingsModal = ({ isOpen, onClose }) => {
       showToast('Please enter a MongoDB connection string', 'error');
       return;
     }
-    
+
     if (!window.confirm('Switch to external MongoDB? This will migrate your data to the new database.')) return;
-    
+
     setDbLoading(true);
     try {
-      const response = await fetch('/api/settings/mongodb/migrate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ connectionString: mongoConnectionString })
+      const response = await api.post('/settings/mongodb/migrate', {
+        connectionString: mongoConnectionString
       });
-      const data = await response.json();
-      
-      if (data.success) {
+
+      if (response.data.success) {
         showToast('Switched to external MongoDB successfully', 'success');
         loadDatabaseStatus();
       } else {
-        showToast(`Failed to switch: ${data.error}`, 'error');
+        showToast(`Failed to switch: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      showToast('Failed to switch to external MongoDB', 'error');
+      console.error('Failed to switch to external MongoDB:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to switch to external MongoDB';
+      showToast(`Failed to switch: ${errorMessage}`, 'error');
     } finally {
       setDbLoading(false);
     }
@@ -286,27 +277,23 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
   const switchToSQLite = async () => {
     if (!window.confirm('Switch to SQLite? This will migrate your MongoDB data back to SQLite.')) return;
-    
+
     setDbLoading(true);
     try {
-      const response = await fetch('/api/settings/mongodb/revert-to-sqlite', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ migrateData: true })
+      const response = await api.post('/settings/mongodb/revert-to-sqlite', {
+        migrateData: true
       });
-      const data = await response.json();
-      
-      if (data.success) {
+
+      if (response.data.success) {
         showToast('Switched to SQLite successfully', 'success');
         loadDatabaseStatus();
       } else {
-        showToast(`Failed to switch: ${data.error}`, 'error');
+        showToast(`Failed to switch: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      showToast('Failed to switch to SQLite', 'error');
+      console.error('Failed to switch to SQLite:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to switch to SQLite';
+      showToast(`Failed to switch: ${errorMessage}`, 'error');
     } finally {
       setDbLoading(false);
     }
@@ -317,33 +304,27 @@ const SettingsModal = ({ isOpen, onClose }) => {
       showToast('Please fill in all S3 configuration fields', 'error');
       return;
     }
-    
+
     setStorageLoading(true);
     try {
-      const response = await fetch('/api/settings/storage', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          storageType: 's3',
-          s3BucketName: s3Config.bucketName,
-          awsRegion: s3Config.region,
-          awsAccessKeyId: s3Config.accessKeyId,
-          awsSecretAccessKey: s3Config.secretAccessKey
-        })
+      const response = await api.put('/settings/storage', {
+        storageType: 's3',
+        s3BucketName: s3Config.bucketName,
+        awsRegion: s3Config.region,
+        awsAccessKeyId: s3Config.accessKeyId,
+        awsSecretAccessKey: s3Config.secretAccessKey
       });
-      const data = await response.json();
-      
-      if (data.success) {
+
+      if (response.data.success) {
         showToast('S3 storage configured successfully', 'success');
         loadStorageStatus();
       } else {
-        showToast(`Failed to configure S3: ${data.error}`, 'error');
+        showToast(`Failed to configure S3: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      showToast('Failed to configure S3 storage', 'error');
+      console.error('Failed to configure S3 storage:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to configure S3 storage';
+      showToast(`Failed to configure S3: ${errorMessage}`, 'error');
     } finally {
       setStorageLoading(false);
     }
@@ -351,27 +332,23 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
   const switchToEmbeddedStorage = async () => {
     if (!window.confirm('Switch to embedded storage? Files will be stored locally on the server.')) return;
-    
+
     setStorageLoading(true);
     try {
-      const response = await fetch('/api/settings/storage', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ storageType: 'embedded' })
+      const response = await api.put('/settings/storage', {
+        storageType: 'embedded'
       });
-      const data = await response.json();
-      
-      if (data.success) {
+
+      if (response.data.success) {
         showToast('Switched to embedded storage successfully', 'success');
         loadStorageStatus();
       } else {
-        showToast(`Failed to switch: ${data.error}`, 'error');
+        showToast(`Failed to switch: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      showToast('Failed to switch to embedded storage', 'error');
+      console.error('Failed to switch to embedded storage:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to switch to embedded storage';
+      showToast(`Failed to switch: ${errorMessage}`, 'error');
     } finally {
       setStorageLoading(false);
     }
