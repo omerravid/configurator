@@ -180,24 +180,38 @@ const SettingsModal = ({ isOpen, onClose }) => {
   // Database functions (existing)
   const loadDatabaseStatus = async () => {
     try {
-      // Load MongoDB status
-      const response = await api.get('/settings/mongodb/status');
+      // Load databases from new multi-database API
+      const response = await api.get('/settings/databases');
       if (response.data.success) {
-        setDbStatus({
-          type: response.data.status?.status === 'connected' ? 'mongodb' : 'sqlite',
-          connected: response.data.status?.status === 'connected',
-          host: response.data.status?.host || ''
-        });
+        setDatabases(response.data.databases || []);
+
+        // Set database status based on active database
+        const activeDb = response.data.databases.find(db => db.isActive);
+        if (activeDb && response.data.status.status === 'connected') {
+          setDbStatus({
+            type: 'mongodb',
+            connected: true,
+            host: response.data.status.host || '',
+            activeDatabase: activeDb.name
+          });
+        } else {
+          setDbStatus({ type: 'sqlite', connected: false, host: '' });
+        }
       }
 
-      // Load MongoDB settings
-      const settingsResponse = await api.get('/settings/mongodb');
-      if (settingsResponse.data.success) {
-        setMongoConnectionString(settingsResponse.data.settings.connectionString || '');
+      // Legacy: Load MongoDB settings for backward compatibility
+      try {
+        const settingsResponse = await api.get('/settings/mongodb');
+        if (settingsResponse.data.success) {
+          setMongoConnectionString(settingsResponse.data.settings.connectionString || '');
+        }
+      } catch (legacyError) {
+        // Ignore legacy API errors
       }
     } catch (error) {
       console.error('Failed to load database status:', error);
       setDbStatus({ type: 'sqlite', connected: false, host: '' });
+      setDatabases([]);
     }
   };
 
