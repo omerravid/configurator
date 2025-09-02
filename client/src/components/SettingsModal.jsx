@@ -403,7 +403,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const setActiveDatabase = async (name) => {
     setDbLoading(true);
     try {
-      const response = await api.post(`/settings/databases/${name}/activate`);
+      const response = await api.post(`/settings/databases/${encodeURIComponent(name)}/activate`);
 
       if (response.data.success) {
         showToast(`Database "${name}" is now active`, 'success');
