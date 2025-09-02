@@ -4,7 +4,7 @@
     "connectionString": "mongodb://127.0.0.1:27017/config_manager",
     "description": "Built-in embedded MongoDB server",
     "isEmbedded": true,
-    "isActive": false,
+    "isActive": true,
     "createdAt": "2025-09-02T09:30:00.000Z",
     "updatedAt": "2025-09-02T09:30:00.000Z"
   },
@@ -13,7 +13,7 @@
     "connectionString": "mongodb://localhost:27017/test_db",
     "description": "Test database for demonstration",
     "isEmbedded": false,
-    "isActive": true,
+    "isActive": false,
     "createdAt": "2025-09-02T09:34:52.707Z",
     "updatedAt": "2025-09-02T09:34:52.707Z"
   }
