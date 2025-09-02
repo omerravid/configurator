@@ -78,6 +78,210 @@ const storageSettingsSchema = Joi.object({
   })
 });
 
+// Database Management Endpoints
+
+// Get all database configurations
+router.get("/databases", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const databases = DatabaseManager.getAllDatabases();
+    const status = await DatabaseManager.getConnectionStatus();
+
+    res.json({
+      success: true,
+      databases,
+      status
+    });
+  } catch (error) {
+    console.error("Failed to get databases:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to get databases"
+    });
+  }
+});
+
+// Add new database configuration
+router.post("/databases", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { error, value } = databaseConfigSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.details[0].message
+      });
+    }
+
+    const database = await DatabaseManager.addDatabase(value);
+
+    res.json({
+      success: true,
+      database,
+      message: "Database configuration added successfully"
+    });
+  } catch (error) {
+    console.error("Failed to add database:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to add database"
+    });
+  }
+});
+
+// Update database configuration
+router.put("/databases/:name", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { name } = req.params;
+    const { error, value } = updateDatabaseConfigSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.details[0].message
+      });
+    }
+
+    const database = await DatabaseManager.updateDatabase(name, value);
+
+    res.json({
+      success: true,
+      database,
+      message: "Database configuration updated successfully"
+    });
+  } catch (error) {
+    console.error("Failed to update database:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to update database"
+    });
+  }
+});
+
+// Delete database configuration
+router.delete("/databases/:name", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { name } = req.params;
+    const database = await DatabaseManager.deleteDatabase(name);
+
+    res.json({
+      success: true,
+      database,
+      message: "Database configuration deleted successfully"
+    });
+  } catch (error) {
+    console.error("Failed to delete database:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to delete database"
+    });
+  }
+});
+
+// Set active database
+router.post("/databases/:name/activate", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { name } = req.params;
+    const database = await DatabaseManager.setActiveDatabase(name);
+
+    res.json({
+      success: true,
+      database,
+      message: `Database "${name}" is now active`
+    });
+  } catch (error) {
+    console.error("Failed to set active database:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to set active database"
+    });
+  }
+});
+
+// Test database connection
+router.post("/databases/test", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { connectionString } = req.body;
+    if (!connectionString) {
+      return res.status(400).json({
+        success: false,
+        error: "Connection string is required"
+      });
+    }
+
+    const result = await DatabaseManager.testConnection(connectionString);
+    res.json(result);
+  } catch (error) {
+    console.error("Failed to test database connection:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to test database connection"
+    });
+  }
+});
+
+// Copy data between databases
+router.post("/databases/copy-data", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { error, value } = copyDataSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.details[0].message
+      });
+    }
+
+    const result = await DatabaseManager.copyDataBetweenDatabases(
+      value.sourceDatabase,
+      value.targetDatabase,
+      {
+        includeConfigurations: value.includeConfigurations,
+        includeConfigurationTypes: value.includeConfigurationTypes,
+        adminOnly: value.adminOnly
+      }
+    );
+
+    res.json({
+      success: true,
+      result,
+      message: "Data copied successfully"
+    });
+  } catch (error) {
+    console.error("Failed to copy data:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to copy data"
+    });
+  }
+});
+
+// Migrate database (full migration)
+router.post("/databases/migrate", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { sourceDatabase, targetDatabase } = req.body;
+
+    if (!sourceDatabase || !targetDatabase) {
+      return res.status(400).json({
+        success: false,
+        error: "Source and target databases are required"
+      });
+    }
+
+    const result = await DatabaseManager.migrateDatabase(sourceDatabase, targetDatabase);
+
+    res.json({
+      success: true,
+      result,
+      message: "Database migration completed successfully"
+    });
+  } catch (error) {
+    console.error("Failed to migrate database:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to migrate database"
+    });
+  }
+});
+
+// Legacy MongoDB Endpoints (kept for backward compatibility)
+
 // Get current MongoDB settings
 router.get("/mongodb", authenticateToken, requireAdmin, async (req, res) => {
   try {
