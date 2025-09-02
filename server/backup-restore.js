@@ -7,6 +7,19 @@ class BackupRestore {
     this.isMongoDb = process.env.USE_MONGODB === 'true';
   }
 
+  // Helper function to generate backup names in format: dd-mm-yyyy-HH:MM:ss-suffix
+  generateBackupName(suffix = 'backup') {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    return `${day}-${month}-${year}-${hours}:${minutes}:${seconds}-${suffix}`;
+  }
+
   async ensureBackupDir() {
     try {
       await fs.mkdir(this.backupDir, { recursive: true });
@@ -18,9 +31,8 @@ class BackupRestore {
   async createBackup(name = null) {
     try {
       await this.ensureBackupDir();
-      
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const backupName = name || `backup-${timestamp}`;
+
+      const backupName = name || this.generateBackupName('auto');
       const backupFile = path.join(this.backupDir, `${backupName}.json`);
 
       console.log(`Creating backup: ${backupName} (${this.isMongoDb ? 'MongoDB' : 'SQLite'})`);
@@ -150,17 +162,7 @@ class BackupRestore {
       console.log(`Current system: ${this.isMongoDb ? 'MongoDB' : 'SQLite'}, Backup from: ${backupData.databaseType || 'unknown'}`);
 
       // Create a current backup before restoring
-      const now = new Date();
-      const day = String(now.getDate()).padStart(2, '0');
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const year = now.getFullYear();
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
-
-      const preRestoreBackupName = `${day}-${month}-${year}-${hours}:${minutes}:${seconds}-pre-restore`;
-
-      const preRestoreBackup = await this.createBackup(preRestoreBackupName);
+      const preRestoreBackup = await this.createBackup(this.generateBackupName('pre-restore'));
       if (!preRestoreBackup.success) {
         throw new Error(`Failed to create pre-restore backup: ${preRestoreBackup.error}`);
       }
