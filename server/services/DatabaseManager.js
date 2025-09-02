@@ -371,6 +371,45 @@ class DatabaseManager {
       // Step 3: Connect to target database
       await this.connectToDatabase(targetDbName);
 
+      // Step 3a: Copy admin users to ensure authentication works in target database
+      for (const adminUser of adminUsers) {
+        try {
+          copyStats.usersProcessed++;
+
+          // Check if user already exists in target
+          const existingUser = await mongoose.model('User').findOne({
+            username: adminUser.username
+          });
+
+          if (existingUser) {
+            // Update existing user to ensure it has admin role
+            await mongoose.model('User').findByIdAndUpdate(existingUser._id, {
+              role: 'ADMIN',
+              password_hash: adminUser.password_hash // Keep the same password
+            });
+            copyStats.usersUpdated++;
+            console.log(`Updated admin user: ${adminUser.username}`);
+          } else {
+            // Create new admin user
+            const newUser = new (mongoose.model('User'))({
+              username: adminUser.username,
+              password_hash: adminUser.password_hash,
+              role: 'ADMIN'
+            });
+
+            await newUser.save();
+            copyStats.usersUpdated++;
+            console.log(`Created admin user: ${adminUser.username}`);
+          }
+        } catch (userError) {
+          console.error(`Error copying admin user ${adminUser.username}:`, userError);
+          copyStats.errors.push({
+            user: adminUser.username,
+            error: userError.message
+          });
+        }
+      }
+
       // Step 4: Process configurations
       for (const sourceConfig of sourceConfigurations) {
         try {
