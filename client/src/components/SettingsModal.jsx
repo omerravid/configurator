@@ -427,10 +427,10 @@ const SettingsModal = ({ isOpen, onClose }) => {
         connectionString
       });
 
-      if (response.success) {
+      if (response.data.success) {
         showToast('Connection test successful', 'success');
       } else {
-        showToast(`Connection test failed: ${response.message}`, 'error');
+        showToast(`Connection test failed: ${response.data.message}`, 'error');
       }
     } catch (error) {
       console.error('Failed to test connection:', error);
