@@ -210,8 +210,13 @@ const SettingsModal = ({ isOpen, onClose }) => {
       }
     } catch (error) {
       console.error('Failed to load database status:', error);
-      setDbStatus({ type: 'sqlite', connected: false, host: '' });
-      setDatabases([]);
+      if (error.response?.status === 401) {
+        showToast('Session expired. Please login again.', 'error');
+        forceLogout();
+      } else {
+        setDbStatus({ type: 'sqlite', connected: false, host: '' });
+        setDatabases([]);
+      }
     }
   };
 
