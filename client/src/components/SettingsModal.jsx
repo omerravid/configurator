@@ -348,6 +348,166 @@ const SettingsModal = ({ isOpen, onClose }) => {
     }
   };
 
+  // Multiple Database Management Functions
+  const addDatabase = async () => {
+    if (!newDatabase.name || !newDatabase.connectionString) {
+      showToast('Please enter database name and connection string', 'error');
+      return;
+    }
+
+    setDbLoading(true);
+    try {
+      const response = await api.post('/settings/databases', newDatabase);
+
+      if (response.data.success) {
+        showToast('Database added successfully', 'success');
+        setNewDatabase({ name: '', connectionString: '', description: '' });
+        setShowAddDatabase(false);
+        loadDatabaseStatus();
+      } else {
+        showToast(`Failed to add database: ${response.data.error}`, 'error');
+      }
+    } catch (error) {
+      console.error('Failed to add database:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to add database';
+      showToast(`Failed to add database: ${errorMessage}`, 'error');
+    } finally {
+      setDbLoading(false);
+    }
+  };
+
+  const deleteDatabase = async (name) => {
+    if (!window.confirm(`Are you sure you want to delete database "${name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    setDbLoading(true);
+    try {
+      const response = await api.delete(`/settings/databases/${name}`);
+
+      if (response.data.success) {
+        showToast('Database deleted successfully', 'success');
+        loadDatabaseStatus();
+      } else {
+        showToast(`Failed to delete database: ${response.data.error}`, 'error');
+      }
+    } catch (error) {
+      console.error('Failed to delete database:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to delete database';
+      showToast(`Failed to delete database: ${errorMessage}`, 'error');
+    } finally {
+      setDbLoading(false);
+    }
+  };
+
+  const setActiveDatabase = async (name) => {
+    setDbLoading(true);
+    try {
+      const response = await api.post(`/settings/databases/${name}/activate`);
+
+      if (response.data.success) {
+        showToast(`Database "${name}" is now active`, 'success');
+        loadDatabaseStatus();
+      } else {
+        showToast(`Failed to activate database: ${response.data.error}`, 'error');
+      }
+    } catch (error) {
+      console.error('Failed to activate database:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to activate database';
+      showToast(`Failed to activate database: ${errorMessage}`, 'error');
+    } finally {
+      setDbLoading(false);
+    }
+  };
+
+  const testDatabaseConnection = async (connectionString) => {
+    setDbLoading(true);
+    try {
+      const response = await api.post('/settings/databases/test', {
+        connectionString
+      });
+
+      if (response.success) {
+        showToast('Connection test successful', 'success');
+      } else {
+        showToast(`Connection test failed: ${response.message}`, 'error');
+      }
+    } catch (error) {
+      console.error('Failed to test connection:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to test connection';
+      showToast(`Connection test failed: ${errorMessage}`, 'error');
+    } finally {
+      setDbLoading(false);
+    }
+  };
+
+  const copyDataBetweenDatabases = async () => {
+    if (!copyDataConfig.sourceDatabase || !copyDataConfig.targetDatabase) {
+      showToast('Please select source and target databases', 'error');
+      return;
+    }
+
+    if (copyDataConfig.sourceDatabase === copyDataConfig.targetDatabase) {
+      showToast('Source and target databases cannot be the same', 'error');
+      return;
+    }
+
+    if (!window.confirm(`Copy data from "${copyDataConfig.sourceDatabase}" to "${copyDataConfig.targetDatabase}"? This will override existing configurations in the target database.`)) {
+      return;
+    }
+
+    setDbLoading(true);
+    try {
+      const response = await api.post('/settings/databases/copy-data', copyDataConfig);
+
+      if (response.data.success) {
+        showToast(response.data.message, 'success');
+        setShowCopyData(false);
+        setCopyDataConfig({
+          sourceDatabase: '',
+          targetDatabase: '',
+          includeConfigurations: true,
+          includeConfigurationTypes: [],
+          adminOnly: true
+        });
+      } else {
+        showToast(`Failed to copy data: ${response.data.error}`, 'error');
+      }
+    } catch (error) {
+      console.error('Failed to copy data:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to copy data';
+      showToast(`Failed to copy data: ${errorMessage}`, 'error');
+    } finally {
+      setDbLoading(false);
+    }
+  };
+
+  const migrateDatabase = async (sourceDb, targetDb) => {
+    if (!window.confirm(`Migrate all data from "${sourceDb}" to "${targetDb}"? This will replace ALL data in the target database.`)) {
+      return;
+    }
+
+    setDbLoading(true);
+    try {
+      const response = await api.post('/settings/databases/migrate', {
+        sourceDatabase: sourceDb,
+        targetDatabase: targetDb
+      });
+
+      if (response.data.success) {
+        showToast(response.data.message, 'success');
+      } else {
+        showToast(`Failed to migrate database: ${response.data.error}`, 'error');
+      }
+    } catch (error) {
+      console.error('Failed to migrate database:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to migrate database';
+      showToast(`Failed to migrate database: ${errorMessage}`, 'error');
+    } finally {
+      setDbLoading(false);
+    }
+  };
+
   const configureS3 = async () => {
     if (!s3Config.bucketName || !s3Config.accessKeyId || !s3Config.secretAccessKey) {
       showToast('Please fill in all S3 configuration fields', 'error');
