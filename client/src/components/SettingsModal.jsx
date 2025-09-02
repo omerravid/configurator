@@ -414,9 +414,10 @@ const SettingsModal = ({ isOpen, onClose }) => {
         showToast(`Database "${name}" is now active`, 'success');
         loadDatabaseStatus();
 
-        // After database switch, the authentication context may have changed
-        // Show a warning about potential authentication issues
-        showToast('Database switched successfully. If you experience authentication issues, please refresh the page.', 'info');
+        // After database switch, warn user about potential session changes
+        setTimeout(() => {
+          showToast('Database activated successfully. You may need to refresh the page if you experience any issues.', 'info');
+        }, 1000);
       } else {
         showToast(`Failed to activate database: ${response.data.error}`, 'error');
       }
