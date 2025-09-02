@@ -1572,7 +1572,10 @@ const SettingsModal = ({ isOpen, onClose }) => {
             </h3>
 
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              To switch to database "{pendingDatabaseSwitch}", please confirm your password:
+              {pendingDatabaseSwitch === 'current'
+                ? 'Your session has expired. Please confirm your password to continue:'
+                : `To switch to database "${pendingDatabaseSwitch}", please confirm your password:`
+              }
             </p>
 
             <div className="space-y-4">
