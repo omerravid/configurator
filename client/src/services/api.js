@@ -24,8 +24,30 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
+      const url = error.config?.url || '';
+      console.log('Global interceptor - 401 error for URL:', url);
+
+      // Allow component-level 401 handling for settings endpoints
+      // These endpoints will show re-authentication modals instead of forcing logout
+      const settingsEndpoints = [
+        '/settings/databases',
+        '/settings/mongodb',
+        '/settings/storage',
+        '/settings/data'
+      ];
+
+      const isSettingsEndpoint = settingsEndpoints.some(endpoint => url.includes(endpoint));
+      console.log('Is settings endpoint:', isSettingsEndpoint);
+
+      if (!isSettingsEndpoint) {
+        console.log('401 Unauthorized - clearing token and redirecting to login');
+        localStorage.removeItem("token");
+        // Force a full page reload to login
+        window.location.replace("/login");
+      } else {
+        console.log('Settings endpoint 401 - letting component handle it');
+      }
+      // For settings endpoints, let the component handle the 401
     }
     return Promise.reject(error);
   },
