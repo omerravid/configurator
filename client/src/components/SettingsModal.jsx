@@ -413,8 +413,13 @@ const SettingsModal = ({ isOpen, onClose }) => {
       }
     } catch (error) {
       console.error('Failed to activate database:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to activate database';
-      showToast(`Failed to activate database: ${errorMessage}`, 'error');
+      if (error.response?.status === 401) {
+        showToast('Authentication failed after database switch. Please login again.', 'error');
+        forceLogout();
+      } else {
+        const errorMessage = error.response?.data?.error || error.message || 'Failed to activate database';
+        showToast(`Failed to activate database: ${errorMessage}`, 'error');
+      }
     } finally {
       setDbLoading(false);
     }
