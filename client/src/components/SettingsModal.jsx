@@ -20,6 +20,7 @@ import {
   PencilIcon
 } from "@heroicons/react/24/outline";
 import { useToast } from "../context/ToastContext";
+import api, { userAPI, authAPI } from "../services/api";
 
 const SettingsModal = ({ isOpen, onClose }) => {
   const { showToast } = useToast();
@@ -83,16 +84,8 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const loadUsers = async () => {
     setUsersLoading(true);
     try {
-      const response = await fetch('/api/users', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUsers(data.users || []);
-      } else {
-        throw new Error('Failed to load users');
-      }
+      const response = await userAPI.getAll();
+      setUsers(response.data.users || []);
     } catch (error) {
       console.error('Failed to load users:', error);
       showToast('Failed to load users', 'error');
@@ -110,27 +103,15 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
     setUsersLoading(true);
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(newUser)
-      });
-
-      if (response.ok) {
-        showToast('User created successfully', 'success');
-        setNewUser({ username: '', password: '', role: 'USER' });
-        setShowCreateUser(false);
-        loadUsers();
-      } else {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to create user');
-      }
+      await authAPI.register(newUser.username, newUser.password, newUser.role);
+      showToast('User created successfully', 'success');
+      setNewUser({ username: '', password: '', role: 'USER' });
+      setShowCreateUser(false);
+      loadUsers();
     } catch (error) {
       console.error('Failed to create user:', error);
-      showToast(`Failed to create user: ${error.message}`, 'error');
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to create user';
+      showToast(`Failed to create user: ${errorMessage}`, 'error');
     } finally {
       setUsersLoading(false);
     }
@@ -139,26 +120,14 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const updateUserRole = async (userId, newRole) => {
     setUsersLoading(true);
     try {
-      const response = await fetch(`/api/users/${userId}/role`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ role: newRole })
-      });
-
-      if (response.ok) {
-        showToast('User role updated successfully', 'success');
-        setEditingUserId(null);
-        loadUsers();
-      } else {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to update user role');
-      }
+      await userAPI.updateRole(userId, newRole);
+      showToast('User role updated successfully', 'success');
+      setEditingUserId(null);
+      loadUsers();
     } catch (error) {
       console.error('Failed to update user role:', error);
-      showToast(`Failed to update user role: ${error.message}`, 'error');
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to update user role';
+      showToast(`Failed to update user role: ${errorMessage}`, 'error');
     } finally {
       setUsersLoading(false);
     }
@@ -171,21 +140,13 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
     setUsersLoading(true);
     try {
-      const response = await fetch(`/api/users/${userId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-
-      if (response.ok) {
-        showToast('User deleted successfully', 'success');
-        loadUsers();
-      } else {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to delete user');
-      }
+      await userAPI.delete(userId);
+      showToast('User deleted successfully', 'success');
+      loadUsers();
     } catch (error) {
       console.error('Failed to delete user:', error);
-      showToast(`Failed to delete user: ${error.message}`, 'error');
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to delete user';
+      showToast(`Failed to delete user: ${errorMessage}`, 'error');
     } finally {
       setUsersLoading(false);
     }
@@ -254,19 +215,11 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
   const loadBackups = async () => {
     try {
-      const response = await fetch('/api/settings/data/backups', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        setBackups(data.backups || []);
+      const response = await api.get('/settings/data/backups');
+      if (response.data.success) {
+        setBackups(response.data.backups || []);
       } else {
-        console.warn('Backup loading unsuccessful:', data.error);
+        console.warn('Backup loading unsuccessful:', response.data.error);
         setBackups([]);
       }
     } catch (error) {
@@ -277,19 +230,11 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
   const loadDataStats = async () => {
     try {
-      const response = await fetch('/api/settings/data/status', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        setDataStats(data.stats);
+      const response = await api.get('/settings/data/status');
+      if (response.data.success) {
+        setDataStats(response.data.stats);
       } else {
-        console.warn('Data stats loading unsuccessful:', data.error);
+        console.warn('Data stats loading unsuccessful:', response.data.error);
         setDataStats({ users: 0, configurations: 0 });
       }
     } catch (error) {
@@ -454,25 +399,21 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const createBackup = async () => {
     setBackupLoading(true);
     try {
-      const response = await fetch('/api/settings/data/backup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ name: `manual-${Date.now()}` })
+      const response = await api.post('/settings/data/backup', {
+        name: `manual-${Date.now()}`
       });
-      const data = await response.json();
 
-      if (data.success) {
+      if (response.data.success) {
         showToast('Backup created successfully', 'success');
         loadBackups();
         loadDataStats();
       } else {
-        showToast(`Failed to create backup: ${data.error}`, 'error');
+        showToast(`Failed to create backup: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      showToast('Failed to create backup', 'error');
+      console.error('Failed to create backup:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to create backup';
+      showToast(`Failed to create backup: ${errorMessage}`, 'error');
     } finally {
       setBackupLoading(false);
     }
