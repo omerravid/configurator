@@ -31,6 +31,26 @@ const mongoSettingsSchema = Joi.object({
   }).optional()
 });
 
+const databaseConfigSchema = Joi.object({
+  name: Joi.string().min(1).max(100).required(),
+  connectionString: Joi.string().required(),
+  description: Joi.string().max(500).optional().allow('')
+});
+
+const updateDatabaseConfigSchema = Joi.object({
+  name: Joi.string().min(1).max(100).optional(),
+  connectionString: Joi.string().optional(),
+  description: Joi.string().max(500).optional().allow('')
+});
+
+const copyDataSchema = Joi.object({
+  sourceDatabase: Joi.string().required(),
+  targetDatabase: Joi.string().required(),
+  includeConfigurations: Joi.boolean().default(true),
+  includeConfigurationTypes: Joi.array().items(Joi.string().valid('PRODUCT', 'INSTANCE', 'USER', 'COMPONENT', 'VERSION')).default([]),
+  adminOnly: Joi.boolean().default(true)
+});
+
 const storageSettingsSchema = Joi.object({
   storageType: Joi.string().valid('embedded', 's3').required(),
   s3BucketName: Joi.when('storageType', {
