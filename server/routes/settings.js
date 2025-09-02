@@ -1,12 +1,29 @@
 const express = require("express");
 const Joi = require("joi");
 const mongodb = require("../models/mongodb");
+const DatabaseManager = require("../services/DatabaseManager");
 const { authenticateToken, requireAdmin } = require("../middleware/auth");
 const DataMigration = require("../scripts/migrate-to-mongodb");
 const BackupRestore = require("../backup-restore");
 const FileStorageService = require("../services/FileStorageService");
 
+// Helper function to generate backup names in format: dd-mm-yyyy-HH:MM:ss-suffix
+function generateBackupName(suffix = 'backup') {
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = now.getFullYear();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+
+  return `${day}-${month}-${year}-${hours}:${minutes}:${seconds}-${suffix}`;
+}
+
 const router = express.Router();
+
+// Initialize DatabaseManager
+DatabaseManager.initialize().catch(console.error);
 
 // Validation schemas
 const mongoSettingsSchema = Joi.object({
@@ -15,6 +32,26 @@ const mongoSettingsSchema = Joi.object({
     useNewUrlParser: Joi.boolean(),
     useUnifiedTopology: Joi.boolean()
   }).optional()
+});
+
+const databaseConfigSchema = Joi.object({
+  name: Joi.string().min(1).max(100).required(),
+  connectionString: Joi.string().required(),
+  description: Joi.string().max(500).optional().allow('')
+});
+
+const updateDatabaseConfigSchema = Joi.object({
+  name: Joi.string().min(1).max(100).optional(),
+  connectionString: Joi.string().optional(),
+  description: Joi.string().max(500).optional().allow('')
+});
+
+const copyDataSchema = Joi.object({
+  sourceDatabase: Joi.string().required(),
+  targetDatabase: Joi.string().required(),
+  includeConfigurations: Joi.boolean().default(true),
+  includeConfigurationTypes: Joi.array().items(Joi.string().valid('PRODUCT', 'INSTANCE', 'USER', 'COMPONENT', 'VERSION')).default([]),
+  adminOnly: Joi.boolean().default(true)
 });
 
 const storageSettingsSchema = Joi.object({
@@ -40,6 +77,210 @@ const storageSettingsSchema = Joi.object({
     otherwise: Joi.string().optional()
   })
 });
+
+// Database Management Endpoints
+
+// Get all database configurations
+router.get("/databases", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const databases = DatabaseManager.getAllDatabases();
+    const status = await DatabaseManager.getConnectionStatus();
+
+    res.json({
+      success: true,
+      databases,
+      status
+    });
+  } catch (error) {
+    console.error("Failed to get databases:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to get databases"
+    });
+  }
+});
+
+// Add new database configuration
+router.post("/databases", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { error, value } = databaseConfigSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.details[0].message
+      });
+    }
+
+    const database = await DatabaseManager.addDatabase(value);
+
+    res.json({
+      success: true,
+      database,
+      message: "Database configuration added successfully"
+    });
+  } catch (error) {
+    console.error("Failed to add database:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to add database"
+    });
+  }
+});
+
+// Update database configuration
+router.put("/databases/:name", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { name } = req.params;
+    const { error, value } = updateDatabaseConfigSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.details[0].message
+      });
+    }
+
+    const database = await DatabaseManager.updateDatabase(name, value);
+
+    res.json({
+      success: true,
+      database,
+      message: "Database configuration updated successfully"
+    });
+  } catch (error) {
+    console.error("Failed to update database:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to update database"
+    });
+  }
+});
+
+// Delete database configuration
+router.delete("/databases/:name", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { name } = req.params;
+    const database = await DatabaseManager.deleteDatabase(name);
+
+    res.json({
+      success: true,
+      database,
+      message: "Database configuration deleted successfully"
+    });
+  } catch (error) {
+    console.error("Failed to delete database:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to delete database"
+    });
+  }
+});
+
+// Set active database
+router.post("/databases/:name/activate", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { name } = req.params;
+    const database = await DatabaseManager.setActiveDatabase(name);
+
+    res.json({
+      success: true,
+      database,
+      message: `Database "${name}" is now active`
+    });
+  } catch (error) {
+    console.error("Failed to set active database:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to set active database"
+    });
+  }
+});
+
+// Test database connection
+router.post("/databases/test", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { connectionString } = req.body;
+    if (!connectionString) {
+      return res.status(400).json({
+        success: false,
+        error: "Connection string is required"
+      });
+    }
+
+    const result = await DatabaseManager.testConnection(connectionString);
+    res.json(result);
+  } catch (error) {
+    console.error("Failed to test database connection:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to test database connection"
+    });
+  }
+});
+
+// Copy data between databases
+router.post("/databases/copy-data", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { error, value } = copyDataSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        error: error.details[0].message
+      });
+    }
+
+    const result = await DatabaseManager.copyDataBetweenDatabases(
+      value.sourceDatabase,
+      value.targetDatabase,
+      {
+        includeConfigurations: value.includeConfigurations,
+        includeConfigurationTypes: value.includeConfigurationTypes,
+        adminOnly: value.adminOnly
+      }
+    );
+
+    res.json({
+      success: true,
+      result,
+      message: "Data copied successfully"
+    });
+  } catch (error) {
+    console.error("Failed to copy data:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to copy data"
+    });
+  }
+});
+
+// Migrate database (full migration)
+router.post("/databases/migrate", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { sourceDatabase, targetDatabase } = req.body;
+
+    if (!sourceDatabase || !targetDatabase) {
+      return res.status(400).json({
+        success: false,
+        error: "Source and target databases are required"
+      });
+    }
+
+    const result = await DatabaseManager.migrateDatabase(sourceDatabase, targetDatabase);
+
+    res.json({
+      success: true,
+      result,
+      message: "Database migration completed successfully"
+    });
+  } catch (error) {
+    console.error("Failed to migrate database:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to migrate database"
+    });
+  }
+});
+
+// Legacy MongoDB Endpoints (kept for backward compatibility)
 
 // Get current MongoDB settings
 router.get("/mongodb", authenticateToken, requireAdmin, async (req, res) => {
@@ -185,7 +426,7 @@ router.post("/mongodb/migrate", authenticateToken, requireAdmin, async (req, res
     console.log('Creating SQLite backup before migration...');
     const BackupRestore = require("../backup-restore");
     const br = new BackupRestore();
-    const backupResult = await br.createBackup(`pre-migration-${Date.now()}`);
+    const backupResult = await br.createBackup(generateBackupName('pre-migration'));
 
     if (!backupResult.success) {
       return res.status(500).json({
@@ -310,6 +551,118 @@ router.post("/data/restore", authenticateToken, requireAdmin, async (req, res) =
   }
 });
 
+// Download backup file
+router.get("/data/backup/:backupName", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { backupName } = req.params;
+
+    if (!backupName) {
+      return res.status(400).json({
+        success: false,
+        error: "Backup name is required"
+      });
+    }
+
+    const br = new BackupRestore();
+    const result = await br.getBackupFile(backupName);
+
+    if (!result.success) {
+      return res.status(404).json(result);
+    }
+
+    // Set headers for file download
+    res.setHeader('Content-Disposition', `attachment; filename="${backupName}.json"`);
+    res.setHeader('Content-Type', 'application/json');
+
+    // Send the file
+    res.sendFile(result.filePath);
+  } catch (error) {
+    console.error("Failed to download backup:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to download backup"
+    });
+  }
+});
+
+// Upload and restore from backup file
+router.post("/data/upload-restore", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    // Use multer middleware for file upload
+    const multer = require('multer');
+    const path = require('path');
+    const fs = require('fs');
+
+    // Configure multer for temporary file storage
+    const upload = multer({
+      dest: path.join(__dirname, '../temp-uploads'),
+      fileFilter: (req, file, cb) => {
+        // Only allow JSON files
+        if (file.mimetype === 'application/json' || file.originalname.endsWith('.json')) {
+          cb(null, true);
+        } else {
+          cb(new Error('Only JSON files are allowed'), false);
+        }
+      },
+      limits: {
+        fileSize: 100 * 1024 * 1024, // 100MB limit
+      }
+    });
+
+    // Handle the upload
+    upload.single('backupFile')(req, res, async (err) => {
+      try {
+        if (err) {
+          return res.status(400).json({
+            success: false,
+            error: `Upload error: ${err.message}`
+          });
+        }
+
+        if (!req.file) {
+          return res.status(400).json({
+            success: false,
+            error: "No backup file uploaded"
+          });
+        }
+
+        const br = new BackupRestore();
+        const result = await br.restoreFromUploadedFile(req.file.path);
+
+        // Clean up temporary file
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (cleanupError) {
+          console.warn('Failed to clean up temporary file:', cleanupError);
+        }
+
+        res.json(result);
+      } catch (uploadError) {
+        // Clean up temporary file on error
+        if (req.file?.path) {
+          try {
+            fs.unlinkSync(req.file.path);
+          } catch (cleanupError) {
+            console.warn('Failed to clean up temporary file:', cleanupError);
+          }
+        }
+
+        console.error("Failed to restore from uploaded file:", uploadError);
+        res.status(500).json({
+          success: false,
+          error: "Failed to restore from uploaded file"
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Failed to handle upload:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to handle upload"
+    });
+  }
+});
+
 // Migrate to embedded MongoDB (SAFEST OPTION)
 router.post("/mongodb/migrate-embedded", authenticateToken, requireAdmin, async (req, res) => {
   try {
@@ -318,7 +671,7 @@ router.post("/mongodb/migrate-embedded", authenticateToken, requireAdmin, async 
     // Create backup before migration
     const BackupRestore = require("../backup-restore");
     const br = new BackupRestore();
-    const backupResult = await br.createBackup(`pre-embedded-migration-${Date.now()}`);
+    const backupResult = await br.createBackup(generateBackupName('pre-embedded-migration'));
 
     if (!backupResult.success) {
       return res.status(500).json({
@@ -401,7 +754,7 @@ router.post("/mongodb/revert-to-sqlite", authenticateToken, requireAdmin, async 
       // Create backup of current SQLite before overwriting
       const BackupRestore = require("../backup-restore");
       const br = new BackupRestore();
-      const backupResult = await br.createBackup(`pre-mongo-revert-${Date.now()}`);
+      const backupResult = await br.createBackup(generateBackupName('pre-mongo-revert'));
 
       if (!backupResult.success) {
         return res.status(500).json({

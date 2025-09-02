@@ -1,0 +1,306 @@
+{
+  "timestamp": "2025-09-02T08:07:24.839Z",
+  "version": "1.0",
+  "databaseType": "mongodb",
+  "data": {
+    "users": [
+      {
+        "id": "68b6a56d3cc98258fadcabc1",
+        "username": "hana",
+        "password_hash": "$2a$10$lb5glUWIyo5hI2oejVXv0eu2B1mmzW6o3rEi73o0t50FLFoMXT/Wa",
+        "role": "USER",
+        "created_at": "2025-09-02T08:06:05.636Z",
+        "updated_at": "2025-09-02T08:06:05.636Z"
+      },
+      {
+        "id": "68b6a56d3cc98258fadcabc3",
+        "username": "omer",
+        "password_hash": "$2a$10$wg8/vZkDts1GDRH31giyVeIjRyqxDtPstwmQI7HMuS2MumvChDnou",
+        "role": "USER",
+        "created_at": "2025-09-02T08:06:05.637Z",
+        "updated_at": "2025-09-02T08:06:05.637Z"
+      },
+      {
+        "id": "68b6a56d3cc98258fadcabc5",
+        "username": "admin",
+        "password_hash": "$2a$10$WSKK7cBI3s1ZBk0tGxYA5u3qxnbrCesG.SjkYNCDBWm9MEYlFFZQi",
+        "role": "ADMIN",
+        "created_at": "2025-09-02T08:06:05.638Z",
+        "updated_at": "2025-09-02T08:06:05.638Z"
+      }
+    ],
+    "configurations": [
+      {
+        "_id": "68b6a56d3cc98258fadcabc7",
+        "name": "Displayddddddddd",
+        "type": "COMPONENT",
+        "parent_id": null,
+        "data": {
+          "screen": {
+            "resolution": {
+              "width": 454,
+              "height": 454
+            },
+            "brightness": {
+              "auto": true,
+              "min": 10,
+              "max": 100,
+              "default": 75
+            },
+            "colorDepth": "16bit",
+            "refresh": 60
+          },
+          "ui": {
+            "theme": "light",
+            "layout": "grid",
+            "animations": true,
+            "gestures": {
+              "swipe": true,
+              "tap": true,
+              "longPress": true,
+              "crown": true
+            }
+          },
+          "watchface": {
+            "style": "analog",
+            "complications": [
+              "date",
+              "battery",
+              "steps"
+            ],
+            "customizable": true
+          },
+          "alwaysOn": {
+            "enabled": false,
+            "dimLevel": 5,
+            "updateFreq": 1
+          },
+          "accessibility": {
+            "fontSize": "medium",
+            "voiceOver": false,
+            "hapticFeedback": true
+          }
+        },
+        "created_by": "admin",
+        "description": "Complete display and user interface configuration for smart watch",
+        "status": "COMMITTED",
+        "archived": true,
+        "createdAt": "2025-09-02T08:06:05.639Z",
+        "updatedAt": "2025-09-02T08:07:14.665Z",
+        "__v": 0
+      },
+      {
+        "_id": "68b6a56d3cc98258fadcabc9",
+        "name": "Sensors",
+        "type": "COMPONENT",
+        "parent_id": null,
+        "data": {
+          "heartRate": {
+            "enabled": true,
+            "sampleRate": 1,
+            "accuracy": "high",
+            "zones": {
+              "resting": [
+                50,
+                90
+              ],
+              "fat_burn": [
+                90,
+                126
+              ],
+              "cardio": [
+                126,
+                153
+              ],
+              "peak": [
+                153,
+                200
+              ]
+            }
+          },
+          "gps": {
+            "enabled": true,
+            "accuracy": "balanced",
+            "satellites": [
+              "GPS",
+              "GLONASS"
+            ],
+            "assistedGPS": true,
+            "coldStart": 30,
+            "hotStart": 3
+          },
+          "accelerometer": {
+            "enabled": true,
+            "sensitivity": "medium",
+            "range": "8g",
+            "sampleRate": 50
+          },
+          "gyroscope": {
+            "enabled": true,
+            "range": "2000dps",
+            "calibration": true
+          },
+          "barometer": {
+            "enabled": true,
+            "precision": 1,
+            "seaLevel": 1013.25
+          },
+          "ambient": {
+            "light": true,
+            "temperature": false,
+            "humidity": false
+          },
+          "stepCounter": {
+            "enabled": true,
+            "sensitivity": "auto",
+            "goalDaily": 10000
+          }
+        },
+        "created_by": "admin",
+        "description": "Comprehensive sensor package for health and fitness tracking",
+        "status": "COMMITTED",
+        "archived": false,
+        "createdAt": "2025-09-02T08:06:05.640Z",
+        "updatedAt": "2025-09-02T08:06:05.640Z",
+        "__v": 0
+      },
+      {
+        "_id": "68b6a56d3cc98258fadcabcb",
+        "name": "Battery",
+        "type": "COMPONENT",
+        "parent_id": null,
+        "data": {
+          "capacity": {
+            "mAh": 284,
+            "voltage": 3.8,
+            "chemistry": "LiPo"
+          },
+          "charging": {
+            "method": "wireless",
+            "maxWatts": 5,
+            "fastCharge": false,
+            "efficiency": 85,
+            "timeToFull": 120
+          },
+          "power": {
+            "management": "adaptive",
+            "lowPowerMode": {
+              "threshold": 20,
+              "features": [
+                "gps",
+                "wifi",
+                "animations"
+              ],
+              "brightness": 30
+            },
+            "sleepMode": {
+              "enabled": true,
+              "timeout": 300,
+              "wakeGestures": [
+                "tap",
+                "crown",
+                "raise"
+              ]
+            }
+          },
+          "monitoring": {
+            "reporting": true,
+            "intervals": [
+              1,
+              5,
+              15,
+              60
+            ],
+            "alerts": {
+              "low": 15,
+              "critical": 5
+            },
+            "optimization": {
+              "adaptive": true,
+              "learning": true,
+              "backgroundSync": "smart"
+            }
+          },
+          "lifespan": {
+            "cycleCount": 0,
+            "degradation": 0,
+            "warranty": 500
+          }
+        },
+        "created_by": "admin",
+        "description": "Advanced battery management and power optimization system",
+        "status": "COMMITTED",
+        "archived": false,
+        "createdAt": "2025-09-02T08:06:05.641Z",
+        "updatedAt": "2025-09-02T08:06:05.641Z",
+        "__v": 0
+      },
+      {
+        "_id": "68b6a56d3cc98258fadcabcd",
+        "name": "FitnessWatch Pro",
+        "type": "PRODUCT",
+        "parent_id": null,
+        "data": {
+          "Display": {
+            "componentId": "fz20lukhbctmf28p223",
+            "versionId": "njmn271y1tlmf28p22g",
+            "componentName": "Display",
+            "versionName": "Display v2"
+          },
+          "Sensors": {
+            "componentId": "5eavbmjptp9mf28p22c",
+            "versionId": "37my4ifjvhtmf28p22k",
+            "componentName": "Sensors",
+            "versionName": "Sensors v2"
+          },
+          "Battery": {
+            "componentId": "s8ye1bjxh6cmf28p22e",
+            "versionId": "ypqemk8vldtmf28p22l",
+            "componentName": "Battery",
+            "versionName": "Battery v2"
+          }
+        },
+        "created_by": "admin",
+        "description": "Premium fitness watch with advanced display, comprehensive sensors, and enhanced battery",
+        "status": "COMMITTED",
+        "archived": false,
+        "createdAt": "2025-09-02T08:06:05.642Z",
+        "updatedAt": "2025-09-02T08:06:05.642Z",
+        "__v": 0
+      },
+      {
+        "_id": "68b6a56d3cc98258fadcabcf",
+        "name": "SmartWatch Lite",
+        "type": "PRODUCT",
+        "parent_id": null,
+        "data": {
+          "Display": {
+            "componentId": "fz20lukhbctmf28p223",
+            "versionId": "fz20lukhbctmf28p223",
+            "componentName": "Display",
+            "versionName": "Display (root)"
+          },
+          "Sensors": {
+            "componentId": "5eavbmjptp9mf28p22c",
+            "versionId": "5eavbmjptp9mf28p22c",
+            "componentName": "Sensors",
+            "versionName": "Sensors (root)"
+          },
+          "Battery": {
+            "componentId": "s8ye1bjxh6cmf28p22e",
+            "versionId": "s8ye1bjxh6cmf28p22e",
+            "componentName": "Battery",
+            "versionName": "Battery (root)"
+          }
+        },
+        "created_by": "admin",
+        "description": "Essential smart watch with standard display, basic sensors, and standard battery",
+        "status": "COMMITTED",
+        "archived": false,
+        "createdAt": "2025-09-02T08:06:05.643Z",
+        "updatedAt": "2025-09-02T08:06:05.643Z",
+        "__v": 0
+      }
+    ]
+  }
+}
