@@ -383,7 +383,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
     setDbLoading(true);
     try {
-      const response = await api.delete(`/settings/databases/${name}`);
+      const response = await api.delete(`/settings/databases/${encodeURIComponent(name)}`);
 
       if (response.data.success) {
         showToast('Database deleted successfully', 'success');
