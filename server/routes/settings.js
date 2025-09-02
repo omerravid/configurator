@@ -419,7 +419,7 @@ router.post("/mongodb/migrate", authenticateToken, requireAdmin, async (req, res
     console.log('Creating SQLite backup before migration...');
     const BackupRestore = require("../backup-restore");
     const br = new BackupRestore();
-    const backupResult = await br.createBackup(generateBackupName('pre-migration'));
+    const backupResult = await br.createBackup(generateBackupName('system', 'pre-migration'));
 
     if (!backupResult.success) {
       return res.status(500).json({
@@ -668,7 +668,7 @@ router.post("/mongodb/migrate-embedded", authenticateToken, requireAdmin, async 
     // Create backup before migration
     const BackupRestore = require("../backup-restore");
     const br = new BackupRestore();
-    const backupResult = await br.createBackup(generateBackupName('pre-embedded-migration'));
+    const backupResult = await br.createBackup(generateBackupName('system', 'pre-embedded-migration'));
 
     if (!backupResult.success) {
       return res.status(500).json({
@@ -751,7 +751,7 @@ router.post("/mongodb/revert-to-sqlite", authenticateToken, requireAdmin, async 
       // Create backup of current SQLite before overwriting
       const BackupRestore = require("../backup-restore");
       const br = new BackupRestore();
-      const backupResult = await br.createBackup(generateBackupName('pre-mongo-revert'));
+      const backupResult = await br.createBackup(generateBackupName('system', 'pre-mongo-revert'));
 
       if (!backupResult.success) {
         return res.status(500).json({
