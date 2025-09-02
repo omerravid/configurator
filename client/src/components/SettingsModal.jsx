@@ -923,12 +923,12 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
   const renderDatabaseTab = () => (
     <div className="space-y-6">
-      {/* Database Section */}
+      {/* Database Status Section */}
       <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center space-x-2">
             <ServerIcon className="w-5 h-5" />
-            <span>Database Configuration</span>
+            <span>Database Status</span>
           </h3>
           <div className="flex items-center space-x-2">
             {dbStatus.connected ? (
@@ -937,58 +937,280 @@ const SettingsModal = ({ isOpen, onClose }) => {
               <XCircleIcon className="w-5 h-5 text-gray-400" />
             )}
             <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-              {dbStatus.type === 'mongodb' ? 'MongoDB' : 'SQLite'}
+              {dbStatus.activeDatabase ? `Active: ${dbStatus.activeDatabase}` : 'SQLite'}
               {dbStatus.host && ` • ${dbStatus.host}`}
             </span>
           </div>
         </div>
 
-        <div className="space-y-4">
-          {/* MongoDB Connection Input */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-              MongoDB Connection String
-            </label>
-            <input
-              type="text"
-              value={mongoConnectionString}
-              onChange={(e) => setMongoConnectionString(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
-              placeholder="mongodb://localhost:27017/config_manager"
-            />
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          {databases.length} database{databases.length !== 1 ? 's' : ''} configured
+        </div>
+      </div>
+
+      {/* Database Management Section */}
+      <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center space-x-2">
+            <ServerIcon className="w-5 h-5" />
+            <span>Database Connections</span>
+          </h3>
+          <button
+            onClick={() => setShowAddDatabase(true)}
+            className="btn-primary flex items-center space-x-2"
+          >
+            <PlusIcon className="w-4 h-4" />
+            <span>Add Database</span>
+          </button>
+        </div>
+
+        {/* Database List */}
+        <div className="space-y-3">
+          {databases.length === 0 ? (
+            <div className="text-center text-gray-500 p-8">
+              No databases configured
+            </div>
+          ) : (
+            databases.map(database => (
+              <div key={database.name} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-3 h-3 rounded-full ${database.isActive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                      <h4 className="text-md font-medium text-gray-900 dark:text-gray-100">
+                        {database.name}
+                        {database.isEmbedded && <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Embedded</span>}
+                        {database.isActive && <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Active</span>}
+                      </h4>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {database.description || 'No description'}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-1 font-mono">
+                      {database.connectionString}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    {!database.isActive && (
+                      <button
+                        onClick={() => setActiveDatabase(database.name)}
+                        disabled={dbLoading}
+                        className="px-3 py-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded font-medium transition-colors disabled:cursor-not-allowed text-xs"
+                      >
+                        Activate
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => testDatabaseConnection(database.connectionString)}
+                      disabled={dbLoading}
+                      className="px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded font-medium transition-colors disabled:cursor-not-allowed text-xs"
+                    >
+                      Test
+                    </button>
+
+                    {!database.isEmbedded && (
+                      <button
+                        onClick={() => deleteDatabase(database.name)}
+                        disabled={dbLoading || database.isActive}
+                        className="px-3 py-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded font-medium transition-colors disabled:cursor-not-allowed text-xs"
+                        title={database.isActive ? "Cannot delete active database" : "Delete database"}
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Data Operations */}
+        {databases.length > 1 && (
+          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+            <h4 className="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Data Operations</h4>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowCopyData(true)}
+                disabled={dbLoading}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center space-x-2"
+              >
+                <DocumentArrowUpIcon className="w-4 h-4" />
+                <span>Copy Data</span>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Add Database Modal */}
+      {showAddDatabase && (
+        <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+          <h4 className="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Add New Database</h4>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                Database Name
+              </label>
+              <input
+                type="text"
+                value={newDatabase.name}
+                onChange={(e) => setNewDatabase({...newDatabase, name: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+                placeholder="e.g., Production Database"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                Connection String
+              </label>
+              <input
+                type="text"
+                value={newDatabase.connectionString}
+                onChange={(e) => setNewDatabase({...newDatabase, connectionString: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+                placeholder="mongodb://localhost:27017/database_name"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                Description (Optional)
+              </label>
+              <textarea
+                value={newDatabase.description}
+                onChange={(e) => setNewDatabase({...newDatabase, description: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+                placeholder="Description of this database"
+                rows="2"
+              />
+            </div>
           </div>
 
-          {/* Database Switch Buttons */}
-          <div className="flex space-x-3">
+          <div className="flex space-x-3 mt-4">
             <button
-              onClick={switchToEmbeddedMongo}
-              disabled={dbLoading || dbStatus.type === 'mongodb'}
-              className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              onClick={addDatabase}
+              disabled={dbLoading}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center space-x-2"
             >
-              {dbLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <ServerIcon className="w-4 h-4" />}
-              <span>Embedded MongoDB</span>
+              {dbLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <PlusIcon className="w-4 h-4" />}
+              <span>Add Database</span>
             </button>
-
             <button
-              onClick={switchToExternalMongo}
-              disabled={dbLoading || !mongoConnectionString.trim()}
-              className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              onClick={() => setShowAddDatabase(false)}
+              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
             >
-              {dbLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <CloudIcon className="w-4 h-4" />}
-              <span>External MongoDB</span>
-            </button>
-
-            <button
-              onClick={switchToSQLite}
-              disabled={dbLoading || dbStatus.type === 'sqlite'}
-              className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-            >
-              {dbLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <ServerIcon className="w-4 h-4" />}
-              <span>SQLite</span>
+              Cancel
             </button>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Copy Data Modal */}
+      {showCopyData && (
+        <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+          <h4 className="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Copy Data Between Databases</h4>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                  Source Database
+                </label>
+                <select
+                  value={copyDataConfig.sourceDatabase}
+                  onChange={(e) => setCopyDataConfig({...copyDataConfig, sourceDatabase: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+                >
+                  <option value="">Select source...</option>
+                  {databases.map(db => (
+                    <option key={db.name} value={db.name}>{db.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                  Target Database
+                </label>
+                <select
+                  value={copyDataConfig.targetDatabase}
+                  onChange={(e) => setCopyDataConfig({...copyDataConfig, targetDatabase: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+                >
+                  <option value="">Select target...</option>
+                  {databases.filter(db => db.name !== copyDataConfig.sourceDatabase).map(db => (
+                    <option key={db.name} value={db.name}>{db.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+                Configuration Types to Copy
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {['PRODUCT', 'INSTANCE', 'USER', 'COMPONENT', 'VERSION'].map(type => (
+                  <label key={type} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={copyDataConfig.includeConfigurationTypes.includes(type)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setCopyDataConfig({
+                            ...copyDataConfig,
+                            includeConfigurationTypes: [...copyDataConfig.includeConfigurationTypes, type]
+                          });
+                        } else {
+                          setCopyDataConfig({
+                            ...copyDataConfig,
+                            includeConfigurationTypes: copyDataConfig.includeConfigurationTypes.filter(t => t !== type)
+                          });
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{type}</span>
+                  </label>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Leave empty to copy all types</p>
+            </div>
+
+            <div>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={copyDataConfig.adminOnly}
+                  onChange={(e) => setCopyDataConfig({...copyDataConfig, adminOnly: e.target.checked})}
+                  className="rounded"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">Only copy admin-created configurations</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="flex space-x-3 mt-4">
+            <button
+              onClick={copyDataBetweenDatabases}
+              disabled={dbLoading}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center space-x-2"
+            >
+              {dbLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <DocumentArrowUpIcon className="w-4 h-4" />}
+              <span>Copy Data</span>
+            </button>
+            <button
+              onClick={() => setShowCopyData(false)}
+              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 
