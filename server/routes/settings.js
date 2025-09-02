@@ -323,6 +323,118 @@ router.post("/data/restore", authenticateToken, requireAdmin, async (req, res) =
   }
 });
 
+// Download backup file
+router.get("/data/backup/:backupName", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { backupName } = req.params;
+
+    if (!backupName) {
+      return res.status(400).json({
+        success: false,
+        error: "Backup name is required"
+      });
+    }
+
+    const br = new BackupRestore();
+    const result = await br.getBackupFile(backupName);
+
+    if (!result.success) {
+      return res.status(404).json(result);
+    }
+
+    // Set headers for file download
+    res.setHeader('Content-Disposition', `attachment; filename="${backupName}.json"`);
+    res.setHeader('Content-Type', 'application/json');
+
+    // Send the file
+    res.sendFile(result.filePath);
+  } catch (error) {
+    console.error("Failed to download backup:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to download backup"
+    });
+  }
+});
+
+// Upload and restore from backup file
+router.post("/data/upload-restore", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    // Use multer middleware for file upload
+    const multer = require('multer');
+    const path = require('path');
+    const fs = require('fs');
+
+    // Configure multer for temporary file storage
+    const upload = multer({
+      dest: path.join(__dirname, '../temp-uploads'),
+      fileFilter: (req, file, cb) => {
+        // Only allow JSON files
+        if (file.mimetype === 'application/json' || file.originalname.endsWith('.json')) {
+          cb(null, true);
+        } else {
+          cb(new Error('Only JSON files are allowed'), false);
+        }
+      },
+      limits: {
+        fileSize: 100 * 1024 * 1024, // 100MB limit
+      }
+    });
+
+    // Handle the upload
+    upload.single('backupFile')(req, res, async (err) => {
+      try {
+        if (err) {
+          return res.status(400).json({
+            success: false,
+            error: `Upload error: ${err.message}`
+          });
+        }
+
+        if (!req.file) {
+          return res.status(400).json({
+            success: false,
+            error: "No backup file uploaded"
+          });
+        }
+
+        const br = new BackupRestore();
+        const result = await br.restoreFromUploadedFile(req.file.path);
+
+        // Clean up temporary file
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (cleanupError) {
+          console.warn('Failed to clean up temporary file:', cleanupError);
+        }
+
+        res.json(result);
+      } catch (uploadError) {
+        // Clean up temporary file on error
+        if (req.file?.path) {
+          try {
+            fs.unlinkSync(req.file.path);
+          } catch (cleanupError) {
+            console.warn('Failed to clean up temporary file:', cleanupError);
+          }
+        }
+
+        console.error("Failed to restore from uploaded file:", uploadError);
+        res.status(500).json({
+          success: false,
+          error: "Failed to restore from uploaded file"
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Failed to handle upload:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to handle upload"
+    });
+  }
+});
+
 // Migrate to embedded MongoDB (SAFEST OPTION)
 router.post("/mongodb/migrate-embedded", authenticateToken, requireAdmin, async (req, res) => {
   try {
