@@ -6,6 +6,19 @@ const DataMigration = require("../scripts/migrate-to-mongodb");
 const BackupRestore = require("../backup-restore");
 const FileStorageService = require("../services/FileStorageService");
 
+// Helper function to generate backup names in format: dd-mm-yyyy-HH:MM:ss-suffix
+function generateBackupName(suffix = 'backup') {
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = now.getFullYear();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+
+  return `${day}-${month}-${year}-${hours}:${minutes}:${seconds}-${suffix}`;
+}
+
 const router = express.Router();
 
 // Validation schemas
@@ -185,17 +198,7 @@ router.post("/mongodb/migrate", authenticateToken, requireAdmin, async (req, res
     console.log('Creating SQLite backup before migration...');
     const BackupRestore = require("../backup-restore");
     const br = new BackupRestore();
-
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const year = now.getFullYear();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    const backupName = `${day}-${month}-${year}-${hours}:${minutes}:${seconds}-pre-migration`;
-    const backupResult = await br.createBackup(backupName);
+    const backupResult = await br.createBackup(generateBackupName('pre-migration'));
 
     if (!backupResult.success) {
       return res.status(500).json({
@@ -328,17 +331,7 @@ router.post("/mongodb/migrate-embedded", authenticateToken, requireAdmin, async 
     // Create backup before migration
     const BackupRestore = require("../backup-restore");
     const br = new BackupRestore();
-
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const year = now.getFullYear();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    const backupName = `${day}-${month}-${year}-${hours}:${minutes}:${seconds}-pre-embedded-migration`;
-    const backupResult = await br.createBackup(backupName);
+    const backupResult = await br.createBackup(generateBackupName('pre-embedded-migration'));
 
     if (!backupResult.success) {
       return res.status(500).json({
@@ -421,17 +414,7 @@ router.post("/mongodb/revert-to-sqlite", authenticateToken, requireAdmin, async 
       // Create backup of current SQLite before overwriting
       const BackupRestore = require("../backup-restore");
       const br = new BackupRestore();
-
-      const now = new Date();
-      const day = String(now.getDate()).padStart(2, '0');
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const year = now.getFullYear();
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
-
-      const backupName = `${day}-${month}-${year}-${hours}:${minutes}:${seconds}-pre-mongo-revert`;
-      const backupResult = await br.createBackup(backupName);
+      const backupResult = await br.createBackup(generateBackupName('pre-mongo-revert'));
 
       if (!backupResult.success) {
         return res.status(500).json({
