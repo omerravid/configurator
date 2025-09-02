@@ -524,13 +524,18 @@ const SettingsModal = ({ isOpen, onClose }) => {
       const loginResult = await login(user.username, reAuthPassword);
 
       if (loginResult.success) {
-        // Authentication successful, now try the database switch again
-        showToast('Re-authentication successful. Switching database...', 'success');
+        // Authentication successful
+        showToast('Re-authentication successful.', 'success');
         setShowReAuthModal(false);
         setReAuthPassword('');
 
-        // Retry the database switch
-        await setActiveDatabase(pendingDatabaseSwitch);
+        if (pendingDatabaseSwitch === 'current') {
+          // Just reload the current database status
+          await loadDatabaseStatus();
+        } else {
+          // Retry the database switch
+          await setActiveDatabase(pendingDatabaseSwitch);
+        }
         setPendingDatabaseSwitch(null);
       } else {
         showToast('Authentication failed. Please check your password.', 'error');
