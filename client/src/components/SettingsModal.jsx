@@ -20,10 +20,12 @@ import {
   PencilIcon
 } from "@heroicons/react/24/outline";
 import { useToast } from "../context/ToastContext";
+import { useAuth } from "../context/AuthContext";
 import api, { userAPI, authAPI } from "../services/api";
 
 const SettingsModal = ({ isOpen, onClose }) => {
   const { showToast } = useToast();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('users');
   
   // Database state
@@ -357,8 +359,20 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const createBackup = async () => {
     setBackupLoading(true);
     try {
+      // Create backup name in format: dd-mm-yyyy-HH:MM:ss-username
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = now.getFullYear();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const username = user?.username || 'unknown';
+
+      const backupName = `${day}-${month}-${year}-${hours}:${minutes}:${seconds}-${username}`;
+
       const response = await api.post('/settings/data/backup', {
-        name: `manual-${Date.now()}`
+        name: backupName
       });
 
       if (response.data.success) {
@@ -809,7 +823,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 value={s3Config.secretAccessKey}
                 onChange={(e) => setS3Config({...s3Config, secretAccessKey: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
-                placeholder="••••••••"
+                placeholder="••���•••••"
               />
             </div>
           </div>
