@@ -39,6 +39,20 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const [dbStatus, setDbStatus] = useState({ type: 'unknown', connected: false, host: '' });
   const [mongoConnectionString, setMongoConnectionString] = useState('');
   const [dbLoading, setDbLoading] = useState(false);
+
+  // Multi-database management state
+  const [databases, setDatabases] = useState([]);
+  const [selectedDatabase, setSelectedDatabase] = useState(null);
+  const [showAddDatabase, setShowAddDatabase] = useState(false);
+  const [showCopyData, setShowCopyData] = useState(false);
+  const [newDatabase, setNewDatabase] = useState({ name: '', connectionString: '', description: '' });
+  const [copyDataConfig, setCopyDataConfig] = useState({
+    sourceDatabase: '',
+    targetDatabase: '',
+    includeConfigurations: true,
+    includeConfigurationTypes: [],
+    adminOnly: true
+  });
   
   // Storage state
   const [storageStatus, setStorageStatus] = useState({ type: 'embedded', configured: false });
