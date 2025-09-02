@@ -25,8 +25,15 @@ import api, { userAPI, authAPI } from "../services/api";
 
 const SettingsModal = ({ isOpen, onClose }) => {
   const { showToast } = useToast();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('users');
+
+  // Force logout and redirect on authentication errors
+  const forceLogout = () => {
+    localStorage.removeItem("token");
+    logout();
+    window.location.replace("/login");
+  };
   
   // Database state
   const [dbStatus, setDbStatus] = useState({ type: 'unknown', connected: false, host: '' });
@@ -207,7 +214,12 @@ const SettingsModal = ({ isOpen, onClose }) => {
       }
     } catch (error) {
       console.error('Failed to load backups:', error);
-      setBackups([]);
+      if (error.response?.status === 401) {
+        showToast('Session expired. Please login again.', 'error');
+        forceLogout();
+      } else {
+        setBackups([]);
+      }
     }
   };
 
@@ -222,7 +234,12 @@ const SettingsModal = ({ isOpen, onClose }) => {
       }
     } catch (error) {
       console.error('Failed to load data stats:', error);
-      setDataStats({ users: 0, configurations: 0 });
+      if (error.response?.status === 401) {
+        showToast('Session expired. Please login again.', 'error');
+        forceLogout();
+      } else {
+        setDataStats({ users: 0, configurations: 0 });
+      }
     }
   };
 
