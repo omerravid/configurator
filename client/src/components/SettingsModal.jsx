@@ -155,31 +155,20 @@ const SettingsModal = ({ isOpen, onClose }) => {
   // Database functions (existing)
   const loadDatabaseStatus = async () => {
     try {
-      const response = await fetch('/api/settings/mongodb/status', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setDbStatus({
-            type: data.status?.status === 'connected' ? 'mongodb' : 'sqlite',
-            connected: data.status?.status === 'connected',
-            host: data.status?.host || ''
-          });
-        }
+      // Load MongoDB status
+      const response = await api.get('/settings/mongodb/status');
+      if (response.data.success) {
+        setDbStatus({
+          type: response.data.status?.status === 'connected' ? 'mongodb' : 'sqlite',
+          connected: response.data.status?.status === 'connected',
+          host: response.data.status?.host || ''
+        });
       }
 
       // Load MongoDB settings
-      const settingsResponse = await fetch('/api/settings/mongodb', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-
-      if (settingsResponse.ok) {
-        const settingsData = await settingsResponse.json();
-        if (settingsData.success) {
-          setMongoConnectionString(settingsData.settings.connectionString || '');
-        }
+      const settingsResponse = await api.get('/settings/mongodb');
+      if (settingsResponse.data.success) {
+        setMongoConnectionString(settingsResponse.data.settings.connectionString || '');
       }
     } catch (error) {
       console.error('Failed to load database status:', error);
@@ -189,22 +178,14 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
   const loadStorageStatus = async () => {
     try {
-      const response = await fetch('/api/settings/storage/status', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.success) {
+      const response = await api.get('/settings/storage/status');
+      if (response.data.success) {
         setStorageStatus({
-          type: data.status.storageType,
-          configured: data.status.isConfigured
+          type: response.data.status.storageType,
+          configured: response.data.status.isConfigured
         });
       } else {
-        console.warn('Storage status loading unsuccessful:', data.error);
+        console.warn('Storage status loading unsuccessful:', response.data.error);
         setStorageStatus({ type: 'embedded', configured: false });
       }
     } catch (error) {
@@ -431,26 +412,22 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
     setBackupLoading(true);
     try {
-      const response = await fetch('/api/settings/data/restore', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ backupName: selectedBackup })
+      const response = await api.post('/settings/data/restore', {
+        backupName: selectedBackup
       });
-      const data = await response.json();
 
-      if (data.success) {
+      if (response.data.success) {
         showToast('Data restored successfully', 'success');
         setSelectedBackup('');
         loadBackups();
         loadDataStats();
       } else {
-        showToast(`Failed to restore backup: ${data.error}`, 'error');
+        showToast(`Failed to restore backup: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      showToast('Failed to restore backup', 'error');
+      console.error('Failed to restore backup:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to restore backup';
+      showToast(`Failed to restore backup: ${errorMessage}`, 'error');
     } finally {
       setBackupLoading(false);
     }
