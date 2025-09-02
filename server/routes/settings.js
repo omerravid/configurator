@@ -7,17 +7,10 @@ const DataMigration = require("../scripts/migrate-to-mongodb");
 const BackupRestore = require("../backup-restore");
 const FileStorageService = require("../services/FileStorageService");
 
-// Helper function to generate backup names in format: dd-mm-yyyy-HH:MM:ss-suffix
-function generateBackupName(suffix = 'backup') {
-  const now = new Date();
-  const day = String(now.getDate()).padStart(2, '0');
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const year = now.getFullYear();
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-
-  return `${day}-${month}-${year}-${hours}:${minutes}:${seconds}-${suffix}`;
+// Helper function to generate backup names in format: MongoServerName_Username_timestamp
+function generateBackupName(username = 'system', suffix = null) {
+  const br = new BackupRestore();
+  return br.generateBackupName(username, suffix);
 }
 
 const router = express.Router();
@@ -500,8 +493,12 @@ router.get("/data/status", authenticateToken, requireAdmin, async (req, res) => 
 router.post("/data/backup", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { name } = req.body;
+    const username = req.user?.username || 'admin';
     const br = new BackupRestore();
-    const result = await br.createBackup(name);
+
+    // Generate backup name with new format if no custom name provided
+    const backupName = name || br.generateBackupName(username);
+    const result = await br.createBackup(backupName);
     res.json(result);
   } catch (error) {
     console.error("Failed to create backup:", error);
