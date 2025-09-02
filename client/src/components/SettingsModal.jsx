@@ -393,8 +393,13 @@ const SettingsModal = ({ isOpen, onClose }) => {
       }
     } catch (error) {
       console.error('Failed to delete database:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to delete database';
-      showToast(`Failed to delete database: ${errorMessage}`, 'error');
+      if (error.response?.status === 401) {
+        showToast('Authentication failed. Please login again.', 'error');
+        forceLogout();
+      } else {
+        const errorMessage = error.response?.data?.error || error.message || 'Failed to delete database';
+        showToast(`Failed to delete database: ${errorMessage}`, 'error');
+      }
     } finally {
       setDbLoading(false);
     }
