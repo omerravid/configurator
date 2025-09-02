@@ -90,10 +90,8 @@ class BackupRestore {
 
   // Get users with password_hash for backup
   async getAllUsersForBackup() {
-    const { User } = this.getModels();
-
     if (this.isMongoDb) {
-      // MongoDB - use the findAll method and get users with passwords
+      // MongoDB - access the underlying mongoose model directly
       const mongoose = require('mongoose');
       const UserModel = mongoose.model('User');
 
