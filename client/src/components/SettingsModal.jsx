@@ -826,37 +826,97 @@ const SettingsModal = ({ isOpen, onClose }) => {
             </button>
           </div>
 
-          {/* Backup Selection & Restore */}
+          {/* Available Backups List with Download & Restore */}
           {backups.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                Available Backups
+              </h4>
+
+              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 max-h-40 overflow-y-auto">
+                {backups.map(backup => (
+                  <div key={backup.name} className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-600 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <div className="flex items-center space-x-3">
+                      <ClockIcon className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm text-gray-900 dark:text-gray-100 font-mono">
+                        {backup.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => downloadBackup(backup.name)}
+                        disabled={backupLoading}
+                        className="px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded font-medium transition-colors disabled:cursor-not-allowed flex items-center space-x-1 text-xs"
+                        title="Download backup file"
+                      >
+                        <DocumentArrowDownIcon className="w-3 h-3" />
+                        <span>Download</span>
+                      </button>
+                      <button
+                        onClick={() => setSelectedBackup(backup.name)}
+                        disabled={backupLoading}
+                        className={`px-3 py-1 rounded font-medium transition-colors disabled:cursor-not-allowed flex items-center space-x-1 text-xs ${
+                          selectedBackup === backup.name
+                            ? 'bg-green-600 hover:bg-green-700 text-white'
+                            : 'bg-gray-200 hover:bg-gray-300 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200'
+                        }`}
+                        title="Select for restore"
+                      >
+                        <ArrowPathIcon className="w-3 h-3" />
+                        <span>Select</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {selectedBackup && (
+                <button
+                  onClick={restoreBackup}
+                  disabled={backupLoading}
+                  className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                  {backupLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <DocumentArrowDownIcon className="w-4 h-4" />}
+                  <span>Restore from "{selectedBackup}"</span>
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Upload and Restore Section */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200">
+              Upload & Restore from File
+            </h4>
+
             <div className="space-y-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                  Select Backup to Restore
+                  Select Backup File (.json)
                 </label>
-                <select
-                  value={selectedBackup}
-                  onChange={(e) => setSelectedBackup(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
-                >
-                  <option value="">Choose a backup...</option>
-                  {backups.map(backup => (
-                    <option key={backup.name} value={backup.name}>
-                      {backup.name}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileUpload}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-200"
+                />
+                {uploadedFile && (
+                  <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    Selected: {uploadedFile.name} ({Math.round(uploadedFile.size / 1024)} KB)
+                  </div>
+                )}
               </div>
-              
+
               <button
-                onClick={restoreBackup}
-                disabled={!selectedBackup || backupLoading}
-                className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                onClick={uploadAndRestore}
+                disabled={!uploadedFile || uploadLoading}
+                className="w-full px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
-                {backupLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <DocumentArrowDownIcon className="w-4 h-4" />}
-                <span>Restore from Backup</span>
+                {uploadLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <DocumentArrowUpIcon className="w-4 h-4" />}
+                <span>Upload & Restore</span>
               </button>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
