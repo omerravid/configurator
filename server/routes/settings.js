@@ -22,6 +22,9 @@ function generateBackupName(suffix = 'backup') {
 
 const router = express.Router();
 
+// Initialize DatabaseManager
+DatabaseManager.initialize().catch(console.error);
+
 // Validation schemas
 const mongoSettingsSchema = Joi.object({
   connectionString: Joi.string().required(),
