@@ -92,6 +92,14 @@ const SettingsModal = ({ isOpen, onClose }) => {
     }
   }, [isOpen]);
 
+  // Debug modal state changes
+  useEffect(() => {
+    console.log('Modal state changed - showReAuthModal:', showReAuthModal);
+    if (showReAuthModal) {
+      console.log('Re-auth modal should be visible now');
+    }
+  }, [showReAuthModal]);
+
   const loadAllStatus = async () => {
     // Use Promise.allSettled to ensure all requests complete even if some fail
     const results = await Promise.allSettled([
