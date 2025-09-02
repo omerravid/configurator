@@ -216,10 +216,15 @@ const SettingsModal = ({ isOpen, onClose }) => {
       }
     } catch (error) {
       console.error('Failed to load database status:', error);
+      console.error('Error status:', error.response?.status);
+      console.error('Error config URL:', error.config?.url);
+
       if (error.response?.status === 401) {
+        console.log('401 detected - showing re-auth modal');
         showToast('Session expired. Please re-authenticate to continue.', 'info');
         setPendingDatabaseSwitch('current'); // Special value for reloading current status
         setShowReAuthModal(true);
+        console.log('Re-auth modal state set to true');
       } else {
         setDbStatus({ type: 'sqlite', connected: false, host: '' });
         setDatabases([]);
