@@ -7,17 +7,41 @@ class BackupRestore {
     this.isMongoDb = process.env.USE_MONGODB === 'true';
   }
 
-  // Helper function to generate backup names in format: dd-mm-yyyy-HH:MM:ss-suffix
-  generateBackupName(suffix = 'backup') {
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const year = now.getFullYear();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
+  // Helper function to generate backup names in format: MongoServerName_Username_timestamp
+  generateBackupName(username = 'system', suffix = null) {
+    const serverName = this.getMongoServerName();
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, -5);
 
-    return `${day}-${month}-${year}-${hours}:${minutes}:${seconds}-${suffix}`;
+    if (suffix) {
+      return `${serverName}_${username}_${timestamp}_${suffix}`;
+    }
+    return `${serverName}_${username}_${timestamp}`;
+  }
+
+  // Get MongoDB server name for backup naming
+  getMongoServerName() {
+    if (this.isMongoDb) {
+      try {
+        const mongoose = require('mongoose');
+        if (mongoose.connection.readyState === 1) {
+          const connectionHost = mongoose.connection.host;
+          const connectionName = mongoose.connection.name;
+
+          // For embedded MongoDB, use a descriptive name
+          if (connectionHost === '127.0.0.1' || connectionHost === 'localhost') {
+            return 'EmbeddedMongoDB';
+          }
+
+          // For external MongoDB, use host:db format
+          return `${connectionHost}_${connectionName}`;
+        }
+      } catch (error) {
+        console.warn('Could not determine MongoDB server name:', error.message);
+      }
+      return 'MongoDB';
+    } else {
+      return 'SQLite';
+    }
   }
 
   async ensureBackupDir() {
@@ -32,7 +56,7 @@ class BackupRestore {
     try {
       await this.ensureBackupDir();
 
-      const backupName = name || this.generateBackupName('auto');
+      const backupName = name || this.generateBackupName('system', 'auto');
       const backupFile = path.join(this.backupDir, `${backupName}.json`);
 
       console.log(`Creating backup: ${backupName} (${this.isMongoDb ? 'MongoDB' : 'SQLite'})`);
@@ -162,7 +186,7 @@ class BackupRestore {
       console.log(`Current system: ${this.isMongoDb ? 'MongoDB' : 'SQLite'}, Backup from: ${backupData.databaseType || 'unknown'}`);
 
       // Create a current backup before restoring
-      const preRestoreBackup = await this.createBackup(this.generateBackupName('pre-restore'));
+      const preRestoreBackup = await this.createBackup(this.generateBackupName('system', 'pre-restore'));
       if (!preRestoreBackup.success) {
         throw new Error(`Failed to create pre-restore backup: ${preRestoreBackup.error}`);
       }
@@ -468,7 +492,7 @@ class BackupRestore {
       console.log(`Current system: ${this.isMongoDb ? 'MongoDB' : 'SQLite'}, Backup from: ${backupData.databaseType || 'unknown'}`);
 
       // Create a current backup before restoring
-      const preRestoreBackup = await this.createBackup(this.generateBackupName('pre-upload-restore'));
+      const preRestoreBackup = await this.createBackup(this.generateBackupName('system', 'pre-upload-restore'));
       if (!preRestoreBackup.success) {
         throw new Error(`Failed to create pre-restore backup: ${preRestoreBackup.error}`);
       }
