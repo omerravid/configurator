@@ -25,7 +25,7 @@ import api, { userAPI, authAPI } from "../services/api";
 
 const SettingsModal = ({ isOpen, onClose }) => {
   const { showToast } = useToast();
-  const { user, logout } = useAuth();
+  const { user, logout, login } = useAuth();
   const [activeTab, setActiveTab] = useState('users');
 
   // Force logout and redirect on authentication errors
@@ -1477,7 +1477,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 value={s3Config.secretAccessKey}
                 onChange={(e) => setS3Config({...s3Config, secretAccessKey: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
-                placeholder="••���•••••"
+                placeholder="••���••••��"
               />
             </div>
           </div>
@@ -1555,6 +1555,74 @@ const SettingsModal = ({ isOpen, onClose }) => {
           {activeTab === 'filesystem' && renderFileSystemTab()}
         </div>
       </div>
+
+      {/* Re-authentication Modal for Database Switching */}
+      {showReAuthModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
+              <ShieldCheckIcon className="w-5 h-5" />
+              <span>Confirm Password</span>
+            </h3>
+
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              To switch to database "{pendingDatabaseSwitch}", please confirm your password:
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={user?.username || ''}
+                  disabled
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={reAuthPassword}
+                  onChange={(e) => setReAuthPassword(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleReAuthentication()}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+                  placeholder="Enter your password"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            <div className="flex space-x-3 mt-6">
+              <button
+                onClick={handleReAuthentication}
+                disabled={reAuthLoading || !reAuthPassword.trim()}
+                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              >
+                {reAuthLoading ? (
+                  <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                ) : (
+                  <ShieldCheckIcon className="w-4 h-4" />
+                )}
+                <span>Authenticate & Switch</span>
+              </button>
+
+              <button
+                onClick={cancelReAuthentication}
+                disabled={reAuthLoading}
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
