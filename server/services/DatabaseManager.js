@@ -300,7 +300,7 @@ class DatabaseManager {
     };
   }
 
-  // Data copying methods will be added in the next step
+  // Data copying methods
   async copyDataBetweenDatabases(sourceDbName, targetDbName, options = {}) {
     const {
       includeConfigurations = true,
@@ -315,13 +315,231 @@ class DatabaseManager {
       throw new Error('Source or target database not found');
     }
 
-    // Implementation will be added in the next step
-    throw new Error('Data copying not yet implemented');
+    if (sourceDbName === targetDbName) {
+      throw new Error('Source and target databases cannot be the same');
+    }
+
+    console.log(`Starting data copy from "${sourceDbName}" to "${targetDbName}"`);
+
+    const copyStats = {
+      configurationsProcessed: 0,
+      configurationsUpdated: 0,
+      configurationsSkipped: 0,
+      errors: []
+    };
+
+    try {
+      // Step 1: Connect to source database
+      await this.connectToDatabase(sourceDbName);
+      const Configuration = require('../models/Configuration.mongo');
+
+      // Step 2: Get admin-created configurations from source
+      let configQuery = {};
+
+      if (adminOnly) {
+        // Get admin users from source to filter by
+        const User = require('../models/User.mongo');
+        const adminUsers = await mongoose.model('User').find({ role: 'ADMIN' }).lean();
+        const adminUsernames = adminUsers.map(user => user.username);
+
+        if (adminUsernames.length === 0) {
+          throw new Error('No admin users found in source database');
+        }
+
+        configQuery.created_by = { $in: adminUsernames };
+      }
+
+      // Filter by configuration types if specified
+      if (includeConfigurationTypes.length > 0) {
+        configQuery.type = { $in: includeConfigurationTypes };
+      }
+
+      const sourceConfigurations = await mongoose.model('Configuration').find(configQuery).lean();
+      console.log(`Found ${sourceConfigurations.length} configurations to copy`);
+
+      if (sourceConfigurations.length === 0) {
+        return {
+          success: true,
+          message: 'No configurations found to copy',
+          stats: copyStats
+        };
+      }
+
+      // Step 3: Connect to target database
+      await this.connectToDatabase(targetDbName);
+
+      // Step 4: Process configurations
+      for (const sourceConfig of sourceConfigurations) {
+        try {
+          copyStats.configurationsProcessed++;
+
+          // Check if configuration already exists in target
+          const existingConfig = await mongoose.model('Configuration').findOne({
+            name: sourceConfig.name,
+            type: sourceConfig.type
+          });
+
+          if (existingConfig) {
+            // Update existing configuration (override but don't delete)
+            await mongoose.model('Configuration').findByIdAndUpdate(existingConfig._id, {
+              data: sourceConfig.data,
+              description: sourceConfig.description,
+              status: sourceConfig.status,
+              archived: sourceConfig.archived,
+              updatedAt: new Date()
+            });
+
+            copyStats.configurationsUpdated++;
+            console.log(`Updated configuration: ${sourceConfig.name} (${sourceConfig.type})`);
+          } else {
+            // Create new configuration
+            const newConfig = new (mongoose.model('Configuration'))({
+              name: sourceConfig.name,
+              type: sourceConfig.type,
+              parent_id: sourceConfig.parent_id, // Note: parent relationships might break
+              data: sourceConfig.data,
+              created_by: sourceConfig.created_by,
+              description: sourceConfig.description,
+              status: sourceConfig.status,
+              archived: sourceConfig.archived
+            });
+
+            await newConfig.save();
+            copyStats.configurationsUpdated++;
+            console.log(`Created configuration: ${sourceConfig.name} (${sourceConfig.type})`);
+          }
+        } catch (configError) {
+          console.error(`Error processing configuration ${sourceConfig.name}:`, configError);
+          copyStats.errors.push({
+            configuration: sourceConfig.name,
+            error: configError.message
+          });
+        }
+      }
+
+      console.log(`Data copy completed. Updated: ${copyStats.configurationsUpdated}, Errors: ${copyStats.errors.length}`);
+
+      return {
+        success: true,
+        message: `Successfully copied ${copyStats.configurationsUpdated} configurations`,
+        stats: copyStats
+      };
+
+    } catch (error) {
+      console.error('Data copy failed:', error);
+      return {
+        success: false,
+        error: error.message,
+        stats: copyStats
+      };
+    }
   }
 
   async migrateDatabase(sourceDbName, targetDbName) {
-    // Implementation will be added in the next step
-    throw new Error('Database migration not yet implemented');
+    const sourceDb = this.databaseConfigs.get(sourceDbName);
+    const targetDb = this.databaseConfigs.get(targetDbName);
+
+    if (!sourceDb || !targetDb) {
+      throw new Error('Source or target database not found');
+    }
+
+    if (sourceDbName === targetDbName) {
+      throw new Error('Source and target databases cannot be the same');
+    }
+
+    console.log(`Starting full migration from "${sourceDbName}" to "${targetDbName}"`);
+
+    const migrationStats = {
+      users: 0,
+      configurations: 0,
+      rules: 0,
+      errors: []
+    };
+
+    try {
+      // Step 1: Connect to source database and get all data
+      await this.connectToDatabase(sourceDbName);
+
+      const User = mongoose.model('User');
+      const Configuration = mongoose.model('Configuration');
+
+      const sourceUsers = await User.find({}).lean();
+      const sourceConfigurations = await Configuration.find({}).lean();
+
+      console.log(`Found ${sourceUsers.length} users and ${sourceConfigurations.length} configurations to migrate`);
+
+      // Step 2: Connect to target database
+      await this.connectToDatabase(targetDbName);
+
+      // Step 3: Clear existing data in target database
+      await mongoose.model('Configuration').deleteMany({});
+      await mongoose.model('User').deleteMany({});
+
+      console.log('Cleared target database');
+
+      // Step 4: Migrate users
+      for (const sourceUser of sourceUsers) {
+        try {
+          const newUser = new (mongoose.model('User'))({
+            username: sourceUser.username,
+            password_hash: sourceUser.password_hash,
+            role: sourceUser.role
+          });
+
+          await newUser.save();
+          migrationStats.users++;
+        } catch (userError) {
+          console.error(`Error migrating user ${sourceUser.username}:`, userError);
+          migrationStats.errors.push({
+            type: 'user',
+            item: sourceUser.username,
+            error: userError.message
+          });
+        }
+      }
+
+      // Step 5: Migrate configurations
+      for (const sourceConfig of sourceConfigurations) {
+        try {
+          const newConfig = new (mongoose.model('Configuration'))({
+            name: sourceConfig.name,
+            type: sourceConfig.type,
+            parent_id: sourceConfig.parent_id,
+            data: sourceConfig.data,
+            created_by: sourceConfig.created_by,
+            description: sourceConfig.description,
+            status: sourceConfig.status,
+            archived: sourceConfig.archived
+          });
+
+          await newConfig.save();
+          migrationStats.configurations++;
+        } catch (configError) {
+          console.error(`Error migrating configuration ${sourceConfig.name}:`, configError);
+          migrationStats.errors.push({
+            type: 'configuration',
+            item: sourceConfig.name,
+            error: configError.message
+          });
+        }
+      }
+
+      console.log(`Migration completed. Users: ${migrationStats.users}, Configurations: ${migrationStats.configurations}, Errors: ${migrationStats.errors.length}`);
+
+      return {
+        success: true,
+        message: `Successfully migrated ${migrationStats.users} users and ${migrationStats.configurations} configurations`,
+        stats: migrationStats
+      };
+
+    } catch (error) {
+      console.error('Migration failed:', error);
+      return {
+        success: false,
+        error: error.message,
+        stats: migrationStats
+      };
+    }
   }
 }
 
