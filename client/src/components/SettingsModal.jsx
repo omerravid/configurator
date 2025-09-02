@@ -652,20 +652,9 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const createBackup = async () => {
     setBackupLoading(true);
     try {
-      // Create backup name in format: dd-mm-yyyy-HH:MM:ss-username
-      const now = new Date();
-      const day = String(now.getDate()).padStart(2, '0');
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const year = now.getFullYear();
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
-      const username = user?.username || 'unknown';
-
-      const backupName = `${day}-${month}-${year}-${hours}:${minutes}:${seconds}-${username}`;
-
+      // Let server generate backup name with new format: MongoServerName_Username_timestamp
       const response = await api.post('/settings/data/backup', {
-        name: backupName
+        // No name provided - server will generate with new format
       });
 
       if (response.data.success) {
