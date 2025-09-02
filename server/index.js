@@ -17,11 +17,23 @@ if (process.env.USE_MONGODB !== 'true') {
 // Initialize MongoDB if enabled
 if (process.env.USE_MONGODB === 'true') {
   const embeddedMongo = require("./models/embedded-mongodb");
+  const DatabaseManager = require("./services/DatabaseManager");
 
-  // Start embedded MongoDB on startup
+  // Start embedded MongoDB and initialize DatabaseManager
   embeddedMongo.start()
-    .then(() => {
+    .then(async () => {
       console.log('Embedded MongoDB initialized successfully');
+
+      // Initialize DatabaseManager
+      await DatabaseManager.initialize();
+
+      // Connect to active database
+      const activeDb = DatabaseManager.getActiveDatabase();
+      if (activeDb) {
+        await DatabaseManager.connectToDatabase(activeDb.name);
+        console.log(`Connected to active database: ${activeDb.name}`);
+      }
+
       // Initialize default data
       return embeddedMongo.initializeData();
     })
@@ -43,6 +55,10 @@ if (process.env.USE_MONGODB === 'true') {
     await embeddedMongo.stop();
     process.exit(0);
   });
+} else {
+  // For SQLite mode, still initialize DatabaseManager for consistency
+  const DatabaseManager = require("./services/DatabaseManager");
+  DatabaseManager.initialize().catch(console.error);
 }
 
 // Middleware
