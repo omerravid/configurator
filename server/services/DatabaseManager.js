@@ -459,11 +459,11 @@ class DatabaseManager {
         }
       }
 
-      console.log(`Data copy completed. Updated: ${copyStats.configurationsUpdated}, Errors: ${copyStats.errors.length}`);
+      console.log(`Data copy completed. Users: ${copyStats.usersUpdated}, Configurations: ${copyStats.configurationsUpdated}, Errors: ${copyStats.errors.length}`);
 
       return {
         success: true,
-        message: `Successfully copied ${copyStats.configurationsUpdated} configurations`,
+        message: `Successfully copied ${copyStats.usersUpdated} admin users and ${copyStats.configurationsUpdated} configurations`,
         stats: copyStats
       };
 
