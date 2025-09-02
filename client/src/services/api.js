@@ -24,10 +24,26 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      console.log('401 Unauthorized - clearing token and redirecting to login');
-      localStorage.removeItem("token");
-      // Force a full page reload to login
-      window.location.replace("/login");
+      const url = error.config?.url || '';
+
+      // Allow component-level 401 handling for settings endpoints
+      // These endpoints will show re-authentication modals instead of forcing logout
+      const settingsEndpoints = [
+        '/settings/databases',
+        '/settings/mongodb',
+        '/settings/storage',
+        '/settings/data'
+      ];
+
+      const isSettingsEndpoint = settingsEndpoints.some(endpoint => url.includes(endpoint));
+
+      if (!isSettingsEndpoint) {
+        console.log('401 Unauthorized - clearing token and redirecting to login');
+        localStorage.removeItem("token");
+        // Force a full page reload to login
+        window.location.replace("/login");
+      }
+      // For settings endpoints, let the component handle the 401
     }
     return Promise.reject(error);
   },
