@@ -1331,6 +1331,11 @@ const SettingsModal = ({ isOpen, onClose }) => {
                       <span className="text-sm text-gray-900 dark:text-gray-100 font-mono">
                         {backup.name}
                       </span>
+                      {backup.type === 'full' && (
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full dark:bg-blue-900 dark:text-blue-200">
+                          Full Backup
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center space-x-2">
                       <button
