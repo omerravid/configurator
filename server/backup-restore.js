@@ -283,17 +283,44 @@ class BackupRestore {
     try {
       console.log(`Restoring from backup: ${backupPath}`);
 
-      const backupFile = path.isAbsolute(backupPath)
-        ? backupPath
-        : path.join(this.backupDir, `${backupPath}.json`);
+      // Determine backup file type and path
+      let backupFile;
+      let isZip = false;
 
-      const backupData = JSON.parse(await fs.readFile(backupFile, 'utf8'));
+      if (path.isAbsolute(backupPath)) {
+        backupFile = backupPath;
+        isZip = backupPath.endsWith('.zip');
+      } else {
+        // Try ZIP first, then JSON
+        const zipPath = path.join(this.backupDir, `${backupPath}.zip`);
+        const jsonPath = path.join(this.backupDir, `${backupPath}.json`);
+
+        try {
+          await fs.access(zipPath);
+          backupFile = zipPath;
+          isZip = true;
+        } catch (error) {
+          backupFile = jsonPath;
+          isZip = false;
+        }
+      }
+
+      let backupData;
+
+      if (isZip) {
+        console.log('Extracting ZIP backup...');
+        backupData = await this.extractZipBackup(backupFile);
+      } else {
+        console.log('Reading JSON backup...');
+        backupData = JSON.parse(await fs.readFile(backupFile, 'utf8'));
+      }
 
       if (!backupData.data || !backupData.data.users || !backupData.data.configurations) {
         throw new Error('Invalid backup file format');
       }
 
-      console.log(`Backup contains ${backupData.data.users.length} users and ${backupData.data.configurations.length} configurations`);
+      const fileCount = backupData.data.files ? backupData.data.files.length : 0;
+      console.log(`Backup contains ${backupData.data.users.length} users, ${backupData.data.configurations.length} configurations, and ${fileCount} files`);
       console.log(`Current system: ${this.isMongoDb ? 'MongoDB' : 'SQLite'}, Backup from: ${backupData.databaseType || 'unknown'}`);
 
       // Create a current backup before restoring
@@ -306,7 +333,17 @@ class BackupRestore {
       // Clear existing data completely
       console.log('⚠️ Clearing existing data...');
 
-      // Delete all configurations first (to avoid foreign key issues)
+      // Clear files first
+      if (fileCount > 0) {
+        try {
+          await this.clearAllFiles();
+          console.log('✅ Cleared existing files');
+        } catch (error) {
+          console.warn('Warning: Could not clear files:', error.message);
+        }
+      }
+
+      // Delete all configurations (to avoid foreign key issues)
       try {
         await this.clearAllConfigurations();
         console.log('✅ Cleared existing configurations');
@@ -373,13 +410,22 @@ class BackupRestore {
       }
       console.log(`✅ Restored ${restoredConfigs} configurations`);
 
+      // Restore files if present
+      let restoredFiles = 0;
+      if (backupData.data.files && backupData.data.files.length > 0 && isZip) {
+        console.log('📥 Restoring files...');
+        restoredFiles = await this.restoreFilesFromBackup(backupData.data.files, backupFile);
+        console.log(`✅ Restored ${restoredFiles} files`);
+      }
+
       console.log('✅ Restore completed successfully');
       return {
         success: true,
-        message: `Restore completed. ${restoredUsers} users and ${restoredConfigs} configurations restored. Pre-restore backup saved.`,
+        message: `Restore completed. ${restoredUsers} users, ${restoredConfigs} configurations, and ${restoredFiles} files restored. Pre-restore backup saved.`,
         stats: {
           users: restoredUsers,
-          configurations: restoredConfigs
+          configurations: restoredConfigs,
+          files: restoredFiles
         },
         preRestoreBackup: preRestoreBackup.file
       };
