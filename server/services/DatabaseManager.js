@@ -392,13 +392,9 @@ class DatabaseManager {
           });
 
           if (existingUser) {
-            // Update existing user to ensure it has admin role
-            await mongoose.model('User').findByIdAndUpdate(existingUser._id, {
-              role: 'ADMIN',
-              password_hash: adminUser.password_hash // Keep the same password
-            });
-            copyStats.usersUpdated++;
-            console.log(`Updated admin user: ${adminUser.username}`);
+            // Skip updating existing user to preserve authentication tokens
+            copyStats.usersSkipped++;
+            console.log(`Preserved existing user: ${adminUser.username} (skipped to prevent auth token expiration)`);
           } else {
             // Create new admin user
             const newUser = new (mongoose.model('User'))({
