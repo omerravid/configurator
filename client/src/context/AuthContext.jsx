@@ -58,9 +58,14 @@ export const AuthProvider = ({ children }) => {
             },
           });
         })
-        .catch(() => {
+        .catch((error) => {
+          console.log("Token validation failed:", error.message);
           localStorage.removeItem("token");
           dispatch({ type: "LOGOUT" });
+          // If we're not already on login page, redirect
+          if (window.location.pathname !== "/login") {
+            window.location.replace("/login");
+          }
         });
     }
   }, []);
