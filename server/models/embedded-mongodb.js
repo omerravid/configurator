@@ -6,6 +6,8 @@ class EmbeddedMongoDB {
     this.mongod = null;
     this.connection = null;
     this.connectionString = null;
+    this.testMongod = null;
+    this.testConnectionString = null;
   }
 
   async start() {
