@@ -13,6 +13,7 @@ import {
   LockClosedIcon,
 } from "@heroicons/react/24/outline";
 import { configAPI } from "../services/api";
+import { useToast } from "../context/ToastContext";
 import ContextMenu from "./ContextMenu";
 
 const ConfigTypeIcon = ({ type, status }) => {
