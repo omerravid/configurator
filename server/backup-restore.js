@@ -931,6 +931,84 @@ class BackupRestore {
     }
   }
 
+  // Map configuration IDs within data structures (for products that reference components/versions)
+  async mapConfigurationIDsInData(configIdMapping) {
+    try {
+      console.log('📥 Updating internal configuration ID references...');
+      let updatedConfigs = 0;
+
+      if (this.isMongoDb) {
+        const mongoose = require('mongoose');
+        const ConfigurationModel = mongoose.model('Configuration');
+
+        // Find all configurations with data that might contain ID references
+        const configurations = await ConfigurationModel.find({}).lean();
+
+        for (const config of configurations) {
+          if (config.data && typeof config.data === 'object') {
+            let dataChanged = false;
+            const updatedData = this.mapIDsInObject(config.data, configIdMapping);
+
+            if (JSON.stringify(updatedData) !== JSON.stringify(config.data)) {
+              dataChanged = true;
+              await ConfigurationModel.findByIdAndUpdate(config._id, { data: updatedData });
+              updatedConfigs++;
+              console.log(`✅ Updated ID references in: ${config.name}`);
+            }
+          }
+        }
+      } else {
+        const { Configuration } = require('./models');
+        const configurations = await Configuration.findAll();
+
+        for (const config of configurations) {
+          if (config.data && typeof config.data === 'object') {
+            const updatedData = this.mapIDsInObject(config.data, configIdMapping);
+
+            if (JSON.stringify(updatedData) !== JSON.stringify(config.data)) {
+              await Configuration.update(config.id, { data: updatedData });
+              updatedConfigs++;
+              console.log(`✅ Updated ID references in: ${config.name}`);
+            }
+          }
+        }
+      }
+
+      console.log(`✅ Updated ID references in ${updatedConfigs} configurations`);
+    } catch (error) {
+      console.warn('Warning: Failed to map configuration IDs in data:', error.message);
+    }
+  }
+
+  // Recursively map configuration IDs in an object
+  mapIDsInObject(obj, configIdMapping) {
+    if (!obj || typeof obj !== 'object') {
+      return obj;
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.mapIDsInObject(item, configIdMapping));
+    }
+
+    const mapped = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (key === 'componentId' || key === 'versionId') {
+        // Map configuration ID references
+        if (value && configIdMapping.has(value)) {
+          mapped[key] = configIdMapping.get(value);
+        } else {
+          mapped[key] = value;
+        }
+      } else if (value && typeof value === 'object') {
+        // Recursively process nested objects
+        mapped[key] = this.mapIDsInObject(value, configIdMapping);
+      } else {
+        mapped[key] = value;
+      }
+    }
+    return mapped;
+  }
+
   // Extract ZIP backup
   async extractZipBackup(zipFile) {
     const tempDir = path.join(__dirname, 'temp-restore');
