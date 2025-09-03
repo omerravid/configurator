@@ -759,6 +759,101 @@ class BackupRestore {
       };
     }
   }
+
+  // Extract ZIP backup
+  async extractZipBackup(zipFile) {
+    const tempDir = path.join(__dirname, 'temp-restore');
+
+    try {
+      // Ensure temp directory exists
+      await fs.mkdir(tempDir, { recursive: true });
+
+      // Extract ZIP to temp directory
+      await new Promise((resolve, reject) => {
+        require('fs').createReadStream(zipFile)
+          .pipe(unzipper.Extract({ path: tempDir }))
+          .on('close', resolve)
+          .on('error', reject);
+      });
+
+      // Read database.json
+      const databaseJsonPath = path.join(tempDir, 'database.json');
+      const backupData = JSON.parse(await fs.readFile(databaseJsonPath, 'utf8'));
+
+      return backupData;
+    } catch (error) {
+      throw new Error(`Failed to extract ZIP backup: ${error.message}`);
+    } finally {
+      // Clean up temp directory
+      try {
+        await fs.rm(tempDir, { recursive: true, force: true });
+      } catch (cleanupError) {
+        console.warn('Could not clean up temp directory:', cleanupError.message);
+      }
+    }
+  }
+
+  // Restore files from ZIP backup
+  async restoreFilesFromBackup(fileMetadata, zipFile) {
+    const tempDir = path.join(__dirname, 'temp-restore');
+    const storageDir = path.join(__dirname, 'storage/files');
+    let restoredCount = 0;
+
+    try {
+      // Ensure temp and storage directories exist
+      await fs.mkdir(tempDir, { recursive: true });
+      await fs.mkdir(storageDir, { recursive: true });
+
+      // Extract ZIP to temp directory
+      await new Promise((resolve, reject) => {
+        require('fs').createReadStream(zipFile)
+          .pipe(unzipper.Extract({ path: tempDir }))
+          .on('close', resolve)
+          .on('error', reject);
+      });
+
+      // Copy files from temp/files to storage/files
+      const tempFilesDir = path.join(tempDir, 'files');
+
+      try {
+        await fs.access(tempFilesDir);
+
+        for (const fileInfo of fileMetadata) {
+          try {
+            const sourcePath = path.join(tempFilesDir, fileInfo.fileName);
+            const metaSourcePath = path.join(tempFilesDir, fileInfo.fileName + '.meta.json');
+            const destPath = path.join(storageDir, fileInfo.fileName);
+            const metaDestPath = path.join(storageDir, fileInfo.fileName + '.meta.json');
+
+            // Copy the actual file
+            await fs.copyFile(sourcePath, destPath);
+
+            // Copy the metadata file
+            await fs.copyFile(metaSourcePath, metaDestPath);
+
+            restoredCount++;
+            console.log(`✅ Restored file: ${fileInfo.originalName}`);
+          } catch (error) {
+            console.warn(`Warning: Could not restore file ${fileInfo.fileName}:`, error.message);
+          }
+        }
+      } catch (error) {
+        console.warn('No files directory found in backup');
+      }
+
+      return restoredCount;
+    } catch (error) {
+      console.error('Error restoring files:', error);
+      return restoredCount;
+    } finally {
+      // Clean up temp directory
+      try {
+        await fs.rm(tempDir, { recursive: true, force: true });
+      } catch (cleanupError) {
+        console.warn('Could not clean up temp directory:', cleanupError.message);
+      }
+    }
+  }
 }
 
 module.exports = BackupRestore;
