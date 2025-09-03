@@ -10,6 +10,7 @@ import {
   ClockIcon,
   DocumentArrowUpIcon,
   DocumentArrowDownIcon,
+  DocumentDuplicateIcon,
   CogIcon,
   WifiIcon,
   XCircleIcon,
