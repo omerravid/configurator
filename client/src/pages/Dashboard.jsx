@@ -1093,6 +1093,7 @@ const Dashboard = () => {
       <SettingsModal
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
+        onDataRefresh={() => setRefreshTrigger(prev => prev + 1)}
       />
 
       {/* Delete Confirmation Dialog */}
