@@ -457,7 +457,7 @@ class BackupRestore {
           console.warn(`Warning: Could not restore configuration ${configData.name}:`, error.message);
         }
       }
-      console.log(`��� Restored ${restoredConfigs} configurations`);
+      console.log(`✅ Restored ${restoredConfigs} configurations`);
 
       // Restore files if present
       let restoredFiles = 0;
@@ -911,13 +911,15 @@ class BackupRestore {
       console.log('✅ Restore from uploaded file completed successfully');
       return {
         success: true,
-        message: `Restore completed from uploaded file. ${restoredUsers} users, ${restoredConfigs} configurations${isZip ? `, and ${restoredFiles} files` : ''} restored. Pre-restore backup saved.`,
+        message: `Restore completed from uploaded file. ${restoredUsers} users restored, ${skippedAdminUsers} admin users preserved, ${restoredConfigs} configurations${isZip ? `, and ${restoredFiles} files` : ''} restored. Pre-restore backup saved.`,
         stats: {
           users: restoredUsers,
           configurations: restoredConfigs,
-          files: restoredFiles
+          files: restoredFiles,
+          preservedAdminUsers: skippedAdminUsers
         },
-        preRestoreBackup: preRestoreBackup.file
+        preRestoreBackup: preRestoreBackup.file,
+        adminUsersPreserved: skippedAdminUsers > 0
       };
 
     } catch (error) {
