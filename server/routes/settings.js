@@ -585,6 +585,43 @@ router.get("/data/backup/:backupName", authenticateToken, requireAdmin, async (r
   }
 });
 
+// Delete backup file (json/zip)
+router.delete("/data/backup/:backupName", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { backupName } = req.params;
+    if (!backupName) {
+      return res.status(400).json({ success: false, error: "Backup name is required" });
+    }
+
+    const fs = require('fs').promises;
+    const path = require('path');
+    const backupsDir = path.join(__dirname, '../backups');
+    const candidates = [
+      path.join(backupsDir, `${backupName}.zip`),
+      path.join(backupsDir, `${backupName}.json`)
+    ];
+
+    let deleted = 0;
+    for (const filePath of candidates) {
+      try {
+        await fs.unlink(filePath);
+        deleted++;
+      } catch (e) {
+        // ignore if not exists
+      }
+    }
+
+    if (deleted === 0) {
+      return res.status(404).json({ success: false, error: 'Backup file not found' });
+    }
+
+    res.json({ success: true, message: 'Backup deleted', deleted });
+  } catch (error) {
+    console.error('Failed to delete backup:', error);
+    res.status(500).json({ success: false, error: 'Failed to delete backup' });
+  }
+});
+
 // Upload and restore from backup file
 router.post("/data/upload-restore", authenticateToken, requireAdmin, async (req, res) => {
   try {
@@ -593,19 +630,29 @@ router.post("/data/upload-restore", authenticateToken, requireAdmin, async (req,
     const path = require('path');
     const fs = require('fs');
 
-    // Configure multer for temporary file storage
+    // Configure multer for temporary file storage - NO SIZE LIMITS
     const upload = multer({
       dest: path.join(__dirname, '../temp-uploads'),
+      limits: {
+        fileSize: Infinity, // Explicitly set to unlimited
+        files: 1,
+        fields: 10,
+        fieldSize: 1000000 // 1MB for text fields
+      },
       fileFilter: (req, file, cb) => {
-        // Only allow JSON files
-        if (file.mimetype === 'application/json' || file.originalname.endsWith('.json')) {
+        console.log(`[BACKUP UPLOAD] Receiving file: ${file.originalname}, size: ${file.size || 'unknown'}, mimetype: ${file.mimetype}`);
+
+        // Allow JSON or ZIP by extension OR common mimetypes
+        const name = (file.originalname || '').toLowerCase();
+        const type = (file.mimetype || '').toLowerCase();
+        const isJson = name.endsWith('.json') || type === 'application/json' || type === 'text/json';
+        const isZip = name.endsWith('.zip') || type === 'application/zip' || type === 'application/x-zip-compressed' || type === 'application/octet-stream';
+
+        if (isJson || isZip) {
           cb(null, true);
         } else {
-          cb(new Error('Only JSON files are allowed'), false);
+          cb(new Error('Only JSON and ZIP files are allowed'), false);
         }
-      },
-      limits: {
-        fileSize: 100 * 1024 * 1024, // 100MB limit
       }
     });
 
@@ -650,7 +697,7 @@ router.post("/data/upload-restore", authenticateToken, requireAdmin, async (req,
         console.error("Failed to restore from uploaded file:", uploadError);
         res.status(500).json({
           success: false,
-          error: "Failed to restore from uploaded file"
+          error: `Failed to restore from uploaded file: ${uploadError.message}`
         });
       }
     });

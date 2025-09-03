@@ -72,8 +72,8 @@ app.use(
     credentials: true,
   }),
 );
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "500mb" })); // Increased for large backup files
+app.use(express.urlencoded({ extended: true, limit: "500mb" }));
 
 // Make database available to all routes (only for SQLite)
 if (db) {

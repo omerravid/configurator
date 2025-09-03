@@ -162,9 +162,14 @@ class BackupRestore {
   // Get all files for backup
   async getAllFilesForBackup() {
     try {
-      const FileStorageService = require('./services/FileStorageService');
-      const fileService = new FileStorageService();
       const storageDir = path.join(__dirname, 'storage/files');
+
+      // Determine which files are actually referenced in configurations
+      const referencedKeys = await this.getReferencedFileKeys();
+      if (!referencedKeys || referencedKeys.size === 0) {
+        console.log('No referenced files found in configurations, skipping files backup');
+        return [];
+      }
 
       // Check if storage directory exists
       try {
@@ -177,7 +182,7 @@ class BackupRestore {
       const allFiles = await fs.readdir(storageDir);
       const fileMetadata = [];
 
-      // Process metadata files
+      // Process metadata files, include only those referenced
       for (const fileName of allFiles) {
         if (fileName.endsWith('.meta.json')) {
           try {
@@ -185,12 +190,17 @@ class BackupRestore {
             const metaData = JSON.parse(await fs.readFile(metaFilePath, 'utf8'));
             const actualFileName = fileName.replace('.meta.json', '');
             const actualFilePath = path.join(storageDir, actualFileName);
+            const storageKey = metaData.storageKey || actualFileName;
+
+            if (!referencedKeys.has(storageKey)) {
+              continue; // skip unreferenced files
+            }
 
             // Check if actual file exists
             try {
               await fs.access(actualFilePath);
               fileMetadata.push({
-                storageKey: metaData.storageKey || actualFileName,
+                storageKey,
                 originalName: metaData.originalName,
                 mimeType: metaData.mimeType,
                 size: metaData.size,
@@ -333,14 +343,12 @@ class BackupRestore {
       // Clear existing data completely
       console.log('⚠️ Clearing existing data...');
 
-      // Clear files first
-      if (fileCount > 0) {
-        try {
-          await this.clearAllFiles();
-          console.log('✅ Cleared existing files');
-        } catch (error) {
-          console.warn('Warning: Could not clear files:', error.message);
-        }
+      // Clear files first (always)
+      try {
+        await this.clearAllFiles();
+        console.log('✅ Cleared existing files');
+      } catch (error) {
+        console.warn('Warning: Could not clear files:', error.message);
       }
 
       // Delete all configurations (to avoid foreign key issues)
@@ -659,14 +667,43 @@ class BackupRestore {
     try {
       console.log(`Restoring from uploaded file: ${uploadedFilePath}`);
 
-      // Read and validate the uploaded file
-      const backupData = JSON.parse(await fs.readFile(uploadedFilePath, 'utf8'));
+      // Detect file type (JSON or ZIP) using extension and magic header
+      let isZip = uploadedFilePath.toLowerCase().endsWith('.zip');
+
+      if (!isZip) {
+        try {
+          const fh = await fs.open(uploadedFilePath, 'r');
+          const header = Buffer.alloc(4);
+          await fh.read(header, 0, 4, 0);
+          await fh.close();
+          // ZIP files start with 'PK\x03\x04'
+          if (header[0] === 0x50 && header[1] === 0x4b && header[2] === 0x03 && header[3] === 0x04) {
+            isZip = true;
+          }
+        } catch (e) {
+          // Ignore header read errors; we'll try JSON parse next
+        }
+      }
+
+      let backupData;
+      try {
+        if (isZip) {
+          console.log('Detected ZIP backup upload');
+          backupData = await this.extractZipBackup(uploadedFilePath);
+        } else {
+          console.log('Detected JSON backup upload');
+          backupData = JSON.parse(await fs.readFile(uploadedFilePath, 'utf8'));
+        }
+      } catch (parseError) {
+        throw new Error('The uploaded file is not a valid backup. Expected a JSON with "data" or a ZIP containing database.json.');
+      }
 
       if (!backupData.data || !backupData.data.users || !backupData.data.configurations) {
         throw new Error('Invalid backup file format - missing required data sections');
       }
 
-      console.log(`Uploaded backup contains ${backupData.data.users.length} users and ${backupData.data.configurations.length} configurations`);
+      const fileCount = backupData.data.files ? backupData.data.files.length : 0;
+      console.log(`Uploaded backup contains ${backupData.data.users.length} users, ${backupData.data.configurations.length} configurations, and ${fileCount} files`);
       console.log(`Current system: ${this.isMongoDb ? 'MongoDB' : 'SQLite'}, Backup from: ${backupData.databaseType || 'unknown'}`);
 
       // Create a current backup before restoring
@@ -678,6 +715,14 @@ class BackupRestore {
 
       // Clear existing data completely
       console.log('⚠️ Clearing existing data...');
+
+      // Clear files first (always)
+      try {
+        await this.clearAllFiles();
+        console.log('✅ Cleared existing files');
+      } catch (error) {
+        console.warn('Warning: Could not clear files:', error.message);
+      }
 
       // Delete all configurations first (to avoid foreign key issues)
       try {
@@ -746,13 +791,22 @@ class BackupRestore {
       }
       console.log(`✅ Restored ${restoredConfigs} configurations`);
 
+      // Restore files if present in ZIP
+      let restoredFiles = 0;
+      if (isZip && fileCount > 0) {
+        console.log('📥 Restoring files...');
+        restoredFiles = await this.restoreFilesFromBackup(backupData.data.files, uploadedFilePath);
+        console.log(`✅ Restored ${restoredFiles} files`);
+      }
+
       console.log('✅ Restore from uploaded file completed successfully');
       return {
         success: true,
-        message: `Restore completed from uploaded file. ${restoredUsers} users and ${restoredConfigs} configurations restored. Pre-restore backup saved.`,
+        message: `Restore completed from uploaded file. ${restoredUsers} users, ${restoredConfigs} configurations${isZip ? `, and ${restoredFiles} files` : ''} restored. Pre-restore backup saved.`,
         stats: {
           users: restoredUsers,
-          configurations: restoredConfigs
+          configurations: restoredConfigs,
+          files: restoredFiles
         },
         preRestoreBackup: preRestoreBackup.file
       };
@@ -800,6 +854,34 @@ class BackupRestore {
   }
 
   // Restore files from ZIP backup
+  // Compute referenced file storage keys from all configurations
+  async getReferencedFileKeys() {
+    const keys = new Set();
+    try {
+      const configs = await this.getAllConfigurationsForBackup();
+      const addRefs = (obj) => {
+        if (obj && typeof obj === 'object') {
+          if (Array.isArray(obj)) {
+            for (const item of obj) addRefs(item);
+          } else {
+            if (obj._type === 'file' && obj._metadata && obj._metadata.storageKey) {
+              keys.add(obj._metadata.storageKey);
+            }
+            for (const k in obj) {
+              if (Object.prototype.hasOwnProperty.call(obj, k)) addRefs(obj[k]);
+            }
+          }
+        }
+      };
+      for (const cfg of configs) {
+        addRefs(cfg.data);
+      }
+    } catch (e) {
+      console.warn('Error computing referenced file keys:', e.message);
+    }
+    return keys;
+  }
+
   async restoreFilesFromBackup(fileMetadata, zipFile) {
     const tempDir = path.join(__dirname, 'temp-restore');
     const storageDir = path.join(__dirname, 'storage/files');

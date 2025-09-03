@@ -9,9 +9,9 @@ const router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB max file size
+    fileSize: Infinity, // No file size limit
     files: 1000, // Max 1000 files per request (increased from 100)
-    fieldSize: 10 * 1024 * 1024 // 10MB field size limit
+    fieldSize: Infinity // No field size limit
   },
   fileFilter: (req, file, cb) => {
     // Accept all file types for now
@@ -77,7 +77,7 @@ router.post("/", authenticateToken, upload.array('files'), async (req, res) => {
       return res.status(400).json({
         success: false,
         error: "File too large",
-        details: "Maximum file size is 50MB"
+        details: "File size limit exceeded"
       });
     }
 
@@ -106,7 +106,7 @@ router.use((error, req, res, next) => {
       return res.status(400).json({
         success: false,
         error: "File too large",
-        details: "Maximum file size is 50MB"
+        details: "File size limit exceeded"
       });
     }
 

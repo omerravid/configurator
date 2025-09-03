@@ -217,6 +217,10 @@ class DatabaseManager {
       });
 
       console.log(`Connected to database: ${name}`);
+
+      // Initialize default admin user if database is empty
+      await this.initializeAdminUserIfNeeded();
+
       return connection;
     } catch (error) {
       console.error(`Failed to connect to database "${name}":`, error);
@@ -581,6 +585,38 @@ class DatabaseManager {
         error: error.message,
         stats: migrationStats
       };
+    }
+  }
+
+  // Initialize default admin user if database is empty
+  async initializeAdminUserIfNeeded() {
+    try {
+      // Check if we're connected to MongoDB
+      if (mongoose.connection.readyState !== 1) {
+        return;
+      }
+
+      const User = mongoose.model('User');
+
+      // Check if any users exist
+      const userCount = await User.countDocuments();
+
+      if (userCount === 0) {
+        console.log('Database is empty, creating default admin user...');
+        const bcrypt = require('bcryptjs');
+        const hashedPassword = await bcrypt.hash('admin123', 10);
+
+        await User.create({
+          username: 'admin',
+          password_hash: hashedPassword,
+          role: 'ADMIN'
+        });
+        console.log('Default admin user created (username: admin, password: admin123)');
+      } else {
+        console.log(`Database already has ${userCount} users`);
+      }
+    } catch (error) {
+      console.error('Failed to initialize admin user:', error);
     }
   }
 }

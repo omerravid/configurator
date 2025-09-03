@@ -1,0 +1,7 @@
+node_modules
+server/node_modules
+server/storage
+server/backups
+server/temp-uploads
+client/node_modules
+ConfigurationManager.Client/obj

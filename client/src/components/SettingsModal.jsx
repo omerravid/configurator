@@ -75,6 +75,12 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const [selectedBackup, setSelectedBackup] = useState('');
   const [backupLoading, setBackupLoading] = useState(false);
   const [dataStats, setDataStats] = useState({ users: 0, configurations: 0 });
+  const [selectedBackups, setSelectedBackups] = useState([]);
+
+  // File cleanup state
+  const [fileCleanupLoading, setFileCleanupLoading] = useState(false);
+  const [unreferencedFiles, setUnreferencedFiles] = useState([]);
+  const [showFileCleanupConfirm, setShowFileCleanupConfirm] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [uploadLoading, setUploadLoading] = useState(false);
 
@@ -263,9 +269,11 @@ const SettingsModal = ({ isOpen, onClose }) => {
       const response = await api.get('/settings/data/backups');
       if (response.data.success) {
         setBackups(response.data.backups || []);
+        setSelectedBackups([]);
       } else {
         console.warn('Backup loading unsuccessful:', response.data.error);
         setBackups([]);
+        setSelectedBackups([]);
       }
     } catch (error) {
       console.error('Failed to load backups:', error);
@@ -710,7 +718,56 @@ const SettingsModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const downloadBackup = async (backupName) => {
+  const toggleBackupSelection = (name) => {
+    setSelectedBackups((prev) =>
+      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
+    );
+  };
+
+  const selectAllBackups = () => {
+    setSelectedBackups((prev) => (prev.length === backups.length ? [] : backups.map(b => b.name)));
+  };
+
+  const downloadSelectedBackups = async () => {
+    if (selectedBackups.length === 0) return;
+    setBackupLoading(true);
+    try {
+      for (const name of selectedBackups) {
+        await downloadBackup(name, true);
+      }
+      showToast(`Downloaded ${selectedBackups.length} backup(s)`, 'success');
+    } catch (e) {
+      // Individual downloads handle errors
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
+  const deleteSelectedBackups = async () => {
+    if (selectedBackups.length === 0) return;
+    if (!window.confirm(`Delete ${selectedBackups.length} selected backup(s)? This cannot be undone.`)) return;
+    setBackupLoading(true);
+    try {
+      let deleted = 0, failed = 0;
+      for (const name of selectedBackups) {
+        try {
+          await api.delete(`/settings/data/backup/${name}`);
+          deleted++;
+        } catch (err) {
+          failed++;
+        }
+      }
+      if (deleted) showToast(`Deleted ${deleted} backup(s)`, 'success');
+      if (failed) showToast(`${failed} backup(s) failed to delete`, 'warning');
+      await loadBackups();
+      setSelectedBackups([]);
+      setSelectedBackup('');
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
+  const downloadBackup = async (backupName, silent = false) => {
     try {
       setBackupLoading(true);
 
@@ -718,17 +775,27 @@ const SettingsModal = ({ isOpen, onClose }) => {
         responseType: 'blob' // Important for file downloads
       });
 
-      // Create blob link to download
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      // Create blob link to download with correct filename
+      const blob = new Blob([response.data]);
+      const disposition = response.headers && (response.headers['content-disposition'] || response.headers['Content-Disposition']);
+      const contentType = (response.headers && (response.headers['content-type'] || response.headers['Content-Type'])) || '';
+      let filename = `${backupName}.json`;
+      if (disposition) {
+        const match = /filename="?([^";]+)"?/i.exec(disposition);
+        if (match && match[1]) filename = match[1];
+      } else if (contentType.includes('zip')) {
+        filename = `${backupName}.zip`;
+      }
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${backupName}.json`);
+      link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
 
-      showToast('Backup downloaded successfully', 'success');
+      if (!silent) showToast('Backup downloaded successfully', 'success');
     } catch (error) {
       console.error('Failed to download backup:', error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to download backup';
@@ -741,12 +808,11 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      if (!file.name.endsWith('.json')) {
-        showToast('Please select a JSON file', 'error');
-        return;
-      }
-      if (file.size > 100 * 1024 * 1024) { // 100MB limit
-        showToast('File size must be less than 100MB', 'error');
+      const name = file.name.toLowerCase();
+      const isJson = name.endsWith('.json');
+      const isZip = name.endsWith('.zip');
+      if (!isJson && !isZip) {
+        showToast('Please select a JSON or ZIP file', 'error');
         return;
       }
       setUploadedFile(file);
@@ -796,6 +862,64 @@ const SettingsModal = ({ isOpen, onClose }) => {
       showToast(`Failed to restore from uploaded file: ${errorMessage}`, 'error');
     } finally {
       setUploadLoading(false);
+    }
+  };
+
+  const findUnreferencedFiles = async () => {
+    setFileCleanupLoading(true);
+    try {
+      const response = await api.get('/file-management/unreferenced');
+
+      if (response.data.success) {
+        setUnreferencedFiles(response.data.unreferencedFiles);
+
+        if (response.data.unreferencedCount === 0) {
+          showToast('No unreferenced files found', 'success');
+        } else {
+          setShowFileCleanupConfirm(true);
+        }
+      } else {
+        showToast(`Failed to find unreferenced files: ${response.data.error}`, 'error');
+      }
+    } catch (error) {
+      console.error('Failed to find unreferenced files:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to find unreferenced files';
+      showToast(`Failed to find unreferenced files: ${errorMessage}`, 'error');
+    } finally {
+      setFileCleanupLoading(false);
+    }
+  };
+
+  const deleteUnreferencedFiles = async () => {
+    setFileCleanupLoading(true);
+    setShowFileCleanupConfirm(false);
+
+    try {
+      const response = await api.delete('/file-management/unreferenced');
+
+      if (response.data.success) {
+        showToast(
+          `Successfully deleted ${response.data.deletedCount} unreferenced files`,
+          'success'
+        );
+        setUnreferencedFiles([]);
+
+        if (response.data.errors && response.data.errors.length > 0) {
+          console.warn('Some files could not be deleted:', response.data.errors);
+          showToast(
+            `${response.data.errors.length} files could not be deleted`,
+            'warning'
+          );
+        }
+      } else {
+        showToast(`Failed to delete unreferenced files: ${response.data.error}`, 'error');
+      }
+    } catch (error) {
+      console.error('Failed to delete unreferenced files:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to delete unreferenced files';
+      showToast(`Failed to delete unreferenced files: ${errorMessage}`, 'error');
+    } finally {
+      setFileCleanupLoading(false);
     }
   };
 
@@ -1323,10 +1447,36 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 Available Backups
               </h4>
 
+              <div className="flex items-center justify-between mb-2">
+                <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300">
+                  <input type="checkbox" onChange={selectAllBackups} checked={selectedBackups.length === backups.length && backups.length > 0} />
+                  <span>Select All</span>
+                </label>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={downloadSelectedBackups}
+                    disabled={backupLoading || selectedBackups.length === 0}
+                    className="px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded font-medium transition-colors disabled:cursor-not-allowed flex items-center space-x-1 text-xs"
+                  >
+                    <DocumentArrowDownIcon className="w-3 h-3" />
+                    <span>Download Selected</span>
+                  </button>
+                  <button
+                    onClick={deleteSelectedBackups}
+                    disabled={backupLoading || selectedBackups.length === 0}
+                    className="px-3 py-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded font-medium transition-colors disabled:cursor-not-allowed flex items-center space-x-1 text-xs"
+                  >
+                    <TrashIcon className="w-3 h-3" />
+                    <span>Delete Selected</span>
+                  </button>
+                </div>
+              </div>
+
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 max-h-40 overflow-y-auto">
                 {backups.map(backup => (
                   <div key={backup.name} className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-600 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700">
                     <div className="flex items-center space-x-3">
+                      <input type="checkbox" checked={selectedBackups.includes(backup.name)} onChange={() => toggleBackupSelection(backup.name)} />
                       <ClockIcon className="w-4 h-4 text-gray-400" />
                       <span className="text-sm text-gray-900 dark:text-gray-100 font-mono">
                         {backup.name}
@@ -1387,11 +1537,11 @@ const SettingsModal = ({ isOpen, onClose }) => {
             <div className="space-y-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                  Select Backup File (.json)
+                  Select Backup File (.json or .zip)
                 </label>
                 <input
                   type="file"
-                  accept=".json"
+                  accept=".json,.zip"
                   onChange={handleFileUpload}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-200"
                 />
@@ -1517,6 +1667,35 @@ const SettingsModal = ({ isOpen, onClose }) => {
           </div>
         </div>
       </div>
+
+      {/* File Cleanup Section */}
+      <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center space-x-2">
+            <TrashIcon className="w-5 h-5" />
+            <span>File Cleanup</span>
+          </h3>
+        </div>
+
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Remove files that are no longer referenced by any configuration. This helps free up storage space.
+          </p>
+
+          <button
+            onClick={findUnreferencedFiles}
+            disabled={fileCleanupLoading}
+            className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+          >
+            {fileCleanupLoading ? (
+              <ArrowPathIcon className="w-4 h-4 animate-spin" />
+            ) : (
+              <TrashIcon className="w-4 h-4" />
+            )}
+            <span>Find & Remove Unreferenced Files</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 
@@ -1568,6 +1747,57 @@ const SettingsModal = ({ isOpen, onClose }) => {
           {activeTab === 'filesystem' && renderFileSystemTab()}
         </div>
       </div>
+
+      {/* File Cleanup Confirmation Modal */}
+      {showFileCleanupConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
+            <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-4 flex items-center space-x-2">
+              <TrashIcon className="w-5 h-5" />
+              <span>Confirm File Cleanup</span>
+            </h3>
+
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Found <strong>{unreferencedFiles.length}</strong> unreferenced files that will be permanently deleted:
+            </p>
+
+            <div className="max-h-48 overflow-y-auto bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-4">
+              {unreferencedFiles.slice(0, 10).map((file, index) => (
+                <div key={index} className="text-xs text-gray-700 dark:text-gray-300 py-1">
+                  {file.originalName} ({(file.size / 1024).toFixed(1)} KB)
+                </div>
+              ))}
+              {unreferencedFiles.length > 10 && (
+                <div className="text-xs text-gray-500 dark:text-gray-400 py-1">
+                  ... and {unreferencedFiles.length - 10} more files
+                </div>
+              )}
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowFileCleanupConfirm(false)}
+                disabled={fileCleanupLoading}
+                className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={deleteUnreferencedFiles}
+                disabled={fileCleanupLoading}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              >
+                {fileCleanupLoading ? (
+                  <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                ) : (
+                  <TrashIcon className="w-4 h-4" />
+                )}
+                <span>Delete Files</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Re-authentication Modal for Database Switching */}
       {console.log('Modal render check - showReAuthModal:', showReAuthModal, 'pendingDatabaseSwitch:', pendingDatabaseSwitch)}
@@ -1635,6 +1865,57 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 className="px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
               >
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* File Cleanup Confirmation Modal */}
+      {showFileCleanupConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
+            <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-4 flex items-center space-x-2">
+              <TrashIcon className="w-5 h-5" />
+              <span>Confirm File Cleanup</span>
+            </h3>
+
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Found <strong>{unreferencedFiles.length}</strong> unreferenced files that will be permanently deleted:
+            </p>
+
+            <div className="max-h-48 overflow-y-auto bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-4">
+              {unreferencedFiles.slice(0, 10).map((file, index) => (
+                <div key={index} className="text-xs text-gray-700 dark:text-gray-300 py-1">
+                  {file.originalName} ({(file.size / 1024).toFixed(1)} KB)
+                </div>
+              ))}
+              {unreferencedFiles.length > 10 && (
+                <div className="text-xs text-gray-500 dark:text-gray-400 py-1">
+                  ... and {unreferencedFiles.length - 10} more files
+                </div>
+              )}
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowFileCleanupConfirm(false)}
+                disabled={fileCleanupLoading}
+                className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={deleteUnreferencedFiles}
+                disabled={fileCleanupLoading}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              >
+                {fileCleanupLoading ? (
+                  <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                ) : (
+                  <TrashIcon className="w-4 h-4" />
+                )}
+                <span>Delete Files</span>
               </button>
             </div>
           </div>
