@@ -540,22 +540,22 @@ class BackupRestore {
     }
   }
 
-  async createConfigurationFromBackup(configData, created_by, updated_by) {
+  async createConfigurationFromBackup(configData, created_by, updated_by, mapped_parent_id = null) {
     if (this.isMongoDb) {
       const mongoose = require('mongoose');
       const ConfigurationModel = mongoose.model('Configuration');
-      
+
       const config = new ConfigurationModel({
         name: configData.name,
         type: configData.type,
-        parent_id: configData.parent_id || configData.parentId,
+        parent_id: mapped_parent_id || configData.parent_id || configData.parentId,
         data: configData.data || {},
         status: configData.status || 'DRAFT',
         created_by: created_by,
         description: configData.description || '',
         archived: configData.archived || false
       });
-      
+
       return await config.save();
     } else {
       const db = require('./models/database');
