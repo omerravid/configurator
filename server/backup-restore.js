@@ -462,6 +462,21 @@ class BackupRestore {
     }
   }
 
+  async clearAllFiles() {
+    const storageDir = path.join(__dirname, 'storage/files');
+    try {
+      const files = await fs.readdir(storageDir);
+      for (const file of files) {
+        await fs.unlink(path.join(storageDir, file));
+      }
+      console.log(`Cleared ${files.length} files from storage`);
+    } catch (error) {
+      if (error.code !== 'ENOENT') {
+        throw error;
+      }
+    }
+  }
+
   // Create operations for restore
   async createUserFromBackup(userData) {
     return this.createUserFromBackupWithId(userData);
