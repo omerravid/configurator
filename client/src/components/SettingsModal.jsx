@@ -60,6 +60,10 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
     includeConfigurationTypes: [],
     adminOnly: true
   });
+  const [copyDatabaseConfig, setCopyDatabaseConfig] = useState({
+    sourceDatabase: '',
+    targetDatabase: ''
+  });
   
   // Storage state
   const [storageStatus, setStorageStatus] = useState({ type: 'embedded', configured: false });
