@@ -698,14 +698,28 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
       });
 
       if (response.data.success) {
-        showToast('Data restored successfully. You will be redirected to login due to session changes.', 'success');
-        setSelectedBackup('');
+        const { adminUsersPreserved, message } = response.data;
 
-        // Clear token and redirect to login after restore (user IDs changed)
-        setTimeout(() => {
-          localStorage.removeItem("token");
-          window.location.replace("/login");
-        }, 2000);
+        if (adminUsersPreserved && onDataRefresh) {
+          // Admin users were preserved, we can stay logged in and just refresh the data
+          showToast('Data restored successfully. Admin user preserved, refreshing view...', 'success');
+          setSelectedBackup('');
+
+          // Refresh the dashboard data after a short delay
+          setTimeout(() => {
+            onDataRefresh();
+          }, 1000);
+        } else {
+          // Admin users were not preserved or changed, need to re-login
+          showToast('Data restored successfully. You will be redirected to login due to session changes.', 'success');
+          setSelectedBackup('');
+
+          // Clear token and redirect to login after restore (user IDs changed)
+          setTimeout(() => {
+            localStorage.removeItem("token");
+            window.location.replace("/login");
+          }, 2000);
+        }
       } else {
         showToast(`Failed to restore backup: ${response.data.error}`, 'error');
       }
@@ -1640,7 +1654,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
                 value={s3Config.secretAccessKey}
                 onChange={(e) => setS3Config({...s3Config, secretAccessKey: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
-                placeholder="••���•••••"
+                placeholder="••���•���•••"
               />
             </div>
           </div>
