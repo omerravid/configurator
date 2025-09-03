@@ -21,14 +21,19 @@ class DatabaseManager {
       if (this.databaseConfigs.size === 0) {
         const embeddedMongo = require('../models/embedded-mongodb');
         const connectionString = embeddedMongo.getConnectionString();
-        
+
         if (connectionString) {
+          console.log('Adding embedded MongoDB to database configs...');
           await this.addDatabase({
             name: 'Embedded MongoDB',
             connectionString: connectionString,
+            description: 'Built-in embedded MongoDB server',
             isEmbedded: true,
             isActive: true
           });
+          console.log('Embedded MongoDB added to database configs');
+        } else {
+          console.warn('Embedded MongoDB connection string not available');
         }
       }
 
