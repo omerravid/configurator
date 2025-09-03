@@ -59,6 +59,18 @@ if (process.env.USE_MONGODB === 'true') {
             isEmbedded: true
           });
           console.log('Test MongoDB registered as secondary database');
+
+          // Initialize test data in the test database
+          console.log('Switching to test database to initialize test data...');
+          const originalActiveDb = DatabaseManager.getActiveDatabaseName();
+
+          // Temporarily switch to test database
+          await DatabaseManager.setActiveDatabase('Test MongoDB');
+          await embeddedMongo.initializeTestData();
+
+          // Switch back to primary database
+          await DatabaseManager.setActiveDatabase(originalActiveDb);
+          console.log('Switched back to primary database');
         }
       } catch (error) {
         console.log('MongoDB configuration already exists or error:', error.message);
