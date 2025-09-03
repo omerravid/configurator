@@ -1,5 +1,7 @@
 const fs = require('fs').promises;
 const path = require('path');
+const archiver = require('archiver');
+const unzipper = require('unzipper');
 
 class BackupRestore {
   constructor() {
@@ -57,7 +59,7 @@ class BackupRestore {
       await this.ensureBackupDir();
 
       const backupName = name || this.generateBackupName('system', 'auto');
-      const backupFile = path.join(this.backupDir, `${backupName}.json`);
+      const backupFile = path.join(this.backupDir, `${backupName}.zip`);
 
       console.log(`Creating backup: ${backupName} (${this.isMongoDb ? 'MongoDB' : 'SQLite'})`);
 
@@ -69,25 +71,32 @@ class BackupRestore {
       const configurations = await this.getAllConfigurationsForBackup();
       console.log(`Found ${configurations.length} configurations`);
 
+      // Get all files
+      const files = await this.getAllFilesForBackup();
+      console.log(`Found ${files.length} files`);
+
       const backupData = {
         timestamp: new Date().toISOString(),
-        version: '1.0',
+        version: '2.0',
         databaseType: this.isMongoDb ? 'mongodb' : 'sqlite',
         data: {
           users: userRows,
-          configurations
+          configurations,
+          files
         }
       };
 
-      await fs.writeFile(backupFile, JSON.stringify(backupData, null, 2));
-      
+      // Create ZIP archive with database data and files
+      await this.createZipBackup(backupFile, backupData);
+
       console.log(`✅ Backup created successfully: ${backupFile}`);
       return {
         success: true,
         file: backupFile,
         stats: {
           users: userRows.length,
-          configurations: configurations.length
+          configurations: configurations.length,
+          files: files.length
         }
       };
 
