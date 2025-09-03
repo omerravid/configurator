@@ -234,11 +234,12 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
       console.error('Error config URL:', error.config?.url);
 
       if (error.response?.status === 401) {
-        console.log('401 detected - showing re-auth modal');
-        showToast('Session expired. Please re-authenticate to continue.', 'info');
-        setPendingDatabaseSwitch('current'); // Special value for reloading current status
-        setShowReAuthModal(true);
-        console.log('Re-auth modal state set to true');
+        console.log('401 detected - authentication failed');
+        showToast('Session expired after database switch. Please login again.', 'warning');
+        localStorage.removeItem('token');
+        setTimeout(() => {
+          window.location.replace('/login');
+        }, 2000);
       } else {
         setDbStatus({ type: 'sqlite', connected: false, host: '' });
         setDatabases([]);
