@@ -798,22 +798,48 @@ class BackupRestore {
         console.warn('Warning: Could not clear configurations:', error.message);
       }
 
-      // Delete ALL users (we'll restore from backup including admin)
+      // Get existing admin users before clearing (we'll preserve them)
+      const existingAdminUsers = await this.getExistingAdminUsers();
+      console.log(`Found ${existingAdminUsers.length} existing admin users to preserve`);
+
+      // Delete only non-admin users
       try {
-        await this.clearAllUsers();
-        console.log('✅ Cleared all existing users');
+        await this.clearNonAdminUsers();
+        console.log('✅ Cleared existing non-admin users');
       } catch (error) {
-        console.warn('Warning: Could not clear users:', error.message);
+        console.warn('Warning: Could not clear non-admin users:', error.message);
       }
 
       // Restore users first (to maintain referential integrity)
       console.log('📥 Restoring users...');
       let restoredUsers = 0;
+      let skippedAdminUsers = 0;
       const userIdMapping = new Map(); // Track old ID to new ID mapping
+
+      // Map existing admin users to maintain references
+      for (const existingAdmin of existingAdminUsers) {
+        const matchingBackupUser = backupData.data.users.find(u =>
+          u.username === existingAdmin.username && u.role === 'ADMIN'
+        );
+        if (matchingBackupUser) {
+          const existingUserId = existingAdmin.id || existingAdmin._id?.toString();
+          userIdMapping.set(matchingBackupUser.id, existingUserId);
+          skippedAdminUsers++;
+          console.log(`✅ Preserved existing admin user: ${existingAdmin.username} - ID: ${existingUserId}`);
+        }
+      }
 
       for (const userData of backupData.data.users) {
         try {
-          // Try to preserve original user ID if possible (especially for admin)
+          // Skip admin users that already exist
+          if (userData.role === 'ADMIN') {
+            const existingAdmin = existingAdminUsers.find(u => u.username === userData.username);
+            if (existingAdmin) {
+              continue; // Skip this admin user, already handled above
+            }
+          }
+
+          // Restore non-admin users or new admin users
           const newUser = await this.createUserFromBackupWithId(userData);
           const newUserId = newUser.id || newUser._id?.toString() || newUser.id;
           userIdMapping.set(userData.id, newUserId);
@@ -823,7 +849,7 @@ class BackupRestore {
           console.warn(`Warning: Could not restore user ${userData.username}:`, error.message);
         }
       }
-      console.log(`✅ Restored ${restoredUsers} users`);
+      console.log(`✅ Restored ${restoredUsers} users, preserved ${skippedAdminUsers} admin users`);
 
       // Restore configurations with updated user references
       console.log('📥 Restoring configurations...');
