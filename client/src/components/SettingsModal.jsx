@@ -1332,6 +1332,14 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
                 <DocumentArrowUpIcon className="w-4 h-4" />
                 <span>Copy Data</span>
               </button>
+              <button
+                onClick={() => setShowCopyDatabase(true)}
+                disabled={dbLoading}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center space-x-2"
+              >
+                <DocumentDuplicateIcon className="w-4 h-4" />
+                <span>Copy Database</span>
+              </button>
             </div>
           </div>
         )}
