@@ -50,6 +50,11 @@ const Dashboard = () => {
 
 
   const loadAllConfigurations = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.replace("/login");
+      return;
+    }
     try {
       const response = await configAPI.getAll();
       setAllConfigurations(response.data.configs || []);
