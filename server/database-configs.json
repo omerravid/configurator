@@ -4,7 +4,7 @@
     "connectionString": "mongodb://127.0.0.1:27017/",
     "description": "Built-in embedded MongoDB server",
     "isEmbedded": true,
-    "isActive": false,
+    "isActive": true,
     "createdAt": "2025-09-03T12:49:51.382Z",
     "updatedAt": "2025-09-03T12:49:51.382Z"
   },
@@ -13,7 +13,7 @@
     "connectionString": "mongodb://127.0.0.1:27018/",
     "description": "Secondary test MongoDB server for testing database switching",
     "isEmbedded": false,
-    "isActive": true,
+    "isActive": false,
     "createdAt": "2025-09-03T12:53:31.672Z",
     "updatedAt": "2025-09-03T12:53:31.672Z"
   }
