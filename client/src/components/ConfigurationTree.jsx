@@ -575,6 +575,7 @@ const ConfigurationTree = ({
   onAddComponent,
   user,
 }) => {
+  const { showToast } = useToast();
   const [rootConfigs, setRootConfigs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
