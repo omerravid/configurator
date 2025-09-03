@@ -777,6 +777,7 @@ class BackupRestore {
       // Restore configurations with updated user references
       console.log('📥 Restoring configurations...');
       let restoredConfigs = 0;
+      const configIdMapping = new Map(); // Track old config ID to new config ID mapping
 
       // Sort configurations by hierarchy (parents first)
       const sortedConfigs = [...backupData.data.configurations].sort((a, b) => {
