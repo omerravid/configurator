@@ -30,14 +30,19 @@ if (process.env.USE_MONGODB === 'true') {
       // Initialize DatabaseManager
       await DatabaseManager.initialize();
 
-      // Manually add embedded MongoDB configuration
+      // Start test MongoDB instance
+      await embeddedMongo.startTestInstance();
+
+      // Manually add embedded MongoDB configurations
       try {
         const connectionString = embeddedMongo.getConnectionString();
+        const testConnectionString = embeddedMongo.getTestConnectionString();
+
         if (connectionString) {
           await DatabaseManager.addDatabase({
             name: 'Embedded MongoDB',
             connectionString: connectionString,
-            description: 'Built-in embedded MongoDB server',
+            description: 'Primary embedded MongoDB server',
             isEmbedded: true
           });
 
@@ -45,8 +50,18 @@ if (process.env.USE_MONGODB === 'true') {
           await DatabaseManager.setActiveDatabase('Embedded MongoDB');
           console.log('Embedded MongoDB registered and set as active database');
         }
+
+        if (testConnectionString) {
+          await DatabaseManager.addDatabase({
+            name: 'Test MongoDB',
+            connectionString: testConnectionString,
+            description: 'Secondary test MongoDB server for testing database switching',
+            isEmbedded: true
+          });
+          console.log('Test MongoDB registered as secondary database');
+        }
       } catch (error) {
-        console.log('Embedded MongoDB already configured or error:', error.message);
+        console.log('MongoDB configuration already exists or error:', error.message);
       }
 
       // Connect to active database
