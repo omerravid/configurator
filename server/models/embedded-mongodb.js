@@ -100,6 +100,10 @@ class EmbeddedMongoDB {
     return this.connectionString;
   }
 
+  getTestConnectionString() {
+    return this.testConnectionString;
+  }
+
   async getConnectionStatus() {
     if (!this.mongod) {
       return { status: 'stopped', uri: null };
