@@ -11,16 +11,37 @@ const authenticateToken = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId);
+    let user = await User.findById(decoded.userId);
+
+    // If user not found in current database, try to find by username
+    // This handles cases where databases have been switched
+    if (!user && decoded.username) {
+      user = await User.findByUsername(decoded.username);
+
+      // If we found user by username but with different ID, this is likely a database switch
+      if (user && user.role === decoded.role) {
+        console.log(`Authentication: User ${decoded.username} found by username after database switch`);
+      } else {
+        user = null;
+      }
+    }
 
     if (!user) {
-      return res.status(401).json({ error: "Invalid token - user not found" });
+      return res.status(401).json({
+        error: "Invalid token - user not found. Please login again after database switch."
+      });
     }
 
     req.user = user;
     next();
   } catch (error) {
-    return res.status(403).json({ error: "Invalid or expired token" });
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: "Invalid token format" });
+    } else if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: "Token expired" });
+    } else {
+      return res.status(403).json({ error: "Invalid or expired token" });
+    }
   }
 };
 
