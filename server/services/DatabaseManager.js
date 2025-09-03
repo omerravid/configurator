@@ -336,6 +336,7 @@ class DatabaseManager {
       configurationsSkipped: 0,
       usersProcessed: 0,
       usersUpdated: 0,
+      usersSkipped: 0,
       errors: []
     };
 
