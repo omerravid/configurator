@@ -625,16 +625,22 @@ class BackupRestore {
     try {
       await this.ensureBackupDir();
 
-      const backupFile = path.join(this.backupDir, `${backupName}.json`);
+      // Try ZIP first, then JSON
+      let backupFile = path.join(this.backupDir, `${backupName}.zip`);
 
-      // Check if file exists
       try {
         await fs.access(backupFile);
       } catch (error) {
-        return {
-          success: false,
-          error: `Backup file not found: ${backupName}`
-        };
+        // Try JSON format
+        backupFile = path.join(this.backupDir, `${backupName}.json`);
+        try {
+          await fs.access(backupFile);
+        } catch (error2) {
+          return {
+            success: false,
+            error: `Backup file not found: ${backupName}`
+          };
+        }
       }
 
       return {
