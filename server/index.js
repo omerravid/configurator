@@ -27,8 +27,27 @@ if (process.env.USE_MONGODB === 'true') {
       // Small delay to ensure MongoDB is fully ready
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Initialize DatabaseManager with embedded MongoDB
+      // Initialize DatabaseManager
       await DatabaseManager.initialize();
+
+      // Manually add embedded MongoDB configuration
+      try {
+        const connectionString = embeddedMongo.getConnectionString();
+        if (connectionString) {
+          await DatabaseManager.addDatabase({
+            name: 'Embedded MongoDB',
+            connectionString: connectionString,
+            description: 'Built-in embedded MongoDB server',
+            isEmbedded: true
+          });
+
+          // Set it as active
+          await DatabaseManager.setActiveDatabase('Embedded MongoDB');
+          console.log('Embedded MongoDB registered and set as active database');
+        }
+      } catch (error) {
+        console.log('Embedded MongoDB already configured or error:', error.message);
+      }
 
       // Connect to active database
       const activeDb = DatabaseManager.getActiveDatabase();
