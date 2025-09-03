@@ -798,7 +798,21 @@ class BackupRestore {
             updated_by = userIdMapping.get(updated_by);
           }
 
-          await this.createConfigurationFromBackup(configData, created_by, updated_by);
+          // Map parent_id from old to new if it exists in mapping
+          let mapped_parent_id = configData.parent_id || configData.parentId;
+          if (mapped_parent_id && configIdMapping.has(mapped_parent_id)) {
+            mapped_parent_id = configIdMapping.get(mapped_parent_id);
+          }
+
+          const newConfig = await this.createConfigurationFromBackup(configData, created_by, updated_by, mapped_parent_id);
+
+          // Store the mapping from old ID to new ID for future parent references
+          const oldConfigId = configData.id || configData._id;
+          const newConfigId = newConfig.id || newConfig._id?.toString();
+          if (oldConfigId && newConfigId) {
+            configIdMapping.set(oldConfigId, newConfigId);
+          }
+
           restoredConfigs++;
         } catch (error) {
           console.warn(`Warning: Could not restore configuration ${configData.name}:`, error.message);
