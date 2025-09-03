@@ -24,7 +24,10 @@ if (process.env.USE_MONGODB === 'true') {
     .then(async () => {
       console.log('Embedded MongoDB initialized successfully');
 
-      // Initialize DatabaseManager
+      // Small delay to ensure MongoDB is fully ready
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Initialize DatabaseManager with embedded MongoDB
       await DatabaseManager.initialize();
 
       // Connect to active database
@@ -32,6 +35,8 @@ if (process.env.USE_MONGODB === 'true') {
       if (activeDb) {
         await DatabaseManager.connectToDatabase(activeDb.name);
         console.log(`Connected to active database: ${activeDb.name}`);
+      } else {
+        console.log('No active database found, using embedded MongoDB connection');
       }
 
       // Initialize default data
