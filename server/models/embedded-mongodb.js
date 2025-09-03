@@ -141,6 +141,20 @@ class EmbeddedMongoDB {
       console.error('Failed to initialize MongoDB data:', error);
     }
   }
+
+  // Initialize test database with different sample data
+  async initializeTestData() {
+    try {
+      console.log('Initializing test MongoDB with sample data...');
+      const { initializeTestData } = require('../scripts/init-test-data');
+
+      // Force initialization of test data
+      await initializeTestData(true);
+      console.log('Test MongoDB data initialization completed');
+    } catch (error) {
+      console.error('Failed to initialize test MongoDB data:', error);
+    }
+  }
 }
 
 module.exports = new EmbeddedMongoDB();
