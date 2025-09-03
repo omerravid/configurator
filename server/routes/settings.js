@@ -210,7 +210,7 @@ router.post("/databases/test", authenticateToken, requireAdmin, async (req, res)
   }
 });
 
-// Copy data between databases
+// Copy data between databases (using backup+restore approach)
 router.post("/databases/copy-data", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { error, value } = copyDataSchema.validate(req.body);
@@ -221,23 +221,99 @@ router.post("/databases/copy-data", authenticateToken, requireAdmin, async (req,
       });
     }
 
-    const result = await DatabaseManager.copyDataBetweenDatabases(
-      value.sourceDatabase,
-      value.targetDatabase,
-      {
-        includeConfigurations: value.includeConfigurations,
-        includeConfigurationTypes: value.includeConfigurationTypes,
-        adminOnly: value.adminOnly
-      }
-    );
+    const { sourceDatabase, targetDatabase } = value;
 
+    if (!sourceDatabase || !targetDatabase) {
+      return res.status(400).json({
+        success: false,
+        error: "Source and target databases are required"
+      });
+    }
+
+    if (sourceDatabase === targetDatabase) {
+      return res.status(400).json({
+        success: false,
+        error: "Source and target databases cannot be the same"
+      });
+    }
+
+    const username = req.user?.username || 'admin';
+    console.log(`Starting database copy from "${sourceDatabase}" to "${targetDatabase}" using backup+restore approach (with filtering)`);
+
+    // Step 1: Switch to source database and create backup
+    console.log(`Step 1: Switching to source database "${sourceDatabase}"`);
+    const originalDatabase = DatabaseManager.getActiveDatabaseName();
+    await DatabaseManager.setActiveDatabase(sourceDatabase);
+
+    const br = new BackupRestore();
+    const backupName = br.generateBackupName(username, `filtered-copy-from-${sourceDatabase}`);
+
+    console.log(`Step 2: Creating backup from source database: ${backupName}`);
+    const backupResult = await br.createBackup(backupName);
+
+    if (!backupResult.success) {
+      // Restore original database connection
+      await DatabaseManager.setActiveDatabase(originalDatabase);
+      return res.status(500).json({
+        success: false,
+        error: `Failed to create backup from source database: ${backupResult.error}`
+      });
+    }
+
+    console.log(`✅ Backup created successfully: ${backupResult.file}`);
+
+    // Step 3: Switch to target database and restore backup
+    console.log(`Step 3: Switching to target database "${targetDatabase}"`);
+    await DatabaseManager.setActiveDatabase(targetDatabase);
+
+    console.log(`Step 4: Restoring backup to target database`);
+    const restoreResult = await br.restoreFromBackup(backupName);
+
+    if (!restoreResult.success) {
+      // Restore original database connection
+      await DatabaseManager.setActiveDatabase(originalDatabase);
+      return res.status(500).json({
+        success: false,
+        error: `Failed to restore backup to target database: ${restoreResult.error}`,
+        backup: backupResult.file
+      });
+    }
+
+    console.log(`✅ Database copy completed successfully using backup+restore`);
+
+    // Step 5: Restore original database connection
+    await DatabaseManager.setActiveDatabase(originalDatabase);
+
+    // Format response to match the expected format from the old copy-data API
     res.json({
       success: true,
-      result,
-      message: "Data copied successfully"
+      result: {
+        configurationsProcessed: restoreResult.stats.configurations,
+        configurationsUpdated: restoreResult.stats.configurations,
+        configurationsSkipped: 0,
+        usersProcessed: restoreResult.stats.users,
+        usersUpdated: restoreResult.stats.users,
+        usersSkipped: restoreResult.stats.preservedAdminUsers || 0,
+        errors: []
+      },
+      message: `Data copied successfully using backup+restore approach. ${restoreResult.stats.users} users and ${restoreResult.stats.configurations} configurations copied.`,
+      backupFile: backupResult.file,
+      preRestoreBackup: restoreResult.preRestoreBackup
     });
+
   } catch (error) {
-    console.error("Failed to copy data:", error);
+    console.error("Failed to copy data using backup+restore:", error);
+
+    // Try to restore original database connection in case of error
+    try {
+      const originalDatabase = DatabaseManager.getActiveDatabaseName();
+      if (originalDatabase) {
+        await DatabaseManager.setActiveDatabase(originalDatabase);
+      }
+    } catch (restoreError) {
+      console.error("Failed to restore original database connection:", restoreError);
+    }
+
     res.status(500).json({
       success: false,
       error: error.message || "Failed to copy data"
@@ -962,7 +1038,7 @@ router.post("/mongodb/revert-to-sqlite", authenticateToken, requireAdmin, async 
           "✅ SQLite is now set as the default database",
           "🔄 Restart the server to activate SQLite",
           "⚠️ MongoDB changes were NOT migrated",
-          "���️ Your MongoDB data is preserved but not in SQLite"
+          "🗄️ Your MongoDB data is preserved but not in SQLite"
         ];
 
     res.json({
