@@ -48,19 +48,49 @@ class EmbeddedMongoDB {
     }
   }
 
+  async startTestInstance() {
+    try {
+      console.log('Starting test MongoDB instance...');
+
+      // Create a second in-memory MongoDB instance on a different port
+      this.testMongod = await MongoMemoryServer.create({
+        instance: {
+          dbName: 'test_config_manager',
+          port: 27018, // Different port for test instance
+        },
+        binary: {
+          version: '7.0.3'
+        }
+      });
+
+      this.testConnectionString = this.testMongod.getUri();
+      console.log(`Test MongoDB started at: ${this.testConnectionString}`);
+
+      return this.testConnectionString;
+    } catch (error) {
+      console.error('Failed to start test MongoDB:', error);
+      throw error;
+    }
+  }
+
   async stop() {
     try {
       if (this.connection) {
         await mongoose.disconnect();
         this.connection = null;
       }
-      
+
       if (this.mongod) {
         await this.mongod.stop();
         this.mongod = null;
       }
-      
-      console.log('Embedded MongoDB stopped');
+
+      if (this.testMongod) {
+        await this.testMongod.stop();
+        this.testMongod = null;
+      }
+
+      console.log('Embedded MongoDB instances stopped');
     } catch (error) {
       console.error('Error stopping embedded MongoDB:', error);
     }
