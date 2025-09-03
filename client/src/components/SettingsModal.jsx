@@ -23,7 +23,7 @@ import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
 import api, { userAPI, authAPI } from "../services/api";
 
-const SettingsModal = ({ isOpen, onClose }) => {
+const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
   const { showToast } = useToast();
   const { user, logout, login } = useAuth();
   const [activeTab, setActiveTab] = useState('users');
