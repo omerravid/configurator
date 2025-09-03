@@ -1511,6 +1511,78 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
           </div>
         </div>
       )}
+
+      {/* Copy Database Modal */}
+      {showCopyDatabase && (
+        <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+          <h4 className="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Copy Entire Database (Backup+Restore)</h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            This will create a complete backup from the source database and restore it to the target database,
+            completely replacing all data in the target database.
+          </p>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                Source Database
+              </label>
+              <select
+                value={copyDatabaseConfig.sourceDatabase}
+                onChange={(e) => setCopyDatabaseConfig({...copyDatabaseConfig, sourceDatabase: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+              >
+                <option value="">Select source...</option>
+                {databases.map(db => (
+                  <option key={db.name} value={db.name}>{db.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                Target Database
+              </label>
+              <select
+                value={copyDatabaseConfig.targetDatabase}
+                onChange={(e) => setCopyDatabaseConfig({...copyDatabaseConfig, targetDatabase: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+              >
+                <option value="">Select target...</option>
+                {databases.filter(db => db.name !== copyDatabaseConfig.sourceDatabase).map(db => (
+                  <option key={db.name} value={db.name}>{db.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+              <div className="flex items-center space-x-2">
+                <ExclamationCircleIcon className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                <span className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Warning</span>
+              </div>
+              <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                This operation will completely replace all data in the target database. All existing configurations,
+                users, and files in the target database will be lost.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex space-x-3 mt-4">
+            <button
+              onClick={copyDatabaseUsingBackup}
+              disabled={dbLoading}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center space-x-2"
+            >
+              {dbLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <DocumentDuplicateIcon className="w-4 h-4" />}
+              <span>Copy Database</span>
+            </button>
+            <button
+              onClick={() => setShowCopyDatabase(false)}
+              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 
