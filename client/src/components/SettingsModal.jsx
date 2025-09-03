@@ -45,6 +45,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
   const [selectedDatabase, setSelectedDatabase] = useState(null);
   const [showAddDatabase, setShowAddDatabase] = useState(false);
   const [showCopyData, setShowCopyData] = useState(false);
+  const [showCopyDatabase, setShowCopyDatabase] = useState(false);
 
   // Re-authentication state for database switching
   const [showReAuthModal, setShowReAuthModal] = useState(false);
