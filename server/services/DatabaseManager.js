@@ -465,11 +465,11 @@ class DatabaseManager {
         }
       }
 
-      console.log(`Data copy completed. Users: ${copyStats.usersUpdated}, Configurations: ${copyStats.configurationsUpdated}, Errors: ${copyStats.errors.length}`);
+      console.log(`Data copy completed. Users created: ${copyStats.usersUpdated}, Users skipped: ${copyStats.usersSkipped}, Configurations: ${copyStats.configurationsUpdated}, Errors: ${copyStats.errors.length}`);
 
       return {
         success: true,
-        message: `Successfully copied ${copyStats.usersUpdated} admin users and ${copyStats.configurationsUpdated} configurations`,
+        message: `Successfully copied ${copyStats.usersUpdated} admin users (${copyStats.usersSkipped} existing users preserved) and ${copyStats.configurationsUpdated} configurations`,
         stats: copyStats
       };
 
