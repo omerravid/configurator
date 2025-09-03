@@ -1413,84 +1413,52 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
       {/* Copy Data Modal */}
       {showCopyData && (
         <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
-          <h4 className="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Copy Data Between Databases</h4>
+          <h4 className="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Copy Database (Backup+Restore)</h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            This uses the robust backup+restore system to copy all data from source to target database.
+            All users, configurations, and files will be copied, ensuring no data inconsistencies.
+          </p>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                  Source Database
-                </label>
-                <select
-                  value={copyDataConfig.sourceDatabase}
-                  onChange={(e) => setCopyDataConfig({...copyDataConfig, sourceDatabase: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
-                >
-                  <option value="">Select source...</option>
-                  {databases.map(db => (
-                    <option key={db.name} value={db.name}>{db.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                  Target Database
-                </label>
-                <select
-                  value={copyDataConfig.targetDatabase}
-                  onChange={(e) => setCopyDataConfig({...copyDataConfig, targetDatabase: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
-                >
-                  <option value="">Select target...</option>
-                  {databases.filter(db => db.name !== copyDataConfig.sourceDatabase).map(db => (
-                    <option key={db.name} value={db.name}>{db.name}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Configuration Types to Copy
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                Source Database
               </label>
-              <div className="flex flex-wrap gap-2">
-                {['PRODUCT', 'INSTANCE', 'USER', 'COMPONENT', 'VERSION'].map(type => (
-                  <label key={type} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={copyDataConfig.includeConfigurationTypes.includes(type)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setCopyDataConfig({
-                            ...copyDataConfig,
-                            includeConfigurationTypes: [...copyDataConfig.includeConfigurationTypes, type]
-                          });
-                        } else {
-                          setCopyDataConfig({
-                            ...copyDataConfig,
-                            includeConfigurationTypes: copyDataConfig.includeConfigurationTypes.filter(t => t !== type)
-                          });
-                        }
-                      }}
-                      className="rounded"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{type}</span>
-                  </label>
+              <select
+                value={copyDataConfig.sourceDatabase}
+                onChange={(e) => setCopyDataConfig({...copyDataConfig, sourceDatabase: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+              >
+                <option value="">Select source...</option>
+                {databases.map(db => (
+                  <option key={db.name} value={db.name}>{db.name}</option>
                 ))}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Leave empty to copy all types</p>
+              </select>
             </div>
 
             <div>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={copyDataConfig.adminOnly}
-                  onChange={(e) => setCopyDataConfig({...copyDataConfig, adminOnly: e.target.checked})}
-                  className="rounded"
-                />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Only copy admin-created configurations</span>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                Target Database
               </label>
+              <select
+                value={copyDataConfig.targetDatabase}
+                onChange={(e) => setCopyDataConfig({...copyDataConfig, targetDatabase: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+              >
+                <option value="">Select target...</option>
+                {databases.filter(db => db.name !== copyDataConfig.sourceDatabase).map(db => (
+                  <option key={db.name} value={db.name}>{db.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+              <div className="flex items-center space-x-2">
+                <CheckCircleIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <span className="text-sm font-medium text-blue-800 dark:text-blue-200">Backup+Restore Technology</span>
+              </div>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                Uses the same reliable backup and restore system for consistent data copying with automatic ID mapping and integrity preservation.
+              </p>
             </div>
           </div>
 
