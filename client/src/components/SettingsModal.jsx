@@ -549,46 +549,6 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
     }
   };
 
-  const copyDatabaseUsingBackup = async () => {
-    if (!copyDatabaseConfig.sourceDatabase || !copyDatabaseConfig.targetDatabase) {
-      showToast('Please select source and target databases', 'error');
-      return;
-    }
-
-    if (copyDatabaseConfig.sourceDatabase === copyDatabaseConfig.targetDatabase) {
-      showToast('Source and target databases cannot be the same', 'error');
-      return;
-    }
-
-    if (!window.confirm(`Copy entire database from "${copyDatabaseConfig.sourceDatabase}" to "${copyDatabaseConfig.targetDatabase}"? This will completely replace all data in the target database with data from the source database.`)) {
-      return;
-    }
-
-    setDbLoading(true);
-    try {
-      const response = await api.post('/settings/databases/copy-database', copyDatabaseConfig);
-
-      if (response.data.success) {
-        showToast(`Database copied successfully! ${response.data.message}`, 'success');
-        setShowCopyDatabase(false);
-        setCopyDatabaseConfig({
-          sourceDatabase: '',
-          targetDatabase: ''
-        });
-        // Refresh database status to reflect any changes
-        await loadDatabaseStatus();
-      } else {
-        showToast(`Failed to copy database: ${response.data.error}`, 'error');
-      }
-    } catch (error) {
-      console.error('Failed to copy database using backup+restore:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to copy database';
-      showToast(`Failed to copy database: ${errorMessage}`, 'error');
-    } finally {
-      setDbLoading(false);
-    }
-  };
-
   // Re-authentication for database switching
   const handleReAuthentication = async () => {
     if (!reAuthPassword.trim()) {
