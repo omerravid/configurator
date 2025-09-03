@@ -790,7 +790,7 @@ class BackupRestore {
       // Clear files first (always)
       try {
         await this.clearAllFiles();
-        console.log('✅ Cleared existing files');
+        console.log('�� Cleared existing files');
       } catch (error) {
         console.warn('Warning: Could not clear files:', error.message);
       }
@@ -972,7 +972,10 @@ class BackupRestore {
             const updatedData = this.mapIDsInObject(config.data, configIdMapping);
 
             if (JSON.stringify(updatedData) !== JSON.stringify(config.data)) {
-              await Configuration.update(config.id, { data: updatedData });
+              await Configuration.update(config.id, {
+                data: updatedData,
+                description: config.description
+              });
               updatedConfigs++;
               console.log(`✅ Updated ID references in: ${config.name}`);
             }
