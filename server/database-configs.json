@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "name": "Embedded MongoDB",
+    "connectionString": "mongodb://127.0.0.1:27017/",
+    "description": "Built-in embedded MongoDB server",
+    "isEmbedded": true,
+    "isActive": true,
+    "createdAt": "2025-09-03T12:49:51.382Z",
+    "updatedAt": "2025-09-03T12:49:51.382Z"
+  }
+]
