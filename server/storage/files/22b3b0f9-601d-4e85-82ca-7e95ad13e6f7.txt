@@ -1,9 +1,0 @@
-#P_DET_OUT_P_SCAN_RIGHT
-<lbrL>
-<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
-#P1,BaseCor/BaseWork/BaseDet,0.5,2.09,-410,178.48,1.66,0.54,5,38,-53.48776,LIN,100,detector,fcu
-P_DETECTOR_OUT,LIN,50
-P2,BaseCor/BaseWork/BaseDet,0.28, 5.71, -150, 178.49, 2.20, 0.73,5,38,-53.48776,LIN,80,detector,fcu
-P_DETECTOR_IN,LIN,20
-#P3,BaseCor/BaseWork/BaseDet,-3.34,2.69,-22.33,178.48,1.66,0.54,5,38,-53.48776,LIN,30,detector,fcu
-#plannerSeed: -90.4465; -46.1858; -38.171; 18.6013; -104.5895; -73.9376; -90.4434

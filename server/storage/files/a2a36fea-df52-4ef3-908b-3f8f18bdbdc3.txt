@@ -1,9 +1,0 @@
-#P_TLB_OUT_P_SCREW_OUT
-<lbrR>
-<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
-#P1,BaseCor/BaseWork/BaseTLB,0,200,0,0,-90,90,5,31,-65.9276428222657,PTP,0.3,fcu,fcu
-P_HOME,PTP,0.2
-P_TLB_OUT,PTP,0.2
-P_SCREW_OUT,PTP,0.2
-#P2,BaseCor/BaseWork,600,650,-50,180,0,0,5,54,-32.32657,PTP,0.3,fcu,fcu
-#plannerSeed: 151; -27; -53; 44; -76; -110; 136

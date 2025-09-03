@@ -1,7 +1,0 @@
-#standardIKKukaPathPlanner: ARange=90; ZValoffsetNextTarget=140; NextTarget=P_IMPLANT_RIGHT_IN
-#P_IMP_OUT_L_P_IMP_IN_L
-<lbrL>
-<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
-#P2,BaseCor/BaseWork/BaseImp,0,0,-140,180,0,0,5,54,-140,LIN,100,ScrewInserter,fcu/tool
-P_IMPLANT_RIGHT_OUT,LIN,100
-#plannerSeed: -61; 42; 35.8; 88; -69; -54; -45

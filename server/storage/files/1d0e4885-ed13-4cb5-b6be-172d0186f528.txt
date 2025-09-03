@@ -1,8 +1,0 @@
-#P_LOAD_P_TLB_OUT
-<lbrR>
-<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
-#P1,BaseCor/BaseWork,-600,625,0,0,0,0,3,27,0,LIN,120,fcu,fcu
-P_LOAD_TOOL,LIN,120
-P2,BaseCor/BaseWork,1.02267,434.94138,133.50442,-151.44777,77.98607,-123.70395,3,27,0,LIN,120,fcu,fcu
-P_TLB_OUT,LIN,120
-#P3,BaseCor/BaseWork/BaseTLB,0,200,0,0,-90,90,3,31,-65.9276428222657,LIN,120,fcu,fcu

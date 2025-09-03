@@ -1,6 +1,0 @@
-#P_SCREW_OUT_P_SCREW_IN
-<lbrR>
-<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
-P_SCREW_IN,LIN,100
-#P2,BaseCor/BaseWork,600,650,-50,-220,0,0,5,54,-32.32657,LIN,100,fcu,fcu
-#plannerSeed: 151; -27; -53; 44; -76; -110; 136

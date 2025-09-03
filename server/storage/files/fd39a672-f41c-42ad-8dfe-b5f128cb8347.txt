@@ -1,9 +1,0 @@
-#P_HOME_P_TLB_OUT
-<lbrL>
-<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
-#P1,BaseCor/BaseWork,391.70343,116.77935,267.01834,-124.01086,-47.2841,118.85567,5,54,-96,PTP,0.25,fcu,fcu
-P_HOME,PTP,0.25
-#P2,BaseCor/BaseWork,0.71568,137.98173,466.03194,0,-90,90,5,38,-56.79019,LIN,120,fcu,fcu
-P_TLB_OUT,PTP,0.25
-#P3,BaseCor/BaseWork/BaseTLB,0,200,0,0,-90,90,5,38,-56.7902,PTP,0.25,fcu,fcu
-#plannerSeed: 23.9979; -45.369; -104.9549; 109.8875; 43.6733; -71.0294; -90.449
