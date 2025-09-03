@@ -855,18 +855,36 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
       });
 
       if (response.data.success) {
-        showToast('Data restored from uploaded file successfully. You will be redirected to login due to session changes.', 'success');
-        setUploadedFile(null);
+        const { adminUsersPreserved, message } = response.data;
 
-        // Reset file input
-        const fileInput = document.querySelector('input[type="file"]');
-        if (fileInput) fileInput.value = '';
+        if (adminUsersPreserved && onDataRefresh) {
+          // Admin users were preserved, we can stay logged in and just refresh the data
+          showToast('Data restored from uploaded file successfully. Admin user preserved, refreshing view...', 'success');
+          setUploadedFile(null);
 
-        // Clear token and redirect to login after restore (user IDs changed)
-        setTimeout(() => {
-          localStorage.removeItem("token");
-          window.location.replace("/login");
-        }, 2000);
+          // Reset file input
+          const fileInput = document.querySelector('input[type="file"]');
+          if (fileInput) fileInput.value = '';
+
+          // Refresh the dashboard data after a short delay
+          setTimeout(() => {
+            onDataRefresh();
+          }, 1000);
+        } else {
+          // Admin users were not preserved or changed, need to re-login
+          showToast('Data restored from uploaded file successfully. You will be redirected to login due to session changes.', 'success');
+          setUploadedFile(null);
+
+          // Reset file input
+          const fileInput = document.querySelector('input[type="file"]');
+          if (fileInput) fileInput.value = '';
+
+          // Clear token and redirect to login after restore (user IDs changed)
+          setTimeout(() => {
+            localStorage.removeItem("token");
+            window.location.replace("/login");
+          }, 2000);
+        }
       } else {
         showToast(`Failed to restore from uploaded file: ${response.data.error}`, 'error');
       }
