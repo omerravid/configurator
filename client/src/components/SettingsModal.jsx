@@ -484,8 +484,18 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
       }
     } catch (error) {
       console.error('Failed to test connection:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to test connection';
-      showToast(`Connection test failed: ${errorMessage}`, 'error');
+
+      if (error.response?.status === 401) {
+        showToast('Authentication failed. Please refresh the page and login again.', 'warning');
+        // Clear invalid token and redirect to login
+        localStorage.removeItem('token');
+        setTimeout(() => {
+          window.location.replace('/login');
+        }, 2000);
+      } else {
+        const errorMessage = error.response?.data?.error || error.message || 'Failed to test connection';
+        showToast(`Connection test failed: ${errorMessage}`, 'error');
+      }
     } finally {
       setDbLoading(false);
     }
