@@ -568,8 +568,11 @@ router.get("/data/backup/:backupName", authenticateToken, requireAdmin, async (r
     }
 
     // Set headers for file download
-    res.setHeader('Content-Disposition', `attachment; filename="${backupName}.json"`);
-    res.setHeader('Content-Type', 'application/json');
+    const fileExtension = result.filePath.endsWith('.zip') ? 'zip' : 'json';
+    const contentType = fileExtension === 'zip' ? 'application/zip' : 'application/json';
+
+    res.setHeader('Content-Disposition', `attachment; filename="${backupName}.${fileExtension}"`);
+    res.setHeader('Content-Type', contentType);
 
     // Send the file
     res.sendFile(result.filePath);
