@@ -459,6 +459,9 @@ class BackupRestore {
       }
       console.log(`✅ Restored ${restoredConfigs} configurations`);
 
+      // Map configuration IDs within data structures (products that reference components/versions)
+      await this.mapConfigurationIDsInData(configIdMapping);
+
       // Restore files if present
       let restoredFiles = 0;
       if (backupData.data.files && backupData.data.files.length > 0 && isZip) {
