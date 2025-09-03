@@ -474,6 +474,31 @@ class BackupRestore {
     }
   }
 
+  // Get existing admin users before clearing
+  async getExistingAdminUsers() {
+    if (this.isMongoDb) {
+      const mongoose = require('mongoose');
+      const UserModel = mongoose.model('User');
+      return await UserModel.find({ role: 'ADMIN' }).lean();
+    } else {
+      const db = require('./models/database');
+      const result = await db.query("SELECT * FROM users WHERE role = 'ADMIN'");
+      return result.rows;
+    }
+  }
+
+  // Clear only non-admin users
+  async clearNonAdminUsers() {
+    if (this.isMongoDb) {
+      const mongoose = require('mongoose');
+      const UserModel = mongoose.model('User');
+      await UserModel.deleteMany({ role: { $ne: 'ADMIN' } });
+    } else {
+      const db = require('./models/database');
+      await db.query("DELETE FROM users WHERE role != 'ADMIN'");
+    }
+  }
+
   async clearAllConfigurations() {
     if (this.isMongoDb) {
       const mongoose = require('mongoose');
