@@ -487,7 +487,12 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
       console.error('Failed to test connection:', error);
 
       if (error.response?.status === 401) {
-        showToast('Authentication failed. Please refresh the page and login again.', 'warning');
+        const errorMsg = error.response?.data?.error || 'Authentication failed';
+        if (errorMsg.includes('database switch')) {
+          showToast('Authentication failed after database switch. Please login again.', 'warning');
+        } else {
+          showToast('Session expired. Please login again.', 'warning');
+        }
         // Clear invalid token and redirect to login
         localStorage.removeItem('token');
         setTimeout(() => {
