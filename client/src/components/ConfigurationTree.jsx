@@ -633,6 +633,12 @@ const ConfigurationTree = ({
   const loadRootConfigurations = async () => {
     setLoading(true);
     setError(null);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      window.location.replace("/login");
+      return;
+    }
     try {
       const includeArchived = activeTab === 'archived';
       const response = await configAPI.getAll(includeArchived);
