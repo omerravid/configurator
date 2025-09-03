@@ -145,12 +145,12 @@ class BackupRestore {
   async getAllConfigurationsForBackup() {
     if (this.isMongoDb) {
       const mongoose = require('mongoose');
-      
+
       // Check if we're connected to MongoDB
       if (mongoose.connection.readyState !== 1) {
         throw new Error('MongoDB is not connected');
       }
-      
+
       const ConfigurationModel = mongoose.model('Configuration');
       return await ConfigurationModel.find({}).lean();
     } else {
@@ -159,16 +159,118 @@ class BackupRestore {
     }
   }
 
+  // Get all files for backup
+  async getAllFilesForBackup() {
+    try {
+      const FileStorageService = require('./services/FileStorageService');
+      const fileService = new FileStorageService();
+      const storageDir = path.join(__dirname, 'storage/files');
+
+      // Check if storage directory exists
+      try {
+        await fs.access(storageDir);
+      } catch (error) {
+        console.log('No storage directory found, skipping files backup');
+        return [];
+      }
+
+      const allFiles = await fs.readdir(storageDir);
+      const fileMetadata = [];
+
+      // Process metadata files
+      for (const fileName of allFiles) {
+        if (fileName.endsWith('.meta.json')) {
+          try {
+            const metaFilePath = path.join(storageDir, fileName);
+            const metaData = JSON.parse(await fs.readFile(metaFilePath, 'utf8'));
+            const actualFileName = fileName.replace('.meta.json', '');
+            const actualFilePath = path.join(storageDir, actualFileName);
+
+            // Check if actual file exists
+            try {
+              await fs.access(actualFilePath);
+              fileMetadata.push({
+                storageKey: metaData.storageKey || actualFileName,
+                originalName: metaData.originalName,
+                mimeType: metaData.mimeType,
+                size: metaData.size,
+                uploadDate: metaData.uploadDate,
+                fileName: actualFileName
+              });
+            } catch (fileError) {
+              console.warn(`File ${actualFileName} metadata exists but file missing`);
+            }
+          } catch (error) {
+            console.warn(`Error reading metadata file ${fileName}:`, error.message);
+          }
+        }
+      }
+
+      return fileMetadata;
+    } catch (error) {
+      console.warn('Error getting files for backup:', error.message);
+      return [];
+    }
+  }
+
+  // Create ZIP backup with database data and files
+  async createZipBackup(backupFile, backupData) {
+    return new Promise((resolve, reject) => {
+      const output = require('fs').createWriteStream(backupFile);
+      const archive = archiver('zip', {
+        zlib: { level: 9 } // Maximum compression
+      });
+
+      output.on('close', () => {
+        console.log(`Archive finalized: ${archive.pointer()} total bytes`);
+        resolve();
+      });
+
+      archive.on('error', (err) => {
+        reject(err);
+      });
+
+      archive.pipe(output);
+
+      // Add database backup as JSON
+      archive.append(JSON.stringify(backupData, null, 2), { name: 'database.json' });
+
+      // Add all files from storage
+      const storageDir = path.join(__dirname, 'storage/files');
+
+      // Add files if they exist
+      if (backupData.data.files && backupData.data.files.length > 0) {
+        for (const fileInfo of backupData.data.files) {
+          const filePath = path.join(storageDir, fileInfo.fileName);
+          const metaPath = path.join(storageDir, fileInfo.fileName + '.meta.json');
+
+          try {
+            // Add the actual file
+            archive.file(filePath, { name: `files/${fileInfo.fileName}` });
+
+            // Add the metadata file
+            archive.file(metaPath, { name: `files/${fileInfo.fileName}.meta.json` });
+          } catch (error) {
+            console.warn(`Could not add file ${fileInfo.fileName} to backup:`, error.message);
+          }
+        }
+      }
+
+      archive.finalize();
+    });
+  }
+
   async listBackups() {
     try {
       await this.ensureBackupDir();
       const files = await fs.readdir(this.backupDir);
       const backups = files
-        .filter(file => file.endsWith('.json'))
+        .filter(file => file.endsWith('.json') || file.endsWith('.zip'))
         .map(file => ({
-          name: file.replace('.json', ''),
+          name: file.replace(/\.(json|zip)$/, ''),
           file: path.join(this.backupDir, file),
-          path: file
+          path: file,
+          type: file.endsWith('.zip') ? 'full' : 'database-only'
         }));
 
       return { success: true, backups };
