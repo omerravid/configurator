@@ -726,12 +726,21 @@ const ScalarPropertiesPanel = ({
       formData.append('relativePaths', rel);
     });
 
+    console.log("=== FOLDER IMPORT DEBUG ===");
     console.log("Folder import:", {
       configId: selectedConfig.id,
       propertyPath,
       folderName: rootFolderName,
       fileCount: selectedImportFiles.length
     });
+    console.log("FormData contents:");
+    for (let [key, value] of formData.entries()) {
+      if (key === 'files') {
+        console.log(`  ${key}: File object - ${value.name || 'unknown'}`);
+      } else {
+        console.log(`  ${key}: ${value}`);
+      }
+    }
 
     // Use the enhanced folder import API that attaches to configuration
     const response = await configAPI.importFolderToProperty(formData);
