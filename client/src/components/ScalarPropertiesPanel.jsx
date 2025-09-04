@@ -1424,6 +1424,18 @@ const ScalarPropertiesPanel = ({
               onChange={(e) => setNewPropertyName(e.target.value)}
               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <div className="flex items-center space-x-2 mb-2">
+              <input
+                type="checkbox"
+                id="createAsArray"
+                checked={createAsArray}
+                onChange={(e) => setCreateAsArray(e.target.checked)}
+                className="rounded"
+              />
+              <label htmlFor="createAsArray" className="text-sm text-gray-700 dark:text-gray-300">
+                Create as array (empty array)
+              </label>
+            </div>
             <input
               type="text"
               placeholder="Property value"
