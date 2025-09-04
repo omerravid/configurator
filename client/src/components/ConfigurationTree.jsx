@@ -483,20 +483,34 @@ const TreeNode = ({
         <ConfigTypeIcon type={config.type} status={config.status} />
 
         <div className="flex-1 min-w-0">
-          <div className={`text-sm font-medium truncate ${Boolean(config.archived) ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}`}>
+          <div className={`text-sm font-medium truncate ${
+            config._isPlaceholder
+              ? 'text-gray-400 dark:text-gray-500'
+              : Boolean(config.archived)
+                ? 'text-gray-500 dark:text-gray-400'
+                : 'text-gray-900 dark:text-gray-100'
+          }`}>
             {config.name}
-            {Boolean(config.archived) && (
+            {config._isPlaceholder && (
+              <span className="ml-1 text-xs text-gray-400">(placeholder)</span>
+            )}
+            {Boolean(config.archived) && !config._isPlaceholder && (
               <span className="ml-1 text-xs text-gray-400">(archived)</span>
             )}
           </div>
-          <div className="text-xs text-gray-500 truncate">
+          <div className={`text-xs truncate ${config._isPlaceholder ? 'text-gray-400' : 'text-gray-500'}`}>
             {config.type}
-            {config.status === "DRAFT" && (
+            {config._isPlaceholder && (
+              <span className="ml-1 px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-full text-xs">
+                PLACEHOLDER
+              </span>
+            )}
+            {config.status === "DRAFT" && !config._isPlaceholder && (
               <span className="ml-1 px-1.5 py-0.5 bg-orange-100 text-orange-800 rounded-full text-xs">
                 DRAFT
               </span>
             )}
-            {Boolean(config.archived) && (
+            {Boolean(config.archived) && !config._isPlaceholder && (
               <span className="ml-1 px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
                 ARCHIVED
               </span>
