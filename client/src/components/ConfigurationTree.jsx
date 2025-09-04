@@ -640,6 +640,26 @@ const TreeNode = ({
   );
 };
 
+// Helper function for TreeNode to check archived descendants
+const hasArchivedDescendantsHelper = (configId, allConfigs) => {
+  const children = allConfigs.filter(config => {
+    const parentId = extractParentId(config.parent_id);
+    return parentId === configId;
+  });
+
+  for (const child of children) {
+    // If this child is archived, we found an archived descendant
+    if (Boolean(child.archived)) {
+      return true;
+    }
+    // Recursively check this child's descendants
+    if (hasArchivedDescendantsHelper(child.id, allConfigs)) {
+      return true;
+    }
+  }
+  return false;
+};
+
 // Helper function to extract actual ID from various parent_id formats
 const extractParentId = (parentId) => {
   if (!parentId) return null;
