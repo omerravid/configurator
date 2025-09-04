@@ -144,6 +144,20 @@ export const configAPI = {
     });
   },
 
+  // Upload a new file to a configuration
+  uploadFile: (configId, propertyPath, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('configId', configId);
+    formData.append('propertyPath', propertyPath);
+
+    return api.post("/file-management/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
   // Replace a file in a configuration
   replaceFile: (configId, propertyPath, file) => {
     const formData = new FormData();
