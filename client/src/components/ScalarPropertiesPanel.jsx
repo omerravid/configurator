@@ -506,23 +506,30 @@ const ScalarPropertiesPanel = ({
 
     let parsedValue;
 
-    if (createAsArray) {
-      // Create empty array when checkbox is checked
-      parsedValue = [];
-    } else {
-      // Parse scalar value
-      parsedValue = newPropertyValue;
-      try {
-        if (newPropertyValue === "true" || newPropertyValue === "false") {
-          parsedValue = newPropertyValue === "true";
-        } else if (!isNaN(newPropertyValue) && newPropertyValue !== "" && newPropertyValue !== null) {
-          parsedValue = Number(newPropertyValue);
-        } else if (newPropertyValue === "null") {
-          parsedValue = null;
+    // Handle different property types based on radio button selection
+    switch (propertyType) {
+      case "array":
+        parsedValue = [];
+        break;
+      case "object":
+        parsedValue = {};
+        break;
+      case "property":
+      default:
+        // Parse scalar value
+        parsedValue = newPropertyValue;
+        try {
+          if (newPropertyValue === "true" || newPropertyValue === "false") {
+            parsedValue = newPropertyValue === "true";
+          } else if (!isNaN(newPropertyValue) && newPropertyValue !== "" && newPropertyValue !== null) {
+            parsedValue = Number(newPropertyValue);
+          } else if (newPropertyValue === "null") {
+            parsedValue = null;
+          }
+        } catch (e) {
+          // Keep as string if parsing fails
         }
-      } catch (e) {
-        // Keep as string if parsing fails
-      }
+        break;
     }
 
     // Check if we're adding a property to an array element
@@ -536,11 +543,16 @@ const ScalarPropertiesPanel = ({
       onPropertyAdd?.(selectedPath, newPropertyName, parsedValue);
     }
 
+    // Reset form
     setNewPropertyName("");
     setNewPropertyValue("");
-                  setCreateAsArray(false);
-    setCreateAsArray(false);
+    setPropertyType("property");
     setShowAddProperty(false);
+
+    // Show success message with appropriate type
+    const typeMessage = propertyType === "array" ? "array" :
+                       propertyType === "object" ? "object" : "property";
+    showToast(`${typeMessage.charAt(0).toUpperCase() + typeMessage.slice(1)} "${newPropertyName}" created successfully${propertyType === "object" ? ". Navigate to it in the Objects section below." : ""}`, "success");
   };
 
   const handleDeleteProperty = (propertyName) => {
