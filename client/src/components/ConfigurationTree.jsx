@@ -610,6 +610,27 @@ const TreeNode = ({
   );
 };
 
+// Helper function to extract actual ID from various parent_id formats
+const extractParentId = (parentId) => {
+  if (!parentId) return null;
+
+  // If it's already a string, return it (unless it's '[object Object]')
+  if (typeof parentId === 'string') {
+    if (parentId === '[object Object]') {
+      console.warn('Found [object Object] as parent_id - database serialization issue');
+      return null;
+    }
+    return parentId;
+  }
+
+  // If it's an object, try to extract the ID
+  if (typeof parentId === 'object') {
+    return parentId.id || parentId._id || null;
+  }
+
+  return String(parentId);
+};
+
 const ConfigurationTree = ({
   selectedConfig,
   onConfigSelect,
