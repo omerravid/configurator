@@ -732,11 +732,6 @@ const ConfigurationTree = ({
       console.log("Active tab:", activeTab);
       console.log("Include archived parameter:", includeArchived);
       console.log("Configurations loaded:", allConfigs.length);
-      console.log("All loaded configurations detailed:");
-      allConfigs.forEach((config, index) => {
-        console.log(`  ${index + 1}. ${config.name} (${config.type}) - ID: ${config.id}`);
-        console.log(`     Archived: ${config.archived}, Parent ID: ${config.parent_id}`);
-      });
 
       // Filter to show only root-level configs (no parent) - includes PRODUCT and COMPONENT
       let rootConfigs = allConfigs.filter(config => !config.parent_id);
