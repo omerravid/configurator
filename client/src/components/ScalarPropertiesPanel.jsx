@@ -34,6 +34,7 @@ const ScalarPropertiesPanel = ({
   configType, // New prop for configuration type
   selectedConfig, // New prop for reset functionality
   getCurrentData, // New prop for getting current data mode
+  onRefreshData, // New prop for triggering data refresh
 }) => {
   const { showToast } = useToast();
   const [editingProperty, setEditingProperty] = useState(null);
