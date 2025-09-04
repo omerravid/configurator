@@ -1581,20 +1581,30 @@ const ScalarPropertiesPanel = ({
                     const response = await configAPI.uploadFile(selectedConfig?.id, propertyPath, selectedFile);
 
                     if (response.data.success) {
-                      showToast(`File "${selectedFile.name}" uploaded successfully`, "success");
+                      showToast(`File "${selectedFile.name}" uploaded successfully. Refreshing page...`, "success");
 
                       // Clear the form
                       setNewFileName("");
                       setSelectedFile(null);
                       setShowFileUpload(false);
 
-                      // Instead of page reload, trigger a proper data refresh
-                      // The parent component should handle reloading the configuration data
-                      if (window.location && window.location.reload) {
-                        setTimeout(() => {
-                          window.location.reload();
-                        }, 1000); // Add delay to prevent crash
-                      }
+                      // Use a safer page refresh approach
+                      setTimeout(() => {
+                        try {
+                          // Try to refresh data without full page reload first
+                          if (getCurrentData && typeof getCurrentData === 'function') {
+                            // Trigger parent data refresh if available
+                            getCurrentData();
+                          } else {
+                            // Fallback to page reload
+                            window.location.reload();
+                          }
+                        } catch (error) {
+                          console.error('Refresh error:', error);
+                          // Force page reload as last resort
+                          window.location.href = window.location.href;
+                        }
+                      }, 500); // Shorter delay
                     } else {
                       showToast(`Failed to upload file: ${response.data.error}`, "error");
                     }
