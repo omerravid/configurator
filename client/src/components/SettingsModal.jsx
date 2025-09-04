@@ -318,6 +318,13 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
       if (response.data.success) {
         showToast('Switched to embedded MongoDB successfully', 'success');
         loadDatabaseStatus();
+
+        // Reload configurations from the new database
+        if (onDataRefresh) {
+          setTimeout(() => {
+            onDataRefresh();
+          }, 500);
+        }
       } else {
         showToast(`Failed to switch: ${response.data.error}`, 'error');
       }
@@ -347,6 +354,13 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
       if (response.data.success) {
         showToast('Switched to external MongoDB successfully', 'success');
         loadDatabaseStatus();
+
+        // Reload configurations from the new database
+        if (onDataRefresh) {
+          setTimeout(() => {
+            onDataRefresh();
+          }, 500);
+        }
       } else {
         showToast(`Failed to switch: ${response.data.error}`, 'error');
       }
@@ -371,6 +385,13 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
       if (response.data.success) {
         showToast('Switched to SQLite successfully', 'success');
         loadDatabaseStatus();
+
+        // Reload configurations from the new database
+        if (onDataRefresh) {
+          setTimeout(() => {
+            onDataRefresh();
+          }, 500);
+        }
       } else {
         showToast(`Failed to switch: ${response.data.error}`, 'error');
       }
