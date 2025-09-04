@@ -1038,6 +1038,7 @@ const Dashboard = () => {
                     onDataChange={handleDataChange}
                     configType={selectedConfig?.type}
                     selectedConfig={selectedConfig}
+                    onRefreshData={() => loadConfigurationData(selectedConfig)}
                   />
                 ) : (
                   <div className="text-center text-gray-500 p-8">
