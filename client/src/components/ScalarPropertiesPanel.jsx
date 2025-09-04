@@ -1299,6 +1299,46 @@ const ScalarPropertiesPanel = ({
 
   return (
     <div className="p-4" onClick={handleContainerClick}>
+      {/* Action Buttons - Above everything */}
+      {isEditable && !componentRef && configType === "COMPONENT" && (
+        <div className="flex items-center space-x-2 mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Add:</span>
+          <button
+            onClick={() => setShowAddProperty(true)}
+            className="flex items-center space-x-1 px-2 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            <PlusIcon className="w-4 h-4" />
+            <span>Property</span>
+          </button>
+          <button
+            onClick={() => setShowAddLevel(true)}
+            className="flex items-center space-x-1 px-2 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            <FolderPlusIcon className="w-4 h-4" />
+            <span>Level</span>
+          </button>
+          <button
+            onClick={() => setShowFileUpload(true)}
+            className="flex items-center space-x-1 px-2 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700"
+          >
+            <ArrowUpTrayIcon className="w-4 h-4" />
+            <span>Upload File</span>
+          </button>
+          {hasLocalOverrides() && (
+            <>
+              <span className="text-gray-300 mx-2">|</span>
+              <button
+                onClick={handleResetAll}
+                className="flex items-center space-x-1 px-2 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700"
+                title="Reset all local changes at this level"
+              >
+                <span className="text-sm font-bold">↺</span>
+                <span>Reset All</span>
+              </button>
+            </>
+          )}
+        </div>
+      )}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
           {componentRef ? "Component" : "Properties"}
