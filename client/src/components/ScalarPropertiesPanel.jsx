@@ -41,12 +41,10 @@ const ScalarPropertiesPanel = ({
   const [newPropertyName, setNewPropertyName] = useState("");
   const [newPropertyValue, setNewPropertyValue] = useState("");
   const [showAddProperty, setShowAddProperty] = useState(false);
-  const [showAddLevel, setShowAddLevel] = useState(false);
-  const [newLevelName, setNewLevelName] = useState("");
+  const [propertyType, setPropertyType] = useState("property"); // "property", "array", "object"
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [newFileName, setNewFileName] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [createAsArray, setCreateAsArray] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
 
   // Component version management state
@@ -1312,13 +1310,6 @@ const ScalarPropertiesPanel = ({
             <span>Property</span>
           </button>
           <button
-            onClick={() => setShowAddLevel(true)}
-            className="flex items-center space-x-1 px-2 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            <FolderPlusIcon className="w-4 h-4" />
-            <span>Level</span>
-          </button>
-          <button
             onClick={() => setShowFileUpload(true)}
             className="flex items-center space-x-1 px-2 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700"
           >
@@ -1417,7 +1408,7 @@ const ScalarPropertiesPanel = ({
       {/* Add Property Form */}
       {showAddProperty && (
         <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded transition-colors">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Add New Property</h4>
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Add New Item</h4>
           <div className="space-y-2">
             <input
               type="text"
@@ -1426,26 +1417,68 @@ const ScalarPropertiesPanel = ({
               onChange={(e) => setNewPropertyName(e.target.value)}
               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <div className="flex items-center space-x-2 mb-2">
-              <input
-                type="checkbox"
-                id="createAsArray"
-                checked={createAsArray}
-                onChange={(e) => setCreateAsArray(e.target.checked)}
-                className="rounded"
-              />
-              <label htmlFor="createAsArray" className="text-sm text-gray-700 dark:text-gray-300">
-                Create as array (empty array)
-              </label>
+
+            {/* Property Type Radio Buttons */}
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Type:</div>
+              <div className="flex items-center space-x-4">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="propertyType"
+                    value="property"
+                    checked={propertyType === "property"}
+                    onChange={(e) => setPropertyType(e.target.value)}
+                    className="text-blue-600"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Property</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="propertyType"
+                    value="array"
+                    checked={propertyType === "array"}
+                    onChange={(e) => setPropertyType(e.target.value)}
+                    className="text-blue-600"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Array</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="propertyType"
+                    value="object"
+                    checked={propertyType === "object"}
+                    onChange={(e) => setPropertyType(e.target.value)}
+                    className="text-blue-600"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Object</span>
+                </label>
+              </div>
             </div>
-            <input
-              type="text"
-              placeholder={createAsArray ? "Array will be created empty" : "Property value"}
-              value={newPropertyValue}
-              onChange={(e) => setNewPropertyValue(e.target.value)}
-              disabled={createAsArray}
-              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+
+            {propertyType === "property" && (
+              <input
+                type="text"
+                placeholder="Property value"
+                value={newPropertyValue}
+                onChange={(e) => setNewPropertyValue(e.target.value)}
+                className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            )}
+
+            {propertyType === "array" && (
+              <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                Will create an empty array
+              </div>
+            )}
+
+            {propertyType === "object" && (
+              <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                Will create an empty object {'{}'}
+              </div>
+            )}
             <div className="flex space-x-2">
               <button
                 onClick={handleAddProperty}
@@ -1458,7 +1491,7 @@ const ScalarPropertiesPanel = ({
                   setShowAddProperty(false);
                   setNewPropertyName("");
                   setNewPropertyValue("");
-                  setCreateAsArray(false);
+                  setPropertyType("property");
                 }}
                 className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600"
               >
