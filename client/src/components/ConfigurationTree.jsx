@@ -753,8 +753,25 @@ const ConfigurationTree = ({
 
   // Helper function to check if a configuration has archived descendants
   const hasArchivedDescendants = (configId, allConfigs) => {
-    const children = allConfigs.filter(config => config.parent_id === configId);
-    console.log(`  Checking children of ${configId}:`, children.map(c => ({ id: c.id, name: c.name, type: c.type, archived: c.archived })));
+    // Handle the parent_id object issue - extract the actual ID if it's an object
+    const children = allConfigs.filter(config => {
+      let parentId = config.parent_id;
+
+      // If parent_id is an object, try to extract the actual ID
+      if (parentId && typeof parentId === 'object') {
+        parentId = parentId.id || parentId._id || parentId.toString();
+      }
+
+      return parentId === configId;
+    });
+
+    console.log(`  Checking children of ${configId}:`, children.map(c => ({
+      id: c.id,
+      name: c.name,
+      type: c.type,
+      archived: c.archived,
+      raw_parent_id: c.parent_id
+    })));
 
     for (const child of children) {
       // If this child is archived, we found an archived descendant
