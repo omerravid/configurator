@@ -52,6 +52,12 @@ router.post("/", authenticateToken, upload.array('files'), async (req, res) => {
     const configId = req.body.configId;
     const propertyPath = req.body.propertyPath;
 
+    console.log("=== FOLDER IMPORT ATTACHMENT DEBUG ===");
+    console.log("req.body keys:", Object.keys(req.body));
+    console.log("configId:", configId, typeof configId);
+    console.log("propertyPath:", propertyPath, typeof propertyPath);
+    console.log("Should attach:", !!(configId && propertyPath));
+
     if (configId && propertyPath) {
       console.log(`Attaching imported structure to config ${configId} at path: ${propertyPath}`);
 
