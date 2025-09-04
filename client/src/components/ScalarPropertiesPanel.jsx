@@ -54,7 +54,23 @@ const ScalarPropertiesPanel = ({
   // Rules dialog state
   const [rulesDialog, setRulesDialog] = useState({ isOpen: false, configurationId: null, propertyPath: null, existingRules: [] });
 
-  // Auto-populate filename when file is selected\n  useEffect(() => {\n    if (selectedFile && !newFileName.trim()) {\n      // Remove file extension and use as property name\n      const nameWithoutExtension = selectedFile.name.replace(/\\.[^/.]+$/, \"\");\n      setNewFileName(nameWithoutExtension);\n    }\n  }, [selectedFile, newFileName]);\n\n  // Validation state
+  // Auto-populate filename when file is selected
+  useEffect(() => {
+    if (selectedFile && !newFileName.trim()) {
+      // Remove file extension and use as property name
+      const nameWithoutExtension = selectedFile.name.replace(/\.[^/.]+$/, "");
+      // Replace periods with underscores for valid property names
+      const sanitizedName = nameWithoutExtension.replace(/\./g, "_");
+      setNewFileName(sanitizedName);
+    }
+  }, [selectedFile, newFileName]);
+
+  // Helper function to sanitize property names (replace periods with underscores)
+  const sanitizePropertyName = (name) => {
+    return name.replace(/\./g, "_");
+  };
+
+  // Validation state
   const [validationError, setValidationError] = useState("");
   const [isValidating, setIsValidating] = useState(false);
 
