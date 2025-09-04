@@ -215,6 +215,17 @@ const TreeNode = ({
         childrenData = childrenData.filter(child => !Boolean(child.archived));
       }
 
+      // Debug the parent-child relationship
+      console.log(`Children for ${config.name} (${config.id}):`,
+        childrenData.map(c => ({
+          name: c.name,
+          type: c.type,
+          archived: c.archived,
+          parent_id: c.parent_id,
+          extracted_parent_id: extractParentId(c.parent_id)
+        }))
+      );
+
       setChildren(childrenData);
       setHasLoadedChildren(true);
     } catch (error) {
