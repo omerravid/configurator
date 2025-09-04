@@ -144,6 +144,15 @@ export const configAPI = {
     });
   },
 
+  // Import folder and attach to a specific property in a configuration
+  importFolderToProperty: (formData) => {
+    return api.post("/folder-import", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
   // Upload a new file to a configuration
   uploadFile: (configId, propertyPath, file) => {
     const formData = new FormData();
