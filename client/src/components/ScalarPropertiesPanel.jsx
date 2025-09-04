@@ -1441,6 +1441,143 @@ const ScalarPropertiesPanel = ({
         </div>
       )}
 
+      {/* Add Level Form */}
+      {showAddLevel && (
+        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded transition-colors">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Add New Level</h4>
+          <div className="space-y-2">
+            <input
+              type="text"
+              placeholder="Level name (creates empty object)"
+              value={newLevelName}
+              onChange={(e) => setNewLevelName(e.target.value)}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+            <div className="flex space-x-2">
+              <button
+                onClick={() => {
+                  if (!newLevelName.trim()) {
+                    showToast("Level name cannot be empty", "error");
+                    return;
+                  }
+
+                  if (selectedValue && selectedValue.hasOwnProperty(newLevelName)) {
+                    showToast("Level already exists", "error");
+                    return;
+                  }
+
+                  // Create a new empty object at this level
+                  const newEmptyObject = {};
+                  onPropertyAdd?.(selectedPath, newLevelName, newEmptyObject);
+
+                  setNewLevelName("");
+                  setShowAddLevel(false);
+                  showToast(`Level "${newLevelName}" created successfully`, "success");
+                }}
+                className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+              >
+                Create
+              </button>
+              <button
+                onClick={() => {
+                  setShowAddLevel(false);
+                  setNewLevelName("");
+                }}
+                className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Upload File Form */}
+      {showFileUpload && (
+        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded transition-colors">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Upload File</h4>
+          <div className="space-y-2">
+            <input
+              type="text"
+              placeholder="Property name for the file"
+              value={newFileName}
+              onChange={(e) => setNewFileName(e.target.value)}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+            <input
+              type="file"
+              onChange={(e) => setSelectedFile(e.target.files[0])}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+            {selectedFile && (
+              <div className="text-xs text-gray-600 dark:text-gray-400">
+                Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+              </div>
+            )}
+            <div className="flex space-x-2">
+              <button
+                onClick={async () => {
+                  if (!newFileName.trim()) {
+                    showToast("File property name cannot be empty", "error");
+                    return;
+                  }
+
+                  if (!selectedFile) {
+                    showToast("Please select a file to upload", "error");
+                    return;
+                  }
+
+                  if (selectedValue && selectedValue.hasOwnProperty(newFileName)) {
+                    showToast("Property already exists", "error");
+                    return;
+                  }
+
+                  try {
+                    const response = await configAPI.replaceFile(selectedConfig?.id, `${selectedPath}.${newFileName}`, selectedFile);
+
+                    if (response.data.success) {
+                      showToast(`File "${selectedFile.name}" uploaded successfully`, "success");
+
+                      // Create file object structure
+                      const fileObject = {
+                        _type: "file",
+                        _metadata: response.data.metadata,
+                        _link: response.data.downloadUrl
+                      };
+
+                      // Add the file property to the configuration
+                      onPropertyAdd?.(selectedPath, newFileName, fileObject);
+
+                      setNewFileName("");
+                      setSelectedFile(null);
+                      setShowFileUpload(false);
+                    } else {
+                      showToast(`Failed to upload file: ${response.data.error}`, "error");
+                    }
+                  } catch (error) {
+                    console.error('File upload error:', error);
+                    showToast(`Failed to upload file: ${error.message}`, "error");
+                  }
+                }}
+                className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700"
+              >
+                Upload
+              </button>
+              <button
+                onClick={() => {
+                  setShowFileUpload(false);
+                  setNewFileName("");
+                  setSelectedFile(null);
+                }}
+                className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* File Object Management */}
       {isFileObject() && (
         <div className="mb-6">
