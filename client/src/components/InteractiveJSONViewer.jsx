@@ -821,6 +821,7 @@ const InteractiveJSONViewer = ({
   onDataChange,
   configType,
   selectedConfig,
+  onRefreshData, // New prop for triggering data refresh
 }) => {
   const [hoveredSource, setHoveredSource] = useState(null);
   const [hoveredPath, setHoveredPath] = useState(null);
