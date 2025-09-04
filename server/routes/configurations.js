@@ -514,9 +514,16 @@ router.post(
   checkConfigPermissions,
   async (req, res) => {
     try {
+      console.log("=== COMMIT ROUTE CALLED ===");
+      console.log("Config ID:", req.params.id);
+      console.log("User:", req.user);
+      console.log("Config from middleware:", req.config);
+
       const config = await ConfigurationService.commitUserConfiguration(
         req.params.id,
       );
+
+      console.log("Commit successful, updated config:", config);
 
       res.json({
         message: "Configuration committed successfully",
