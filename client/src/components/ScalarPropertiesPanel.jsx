@@ -523,7 +523,9 @@ const ScalarPropertiesPanel = ({
         parsedValue = [];
         break;
       case "object":
-        parsedValue = {};
+        parsedValue = {
+          "Property": ""
+        };
         break;
       case "property":
       default:
