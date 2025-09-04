@@ -1500,7 +1500,7 @@ const ScalarPropertiesPanel = ({
 
                   setNewLevelName("");
                   setShowAddLevel(false);
-                  showToast(`Level "${newLevelName}" created successfully`, "success");
+                  showToast(`Level "${newLevelName}" created successfully. Navigate to it in the Objects section below.`, "success");
                 }}
                 className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
               >
@@ -1626,7 +1626,7 @@ const ScalarPropertiesPanel = ({
 
       {/* Help text */}
       <div className="mb-4 text-xs text-gray-500 dark:text-gray-400">
-        💡 Right-click on properties for more options ��� Click ℹ️ to see source configuration
+        💡 Right-click on properties for more options • Click ℹ️ to see source configuration
         {subObjects.length > 0 && " • Use 'Go to' buttons to navigate to objects"}
       </div>
 
