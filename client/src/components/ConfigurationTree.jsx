@@ -268,7 +268,8 @@ const TreeNode = ({
     const canRename = () => user?.role === "ADMIN";
 
     const canCreateChild = () => {
-      if (config.type === "USER" || config.type === "VERSION") return false;
+      if (config.type === "VERSION") return false;
+      if (config.type === "USER") return true; // USER configs can have USER children
       if (config.type === "COMPONENT") return user?.role === "ADMIN";
       return user?.role === "ADMIN" || config.type === "PRODUCT";
     };
