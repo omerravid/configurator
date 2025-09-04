@@ -105,7 +105,23 @@ class Configuration {
        ORDER BY c.type, c.created_at DESC`,
     );
 
+    console.log("=== RAW DATABASE RESULT DEBUG ===");
+    console.log("First few raw rows from database:");
+    result.rows.slice(0, 3).forEach((row, i) => {
+      console.log(`Row ${i + 1}:`, {
+        id: row.id,
+        name: row.name,
+        type: row.type,
+        parent_id: row.parent_id,
+        parent_id_type: typeof row.parent_id,
+        archived: row.archived,
+        archived_type: typeof row.archived
+      });
+    });
+
     return result.rows.map((config) => {
+      console.log(`Processing config ${config.name}: parent_id = ${config.parent_id} (type: ${typeof config.parent_id})`);
+
       if (config.data) {
         config.data = JSON.parse(config.data);
       }
