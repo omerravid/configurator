@@ -1560,7 +1560,11 @@ const ScalarPropertiesPanel = ({
               type="text"
               placeholder="Property name for the file"
               value={newFileName}
-              onChange={(e) => setNewFileName(e.target.value)}
+              onChange={(e) => {
+                // Automatically replace periods with underscores as user types
+                const sanitizedValue = sanitizePropertyName(e.target.value);
+                setNewFileName(sanitizedValue);
+              }}
               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
             <input
