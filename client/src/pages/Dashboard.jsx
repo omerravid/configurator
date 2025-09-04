@@ -251,23 +251,46 @@ const Dashboard = () => {
   };
 
   const handleCommit = async () => {
-    if (
-      !selectedConfig ||
-      selectedConfig.type !== "USER" ||
-      selectedConfig.status !== "DRAFT"
-    ) {
+    console.log("=== handleCommit called ===");
+    console.log("selectedConfig:", selectedConfig);
+
+    if (!selectedConfig) {
+      console.log("No selected config");
+      showToast("No configuration selected", "error");
       return;
     }
 
+    if (selectedConfig.type !== "USER" && selectedConfig.type !== "VERSION") {
+      console.log("Invalid config type:", selectedConfig.type);
+      showToast(`Cannot commit ${selectedConfig.type} configurations. Only USER and VERSION configurations can be committed.`, "error");
+      return;
+    }
+
+    if (selectedConfig.status !== "DRAFT") {
+      console.log("Invalid config status:", selectedConfig.status);
+      showToast(`Configuration is already ${selectedConfig.status}. Only DRAFT configurations can be committed.`, "error");
+      return;
+    }
+
+    console.log("Attempting to commit config ID:", selectedConfig.id);
+
     try {
-      await configAPI.commit(selectedConfig.id);
+      const response = await configAPI.commit(selectedConfig.id);
+      console.log("Commit response:", response);
+
       setRefreshTrigger((prev) => prev + 1);
       // Reload the current config
       const updated = { ...selectedConfig, status: "COMMITTED" };
       setSelectedConfig(updated);
+
+      showToast(`Configuration "${selectedConfig.name}" committed successfully`, "success");
     } catch (err) {
       console.error("Failed to commit configuration:", err);
-      setError("Failed to commit configuration");
+      console.error("Error response:", err.response);
+
+      const errorMessage = err.response?.data?.error || err.message || "Failed to commit configuration";
+      setError(`Failed to commit configuration: ${errorMessage}`);
+      showToast(`Failed to commit: ${errorMessage}`, "error");
     }
   };
 
