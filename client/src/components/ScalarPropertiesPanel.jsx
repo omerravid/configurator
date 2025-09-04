@@ -1502,56 +1502,6 @@ const ScalarPropertiesPanel = ({
         </div>
       )}
 
-      {/* Add Level Form */}
-      {showAddLevel && (
-        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded transition-colors">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Add New Level</h4>
-          <div className="space-y-2">
-            <input
-              type="text"
-              placeholder="Level name (creates empty object)"
-              value={newLevelName}
-              onChange={(e) => setNewLevelName(e.target.value)}
-              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-            <div className="flex space-x-2">
-              <button
-                onClick={() => {
-                  if (!newLevelName.trim()) {
-                    showToast("Level name cannot be empty", "error");
-                    return;
-                  }
-
-                  if (selectedValue && selectedValue.hasOwnProperty(newLevelName)) {
-                    showToast("Level already exists", "error");
-                    return;
-                  }
-
-                  // Create a new empty object at this level
-                  const newEmptyObject = {};
-                  onPropertyAdd?.(selectedPath, newLevelName, newEmptyObject);
-
-                  setNewLevelName("");
-                  setShowAddLevel(false);
-                  showToast(`Level "${newLevelName}" created successfully. Navigate to it in the Objects section below.`, "success");
-                }}
-                className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
-              >
-                Create
-              </button>
-              <button
-                onClick={() => {
-                  setShowAddLevel(false);
-                  setNewLevelName("");
-                }}
-                className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Upload File Form */}
       {showFileUpload && (
