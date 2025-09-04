@@ -1305,13 +1305,29 @@ const ScalarPropertiesPanel = ({
             </button>
           )}
           {isEditable && !componentRef && configType === "COMPONENT" && (
-            <button
-              onClick={() => setShowAddProperty(true)}
-              className="flex items-center space-x-1 px-2 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              <PlusIcon className="w-4 h-4" />
-              <span>Add Property</span>
-            </button>
+            <>
+              <button
+                onClick={() => setShowAddProperty(true)}
+                className="flex items-center space-x-1 px-2 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                <PlusIcon className="w-4 h-4" />
+                <span>Add Property</span>
+              </button>
+              <button
+                onClick={() => setShowAddLevel(true)}
+                className="flex items-center space-x-1 px-2 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                <FolderPlusIcon className="w-4 h-4" />
+                <span>Add Level</span>
+              </button>
+              <button
+                onClick={() => setShowFileUpload(true)}
+                className="flex items-center space-x-1 px-2 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700"
+              >
+                <ArrowUpTrayIcon className="w-4 h-4" />
+                <span>Upload File</span>
+              </button>
+            </>
           )}
         </div>
       </div>
