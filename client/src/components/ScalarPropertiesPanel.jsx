@@ -1563,30 +1563,25 @@ const ScalarPropertiesPanel = ({
                   try {
                     // Handle root path correctly - don't add dot prefix if at root
                     const propertyPath = selectedPath === "root" ? newFileName : `${selectedPath.replace(/^root\./, "")}.${newFileName}`;
-                    const response = await configAPI.replaceFile(selectedConfig?.id, propertyPath, selectedFile);
+                    const response = await configAPI.uploadFile(selectedConfig?.id, propertyPath, selectedFile);
 
                     if (response.data.success) {
                       showToast(`File "${selectedFile.name}" uploaded successfully`, "success");
 
-                      // Create file object structure
-                      const fileObject = {
-                        _type: "file",
-                        _metadata: response.data.metadata,
-                        _link: response.data.downloadUrl
-                      };
-
-                      // Add the file property to the configuration
-                      onPropertyAdd?.(selectedPath, newFileName, fileObject);
-
+                      // The server already updated the configuration, just clear the form
                       setNewFileName("");
                       setSelectedFile(null);
                       setShowFileUpload(false);
+
+                      // Trigger a page refresh to show the new file
+                      window.location.reload();
                     } else {
                       showToast(`Failed to upload file: ${response.data.error}`, "error");
                     }
                   } catch (error) {
                     console.error('File upload error:', error);
-                    showToast(`Failed to upload file: ${error.message}`, "error");
+                    const errorMessage = error.response?.data?.details || error.response?.data?.error || error.message;
+                    showToast(`Failed to upload file: ${errorMessage}`, "error");
                   }
                 }}
                 className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700"
@@ -1631,7 +1626,7 @@ const ScalarPropertiesPanel = ({
 
       {/* Help text */}
       <div className="mb-4 text-xs text-gray-500 dark:text-gray-400">
-        💡 Right-click on properties for more options • Click ℹ️ to see source configuration
+        💡 Right-click on properties for more options ��� Click ℹ️ to see source configuration
         {subObjects.length > 0 && " • Use 'Go to' buttons to navigate to objects"}
       </div>
 
