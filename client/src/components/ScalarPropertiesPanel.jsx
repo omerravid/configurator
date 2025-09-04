@@ -1796,9 +1796,13 @@ const ScalarPropertiesPanel = ({
             <div className="flex space-x-2">
               <button
                 onClick={handleAddProperty}
-                className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                disabled={isImporting}
+                className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center space-x-1"
               >
-                Add
+                {isImporting && (
+                  <div className="w-3 h-3 animate-spin border border-white border-t-transparent rounded-full"></div>
+                )}
+                <span>{isImporting ? "Importing..." : "Add"}</span>
               </button>
               <button
                 onClick={() => {
