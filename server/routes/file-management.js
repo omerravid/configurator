@@ -82,6 +82,12 @@ router.post("/upload", authenticateToken, upload.single('file'), async (req, res
     const dataUpdate = {};
     setValueAtPath(dataUpdate, propertyPath, newFileObject);
 
+    console.log(`Updating configuration ${configId} with file data:`, {
+      propertyPath,
+      dataUpdate: JSON.stringify(dataUpdate, null, 2),
+      fileObject: JSON.stringify(newFileObject, null, 2)
+    });
+
     await ConfigurationService.updateConfiguration(
       configId,
       {
