@@ -539,19 +539,30 @@ class ConfigurationService {
    * Commit a user configuration
    */
   static async commitUserConfiguration(configId) {
+    console.log("=== commitUserConfiguration called ===");
+    console.log("Config ID:", configId);
+
     const config = await Configuration.findById(configId);
     if (!config) {
       throw new Error("Configuration not found");
     }
 
-    if (config.type !== "USER") {
-      throw new Error("Only user configurations can be committed");
+    console.log("Found config for commit:", {
+      id: config.id,
+      name: config.name,
+      type: config.type,
+      status: config.status
+    });
+
+    if (config.type !== "USER" && config.type !== "VERSION") {
+      throw new Error("Only user and version configurations can be committed");
     }
 
     if (config.status === "COMMITTED") {
       throw new Error("Configuration is already committed");
     }
 
+    console.log("Calling Configuration.commit");
     return await Configuration.commit(configId);
   }
 
