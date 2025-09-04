@@ -799,7 +799,22 @@ const ConfigurationTree = ({
     // Handle the parent_id object issue - extract the actual ID if it's an object
     const children = allConfigs.filter(config => {
       const parentId = extractParentId(config.parent_id);
-      return parentId === configId;
+      if (parentId === configId) {
+        return true;
+      }
+
+      // TEMPORARY WORKAROUND: If parent_id is corrupted ('[object Object]'),
+      // try to match based on component-version relationship patterns
+      if (config.parent_id === '[object Object]' && config.type === 'VERSION') {
+        const parentConfig = allConfigs.find(c => c.id === configId);
+        if (parentConfig && parentConfig.type === 'COMPONENT') {
+          // This is likely a version of this component
+          console.log(`WORKAROUND: Assuming ${config.name} (VERSION) is child of ${parentConfig.name} (COMPONENT)`);
+          return true;
+        }
+      }
+
+      return false;
     });
 
     console.log(`  Checking children of ${configId}:`, children.map(c => ({
