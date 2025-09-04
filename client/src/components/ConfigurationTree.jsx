@@ -230,13 +230,28 @@ const TreeNode = ({
       }
 
       // Debug the parent-child relationship
+      // Apply placeholder logic to children that have archived descendants
+      if (isArchiveView && config._isPlaceholder) {
+        childrenData = childrenData.map(child => {
+          if (!Boolean(child.archived)) {
+            // Check if this non-archived child has archived descendants
+            const allConfigs = childrenData; // We already have the full dataset from the filter above
+            // For now, mark all non-archived children as placeholders if they're shown
+            // The proper check was already done in the filter above
+            return { ...child, _isPlaceholder: true };
+          }
+          return child;
+        });
+      }
+
       console.log(`Children for ${config.name} (${config.id}):`,
         childrenData.map(c => ({
           name: c.name,
           type: c.type,
           archived: c.archived,
           parent_id: c.parent_id,
-          extracted_parent_id: extractParentId(c.parent_id)
+          extracted_parent_id: extractParentId(c.parent_id),
+          _isPlaceholder: c._isPlaceholder
         }))
       );
 
