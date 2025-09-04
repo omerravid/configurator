@@ -185,8 +185,24 @@ class Configuration {
     const values = [];
 
     if (data !== undefined) {
+      // Get existing configuration to merge data properly
+      const existingConfig = await this.findById(id);
+      if (!existingConfig) {
+        throw new Error("Configuration not found");
+      }
+
+      // Merge new data with existing data instead of replacing
+      const existingData = existingConfig.data || {};
+      const mergedData = this.deepMerge(existingData, data);
+
       updateFields.push("data = ?");
-      values.push(JSON.stringify(data));
+      values.push(JSON.stringify(mergedData));
+
+      console.log(`Updating configuration ${id}:`, {
+        existingData: JSON.stringify(existingData, null, 2),
+        newData: JSON.stringify(data, null, 2),
+        mergedData: JSON.stringify(mergedData, null, 2)
+      });
     }
 
     if (description !== undefined) {
@@ -207,6 +223,26 @@ class Configuration {
     );
 
     return await this.findById(id);
+  }
+
+  // Helper method for deep merging objects
+  static deepMerge(target, source) {
+    const result = { ...target };
+
+    for (const key in source) {
+      if (source.hasOwnProperty(key)) {
+        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key]) &&
+            target[key] && typeof target[key] === 'object' && !Array.isArray(target[key])) {
+          // Both are objects, merge recursively
+          result[key] = this.deepMerge(target[key], source[key]);
+        } else {
+          // Replace with new value (for primitives, arrays, or null)
+          result[key] = source[key];
+        }
+      }
+    }
+
+    return result;
   }
 
   static async updateName(id, name) {
