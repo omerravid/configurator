@@ -1343,44 +1343,6 @@ const ScalarPropertiesPanel = ({
         <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
           {componentRef ? "Component" : "Properties"}
         </h3>
-        <div className="flex items-center space-x-2">
-          {isEditable && !componentRef && hasLocalOverrides() && (
-            <button
-              onClick={handleResetAll}
-              className="flex items-center space-x-1 px-2 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700"
-              title="Reset all local changes at this level"
-            >
-              <span className="text-sm font-bold">↺</span>
-              <span>Reset All</span>
-            </button>
-          )}
-          {isEditable && !componentRef && configType === "COMPONENT" && (
-            <>
-              <button
-                onClick={() => setShowAddProperty(true)}
-                className="flex items-center space-x-1 px-2 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                <PlusIcon className="w-4 h-4" />
-                <span>Add Property</span>
-              </button>
-              <button
-                onClick={() => setShowAddLevel(true)}
-                className="flex items-center space-x-1 px-2 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
-              >
-                <FolderPlusIcon className="w-4 h-4" />
-                <span>Add Level</span>
-              </button>
-              <button
-                onClick={() => setShowFileUpload(true)}
-                className="flex items-center space-x-1 px-2 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700"
-              >
-                <ArrowUpTrayIcon className="w-4 h-4" />
-                <span>Upload File</span>
-              </button>
-            </>
-          )}
-        </div>
-      </div>
 
       <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
         Path: <span className="font-mono bg-gray-100 px-1 rounded">{selectedPath}</span>
