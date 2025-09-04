@@ -1583,13 +1583,18 @@ const ScalarPropertiesPanel = ({
                     if (response.data.success) {
                       showToast(`File "${selectedFile.name}" uploaded successfully`, "success");
 
-                      // The server already updated the configuration, just clear the form
+                      // Clear the form
                       setNewFileName("");
                       setSelectedFile(null);
                       setShowFileUpload(false);
 
-                      // Trigger a page refresh to show the new file
-                      window.location.reload();
+                      // Instead of page reload, trigger a proper data refresh
+                      // The parent component should handle reloading the configuration data
+                      if (window.location && window.location.reload) {
+                        setTimeout(() => {
+                          window.location.reload();
+                        }, 1000); // Add delay to prevent crash
+                      }
                     } else {
                       showToast(`Failed to upload file: ${response.data.error}`, "error");
                     }
