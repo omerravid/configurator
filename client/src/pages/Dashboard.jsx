@@ -287,6 +287,9 @@ const Dashboard = () => {
     } catch (err) {
       console.error("Failed to commit configuration:", err);
       console.error("Error response:", err.response);
+      console.error("Error response data:", err.response?.data);
+      console.error("Error status:", err.response?.status);
+      console.error("Error message:", err.message);
 
       const errorMessage = err.response?.data?.error || err.message || "Failed to commit configuration";
       setError(`Failed to commit configuration: ${errorMessage}`);
