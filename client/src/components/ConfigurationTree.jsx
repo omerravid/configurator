@@ -204,22 +204,27 @@ const TreeNode = ({
       // Filter children based on the current view and placeholder status
       if (isArchiveView) {
         if (config._isPlaceholder) {
-          // For placeholder parents, show children that are either:
-          // 1. Archived themselves, OR
-          // 2. Have archived descendants (need to become placeholders)
-          // We need to check each child to see if it has archived descendants
-          const allConfigs = await configAPI.getAll(true); // Get all configs to check descendants
-          const allConfigsData = allConfigs.data.configs || [];
+          // For placeholder parents, we need to show children that are either archived
+          // OR have archived descendants. Since we can't easily check descendants here,
+          // we'll get all configurations and check each child
+          try {
+            const allConfigsResponse = await configAPI.getAll(true);
+            const allConfigsData = allConfigsResponse.data.configs || [];
 
-          childrenData = childrenData.filter(child => {
-            if (Boolean(child.archived)) {
-              // Child is archived, definitely show it
-              return true;
-            }
-            // Check if this non-archived child has archived descendants
-            const hasArchived = hasArchivedDescendantsHelper(child.id, allConfigsData);
-            return hasArchived;
-          });
+            childrenData = childrenData.filter(child => {
+              if (Boolean(child.archived)) {
+                // Child is archived, definitely show it
+                return true;
+              }
+              // Check if this non-archived child has archived descendants
+              const hasArchived = hasArchivedDescendantsHelper(child.id, allConfigsData);
+              return hasArchived;
+            });
+          } catch (error) {
+            console.error('Error fetching all configs for archive check:', error);
+            // Fallback: show all children if we can't check
+            childrenData = childrenData.filter(child => Boolean(child.archived));
+          }
         } else {
           // For archived parents, show all children but apply same logic recursively
           // The server already filters based on includeArchived, so we get the right set
