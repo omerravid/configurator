@@ -21,6 +21,94 @@ const upload = multer({
   }
 });
 
+// POST /api/file-management/upload - Upload a new file to a configuration
+router.post("/upload", authenticateToken, upload.single('file'), async (req, res) => {
+  try {
+    const { configId, propertyPath } = req.body;
+    const file = req.file;
+
+    console.log(`File upload request: configId=${configId}, propertyPath=${propertyPath}`);
+
+    if (!file) {
+      return res.status(400).json({
+        success: false,
+        error: 'No file uploaded'
+      });
+    }
+
+    if (!configId || !propertyPath) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing configId or propertyPath'
+      });
+    }
+
+    // Get the current configuration
+    const config = await Configuration.findById(configId);
+    if (!config) {
+      return res.status(404).json({
+        success: false,
+        error: 'Configuration not found'
+      });
+    }
+
+    const fileStorage = new FileStorageService();
+
+    // Store the new file
+    const fileMetadata = await fileStorage.storeFile(
+      file.buffer,
+      file.originalname,
+      file.mimetype || 'application/octet-stream'
+    );
+
+    // Generate download URL
+    const downloadUrl = await fileStorage.generateDownloadUrl(fileMetadata);
+
+    // Create new file object
+    const newFileObject = {
+      _type: 'file',
+      _metadata: {
+        originalName: file.originalname,
+        mimeType: file.mimetype || 'application/octet-stream',
+        size: file.size,
+        storageKey: fileMetadata.fileId,
+        storageType: fileMetadata.storageType
+      },
+      _link: downloadUrl
+    };
+
+    // Update the configuration with the new file object
+    // For nested paths, we need to build the proper nested structure
+    const dataUpdate = {};
+    setValueAtPath(dataUpdate, propertyPath, newFileObject);
+
+    await ConfigurationService.updateConfiguration(
+      configId,
+      {
+        data: dataUpdate
+      },
+      "system" // Use system as updater for file uploads
+    );
+
+    console.log(`File upload completed: ${file.originalname} -> ${fileMetadata.fileId}`);
+
+    res.json({
+      success: true,
+      message: `File "${file.originalname}" uploaded successfully`,
+      metadata: newFileObject._metadata,
+      downloadUrl: downloadUrl
+    });
+
+  } catch (error) {
+    console.error("File upload error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to upload file",
+      details: error.message
+    });
+  }
+});
+
 // POST /api/file-management/replace - Replace a file in a configuration
 router.post("/replace", authenticateToken, upload.single('file'), async (req, res) => {
   try {
