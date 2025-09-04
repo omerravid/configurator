@@ -506,17 +506,25 @@ const ScalarPropertiesPanel = ({
       return;
     }
 
-    let parsedValue = newPropertyValue;
-    try {
-      if (newPropertyValue === "true" || newPropertyValue === "false") {
-        parsedValue = newPropertyValue === "true";
-      } else if (!isNaN(newPropertyValue) && newPropertyValue !== "" && newPropertyValue !== null) {
-        parsedValue = Number(newPropertyValue);
-      } else if (newPropertyValue === "null") {
-        parsedValue = null;
+    let parsedValue;
+
+    if (createAsArray) {
+      // Create empty array when checkbox is checked
+      parsedValue = [];
+    } else {
+      // Parse scalar value
+      parsedValue = newPropertyValue;
+      try {
+        if (newPropertyValue === "true" || newPropertyValue === "false") {
+          parsedValue = newPropertyValue === "true";
+        } else if (!isNaN(newPropertyValue) && newPropertyValue !== "" && newPropertyValue !== null) {
+          parsedValue = Number(newPropertyValue);
+        } else if (newPropertyValue === "null") {
+          parsedValue = null;
+        }
+      } catch (e) {
+        // Keep as string if parsing fails
       }
-    } catch (e) {
-      // Keep as string if parsing fails
     }
 
     // Check if we're adding a property to an array element
