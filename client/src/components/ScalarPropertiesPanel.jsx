@@ -10,6 +10,8 @@ import {
   ArrowRightIcon,
   CogIcon,
   FolderIcon,
+  FolderPlusIcon,
+  ArrowUpTrayIcon,
 } from "@heroicons/react/24/outline";
 import { useToast } from "../context/ToastContext";
 import ContextMenu from "./ContextMenu";
