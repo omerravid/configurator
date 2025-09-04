@@ -540,6 +540,7 @@ const ScalarPropertiesPanel = ({
 
     setNewPropertyName("");
     setNewPropertyValue("");
+    setCreateAsArray(false);
     setShowAddProperty(false);
   };
 
