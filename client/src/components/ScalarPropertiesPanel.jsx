@@ -532,6 +532,13 @@ const ScalarPropertiesPanel = ({
         break;
     }
 
+    console.log("Creating property:", {
+      name: newPropertyName,
+      type: propertyType,
+      value: parsedValue,
+      path: selectedPath
+    });
+
     // Check if we're adding a property to an array element
     const isArrayElementProperty = selectedPath.includes('[') && selectedPath.includes(']');
 
