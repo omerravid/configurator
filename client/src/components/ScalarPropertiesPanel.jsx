@@ -540,6 +540,7 @@ const ScalarPropertiesPanel = ({
 
     setNewPropertyName("");
     setNewPropertyValue("");
+                  setCreateAsArray(false);
     setCreateAsArray(false);
     setShowAddProperty(false);
   };
@@ -1456,6 +1457,7 @@ const ScalarPropertiesPanel = ({
                   setShowAddProperty(false);
                   setNewPropertyName("");
                   setNewPropertyValue("");
+                  setCreateAsArray(false);
                 }}
                 className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600"
               >
