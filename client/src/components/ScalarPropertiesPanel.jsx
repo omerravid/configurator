@@ -1462,7 +1462,11 @@ const ScalarPropertiesPanel = ({
               type="text"
               placeholder="Property name"
               value={newPropertyName}
-              onChange={(e) => setNewPropertyName(e.target.value)}
+              onChange={(e) => {
+                // Automatically replace periods with underscores for property names
+                const sanitizedValue = sanitizePropertyName(e.target.value);
+                setNewPropertyName(sanitizedValue);
+              }}
               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
