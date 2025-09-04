@@ -1533,7 +1533,6 @@ const ScalarPropertiesPanel = ({
                   }
 
                   try {
-try {
                     // Handle root path correctly - don't add dot prefix if at root
                     const propertyPath = selectedPath === "root" ? newFileName : `${selectedPath.replace(/^root\./, "")}.${newFileName}`;
                     const response = await configAPI.replaceFile(selectedConfig?.id, propertyPath, selectedFile);
