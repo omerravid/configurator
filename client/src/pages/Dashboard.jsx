@@ -489,11 +489,17 @@ const Dashboard = () => {
       // Send delta to server - server will handle merging with existing data
       await configAPI.update(configId, { data: deltaData });
 
-      // Optimized update: only reload data without refreshing the tree
-      // This preserves expand/collapse states and focus
+      // Optimized update: reload both resolved and raw data to ensure structure view updates
+      // This preserves expand/collapse states and focus while updating the structure view
       try {
-        const response = await configAPI.getById(configId, true);
-        setResolvedData(response.data);
+        // Load both resolved and raw data to ensure structure view updates properly
+        const [resolvedResponse, rawResponse] = await Promise.all([
+          configAPI.getById(configId, true),
+          configAPI.getRawById(configId)
+        ]);
+
+        setResolvedData(resolvedResponse.data);
+        setRawData(rawResponse.data);
 
         // Don't refresh tree for simple value updates
         // Tree refresh is only needed for structural changes (name, type, parent changes)
