@@ -204,8 +204,22 @@ const TreeNode = ({
       // Filter children based on the current view and placeholder status
       if (isArchiveView) {
         if (config._isPlaceholder) {
-          // For placeholder parents, only show archived children
-          childrenData = childrenData.filter(child => Boolean(child.archived));
+          // For placeholder parents, show children that are either:
+          // 1. Archived themselves, OR
+          // 2. Have archived descendants (need to become placeholders)
+          // We need to check each child to see if it has archived descendants
+          const allConfigs = await configAPI.getAll(true); // Get all configs to check descendants
+          const allConfigsData = allConfigs.data.configs || [];
+
+          childrenData = childrenData.filter(child => {
+            if (Boolean(child.archived)) {
+              // Child is archived, definitely show it
+              return true;
+            }
+            // Check if this non-archived child has archived descendants
+            const hasArchived = hasArchivedDescendantsHelper(child.id, allConfigsData);
+            return hasArchived;
+          });
         } else {
           // For archived parents, show all children but apply same logic recursively
           // The server already filters based on includeArchived, so we get the right set
