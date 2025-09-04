@@ -549,24 +549,30 @@ const TreeNode = ({
               <span className="ml-1 text-xs text-gray-400">(archived)</span>
             )}
           </div>
-          <div className={`text-xs truncate ${config._isPlaceholder ? 'text-gray-400' : 'text-gray-500'}`}>
-            {config.type}
-            {config._isPlaceholder && (
-              <span className="ml-1 px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-full text-xs">
-                PLACEHOLDER
-              </span>
-            )}
-            {config.status === "DRAFT" && !config._isPlaceholder && (
-              <span className="ml-1 px-1.5 py-0.5 bg-orange-100 text-orange-800 rounded-full text-xs">
-                DRAFT
-              </span>
-            )}
-            {Boolean(config.archived) && !config._isPlaceholder && (
-              <span className="ml-1 px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
-                ARCHIVED
-              </span>
-            )}
-          </div>
+          {isArchiveView && Boolean(config.archived) && config._breadcrumb ? (
+            <div className="text-xs text-gray-500 truncate">
+              {config._breadcrumb}
+            </div>
+          ) : (
+            <div className={`text-xs truncate ${config._isPlaceholder ? 'text-gray-400' : 'text-gray-500'}`}>
+              {config.type}
+              {config._isPlaceholder && (
+                <span className="ml-1 px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-full text-xs">
+                  PLACEHOLDER
+                </span>
+              )}
+              {config.status === "DRAFT" && !config._isPlaceholder && (
+                <span className="ml-1 px-1.5 py-0.5 bg-orange-100 text-orange-800 rounded-full text-xs">
+                  DRAFT
+                </span>
+              )}
+              {Boolean(config.archived) && !config._isPlaceholder && (
+                <span className="ml-1 px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                  ARCHIVED
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {config.parent_name && (
