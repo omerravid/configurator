@@ -449,10 +449,18 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
         showToast(`Database "${name}" is now active`, 'success');
         loadDatabaseStatus();
 
-        // After database switch, warn user about potential session changes
-        setTimeout(() => {
-          showToast('Database activated successfully. You may need to refresh the page if you experience any issues.', 'info');
-        }, 1000);
+        // Reload configurations from the new database
+        if (onDataRefresh) {
+          setTimeout(() => {
+            onDataRefresh();
+            showToast('Database activated and configurations reloaded successfully.', 'success');
+          }, 500);
+        } else {
+          // Fallback message if no onDataRefresh callback
+          setTimeout(() => {
+            showToast('Database activated successfully. You may need to refresh the page if you experience any issues.', 'info');
+          }, 1000);
+        }
       } else {
         showToast(`Failed to activate database: ${response.data.error}`, 'error');
       }
