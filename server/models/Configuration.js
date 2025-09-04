@@ -96,7 +96,9 @@ class Configuration {
   static async findAll(includeArchived = false) {
     const archivedFilter = includeArchived ? '' : 'WHERE c.archived = 0';
     const result = await db.query(
-      `SELECT c.*, u.username as created_by_username,
+      `SELECT c.id, c.name, c.type, c.parent_id, c.data, c.status, c.archived,
+              c.created_at, c.updated_at, c.created_by, c.description,
+              u.username as created_by_username,
               pc.name as parent_name, pc.type as parent_type
        FROM configurations c
        LEFT JOIN users u ON c.created_by = u.id
