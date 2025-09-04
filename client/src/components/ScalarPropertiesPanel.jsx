@@ -599,6 +599,164 @@ const ScalarPropertiesPanel = ({
     showToast(`${typeMessage.charAt(0).toUpperCase() + typeMessage.slice(1)} "${newPropertyName}" created successfully${propertyType === "object" ? ". Navigate to it in the Objects section below." : ""}`, "success");
   };
 
+  const handleFileOrFolderImport = async () => {
+    if (!selectedConfig?.id) {
+      showToast("No configuration selected", "error");
+      return;
+    }
+
+    setIsImporting(true);
+    try {
+      if (selectedImportFiles.length > 1) {
+        // Folder import
+        await handleFolderImport();
+      } else if (selectedImportFile) {
+        // Single file import
+        await handleSingleFileImport();
+      } else {
+        showToast("No file or folder selected", "error");
+        return;
+      }
+
+      // Reset form on success
+      setNewPropertyName("");
+      setSelectedImportFile(null);
+      setSelectedImportFiles([]);
+      setPropertyType("property");
+      setShowAddProperty(false);
+
+    } catch (error) {
+      console.error('Import error:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to import';
+      showToast(`Failed to import: ${errorMessage}`, "error");
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleSingleFileImport = async () => {
+    if (!selectedImportFile || !newPropertyName.trim()) {
+      showToast("Property name and file are required", "error");
+      return;
+    }
+
+    // Compute property path
+    let propertyPath;
+    if (selectedPath === "root") {
+      propertyPath = newPropertyName;
+    } else {
+      const cleanSelectedPath = selectedPath.startsWith("root.") ? selectedPath.substring(5) : selectedPath;
+      propertyPath = `${cleanSelectedPath}.${newPropertyName}`;
+    }
+
+    console.log("Single file import:", {
+      configId: selectedConfig.id,
+      propertyPath,
+      fileName: selectedImportFile.name
+    });
+
+    if (selectedImportFile.name.toLowerCase().endsWith('.json')) {
+      // For JSON files, read content and parse as structured data
+      const fileContent = await selectedImportFile.text();
+      try {
+        const jsonContent = JSON.parse(fileContent);
+
+        // Add the parsed JSON content as the property value
+        const isArrayElementProperty = selectedPath.includes('[') && selectedPath.includes(']');
+        if (isArrayElementProperty) {
+          handleArrayElementPropertyChange(newPropertyName, jsonContent);
+        } else {
+          onPropertyAdd?.(selectedPath, newPropertyName, jsonContent);
+        }
+
+        showToast(`JSON file "${selectedImportFile.name}" imported successfully as property "${newPropertyName}"`, "success");
+      } catch (parseError) {
+        showToast(`Failed to parse JSON file: ${parseError.message}`, "error");
+        throw parseError;
+      }
+    } else {
+      // For binary files, use the existing file upload flow
+      const response = await configAPI.uploadFile(selectedConfig.id, propertyPath, selectedImportFile);
+
+      if (response.data.success) {
+        showToast(`File "${selectedImportFile.name}" uploaded successfully as property "${newPropertyName}"`, "success");
+
+        // Trigger data refresh to update structure view
+        if (onRefreshData && typeof onRefreshData === 'function') {
+          onRefreshData();
+        }
+      } else {
+        throw new Error(response.data.error || 'Upload failed');
+      }
+    }
+  };
+
+  const handleFolderImport = async () => {
+    if (!selectedImportFiles || selectedImportFiles.length === 0 || !newPropertyName.trim()) {
+      showToast("Property name and folder are required", "error");
+      return;
+    }
+
+    // Compute property path
+    let propertyPath;
+    if (selectedPath === "root") {
+      propertyPath = newPropertyName;
+    } else {
+      const cleanSelectedPath = selectedPath.startsWith("root.") ? selectedPath.substring(5) : selectedPath;
+      propertyPath = `${cleanSelectedPath}.${newPropertyName}`;
+    }
+
+    // Get root folder name from the first file
+    const rootFolderName = selectedImportFiles[0].webkitRelativePath.split('/')[0];
+
+    // Create FormData for folder import with config and property path
+    const formData = new FormData();
+    formData.append('folderName', rootFolderName);
+    formData.append('configId', selectedConfig.id);
+    formData.append('propertyPath', propertyPath);
+
+    // Add all files to form data with their relative paths
+    selectedImportFiles.forEach(file => {
+      const rel = file.webkitRelativePath || file.name;
+      const fileWithPath = new File([file], rel, {
+        type: file.type,
+        lastModified: file.lastModified
+      });
+      formData.append('files', fileWithPath);
+      formData.append('relativePaths', rel);
+    });
+
+    console.log("Folder import:", {
+      configId: selectedConfig.id,
+      propertyPath,
+      folderName: rootFolderName,
+      fileCount: selectedImportFiles.length
+    });
+
+    // Use the enhanced folder import API that attaches to configuration
+    const response = await configAPI.importFolderToProperty(formData);
+
+    if (!response.data.success) {
+      throw new Error(response.data.error || 'Folder import failed');
+    }
+
+    const { stats } = response.data;
+    let message = `Successfully imported folder "${rootFolderName}" as property "${newPropertyName}" (${stats.totalFiles} files: ${stats.jsonFiles} JSON, ${stats.binaryFiles} binary)`;
+    if (stats.errors > 0) {
+      message += ` (${stats.errors} files had errors)`;
+    }
+    showToast(message, stats.errors > 0 ? 'warning' : 'success');
+
+    if (stats.errors > 0) {
+      console.warn('Import errors:', stats.errorDetails);
+    }
+
+    // Trigger data refresh to update structure view
+    if (onRefreshData && typeof onRefreshData === 'function') {
+      onRefreshData();
+    }
+  };
+
   const handleDeleteProperty = (propertyName) => {
     // Check if we're deleting a property from an array element
     const isArrayElementProperty = selectedPath.includes('[') && selectedPath.includes(']');
