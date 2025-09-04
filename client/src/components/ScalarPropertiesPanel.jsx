@@ -46,6 +46,7 @@ const ScalarPropertiesPanel = ({
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [newFileName, setNewFileName] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
+  const [createAsArray, setCreateAsArray] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
 
   // Component version management state
