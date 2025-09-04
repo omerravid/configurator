@@ -585,9 +585,13 @@ const TreeNode = ({
           )}
           {isVrml && vrmlVisible && (
             <div className="mt-2">
-              <VrmlPreview storageKey={metadata.storageKey} authToken={localStorage.getItem('token')} />
+              <VrmlPreview
+                storageKey={metadata.storageKey}
+                authToken={localStorage.getItem('token')}
+                url={actualValue._link}
+              />
             </div>
-          )}
+          )} }```}```}
         </div>
       );
     }
