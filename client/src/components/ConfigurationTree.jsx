@@ -617,6 +617,8 @@ const extractParentId = (parentId) => {
   // If it's already a string, return it (unless it's '[object Object]')
   if (typeof parentId === 'string') {
     if (parentId === '[object Object]') {
+      // This indicates a database serialization issue - try to find the actual parent
+      // For now, log and return null, but we should fix the root cause
       console.warn('Found [object Object] as parent_id - database serialization issue');
       return null;
     }
@@ -625,7 +627,16 @@ const extractParentId = (parentId) => {
 
   // If it's an object, try to extract the ID
   if (typeof parentId === 'object') {
-    return parentId.id || parentId._id || null;
+    // Check common object patterns
+    if (parentId.id) return parentId.id;
+    if (parentId._id) return parentId._id;
+    if (parentId.toString && typeof parentId.toString === 'function') {
+      const stringified = parentId.toString();
+      if (stringified !== '[object Object]') {
+        return stringified;
+      }
+    }
+    return null;
   }
 
   return String(parentId);
