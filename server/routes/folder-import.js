@@ -22,7 +22,11 @@ const upload = multer({
 // POST /api/folder-import - Import folder with JSON and binary files
 router.post("/", authenticateToken, upload.array('files'), async (req, res) => {
   try {
+    console.log("=== FOLDER IMPORT REQUEST DEBUG ===");
     console.log("Folder import request received");
+    console.log("req.body:", req.body);
+    console.log("req.files count:", req.files ? req.files.length : 0);
+
     const files = req.files;
     const { folderName } = req.body;
 
