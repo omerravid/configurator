@@ -742,18 +742,22 @@ const ConfigurationTree = ({
   // Helper function to check if a configuration has archived descendants
   const hasArchivedDescendants = (configId, allConfigs) => {
     const children = allConfigs.filter(config => config.parent_id === configId);
+    console.log(`  Checking children of ${configId}:`, children.map(c => ({ id: c.id, name: c.name, type: c.type, archived: c.archived })));
 
     for (const child of children) {
       // If this child is archived, we found an archived descendant
       if (Boolean(child.archived)) {
+        console.log(`    Found archived child: ${child.name} (${child.id})`);
         return true;
       }
       // Recursively check this child's descendants
       if (hasArchivedDescendants(child.id, allConfigs)) {
+        console.log(`    Found archived descendant under: ${child.name} (${child.id})`);
         return true;
       }
     }
 
+    console.log(`    No archived descendants found for ${configId}`);
     return false;
   };
 
