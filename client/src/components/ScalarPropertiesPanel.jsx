@@ -1676,6 +1676,17 @@ const ScalarPropertiesPanel = ({
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">Object</span>
                 </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="propertyType"
+                    value="from_file_folder"
+                    checked={propertyType === "from_file_folder"}
+                    onChange={(e) => setPropertyType(e.target.value)}
+                    className="text-blue-600"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">From File/Folder</span>
+                </label>
               </div>
             </div>
 
