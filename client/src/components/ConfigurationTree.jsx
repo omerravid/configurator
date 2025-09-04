@@ -481,7 +481,7 @@ const TreeNode = ({
   };
 
   const isSelected = selectedId === config.id;
-  const hasChildren = children.length > 0 || !hasLoadedChildren;
+  const hasChildren = config._flatArchive ? false : (children.length > 0 || !hasLoadedChildren);
 
   return (
     <div className="select-none relative">
