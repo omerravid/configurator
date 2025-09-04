@@ -181,6 +181,7 @@ const TreeNode = ({
   isExpanded,
   onExpansionChange,
   isNodeExpanded,
+  isArchiveView = false,
 }) => {
   const [children, setChildren] = useState([]);
   const [loadingChildren, setLoadingChildren] = useState(false);
@@ -194,18 +195,24 @@ const TreeNode = ({
 
     setLoadingChildren(true);
     try {
-      const includeArchived = true; // Always include archived children when loading
+      // In archive view, always include archived children
+      // In active view, only include active children
+      const includeArchived = isArchiveView;
       const response = await configAPI.getChildren(config.id, includeArchived);
       let childrenData = response.data.children || [];
 
       // Filter children based on the current view and placeholder status
-      if (config._isPlaceholder) {
-        // For placeholder parents, only show archived children
-        childrenData = childrenData.filter(child => Boolean(child.archived));
+      if (isArchiveView) {
+        if (config._isPlaceholder) {
+          // For placeholder parents, only show archived children
+          childrenData = childrenData.filter(child => Boolean(child.archived));
+        } else {
+          // For archived parents, show all children but apply same logic recursively
+          // The server already filters based on includeArchived, so we get the right set
+        }
       } else {
-        // For normal parents, filter based on active tab
-        // This logic is handled by the server-side filtering in getChildren
-        // but we may need to adjust it for archive view
+        // In active view, only show non-archived children
+        childrenData = childrenData.filter(child => !Boolean(child.archived));
       }
 
       setChildren(childrenData);
@@ -558,7 +565,7 @@ const TreeNode = ({
                 selectedId={selectedId}
                 onSelect={onSelect}
                 level={level + 1}
-      
+
                 onEdit={onEdit}
                 onRename={onRename}
                 onDuplicate={onDuplicate}
@@ -572,6 +579,7 @@ const TreeNode = ({
                 isExpanded={isNodeExpanded(child.id, level + 1)}
                 onExpansionChange={onExpansionChange}
                 isNodeExpanded={isNodeExpanded}
+                isArchiveView={isArchiveView}
               />
             ))
           )}
@@ -820,6 +828,7 @@ const ConfigurationTree = ({
           isExpanded={isNodeExpanded(config.id, 0)}
           onExpansionChange={handleExpansionChange}
           isNodeExpanded={isNodeExpanded}
+          isArchiveView={activeTab === 'archived'}
         />
         ))
       )}
