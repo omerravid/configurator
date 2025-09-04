@@ -766,7 +766,7 @@ const Dashboard = () => {
     if (!selectedConfig || Boolean(selectedConfig.archived)) return false;
     if (selectedConfig.type === "PRODUCT" && user.role === "ADMIN") return true;
     if (selectedConfig.type === "INSTANCE") return true;
-    if (selectedConfig.type === "USER") return false; // USER configs cannot have children
+    if (selectedConfig.type === "USER") return true; // USER configs can have USER children
     if (selectedConfig.type === "COMPONENT" && user.role === "ADMIN")
       return true;
     if (selectedConfig.type === "VERSION") return false; // VERSION configs cannot have children
