@@ -257,14 +257,23 @@ class Configuration {
   }
 
   static async commit(id) {
-    await db.query(
-      `UPDATE configurations 
+    console.log("=== Configuration.commit called ===");
+    console.log("ID:", id);
+
+    const result = await db.query(
+      `UPDATE configurations
        SET status = 'COMMITTED', updated_at = CURRENT_TIMESTAMP
               WHERE id = ? AND (type = 'USER' OR type = 'VERSION') AND status = 'DRAFT'`,
       [id],
     );
 
-    return await this.findById(id);
+    console.log("Update result:", result);
+    console.log("Rows affected:", result.changes || result.affectedRows);
+
+    const updatedConfig = await this.findById(id);
+    console.log("Updated config:", updatedConfig);
+
+    return updatedConfig;
   }
 
   static async archive(id, archiveChildren = false) {
