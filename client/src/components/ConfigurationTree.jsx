@@ -688,16 +688,28 @@ const ConfigurationTree = ({
 
       // Filter by archived status based on active tab
       if (activeTab === 'archived') {
+        console.log("=== ARCHIVE VIEW DEBUG ===");
+        console.log("Total configs loaded:", allConfigs.length);
+        console.log("All configs:", allConfigs.map(c => ({ id: c.id, name: c.name, type: c.type, archived: c.archived, parent_id: c.parent_id })));
+
         // In archive view, show:
         // 1. Actually archived root configs
         // 2. Non-archived root configs that have archived descendants (as placeholders)
         const archivedRoots = rootConfigs.filter(config => Boolean(config.archived));
         const nonArchivedRoots = rootConfigs.filter(config => !Boolean(config.archived));
 
+        console.log("Root configs:", rootConfigs.map(c => ({ id: c.id, name: c.name, type: c.type, archived: c.archived })));
+        console.log("Archived roots:", archivedRoots.map(c => ({ id: c.id, name: c.name, type: c.type })));
+        console.log("Non-archived roots:", nonArchivedRoots.map(c => ({ id: c.id, name: c.name, type: c.type })));
+
         // Find non-archived roots that have archived descendants
         const rootsWithArchivedDescendants = nonArchivedRoots.filter(rootConfig => {
-          return hasArchivedDescendants(rootConfig.id, allConfigs);
+          const hasArchived = hasArchivedDescendants(rootConfig.id, allConfigs);
+          console.log(`Checking ${rootConfig.name} (${rootConfig.id}) for archived descendants:`, hasArchived);
+          return hasArchived;
         });
+
+        console.log("Roots with archived descendants:", rootsWithArchivedDescendants.map(c => ({ id: c.id, name: c.name, type: c.type })));
 
         // Mark placeholder roots for special styling
         const placeholderRoots = rootsWithArchivedDescendants.map(config => ({
@@ -706,6 +718,7 @@ const ConfigurationTree = ({
         }));
 
         rootConfigs = [...archivedRoots, ...placeholderRoots];
+        console.log("Final root configs for archive view:", rootConfigs.map(c => ({ id: c.id, name: c.name, type: c.type, archived: c.archived, _isPlaceholder: c._isPlaceholder })));
       } else {
         rootConfigs = rootConfigs.filter(config => !Boolean(config.archived));
       }
