@@ -1619,23 +1619,23 @@ const ScalarPropertiesPanel = ({
                       setSelectedFile(null);
                       setShowFileUpload(false);
 
-                      // Use a safer page refresh approach
-                      setTimeout(() => {
-                        try {
-                          // Try to refresh data without full page reload first
-                          if (getCurrentData && typeof getCurrentData === 'function') {
-                            // Trigger parent data refresh if available
-                            getCurrentData();
-                          } else {
+                      // Trigger data refresh to update structure view
+                      if (onRefreshData && typeof onRefreshData === 'function') {
+                        // Use the proper refresh function that updates both resolved and raw data
+                        onRefreshData();
+                      } else {
+                        // Fallback: use a safer page refresh approach
+                        setTimeout(() => {
+                          try {
                             // Fallback to page reload
                             window.location.reload();
+                          } catch (error) {
+                            console.error('Refresh error:', error);
+                            // Force page reload as last resort
+                            window.location.href = window.location.href;
                           }
-                        } catch (error) {
-                          console.error('Refresh error:', error);
-                          // Force page reload as last resort
-                          window.location.href = window.location.href;
-                        }
-                      }, 500); // Shorter delay
+                        }, 500); // Shorter delay
+                      }
                     } else {
                       showToast(`Failed to upload file: ${response.data.error}`, "error");
                     }
