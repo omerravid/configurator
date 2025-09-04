@@ -194,8 +194,21 @@ const TreeNode = ({
 
     setLoadingChildren(true);
     try {
-      const response = await configAPI.getChildren(config.id);
-      setChildren(response.data.children || []);
+      const includeArchived = true; // Always include archived children when loading
+      const response = await configAPI.getChildren(config.id, includeArchived);
+      let childrenData = response.data.children || [];
+
+      // Filter children based on the current view and placeholder status
+      if (config._isPlaceholder) {
+        // For placeholder parents, only show archived children
+        childrenData = childrenData.filter(child => Boolean(child.archived));
+      } else {
+        // For normal parents, filter based on active tab
+        // This logic is handled by the server-side filtering in getChildren
+        // but we may need to adjust it for archive view
+      }
+
+      setChildren(childrenData);
       setHasLoadedChildren(true);
     } catch (error) {
       console.error("Failed to load children:", error);
@@ -424,25 +437,29 @@ const TreeNode = ({
       <div
         className={`tree-item ${isSelected ? "selected" : ""} group cursor-context-menu ${
           isDraggable ? "cursor-grab hover:bg-gray-50 dark:hover:bg-gray-700" : ""
-        } ${isDroppable ? "border-2 border-transparent transition-colors" : ""}`}
+        } ${isDroppable ? "border-2 border-transparent transition-colors" : ""} ${
+          config._isPlaceholder ? "opacity-50 bg-gray-50 dark:bg-gray-800" : ""
+        }`}
         style={{ paddingLeft: `${level * 20 + 12}px` }}
-        onClick={handleSelect}
-        onContextMenu={handleContextMenu}
-        draggable={isDraggable}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragOver={handleDragOver}
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
+        onClick={config._isPlaceholder ? undefined : handleSelect}
+        onContextMenu={config._isPlaceholder ? undefined : handleContextMenu}
+        draggable={config._isPlaceholder ? false : isDraggable}
+        onDragStart={config._isPlaceholder ? undefined : handleDragStart}
+        onDragEnd={config._isPlaceholder ? undefined : handleDragEnd}
+        onDragOver={config._isPlaceholder ? undefined : handleDragOver}
+        onDragEnter={config._isPlaceholder ? undefined : handleDragEnter}
+        onDragLeave={config._isPlaceholder ? undefined : handleDragLeave}
+        onDrop={config._isPlaceholder ? undefined : handleDrop}
         title={
-          isDraggable
-            ? config.type === "COMPONENT"
-              ? `Drag component to add with its root version to a product`
-              : `Drag version to add this specific version to a product`
-            : isDroppable
-              ? "Drop components/versions here to add them to this product"
-              : undefined
+          config._isPlaceholder
+            ? `Placeholder: ${config.name} (contains archived items)`
+            : isDraggable
+              ? config.type === "COMPONENT"
+                ? `Drag component to add with its root version to a product`
+                : `Drag version to add this specific version to a product`
+              : isDroppable
+                ? "Drop components/versions here to add them to this product"
+                : undefined
         }
       >
         {hasChildren && (
@@ -642,14 +659,31 @@ const ConfigurationTree = ({
     try {
       const includeArchived = activeTab === 'archived';
       const response = await configAPI.getAll(includeArchived);
+      const allConfigs = response.data.configs || [];
 
       // Filter to show only root-level configs (no parent) - includes PRODUCT and COMPONENT
-      // USER configs will be included in their proper hierarchy during tree building
-      let rootConfigs = (response.data.configs || []).filter(config => !config.parent_id);
+      let rootConfigs = allConfigs.filter(config => !config.parent_id);
 
       // Filter by archived status based on active tab
       if (activeTab === 'archived') {
-        rootConfigs = rootConfigs.filter(config => Boolean(config.archived));
+        // In archive view, show:
+        // 1. Actually archived root configs
+        // 2. Non-archived root configs that have archived descendants (as placeholders)
+        const archivedRoots = rootConfigs.filter(config => Boolean(config.archived));
+        const nonArchivedRoots = rootConfigs.filter(config => !Boolean(config.archived));
+
+        // Find non-archived roots that have archived descendants
+        const rootsWithArchivedDescendants = nonArchivedRoots.filter(rootConfig => {
+          return hasArchivedDescendants(rootConfig.id, allConfigs);
+        });
+
+        // Mark placeholder roots for special styling
+        const placeholderRoots = rootsWithArchivedDescendants.map(config => ({
+          ...config,
+          _isPlaceholder: true
+        }));
+
+        rootConfigs = [...archivedRoots, ...placeholderRoots];
       } else {
         rootConfigs = rootConfigs.filter(config => !Boolean(config.archived));
       }
@@ -668,6 +702,24 @@ const ConfigurationTree = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper function to check if a configuration has archived descendants
+  const hasArchivedDescendants = (configId, allConfigs) => {
+    const children = allConfigs.filter(config => config.parent_id === configId);
+
+    for (const child of children) {
+      // If this child is archived, we found an archived descendant
+      if (Boolean(child.archived)) {
+        return true;
+      }
+      // Recursively check this child's descendants
+      if (hasArchivedDescendants(child.id, allConfigs)) {
+        return true;
+      }
+    }
+
+    return false;
   };
 
   useEffect(() => {
