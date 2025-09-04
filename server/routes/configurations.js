@@ -123,8 +123,10 @@ const checkConfigPermissions = async (req, res, next) => {
 // GET /api/configs - List all configurations
 router.get("/", authenticateTokenOrApiKey, async (req, res) => {
   try {
+    console.log("=== GET /api/configs called ===");
     const { type, status, includeArchived } = req.query;
     const showArchived = includeArchived === 'true';
+    console.log("Query params:", { type, status, includeArchived, showArchived });
 
     let configs;
     if (type) {
@@ -132,6 +134,15 @@ router.get("/", authenticateTokenOrApiKey, async (req, res) => {
     } else {
       configs = await Configuration.findAll(showArchived);
     }
+
+    console.log(`Loaded ${configs.length} configurations from database`);
+    console.log("Configurations:", configs.map(c => ({
+      id: c.id,
+      name: c.name,
+      type: c.type,
+      archived: c.archived,
+      parent_id: c.parent_id
+    })));
 
     // Filter by status if specified
     if (status) {
