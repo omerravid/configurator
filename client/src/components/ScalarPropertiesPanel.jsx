@@ -1508,7 +1508,7 @@ const ScalarPropertiesPanel = ({
 
             {propertyType === "object" && (
               <div className="text-sm text-gray-500 dark:text-gray-400 italic">
-                Will create an empty object {'{}'}
+                Will create an object with a default "Property": "" inside
               </div>
             )}
             <div className="flex space-x-2">
