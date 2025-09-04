@@ -791,38 +791,46 @@ const ConfigurationTree = ({
 
       // Filter by archived status based on active tab
       if (activeTab === 'archived') {
-        console.log("=== ARCHIVE VIEW DEBUG ===");
+        console.log("=== ARCHIVE VIEW (FLAT) DEBUG ===");
         console.log("Total configs loaded:", allConfigs.length);
         console.log("All configs:", allConfigs.map(c => ({ id: c.id, name: c.name, type: c.type, archived: c.archived, parent_id: c.parent_id })));
 
-        // In archive view, show:
-        // 1. Actually archived root configs
-        // 2. Non-archived root configs that have archived descendants (as placeholders)
-        const archivedRoots = rootConfigs.filter(config => Boolean(config.archived));
-        const nonArchivedRoots = rootConfigs.filter(config => !Boolean(config.archived));
+        // Build a flat list of ALL archived configurations (no hierarchy)
+        const idMap = new Map(allConfigs.map(c => [c.id, c]));
 
-        console.log("Root configs:", rootConfigs.map(c => ({ id: c.id, name: c.name, type: c.type, archived: c.archived })));
-        console.log("Archived roots:", archivedRoots.map(c => ({ id: c.id, name: c.name, type: c.type })));
-        console.log("Non-archived roots:", nonArchivedRoots.map(c => ({ id: c.id, name: c.name, type: c.type })));
+        const archivedFlat = allConfigs
+          .filter(config => Boolean(config.archived))
+          .map(config => {
+            // Build breadcrumb from root to current
+            const pathNames = [];
+            let current = config;
+            const guard = new Set();
+            while (current) {
+              // Unshift to build from root to leaf
+              pathNames.unshift(current.name);
+              guard.add(current.id);
+              const parentId = extractParentId(current.parent_id);
+              if (!parentId) break;
+              if (guard.has(parentId)) break; // prevent cycles
+              current = idMap.get(parentId);
+              if (!current) break;
+            }
+            return {
+              ...config,
+              _breadcrumb: pathNames.join(' -> '),
+              _flatArchive: true
+            };
+          });
 
-        // Find non-archived roots that have archived descendants
-        const rootsWithArchivedDescendants = nonArchivedRoots.filter(rootConfig => {
-          const hasArchived = hasArchivedDescendants(rootConfig.id, allConfigs);
-          console.log(`Checking ${rootConfig.name} (${rootConfig.id}) for archived descendants:`, hasArchived);
-          return hasArchived;
+        // Sort by type then name for readability
+        rootConfigs = archivedFlat.sort((a, b) => {
+          if (a.type === b.type) return a.name.localeCompare(b.name);
+          return a.type.localeCompare(b.type);
         });
 
-        console.log("Roots with archived descendants:", rootsWithArchivedDescendants.map(c => ({ id: c.id, name: c.name, type: c.type })));
-
-        // Mark placeholder roots for special styling
-        const placeholderRoots = rootsWithArchivedDescendants.map(config => ({
-          ...config,
-          _isPlaceholder: true
-        }));
-
-        rootConfigs = [...archivedRoots, ...placeholderRoots];
-        console.log("Final root configs for archive view:", rootConfigs.map(c => ({ id: c.id, name: c.name, type: c.type, archived: c.archived, _isPlaceholder: c._isPlaceholder })));
+        console.log("Final flat archived configs:", rootConfigs.map(c => ({ id: c.id, name: c.name, type: c.type, breadcrumb: c._breadcrumb })));
       } else {
+        // Active tab: only non-archived root-level configs
         rootConfigs = rootConfigs.filter(config => !Boolean(config.archived));
       }
 
