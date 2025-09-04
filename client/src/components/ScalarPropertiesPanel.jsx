@@ -1469,6 +1469,9 @@ const ScalarPropertiesPanel = ({
               }}
               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              Periods are automatically replaced with underscores in property names.
+            </div>
 
             {/* Property Type Radio Buttons */}
             <div className="space-y-2">
