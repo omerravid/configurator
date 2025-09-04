@@ -1567,6 +1567,9 @@ const ScalarPropertiesPanel = ({
               }}
               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              Property name will be auto-generated from filename. Periods are automatically replaced with underscores.
+            </div>
             <input
               type="file"
               onChange={(e) => setSelectedFile(e.target.files[0])}
