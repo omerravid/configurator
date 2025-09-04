@@ -1806,6 +1806,8 @@ const ScalarPropertiesPanel = ({
                   setNewPropertyName("");
                   setNewPropertyValue("");
                   setPropertyType("property");
+                  setSelectedImportFile(null);
+                  setSelectedImportFiles([]);
                 }}
                 className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600"
               >
