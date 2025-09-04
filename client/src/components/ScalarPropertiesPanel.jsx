@@ -524,7 +524,7 @@ const ScalarPropertiesPanel = ({
     setValidationError("");
   };
 
-  const handleAddProperty = () => {
+  const handleAddProperty = async () => {
     if (!newPropertyName.trim()) {
       showToast("Property name cannot be empty", "error");
       return;
@@ -547,6 +547,10 @@ const ScalarPropertiesPanel = ({
           "Property": ""
         };
         break;
+      case "from_file_folder":
+        // Handle file/folder import - this will be processed separately
+        await handleFileOrFolderImport();
+        return;
       case "property":
       default:
         // Parse scalar value
