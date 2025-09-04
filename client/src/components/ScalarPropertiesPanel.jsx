@@ -1438,7 +1438,7 @@ const ScalarPropertiesPanel = ({
             </div>
             <input
               type="text"
-              placeholder="Property value"
+              placeholder={createAsArray ? "Array will be created empty" : "Property value"}
               value={newPropertyValue}
               onChange={(e) => setNewPropertyValue(e.target.value)}
               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
