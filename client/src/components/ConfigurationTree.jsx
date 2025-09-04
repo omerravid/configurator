@@ -656,24 +656,9 @@ const ConfigurationTree = ({
 
       setRootConfigs(rootConfigs);
     } catch (err) {
-      console.error("Failed to load configurations:", err);
-
-      // Handle authentication errors
-      if (err.response?.status === 401) {
-        localStorage.removeItem("token");
-        showToast("Session expired. Please log in again.", "warning");
-        window.location.replace("/login");
-        return;
-      }
-
-      // Handle network errors (which might be masked 401s)
-      if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
-        console.log("Network error detected, checking if it's an auth issue...");
-        localStorage.removeItem("token");
-        showToast("Connection issue. Please log in again.", "warning");
-        window.location.replace("/login");
-        return;
-      }
+      // Let global interceptor handle 401/network auth issues
+      if (err.response?.status === 401) return;
+      if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') return;
 
       // Don't show error toast for empty configurations
       if (err.response?.status !== 404) {
