@@ -1430,6 +1430,7 @@ const InteractiveJSONViewer = ({
               configType={configType}
               selectedConfig={selectedConfig}
               getCurrentData={getCurrentData}
+              onRefreshData={onRefreshData}
             />
           </div>
         </div>
