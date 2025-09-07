@@ -989,9 +989,9 @@ const Dashboard = () => {
                 >
                   <div>
                     {/* Breadcrumb for archived configurations */}
-                    {Boolean(selectedConfig.archived) && selectedConfig._breadcrumb && (
+                    {Boolean(selectedConfig.archived) && configBreadcrumb && (
                       <div className="mb-3 flex flex-wrap items-center gap-1">
-                        {selectedConfig._breadcrumb.split(' → ').map((part, index, array) => (
+                        {configBreadcrumb.split(' → ').map((part, index, array) => (
                           <React.Fragment key={index}>
                             <span className="px-2 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded">
                               {part}
