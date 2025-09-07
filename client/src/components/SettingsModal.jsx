@@ -1502,6 +1502,52 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
             </button>
           </div>
 
+          {/* Restore Mode Selection */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-3 flex items-center space-x-2">
+              <CogIcon className="w-4 h-4" />
+              <span>Restore Mode</span>
+            </h4>
+            <div className="space-y-3">
+              <label className="flex items-start space-x-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="restoreMode"
+                  value="restore"
+                  checked={restoreMode === 'restore'}
+                  onChange={(e) => setRestoreMode(e.target.value)}
+                  className="mt-0.5 text-blue-600 focus:ring-blue-500"
+                />
+                <div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    Full Restore (Replace All)
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    Replaces all existing data with backup data. Creates a backup of current data first.
+                  </div>
+                </div>
+              </label>
+              <label className="flex items-start space-x-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="restoreMode"
+                  value="update"
+                  checked={restoreMode === 'update'}
+                  onChange={(e) => setRestoreMode(e.target.value)}
+                  className="mt-0.5 text-blue-600 focus:ring-blue-500"
+                />
+                <div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    Update from Backup (Merge)
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    Updates existing configurations and adds new ones. Preserves configurations not in backup.
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
           {/* Available Backups List with Download & Restore */}
           {backups.length > 0 && (
             <div className="space-y-3">
