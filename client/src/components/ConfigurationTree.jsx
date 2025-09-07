@@ -13,6 +13,7 @@ import {
   LockClosedIcon,
 } from "@heroicons/react/24/outline";
 import { configAPI } from "../services/api";
+import { useToast } from "../context/ToastContext";
 import ContextMenu from "./ContextMenu";
 
 const ConfigTypeIcon = ({ type, status }) => {
@@ -180,6 +181,7 @@ const TreeNode = ({
   isExpanded,
   onExpansionChange,
   isNodeExpanded,
+  isArchiveView = false,
 }) => {
   const [children, setChildren] = useState([]);
   const [loadingChildren, setLoadingChildren] = useState(false);
@@ -193,8 +195,60 @@ const TreeNode = ({
 
     setLoadingChildren(true);
     try {
-      const response = await configAPI.getChildren(config.id);
-      setChildren(response.data.children || []);
+      // In archive view, always include archived children
+      // In active view, only include active children
+      const includeArchived = isArchiveView;
+      const response = await configAPI.getChildren(config.id, includeArchived);
+      let childrenData = response.data.children || [];
+
+      // Filter children based on the current view and placeholder status
+      if (isArchiveView) {
+        if (config._isPlaceholder) {
+          // For placeholder parents, we need to show children that are either archived
+          // OR have archived descendants. Since we can't easily check descendants here,
+          // we'll get all configurations and check each child
+          try {
+            const allConfigsResponse = await configAPI.getAll(true);
+            const allConfigsData = allConfigsResponse.data.configs || [];
+
+            childrenData = childrenData.filter(child => {
+              if (Boolean(child.archived)) {
+                // Child is archived, definitely show it
+                return true;
+              }
+              // Check if this non-archived child has archived descendants
+              const hasArchived = hasArchivedDescendantsHelper(child.id, allConfigsData);
+              return hasArchived;
+            });
+          } catch (error) {
+            console.error('Error fetching all configs for archive check:', error);
+            // Fallback: show all children if we can't check
+            childrenData = childrenData.filter(child => Boolean(child.archived));
+          }
+        } else {
+          // For archived parents, show all children but apply same logic recursively
+          // The server already filters based on includeArchived, so we get the right set
+        }
+      } else {
+        // In active view, only show non-archived children
+        childrenData = childrenData.filter(child => !Boolean(child.archived));
+      }
+
+      // Debug the parent-child relationship
+      // Apply placeholder logic to children that have archived descendants
+      if (isArchiveView && config._isPlaceholder) {
+        childrenData = childrenData.map(child => {
+          if (!Boolean(child.archived)) {
+            // If this non-archived child was included in the filter above,
+            // it means it has archived descendants, so mark it as a placeholder
+            return { ...child, _isPlaceholder: true };
+          }
+          return child;
+        });
+      }
+
+
+      setChildren(childrenData);
       setHasLoadedChildren(true);
     } catch (error) {
       console.error("Failed to load children:", error);
@@ -236,7 +290,8 @@ const TreeNode = ({
     const canRename = () => user?.role === "ADMIN";
 
     const canCreateChild = () => {
-      if (config.type === "USER" || config.type === "VERSION") return false;
+      if (config.type === "VERSION") return false;
+      if (config.type === "USER") return true; // USER configs can have USER children
       if (config.type === "COMPONENT") return user?.role === "ADMIN";
       return user?.role === "ADMIN" || config.type === "PRODUCT";
     };
@@ -416,32 +471,36 @@ const TreeNode = ({
   };
 
   const isSelected = selectedId === config.id;
-  const hasChildren = children.length > 0 || !hasLoadedChildren;
+  const hasChildren = config._flatArchive ? false : (children.length > 0 || !hasLoadedChildren);
 
   return (
     <div className="select-none relative">
       <div
         className={`tree-item ${isSelected ? "selected" : ""} group cursor-context-menu ${
           isDraggable ? "cursor-grab hover:bg-gray-50 dark:hover:bg-gray-700" : ""
-        } ${isDroppable ? "border-2 border-transparent transition-colors" : ""}`}
+        } ${isDroppable ? "border-2 border-transparent transition-colors" : ""} ${
+          config._isPlaceholder ? "opacity-50 bg-gray-50 dark:bg-gray-800" : ""
+        }`}
         style={{ paddingLeft: `${level * 20 + 12}px` }}
-        onClick={handleSelect}
-        onContextMenu={handleContextMenu}
-        draggable={isDraggable}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragOver={handleDragOver}
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
+        onClick={config._isPlaceholder ? undefined : handleSelect}
+        onContextMenu={config._isPlaceholder ? undefined : handleContextMenu}
+        draggable={config._isPlaceholder ? false : isDraggable}
+        onDragStart={config._isPlaceholder ? undefined : handleDragStart}
+        onDragEnd={config._isPlaceholder ? undefined : handleDragEnd}
+        onDragOver={config._isPlaceholder ? undefined : handleDragOver}
+        onDragEnter={config._isPlaceholder ? undefined : handleDragEnter}
+        onDragLeave={config._isPlaceholder ? undefined : handleDragLeave}
+        onDrop={config._isPlaceholder ? undefined : handleDrop}
         title={
-          isDraggable
-            ? config.type === "COMPONENT"
-              ? `Drag component to add with its root version to a product`
-              : `Drag version to add this specific version to a product`
-            : isDroppable
-              ? "Drop components/versions here to add them to this product"
-              : undefined
+          config._isPlaceholder
+            ? `Placeholder: ${config.name} (contains archived items)`
+            : isDraggable
+              ? config.type === "COMPONENT"
+                ? `Drag component to add with its root version to a product`
+                : `Drag version to add this specific version to a product`
+              : isDroppable
+                ? "Drop components/versions here to add them to this product"
+                : undefined
         }
       >
         {hasChildren && (
@@ -465,20 +524,34 @@ const TreeNode = ({
         <ConfigTypeIcon type={config.type} status={config.status} />
 
         <div className="flex-1 min-w-0">
-          <div className={`text-sm font-medium truncate ${Boolean(config.archived) ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}`}>
+          <div className={`text-sm font-medium truncate ${
+            config._isPlaceholder
+              ? 'text-gray-400 dark:text-gray-500'
+              : Boolean(config.archived)
+                ? 'text-gray-500 dark:text-gray-400'
+                : 'text-gray-900 dark:text-gray-100'
+          }`}>
             {config.name}
-            {Boolean(config.archived) && (
+            {config._isPlaceholder && (
+              <span className="ml-1 text-xs text-gray-400">(placeholder)</span>
+            )}
+            {Boolean(config.archived) && !config._isPlaceholder && (
               <span className="ml-1 text-xs text-gray-400">(archived)</span>
             )}
           </div>
-          <div className="text-xs text-gray-500 truncate">
+          <div className={`text-xs truncate ${config._isPlaceholder ? 'text-gray-400' : 'text-gray-500'}`}>
             {config.type}
-            {config.status === "DRAFT" && (
+            {config._isPlaceholder && (
+              <span className="ml-1 px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-full text-xs">
+                PLACEHOLDER
+              </span>
+            )}
+            {config.status === "DRAFT" && !config._isPlaceholder && (
               <span className="ml-1 px-1.5 py-0.5 bg-orange-100 text-orange-800 rounded-full text-xs">
                 DRAFT
               </span>
             )}
-            {Boolean(config.archived) && (
+            {Boolean(config.archived) && !config._isPlaceholder && (
               <span className="ml-1 px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
                 ARCHIVED
               </span>
@@ -526,7 +599,7 @@ const TreeNode = ({
                 selectedId={selectedId}
                 onSelect={onSelect}
                 level={level + 1}
-      
+
                 onEdit={onEdit}
                 onRename={onRename}
                 onDuplicate={onDuplicate}
@@ -540,6 +613,7 @@ const TreeNode = ({
                 isExpanded={isNodeExpanded(child.id, level + 1)}
                 onExpansionChange={onExpansionChange}
                 isNodeExpanded={isNodeExpanded}
+                isArchiveView={isArchiveView}
               />
             ))
           )}
@@ -559,6 +633,58 @@ const TreeNode = ({
   );
 };
 
+// Helper function for TreeNode to check archived descendants
+const hasArchivedDescendantsHelper = (configId, allConfigs) => {
+  const children = allConfigs.filter(config => {
+    const parentId = extractParentId(config.parent_id);
+    return parentId === configId;
+  });
+
+  for (const child of children) {
+    // If this child is archived, we found an archived descendant
+    if (Boolean(child.archived)) {
+      return true;
+    }
+    // Recursively check this child's descendants
+    if (hasArchivedDescendantsHelper(child.id, allConfigs)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+// Helper function to extract actual ID from various parent_id formats
+const extractParentId = (parentId) => {
+  if (!parentId) return null;
+
+  // If it's already a string, return it (unless it's '[object Object]')
+  if (typeof parentId === 'string') {
+    if (parentId === '[object Object]') {
+      // This indicates a database serialization issue - try to find the actual parent
+      // For now, log and return null, but we should fix the root cause
+      console.warn('Found [object Object] as parent_id - database serialization issue');
+      return null;
+    }
+    return parentId;
+  }
+
+  // If it's an object, try to extract the ID
+  if (typeof parentId === 'object') {
+    // Check common object patterns
+    if (parentId.id) return parentId.id;
+    if (parentId._id) return parentId._id;
+    if (parentId.toString && typeof parentId.toString === 'function') {
+      const stringified = parentId.toString();
+      if (stringified !== '[object Object]') {
+        return stringified;
+      }
+    }
+    return null;
+  }
+
+  return String(parentId);
+};
+
 const ConfigurationTree = ({
   selectedConfig,
   onConfigSelect,
@@ -574,6 +700,7 @@ const ConfigurationTree = ({
   onAddComponent,
   user,
 }) => {
+  const { showToast } = useToast();
   const [rootConfigs, setRootConfigs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -631,28 +758,134 @@ const ConfigurationTree = ({
   const loadRootConfigurations = async () => {
     setLoading(true);
     setError(null);
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      window.location.replace("/login");
+      return;
+    }
     try {
+      // In archive view, we need to load ALL configurations (both active and archived)
+      // to properly build the hierarchy and find archived descendants
       const includeArchived = activeTab === 'archived';
       const response = await configAPI.getAll(includeArchived);
+      const allConfigs = response.data.configs || [];
+
 
       // Filter to show only root-level configs (no parent) - includes PRODUCT and COMPONENT
-      // USER configs will be included in their proper hierarchy during tree building
-      let rootConfigs = (response.data.configs || []).filter(config => !config.parent_id);
+      let rootConfigs = allConfigs.filter(config => !config.parent_id);
 
       // Filter by archived status based on active tab
       if (activeTab === 'archived') {
-        rootConfigs = rootConfigs.filter(config => Boolean(config.archived));
+
+        // Build a flat list of ALL archived configurations (no hierarchy)
+        const idMap = new Map(allConfigs.map(c => [c.id, c]));
+
+        const archivedFlat = allConfigs
+          .filter(config => Boolean(config.archived))
+          .map(config => {
+            // Build complete breadcrumb from root to archived item
+            const pathNames = [];
+            const pathTypes = [];
+            let current = config;
+            const guard = new Set();
+
+            // Traverse up the hierarchy to build complete ancestry
+            while (current) {
+              // Add current item to the beginning of the path (root → ... → archived item)
+              pathNames.unshift(current.name);
+              pathTypes.unshift(current.type);
+              guard.add(current.id);
+
+              const parentId = extractParentId(current.parent_id);
+              if (!parentId) break; // reached root
+              if (guard.has(parentId)) {
+                console.warn(`Circular reference detected for ${current.name} (${current.id})`);
+                break; // prevent infinite loops
+              }
+
+              // Find parent in the configurations map
+              current = idMap.get(parentId);
+              if (!current) {
+                console.warn(`Parent ${parentId} not found for ${pathNames[pathNames.length - 1]}`);
+                break;
+              }
+            }
+
+            // Create enriched breadcrumb with full hierarchy
+            const breadcrumb = pathNames.join(' → ');
+
+            return {
+              ...config,
+              _breadcrumb: breadcrumb,
+              _fullPath: pathNames,
+              _pathTypes: pathTypes,
+              _flatArchive: true
+            };
+          });
+
+        // Sort by type then name for readability
+        rootConfigs = archivedFlat.sort((a, b) => {
+          if (a.type === b.type) return a.name.localeCompare(b.name);
+          return a.type.localeCompare(b.type);
+        });
+
       } else {
+        // Active tab: only non-archived root-level configs
         rootConfigs = rootConfigs.filter(config => !Boolean(config.archived));
       }
 
       setRootConfigs(rootConfigs);
     } catch (err) {
-      console.error("Failed to load configurations:", err);
+      // Let global interceptor handle 401/network auth issues
+      if (err.response?.status === 401) return;
+      if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') return;
+
+      // Don't show error toast for empty configurations
+      if (err.response?.status !== 404) {
+        showToast("Failed to load configurations", "error");
+      }
       setError("Failed to load configurations");
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper function to check if a configuration has archived descendants
+  const hasArchivedDescendants = (configId, allConfigs) => {
+    // Handle the parent_id object issue - extract the actual ID if it's an object
+    const children = allConfigs.filter(config => {
+      const parentId = extractParentId(config.parent_id);
+      if (parentId === configId) {
+        return true;
+      }
+
+      // TEMPORARY WORKAROUND: If parent_id is corrupted ('[object Object]'),
+      // try to match based on component-version relationship patterns
+      if (config.parent_id === '[object Object]' && config.type === 'VERSION') {
+        const parentConfig = allConfigs.find(c => c.id === configId);
+        if (parentConfig && parentConfig.type === 'COMPONENT') {
+          // This is likely a version of this component
+          return true;
+        }
+      }
+
+      return false;
+    });
+
+
+    for (const child of children) {
+      // If this child is archived, we found an archived descendant
+      if (Boolean(child.archived)) {
+        return true;
+      }
+      // Recursively check this child's descendants
+      if (hasArchivedDescendants(child.id, allConfigs)) {
+        return true;
+      }
+    }
+
+    return false;
   };
 
   useEffect(() => {
@@ -739,6 +972,7 @@ const ConfigurationTree = ({
           isExpanded={isNodeExpanded(config.id, 0)}
           onExpansionChange={handleExpansionChange}
           isNodeExpanded={isNodeExpanded}
+          isArchiveView={activeTab === 'archived'}
         />
         ))
       )}

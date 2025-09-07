@@ -10,6 +10,8 @@ import {
   ArrowRightIcon,
   CogIcon,
   FolderIcon,
+  FolderPlusIcon,
+  ArrowUpTrayIcon,
 } from "@heroicons/react/24/outline";
 import { useToast } from "../context/ToastContext";
 import ContextMenu from "./ContextMenu";
@@ -32,6 +34,7 @@ const ScalarPropertiesPanel = ({
   configType, // New prop for configuration type
   selectedConfig, // New prop for reset functionality
   getCurrentData, // New prop for getting current data mode
+  onRefreshData, // New prop for triggering data refresh
 }) => {
   const { showToast } = useToast();
   const [editingProperty, setEditingProperty] = useState(null);
@@ -39,6 +42,13 @@ const ScalarPropertiesPanel = ({
   const [newPropertyName, setNewPropertyName] = useState("");
   const [newPropertyValue, setNewPropertyValue] = useState("");
   const [showAddProperty, setShowAddProperty] = useState(false);
+  const [propertyType, setPropertyType] = useState("property"); // "property", "array", "object", "from_file_folder"
+  const [selectedImportFile, setSelectedImportFile] = useState(null);
+  const [selectedImportFiles, setSelectedImportFiles] = useState([]);
+  const [isImporting, setIsImporting] = useState(false);
+  const [showFileUpload, setShowFileUpload] = useState(false);
+  const [newFileName, setNewFileName] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
 
   // Component version management state
@@ -47,6 +57,22 @@ const ScalarPropertiesPanel = ({
 
   // Rules dialog state
   const [rulesDialog, setRulesDialog] = useState({ isOpen: false, configurationId: null, propertyPath: null, existingRules: [] });
+
+  // Auto-populate filename when file is selected
+  useEffect(() => {
+    if (selectedFile && !newFileName.trim()) {
+      // Remove file extension and use as property name
+      const nameWithoutExtension = selectedFile.name.replace(/\.[^/.]+$/, "");
+      // Replace periods with underscores for valid property names
+      const sanitizedName = nameWithoutExtension.replace(/\./g, "_");
+      setNewFileName(sanitizedName);
+    }
+  }, [selectedFile, newFileName]);
+
+  // Helper function to sanitize property names (replace periods with underscores)
+  const sanitizePropertyName = (name) => {
+    return name.replace(/\./g, "_");
+  };
 
   // Validation state
   const [validationError, setValidationError] = useState("");
@@ -203,10 +229,11 @@ const ScalarPropertiesPanel = ({
   // Get sub-objects for navigation (includes both regular objects and component references)
   const getSubObjects = (value) => {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
+      console.log("getSubObjects: No value or not object:", { value, type: typeof value });
       return [];
     }
 
-    return Object.entries(value).filter(([key, val]) => {
+    const result = Object.entries(value).filter(([key, val]) => {
       const { actualValue } = getActualValueAndSource(val);
 
       // Include if it's any kind of object (including component references)
@@ -218,8 +245,18 @@ const ScalarPropertiesPanel = ({
         actualValue.versionId &&
         actualValue.componentName;
 
+      console.log(`getSubObjects - checking key "${key}":`, {
+        actualValue,
+        isObject,
+        isComponentRef,
+        willInclude: isObject
+      });
+
       return isObject;
     });
+
+    console.log("getSubObjects result:", result);
+    return result;
   };
 
   const isCompRef = isComponentReference();
@@ -487,7 +524,7 @@ const ScalarPropertiesPanel = ({
     setValidationError("");
   };
 
-  const handleAddProperty = () => {
+  const handleAddProperty = async () => {
     if (!newPropertyName.trim()) {
       showToast("Property name cannot be empty", "error");
       return;
@@ -498,18 +535,46 @@ const ScalarPropertiesPanel = ({
       return;
     }
 
-    let parsedValue = newPropertyValue;
-    try {
-      if (newPropertyValue === "true" || newPropertyValue === "false") {
-        parsedValue = newPropertyValue === "true";
-      } else if (!isNaN(newPropertyValue) && newPropertyValue !== "" && newPropertyValue !== null) {
-        parsedValue = Number(newPropertyValue);
-      } else if (newPropertyValue === "null") {
-        parsedValue = null;
-      }
-    } catch (e) {
-      // Keep as string if parsing fails
+    let parsedValue;
+
+    // Handle different property types based on radio button selection
+    switch (propertyType) {
+      case "array":
+        parsedValue = [];
+        break;
+      case "object":
+        parsedValue = {
+          "Property": ""
+        };
+        break;
+      case "from_file_folder":
+        // Handle file/folder import - this will be processed separately
+        await handleFileOrFolderImport();
+        return;
+      case "property":
+      default:
+        // Parse scalar value
+        parsedValue = newPropertyValue;
+        try {
+          if (newPropertyValue === "true" || newPropertyValue === "false") {
+            parsedValue = newPropertyValue === "true";
+          } else if (!isNaN(newPropertyValue) && newPropertyValue !== "" && newPropertyValue !== null) {
+            parsedValue = Number(newPropertyValue);
+          } else if (newPropertyValue === "null") {
+            parsedValue = null;
+          }
+        } catch (e) {
+          // Keep as string if parsing fails
+        }
+        break;
     }
+
+    console.log("Creating property:", {
+      name: newPropertyName,
+      type: propertyType,
+      value: parsedValue,
+      path: selectedPath
+    });
 
     // Check if we're adding a property to an array element
     const isArrayElementProperty = selectedPath.includes('[') && selectedPath.includes(']');
@@ -522,9 +587,183 @@ const ScalarPropertiesPanel = ({
       onPropertyAdd?.(selectedPath, newPropertyName, parsedValue);
     }
 
+    // Reset form
     setNewPropertyName("");
     setNewPropertyValue("");
+    setPropertyType("property");
     setShowAddProperty(false);
+
+    // Show success message with appropriate type
+    const typeMessage = propertyType === "array" ? "array" :
+                       propertyType === "object" ? "object" : "property";
+    showToast(`${typeMessage.charAt(0).toUpperCase() + typeMessage.slice(1)} "${newPropertyName}" created successfully${propertyType === "object" ? ". Navigate to it in the Objects section below." : ""}`, "success");
+  };
+
+  const handleFileOrFolderImport = async () => {
+    if (!selectedConfig?.id) {
+      showToast("No configuration selected", "error");
+      return;
+    }
+
+    setIsImporting(true);
+    try {
+      if (selectedImportFiles.length > 1) {
+        // Folder import
+        await handleFolderImport();
+      } else if (selectedImportFile) {
+        // Single file import
+        await handleSingleFileImport();
+      } else {
+        showToast("No file or folder selected", "error");
+        return;
+      }
+
+      // Reset form on success
+      setNewPropertyName("");
+      setSelectedImportFile(null);
+      setSelectedImportFiles([]);
+      setPropertyType("property");
+      setShowAddProperty(false);
+
+    } catch (error) {
+      console.error('Import error:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to import';
+      showToast(`Failed to import: ${errorMessage}`, "error");
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleSingleFileImport = async () => {
+    if (!selectedImportFile || !newPropertyName.trim()) {
+      showToast("Property name and file are required", "error");
+      return;
+    }
+
+    // Compute property path
+    let propertyPath;
+    if (selectedPath === "root") {
+      propertyPath = newPropertyName;
+    } else {
+      const cleanSelectedPath = selectedPath.startsWith("root.") ? selectedPath.substring(5) : selectedPath;
+      propertyPath = `${cleanSelectedPath}.${newPropertyName}`;
+    }
+
+    console.log("Single file import:", {
+      configId: selectedConfig.id,
+      propertyPath,
+      fileName: selectedImportFile.name
+    });
+
+    if (selectedImportFile.name.toLowerCase().endsWith('.json')) {
+      // For JSON files, read content and parse as structured data
+      const fileContent = await selectedImportFile.text();
+      try {
+        const jsonContent = JSON.parse(fileContent);
+
+        // Add the parsed JSON content as the property value
+        const isArrayElementProperty = selectedPath.includes('[') && selectedPath.includes(']');
+        if (isArrayElementProperty) {
+          handleArrayElementPropertyChange(newPropertyName, jsonContent);
+        } else {
+          onPropertyAdd?.(selectedPath, newPropertyName, jsonContent);
+        }
+
+        showToast(`JSON file "${selectedImportFile.name}" imported successfully as property "${newPropertyName}"`, "success");
+      } catch (parseError) {
+        showToast(`Failed to parse JSON file: ${parseError.message}`, "error");
+        throw parseError;
+      }
+    } else {
+      // For binary files, use the existing file upload flow
+      const response = await configAPI.uploadFile(selectedConfig.id, propertyPath, selectedImportFile);
+
+      if (response.data.success) {
+        showToast(`File "${selectedImportFile.name}" uploaded successfully as property "${newPropertyName}"`, "success");
+
+        // Trigger data refresh to update structure view
+        if (onRefreshData && typeof onRefreshData === 'function') {
+          onRefreshData();
+        }
+      } else {
+        throw new Error(response.data.error || 'Upload failed');
+      }
+    }
+  };
+
+  const handleFolderImport = async () => {
+    if (!selectedImportFiles || selectedImportFiles.length === 0 || !newPropertyName.trim()) {
+      showToast("Property name and folder are required", "error");
+      return;
+    }
+
+    // Compute property path
+    let propertyPath;
+    if (selectedPath === "root") {
+      propertyPath = newPropertyName;
+    } else {
+      const cleanSelectedPath = selectedPath.startsWith("root.") ? selectedPath.substring(5) : selectedPath;
+      propertyPath = `${cleanSelectedPath}.${newPropertyName}`;
+    }
+
+    // Get root folder name from the first file
+    const rootFolderName = selectedImportFiles[0].webkitRelativePath.split('/')[0];
+
+    // Create FormData for folder import with config and property path
+    const formData = new FormData();
+    formData.append('folderName', rootFolderName);
+    formData.append('configId', selectedConfig.id);
+    formData.append('propertyPath', propertyPath);
+
+    // Add all files to form data with their relative paths
+    selectedImportFiles.forEach(file => {
+      const rel = file.webkitRelativePath || file.name;
+      const fileWithPath = new File([file], rel, {
+        type: file.type,
+        lastModified: file.lastModified
+      });
+      formData.append('files', fileWithPath);
+      formData.append('relativePaths', rel);
+    });
+
+    console.log("=== FOLDER IMPORT DEBUG ===");
+    console.log("Folder import:", {
+      configId: selectedConfig.id,
+      propertyPath,
+      folderName: rootFolderName,
+      fileCount: selectedImportFiles.length
+    });
+    console.log("FormData contents:");
+    for (let [key, value] of formData.entries()) {
+      if (key === 'files') {
+        console.log(`  ${key}: File object - ${value.name || 'unknown'}`);
+      } else {
+        console.log(`  ${key}: ${value}`);
+      }
+    }
+
+    // Use the enhanced folder import API that attaches to configuration
+    const response = await configAPI.importFolderToProperty(formData);
+
+    if (!response.data.success) {
+      throw new Error(response.data.error || 'Folder import failed');
+    }
+
+    const { stats } = response.data;
+    let message = `Successfully imported folder "${rootFolderName}" as property "${newPropertyName}" (${stats.totalFiles} files: ${stats.jsonFiles} JSON, ${stats.binaryFiles} binary)`;
+    if (stats.errors > 0) {
+      message += ` (${stats.errors} files had errors)`;
+    }
+    showToast(message, stats.errors > 0 ? 'warning' : 'success');
+
+    if (stats.errors > 0) {
+      console.warn('Import errors:', stats.errorDetails);
+    }
+
+    // Trigger data refresh to update structure view
+    if (onRefreshData && typeof onRefreshData === 'function') {
+      onRefreshData();
+    }
   };
 
   const handleDeleteProperty = (propertyName) => {
@@ -1282,33 +1521,45 @@ const ScalarPropertiesPanel = ({
 
   return (
     <div className="p-4" onClick={handleContainerClick}>
+      {/* Action Buttons - Above everything */}
+      {isEditable && !componentRef && configType === "COMPONENT" && (
+        <div className="flex items-center space-x-2 mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Add:</span>
+          <button
+            onClick={() => setShowAddProperty(true)}
+            className="flex items-center space-x-1 px-2 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            <PlusIcon className="w-4 h-4" />
+            <span>Property</span>
+          </button>
+          <button
+            onClick={() => setShowFileUpload(true)}
+            className="flex items-center space-x-1 px-2 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700"
+          >
+            <ArrowUpTrayIcon className="w-4 h-4" />
+            <span>Upload File</span>
+          </button>
+          {hasLocalOverrides() && (
+            <>
+              <span className="text-gray-300 mx-2">|</span>
+              <button
+                onClick={handleResetAll}
+                className="flex items-center space-x-1 px-2 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700"
+                title="Reset all local changes at this level"
+              >
+                <span className="text-sm font-bold">↺</span>
+                <span>Reset All</span>
+              </button>
+            </>
+          )}
+        </div>
+      )}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
           {componentRef ? "Component" : "Properties"}
         </h3>
-        <div className="flex items-center space-x-2">
-          {isEditable && !componentRef && hasLocalOverrides() && (
-            <button
-              onClick={handleResetAll}
-              className="flex items-center space-x-1 px-2 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700"
-              title="Reset all local changes at this level"
-            >
-              <span className="text-sm font-bold">↺</span>
-              <span>Reset All</span>
-            </button>
-          )}
-          {isEditable && !componentRef && configType === "COMPONENT" && (
-            <button
-              onClick={() => setShowAddProperty(true)}
-              className="flex items-center space-x-1 px-2 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              <PlusIcon className="w-4 h-4" />
-              <span>Add Property</span>
-            </button>
-          )}
-        </div>
-      </div>
 
+      </div>
       <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
         Path: <span className="font-mono bg-gray-100 px-1 rounded">{selectedPath}</span>
         <button
@@ -1380,34 +1631,302 @@ const ScalarPropertiesPanel = ({
       {/* Add Property Form */}
       {showAddProperty && (
         <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded transition-colors">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Add New Property</h4>
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Add New Item</h4>
           <div className="space-y-2">
             <input
               type="text"
               placeholder="Property name"
               value={newPropertyName}
-              onChange={(e) => setNewPropertyName(e.target.value)}
+              onChange={(e) => {
+                // Automatically replace periods with underscores for property names
+                const sanitizedValue = sanitizePropertyName(e.target.value);
+                setNewPropertyName(sanitizedValue);
+              }}
               className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <input
-              type="text"
-              placeholder="Property value"
-              value={newPropertyValue}
-              onChange={(e) => setNewPropertyValue(e.target.value)}
-              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              Periods are automatically replaced with underscores in property names.
+            </div>
+
+            {/* Property Type Radio Buttons */}
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Type:</div>
+              <div className="flex items-center space-x-4">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="propertyType"
+                    value="property"
+                    checked={propertyType === "property"}
+                    onChange={(e) => setPropertyType(e.target.value)}
+                    className="text-blue-600"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Property</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="propertyType"
+                    value="array"
+                    checked={propertyType === "array"}
+                    onChange={(e) => setPropertyType(e.target.value)}
+                    className="text-blue-600"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Array</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="propertyType"
+                    value="object"
+                    checked={propertyType === "object"}
+                    onChange={(e) => setPropertyType(e.target.value)}
+                    className="text-blue-600"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Object</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="propertyType"
+                    value="from_file_folder"
+                    checked={propertyType === "from_file_folder"}
+                    onChange={(e) => setPropertyType(e.target.value)}
+                    className="text-blue-600"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">From File/Folder</span>
+                </label>
+              </div>
+            </div>
+
+            {propertyType === "property" && (
+              <input
+                type="text"
+                placeholder="Property value"
+                value={newPropertyValue}
+                onChange={(e) => setNewPropertyValue(e.target.value)}
+                className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            )}
+
+            {propertyType === "array" && (
+              <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                Will create an empty array
+              </div>
+            )}
+
+            {propertyType === "object" && (
+              <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                Will create an object with a default "Property": "" inside
+              </div>
+            )}
+
+            {propertyType === "from_file_folder" && (
+              <div className="space-y-3">
+                <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                  Import content from a file or folder. JSON files will be parsed as structured data.
+                </div>
+
+                <div className="flex space-x-2">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.accept = '.json,*/*';
+                      input.onchange = (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setSelectedImportFile(file);
+                          setSelectedImportFiles([]);
+
+                          // Auto-populate property name from filename (without extension)
+                          if (!newPropertyName.trim()) {
+                            const nameWithoutExtension = file.name.replace(/\.[^/.]+$/, "");
+                            const sanitizedName = nameWithoutExtension.replace(/\./g, "_");
+                            setNewPropertyName(sanitizedName);
+                          }
+                        }
+                      };
+                      input.click();
+                    }}
+                    className="px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    Select File
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const input = document.createElement('input');
+                      input.type = 'file';
+                      input.webkitdirectory = true;
+                      input.multiple = true;
+                      input.accept = '*/*';
+                      input.onchange = (e) => {
+                        const files = Array.from(e.target.files);
+                        if (files.length > 0) {
+                          setSelectedImportFiles(files);
+                          setSelectedImportFile(null);
+
+                          // Auto-populate property name from folder name
+                          if (!newPropertyName.trim()) {
+                            const folderName = files[0].webkitRelativePath.split('/')[0];
+                            const sanitizedName = folderName.replace(/\./g, "_");
+                            setNewPropertyName(sanitizedName);
+                          }
+                        }
+                      };
+                      input.click();
+                    }}
+                    className="px-3 py-2 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    Select Folder
+                  </button>
+                </div>
+
+                {/* Show selected file/folder info */}
+                {selectedImportFile && (
+                  <div className="text-xs text-green-600 dark:text-green-400">
+                    Selected file: {selectedImportFile.name} ({Math.round(selectedImportFile.size / 1024)}KB)
+                    {selectedImportFile.name.toLowerCase().endsWith('.json') && (
+                      <span className="ml-2 text-blue-600">(will be parsed as JSON)</span>
+                    )}
+                  </div>
+                )}
+
+                {selectedImportFiles.length > 0 && (
+                  <div className="text-xs text-green-600 dark:text-green-400">
+                    Selected folder: {selectedImportFiles[0].webkitRelativePath.split('/')[0]} ({selectedImportFiles.length} files)
+                  </div>
+                )}
+              </div>
+            )}
             <div className="flex space-x-2">
               <button
                 onClick={handleAddProperty}
-                className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                disabled={isImporting}
+                className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center space-x-1"
               >
-                Add
+                {isImporting && (
+                  <div className="w-3 h-3 animate-spin border border-white border-t-transparent rounded-full"></div>
+                )}
+                <span>{isImporting ? "Importing..." : "Add"}</span>
               </button>
               <button
                 onClick={() => {
                   setShowAddProperty(false);
                   setNewPropertyName("");
                   setNewPropertyValue("");
+                  setPropertyType("property");
+                  setSelectedImportFile(null);
+                  setSelectedImportFiles([]);
+                }}
+                className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {/* Upload File Form */}
+      {showFileUpload && (
+        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded transition-colors">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Upload File</h4>
+          <div className="space-y-2">
+            <input
+              type="text"
+              placeholder="Property name for the file"
+              value={newFileName}
+              onChange={(e) => {
+                // Automatically replace periods with underscores as user types
+                const sanitizedValue = sanitizePropertyName(e.target.value);
+                setNewFileName(sanitizedValue);
+              }}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              Property name will be auto-generated from filename. Periods are automatically replaced with underscores.
+            </div>
+            <input
+              type="file"
+              onChange={(e) => setSelectedFile(e.target.files[0])}
+              className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+            {selectedFile && (
+              <div className="text-xs text-gray-600 dark:text-gray-400">
+                Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+              </div>
+            )}
+            <div className="flex space-x-2">
+              <button
+                onClick={async () => {
+                  if (!newFileName.trim()) {
+                    showToast("File property name cannot be empty", "error");
+                    return;
+                  }
+
+                  if (!selectedFile) {
+                    showToast("Please select a file to upload", "error");
+                    return;
+                  }
+
+                  if (selectedValue && selectedValue.hasOwnProperty(newFileName)) {
+                    showToast("Property already exists", "error");
+                    return;
+                  }
+
+                  try {
+                    // Handle root path correctly - don't add dot prefix if at root
+                    const propertyPath = selectedPath === "root" ? newFileName : `${selectedPath.replace(/^root\./, "")}.${newFileName}`;
+                    const response = await configAPI.uploadFile(selectedConfig?.id, propertyPath, selectedFile);
+
+                    if (response.data.success) {
+                      showToast(`File "${selectedFile.name}" uploaded successfully. Refreshing page...`, "success");
+
+                      // Clear the form
+                      setNewFileName("");
+                      setSelectedFile(null);
+                      setShowFileUpload(false);
+
+                      // Trigger data refresh to update structure view
+                      if (onRefreshData && typeof onRefreshData === 'function') {
+                        // Use the proper refresh function that updates both resolved and raw data
+                        onRefreshData();
+                      } else {
+                        // Fallback: use a safer page refresh approach
+                        setTimeout(() => {
+                          try {
+                            // Fallback to page reload
+                            window.location.reload();
+                          } catch (error) {
+                            console.error('Refresh error:', error);
+                            // Force page reload as last resort
+                            window.location.href = window.location.href;
+                          }
+                        }, 500); // Shorter delay
+                      }
+                    } else {
+                      showToast(`Failed to upload file: ${response.data.error}`, "error");
+                    }
+                  } catch (error) {
+                    console.error('File upload error:', error);
+                    const errorMessage = error.response?.data?.details || error.response?.data?.error || error.message;
+                    showToast(`Failed to upload file: ${errorMessage}`, "error");
+                  }
+                }}
+                className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700"
+              >
+                Upload
+              </button>
+              <button
+                onClick={() => {
+                  setShowFileUpload(false);
+                  setNewFileName("");
+                  setSelectedFile(null);
                 }}
                 className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600"
               >
@@ -1668,9 +2187,12 @@ const ScalarPropertiesPanel = ({
                 actualValue.componentName;
 
               return (
-                <div key={key} className={`flex items-center justify-between p-2 border border-gray-200 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                  isComponentRef ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-700'
-                }`}>
+                <div
+                  key={key}
+                  className={`flex items-center justify-between p-2 border border-gray-200 dark:border-gray-600 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                    isComponentRef ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-700'
+                  }`}
+                >
                   <div className="flex items-center space-x-2">
                     {isComponentRef ? (
                       <CogIcon className="w-4 h-4 text-blue-600" />

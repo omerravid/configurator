@@ -585,7 +585,11 @@ const TreeNode = ({
           )}
           {isVrml && vrmlVisible && (
             <div className="mt-2">
-              <VrmlPreview storageKey={metadata.storageKey} authToken={localStorage.getItem('token')} />
+              <VrmlPreview
+                storageKey={metadata.storageKey}
+                authToken={localStorage.getItem('token')}
+                url={actualValue._link}
+              />
             </div>
           )}
         </div>
@@ -821,6 +825,7 @@ const InteractiveJSONViewer = ({
   onDataChange,
   configType,
   selectedConfig,
+  onRefreshData, // New prop for triggering data refresh
 }) => {
   const [hoveredSource, setHoveredSource] = useState(null);
   const [hoveredPath, setHoveredPath] = useState(null);
@@ -1429,6 +1434,7 @@ const InteractiveJSONViewer = ({
               configType={configType}
               selectedConfig={selectedConfig}
               getCurrentData={getCurrentData}
+              onRefreshData={onRefreshData}
             />
           </div>
         </div>

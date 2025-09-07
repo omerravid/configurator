@@ -21,14 +21,19 @@ class DatabaseManager {
       if (this.databaseConfigs.size === 0) {
         const embeddedMongo = require('../models/embedded-mongodb');
         const connectionString = embeddedMongo.getConnectionString();
-        
+
         if (connectionString) {
+          console.log('Adding embedded MongoDB to database configs...');
           await this.addDatabase({
             name: 'Embedded MongoDB',
             connectionString: connectionString,
+            description: 'Built-in embedded MongoDB server',
             isEmbedded: true,
             isActive: true
           });
+          console.log('Embedded MongoDB added to database configs');
+        } else {
+          console.warn('Embedded MongoDB connection string not available');
         }
       }
 
@@ -217,6 +222,10 @@ class DatabaseManager {
       });
 
       console.log(`Connected to database: ${name}`);
+
+      // Initialize default admin user if database is empty
+      await this.initializeAdminUserIfNeeded();
+
       return connection;
     } catch (error) {
       console.error(`Failed to connect to database "${name}":`, error);
@@ -327,6 +336,7 @@ class DatabaseManager {
       configurationsSkipped: 0,
       usersProcessed: 0,
       usersUpdated: 0,
+      usersSkipped: 0,
       errors: []
     };
 
@@ -382,13 +392,9 @@ class DatabaseManager {
           });
 
           if (existingUser) {
-            // Update existing user to ensure it has admin role
-            await mongoose.model('User').findByIdAndUpdate(existingUser._id, {
-              role: 'ADMIN',
-              password_hash: adminUser.password_hash // Keep the same password
-            });
-            copyStats.usersUpdated++;
-            console.log(`Updated admin user: ${adminUser.username}`);
+            // Skip updating existing user to preserve authentication tokens
+            copyStats.usersSkipped++;
+            console.log(`Preserved existing user: ${adminUser.username} (skipped to prevent auth token expiration)`);
           } else {
             // Create new admin user
             const newUser = new (mongoose.model('User'))({
@@ -459,11 +465,11 @@ class DatabaseManager {
         }
       }
 
-      console.log(`Data copy completed. Users: ${copyStats.usersUpdated}, Configurations: ${copyStats.configurationsUpdated}, Errors: ${copyStats.errors.length}`);
+      console.log(`Data copy completed. Users created: ${copyStats.usersUpdated}, Users skipped: ${copyStats.usersSkipped}, Configurations: ${copyStats.configurationsUpdated}, Errors: ${copyStats.errors.length}`);
 
       return {
         success: true,
-        message: `Successfully copied ${copyStats.usersUpdated} admin users and ${copyStats.configurationsUpdated} configurations`,
+        message: `Successfully copied ${copyStats.usersUpdated} admin users (${copyStats.usersSkipped} existing users preserved) and ${copyStats.configurationsUpdated} configurations`,
         stats: copyStats
       };
 
@@ -581,6 +587,38 @@ class DatabaseManager {
         error: error.message,
         stats: migrationStats
       };
+    }
+  }
+
+  // Initialize default admin user if database is empty
+  async initializeAdminUserIfNeeded() {
+    try {
+      // Check if we're connected to MongoDB
+      if (mongoose.connection.readyState !== 1) {
+        return;
+      }
+
+      const User = mongoose.model('User');
+
+      // Check if any users exist
+      const userCount = await User.countDocuments();
+
+      if (userCount === 0) {
+        console.log('Database is empty, creating default admin user...');
+        const bcrypt = require('bcryptjs');
+        const hashedPassword = await bcrypt.hash('admin123', 10);
+
+        await User.create({
+          username: 'admin',
+          password_hash: hashedPassword,
+          role: 'ADMIN'
+        });
+        console.log('Default admin user created (username: admin, password: admin123)');
+      } else {
+        console.log(`Database already has ${userCount} users`);
+      }
+    } catch (error) {
+      console.error('Failed to initialize admin user:', error);
     }
   }
 }

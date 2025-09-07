@@ -1,8 +1,0 @@
-#P_HOME_P_LOAD
-<lbrL>
-<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
-#P1,BaseCor/BaseWork,391.70343,116.77935,267.01834,-124.01086,-47.2841,118.85567,5,54,-96,PTP,0.3,fcu,fcu
-P_HOME,PTP,0.3
-#P2,BaseCor/BaseWork,600,650,-50,0,0,0,5,54,-32.32657,PTP,0.3,fcu,fcu
-P_LOAD_TOOL,PTP,0.3
-#plannerSeed: 160.9178; -23.4116; -65.8189; 57.253; -72.8776; -104.5406; -36.9723

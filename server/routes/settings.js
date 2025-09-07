@@ -7,17 +7,10 @@ const DataMigration = require("../scripts/migrate-to-mongodb");
 const BackupRestore = require("../backup-restore");
 const FileStorageService = require("../services/FileStorageService");
 
-// Helper function to generate backup names in format: dd-mm-yyyy-HH:MM:ss-suffix
-function generateBackupName(suffix = 'backup') {
-  const now = new Date();
-  const day = String(now.getDate()).padStart(2, '0');
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const year = now.getFullYear();
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-
-  return `${day}-${month}-${year}-${hours}:${minutes}:${seconds}-${suffix}`;
+// Helper function to generate backup names in format: MongoServerName_Username_timestamp
+function generateBackupName(username = 'system', suffix = null) {
+  const br = new BackupRestore();
+  return br.generateBackupName(username, suffix);
 }
 
 const router = express.Router();
@@ -217,7 +210,7 @@ router.post("/databases/test", authenticateToken, requireAdmin, async (req, res)
   }
 });
 
-// Copy data between databases
+// Copy data between databases (using backup+restore approach)
 router.post("/databases/copy-data", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { error, value } = copyDataSchema.validate(req.body);
@@ -228,23 +221,99 @@ router.post("/databases/copy-data", authenticateToken, requireAdmin, async (req,
       });
     }
 
-    const result = await DatabaseManager.copyDataBetweenDatabases(
-      value.sourceDatabase,
-      value.targetDatabase,
-      {
-        includeConfigurations: value.includeConfigurations,
-        includeConfigurationTypes: value.includeConfigurationTypes,
-        adminOnly: value.adminOnly
-      }
-    );
+    const { sourceDatabase, targetDatabase } = value;
 
+    if (!sourceDatabase || !targetDatabase) {
+      return res.status(400).json({
+        success: false,
+        error: "Source and target databases are required"
+      });
+    }
+
+    if (sourceDatabase === targetDatabase) {
+      return res.status(400).json({
+        success: false,
+        error: "Source and target databases cannot be the same"
+      });
+    }
+
+    const username = req.user?.username || 'admin';
+    console.log(`Starting database copy from "${sourceDatabase}" to "${targetDatabase}" using backup+restore approach (with filtering)`);
+
+    // Step 1: Switch to source database and create backup
+    console.log(`Step 1: Switching to source database "${sourceDatabase}"`);
+    const originalDatabase = DatabaseManager.getActiveDatabaseName();
+    await DatabaseManager.setActiveDatabase(sourceDatabase);
+
+    const br = new BackupRestore();
+    const backupName = br.generateBackupName(username, `filtered-copy-from-${sourceDatabase}`);
+
+    console.log(`Step 2: Creating backup from source database: ${backupName}`);
+    const backupResult = await br.createBackup(backupName);
+
+    if (!backupResult.success) {
+      // Restore original database connection
+      await DatabaseManager.setActiveDatabase(originalDatabase);
+      return res.status(500).json({
+        success: false,
+        error: `Failed to create backup from source database: ${backupResult.error}`
+      });
+    }
+
+    console.log(`✅ Backup created successfully: ${backupResult.file}`);
+
+    // Step 3: Switch to target database and restore backup
+    console.log(`Step 3: Switching to target database "${targetDatabase}"`);
+    await DatabaseManager.setActiveDatabase(targetDatabase);
+
+    console.log(`Step 4: Restoring backup to target database`);
+    const restoreResult = await br.restoreFromBackup(backupName);
+
+    if (!restoreResult.success) {
+      // Restore original database connection
+      await DatabaseManager.setActiveDatabase(originalDatabase);
+      return res.status(500).json({
+        success: false,
+        error: `Failed to restore backup to target database: ${restoreResult.error}`,
+        backup: backupResult.file
+      });
+    }
+
+    console.log(`✅ Database copy completed successfully using backup+restore`);
+
+    // Step 5: Restore original database connection
+    await DatabaseManager.setActiveDatabase(originalDatabase);
+
+    // Format response to match the expected format from the old copy-data API
     res.json({
       success: true,
-      result,
-      message: "Data copied successfully"
+      result: {
+        configurationsProcessed: restoreResult.stats.configurations,
+        configurationsUpdated: restoreResult.stats.configurations,
+        configurationsSkipped: 0,
+        usersProcessed: restoreResult.stats.users,
+        usersUpdated: restoreResult.stats.users,
+        usersSkipped: restoreResult.stats.preservedAdminUsers || 0,
+        errors: []
+      },
+      message: `Data copied successfully using backup+restore approach. ${restoreResult.stats.users} users and ${restoreResult.stats.configurations} configurations copied.`,
+      backupFile: backupResult.file,
+      preRestoreBackup: restoreResult.preRestoreBackup
     });
+
   } catch (error) {
-    console.error("Failed to copy data:", error);
+    console.error("Failed to copy data using backup+restore:", error);
+
+    // Try to restore original database connection in case of error
+    try {
+      const originalDatabase = DatabaseManager.getActiveDatabaseName();
+      if (originalDatabase) {
+        await DatabaseManager.setActiveDatabase(originalDatabase);
+      }
+    } catch (restoreError) {
+      console.error("Failed to restore original database connection:", restoreError);
+    }
+
     res.status(500).json({
       success: false,
       error: error.message || "Failed to copy data"
@@ -426,7 +495,7 @@ router.post("/mongodb/migrate", authenticateToken, requireAdmin, async (req, res
     console.log('Creating SQLite backup before migration...');
     const BackupRestore = require("../backup-restore");
     const br = new BackupRestore();
-    const backupResult = await br.createBackup(generateBackupName('pre-migration'));
+    const backupResult = await br.createBackup(generateBackupName('system', 'pre-migration'));
 
     if (!backupResult.success) {
       return res.status(500).json({
@@ -500,8 +569,12 @@ router.get("/data/status", authenticateToken, requireAdmin, async (req, res) => 
 router.post("/data/backup", authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { name } = req.body;
+    const username = req.user?.username || 'admin';
     const br = new BackupRestore();
-    const result = await br.createBackup(name);
+
+    // Generate backup name with new format if no custom name provided
+    const backupName = name || br.generateBackupName(username);
+    const result = await br.createBackup(backupName);
     res.json(result);
   } catch (error) {
     console.error("Failed to create backup:", error);
@@ -551,6 +624,30 @@ router.post("/data/restore", authenticateToken, requireAdmin, async (req, res) =
   }
 });
 
+// Update from backup (override existing, preserve non-existing)
+router.post("/data/update", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { backupName } = req.body;
+
+    if (!backupName) {
+      return res.status(400).json({
+        success: false,
+        error: "Backup name is required"
+      });
+    }
+
+    const br = new BackupRestore();
+    const result = await br.updateFromBackup(backupName);
+    res.json(result);
+  } catch (error) {
+    console.error("Failed to update from backup:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to update from backup"
+    });
+  }
+});
+
 // Download backup file
 router.get("/data/backup/:backupName", authenticateToken, requireAdmin, async (req, res) => {
   try {
@@ -571,8 +668,11 @@ router.get("/data/backup/:backupName", authenticateToken, requireAdmin, async (r
     }
 
     // Set headers for file download
-    res.setHeader('Content-Disposition', `attachment; filename="${backupName}.json"`);
-    res.setHeader('Content-Type', 'application/json');
+    const fileExtension = result.filePath.endsWith('.zip') ? 'zip' : 'json';
+    const contentType = fileExtension === 'zip' ? 'application/zip' : 'application/json';
+
+    res.setHeader('Content-Disposition', `attachment; filename="${backupName}.${fileExtension}"`);
+    res.setHeader('Content-Type', contentType);
 
     // Send the file
     res.sendFile(result.filePath);
@@ -585,6 +685,43 @@ router.get("/data/backup/:backupName", authenticateToken, requireAdmin, async (r
   }
 });
 
+// Delete backup file (json/zip)
+router.delete("/data/backup/:backupName", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { backupName } = req.params;
+    if (!backupName) {
+      return res.status(400).json({ success: false, error: "Backup name is required" });
+    }
+
+    const fs = require('fs').promises;
+    const path = require('path');
+    const backupsDir = path.join(__dirname, '../backups');
+    const candidates = [
+      path.join(backupsDir, `${backupName}.zip`),
+      path.join(backupsDir, `${backupName}.json`)
+    ];
+
+    let deleted = 0;
+    for (const filePath of candidates) {
+      try {
+        await fs.unlink(filePath);
+        deleted++;
+      } catch (e) {
+        // ignore if not exists
+      }
+    }
+
+    if (deleted === 0) {
+      return res.status(404).json({ success: false, error: 'Backup file not found' });
+    }
+
+    res.json({ success: true, message: 'Backup deleted', deleted });
+  } catch (error) {
+    console.error('Failed to delete backup:', error);
+    res.status(500).json({ success: false, error: 'Failed to delete backup' });
+  }
+});
+
 // Upload and restore from backup file
 router.post("/data/upload-restore", authenticateToken, requireAdmin, async (req, res) => {
   try {
@@ -593,19 +730,29 @@ router.post("/data/upload-restore", authenticateToken, requireAdmin, async (req,
     const path = require('path');
     const fs = require('fs');
 
-    // Configure multer for temporary file storage
+    // Configure multer for temporary file storage - NO SIZE LIMITS
     const upload = multer({
       dest: path.join(__dirname, '../temp-uploads'),
+      limits: {
+        fileSize: Infinity, // Explicitly set to unlimited
+        files: 1,
+        fields: 10,
+        fieldSize: 1000000 // 1MB for text fields
+      },
       fileFilter: (req, file, cb) => {
-        // Only allow JSON files
-        if (file.mimetype === 'application/json' || file.originalname.endsWith('.json')) {
+        console.log(`[BACKUP UPLOAD] Receiving file: ${file.originalname}, size: ${file.size || 'unknown'}, mimetype: ${file.mimetype}`);
+
+        // Allow JSON or ZIP by extension OR common mimetypes
+        const name = (file.originalname || '').toLowerCase();
+        const type = (file.mimetype || '').toLowerCase();
+        const isJson = name.endsWith('.json') || type === 'application/json' || type === 'text/json';
+        const isZip = name.endsWith('.zip') || type === 'application/zip' || type === 'application/x-zip-compressed' || type === 'application/octet-stream';
+
+        if (isJson || isZip) {
           cb(null, true);
         } else {
-          cb(new Error('Only JSON files are allowed'), false);
+          cb(new Error('Only JSON and ZIP files are allowed'), false);
         }
-      },
-      limits: {
-        fileSize: 100 * 1024 * 1024, // 100MB limit
       }
     });
 
@@ -650,7 +797,95 @@ router.post("/data/upload-restore", authenticateToken, requireAdmin, async (req,
         console.error("Failed to restore from uploaded file:", uploadError);
         res.status(500).json({
           success: false,
-          error: "Failed to restore from uploaded file"
+          error: `Failed to restore from uploaded file: ${uploadError.message}`
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Failed to handle upload:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to handle upload"
+    });
+  }
+});
+
+// Upload and update from backup file (override existing, preserve non-existing)
+router.post("/data/upload-update", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    // Use multer middleware for file upload
+    const multer = require('multer');
+    const path = require('path');
+    const fs = require('fs');
+
+    // Configure multer for temporary file storage - NO SIZE LIMITS
+    const upload = multer({
+      dest: path.join(__dirname, '../temp-uploads'),
+      limits: {
+        fileSize: Infinity, // Explicitly set to unlimited
+        files: 1,
+        fields: 10,
+        fieldSize: 1000000 // 1MB for text fields
+      },
+      fileFilter: (req, file, cb) => {
+        console.log(`[BACKUP UPDATE UPLOAD] Receiving file: ${file.originalname}, size: ${file.size || 'unknown'}, mimetype: ${file.mimetype}`);
+
+        // Allow JSON or ZIP by extension OR common mimetypes
+        const name = (file.originalname || '').toLowerCase();
+        const type = (file.mimetype || '').toLowerCase();
+        const isJson = name.endsWith('.json') || type === 'application/json' || type === 'text/json';
+        const isZip = name.endsWith('.zip') || type === 'application/zip' || type === 'application/x-zip-compressed' || type === 'application/octet-stream';
+
+        if (isJson || isZip) {
+          cb(null, true);
+        } else {
+          cb(new Error('Only JSON and ZIP files are allowed'), false);
+        }
+      }
+    });
+
+    // Handle the upload
+    upload.single('backupFile')(req, res, async (err) => {
+      try {
+        if (err) {
+          return res.status(400).json({
+            success: false,
+            error: `Upload error: ${err.message}`
+          });
+        }
+
+        if (!req.file) {
+          return res.status(400).json({
+            success: false,
+            error: "No backup file uploaded"
+          });
+        }
+
+        const br = new BackupRestore();
+        const result = await br.updateFromUploadedFile(req.file.path);
+
+        // Clean up temporary file
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (cleanupError) {
+          console.warn('Failed to clean up temporary file:', cleanupError);
+        }
+
+        res.json(result);
+      } catch (uploadError) {
+        // Clean up temporary file on error
+        if (req.file?.path) {
+          try {
+            fs.unlinkSync(req.file.path);
+          } catch (cleanupError) {
+            console.warn('Failed to clean up temporary file:', cleanupError);
+          }
+        }
+
+        console.error("Failed to update from uploaded file:", uploadError);
+        res.status(500).json({
+          success: false,
+          error: `Failed to update from uploaded file: ${uploadError.message}`
         });
       }
     });
@@ -671,7 +906,7 @@ router.post("/mongodb/migrate-embedded", authenticateToken, requireAdmin, async 
     // Create backup before migration
     const BackupRestore = require("../backup-restore");
     const br = new BackupRestore();
-    const backupResult = await br.createBackup(generateBackupName('pre-embedded-migration'));
+    const backupResult = await br.createBackup(generateBackupName('system', 'pre-embedded-migration'));
 
     if (!backupResult.success) {
       return res.status(500).json({
@@ -754,7 +989,7 @@ router.post("/mongodb/revert-to-sqlite", authenticateToken, requireAdmin, async 
       // Create backup of current SQLite before overwriting
       const BackupRestore = require("../backup-restore");
       const br = new BackupRestore();
-      const backupResult = await br.createBackup(generateBackupName('pre-mongo-revert'));
+      const backupResult = await br.createBackup(generateBackupName('system', 'pre-mongo-revert'));
 
       if (!backupResult.success) {
         return res.status(500).json({

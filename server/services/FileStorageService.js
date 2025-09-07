@@ -196,7 +196,7 @@ class FileStorageService {
                 'https://4c7d7582c7b445d6ac2dadf6cdd558ad-c2353b8c6b2e4daeb0ef650da.fly.dev';
     } else {
       // Use localhost for local development
-      baseUrl = 'http://localhost:3002';
+      baseUrl = 'http://localhost:3003';
     }
 
     console.log(`Generating download URL - isDeployed: ${isDeployed}, baseUrl: ${baseUrl}`);

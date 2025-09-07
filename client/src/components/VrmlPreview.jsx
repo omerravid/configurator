@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-const VrmlPreview = ({ storageKey, authToken }) => {
+const VrmlPreview = ({ storageKey, authToken, url }) => {
   const containerRef = useRef(null);
   const rendererRef = useRef(null);
   const animationRef = useRef(null);
@@ -54,13 +54,20 @@ const VrmlPreview = ({ storageKey, authToken }) => {
         controls.enableDamping = true;
 
         // Load VRML
-        const resp = await fetch(`/api/files/${storageKey}`, {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
-        if (!resp.ok) {
-          throw new Error(`HTTP ${resp.status}`);
+        let text;
+        try {
+          const resp = await fetch(`/api/files/${storageKey}`, {
+            headers: { Authorization: `Bearer ${authToken}` },
+          });
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+          text = await resp.text();
+        } catch (primaryErr) {
+          // Fallback: try direct URL if provided (e.g., presigned or embedded)
+          if (!url) throw primaryErr;
+          const resp2 = await fetch(url);
+          if (!resp2.ok) throw primaryErr; // keep first error context
+          text = await resp2.text();
         }
-        const text = await resp.text();
 
         const loader = new VRMLLoader();
         object3D = loader.parse(text);

@@ -1,8 +1,0 @@
-<lbrR>
-<Robot,Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
-#P1,BaseCor/BaseWork/BaseDecA,0,0,-100,-30.0,0,0,3,47,14,LIN,80,drill,fcu/tool
-P_DEC_A_OUT,LIN,80
-P_DEC_A_IN,LIN,40
-#P2,BaseCor/BaseWork/BaseDecA,0,0,-3,-30.0,0,0,3,39,14,LIN,40,drill,fcu/tool
-#P1,BaseCor/BaseWork/BaseDecA,0,0,-100,-90,0,0,3,47,10,PTP,0.2,drill,fcu/tool
-#P2,BaseCor/BaseWork/BaseDecA,0,0,-3,-90,0,0,3,47,0,LIN,40,drill,fcu/tool

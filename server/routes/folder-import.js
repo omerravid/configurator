@@ -9,9 +9,9 @@ const router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB max file size
+    fileSize: Infinity, // No file size limit
     files: 1000, // Max 1000 files per request (increased from 100)
-    fieldSize: 10 * 1024 * 1024 // 10MB field size limit
+    fieldSize: Infinity // No field size limit
   },
   fileFilter: (req, file, cb) => {
     // Accept all file types for now
@@ -22,7 +22,11 @@ const upload = multer({
 // POST /api/folder-import - Import folder with JSON and binary files
 router.post("/", authenticateToken, upload.array('files'), async (req, res) => {
   try {
+    console.log("=== FOLDER IMPORT REQUEST DEBUG ===");
     console.log("Folder import request received");
+    console.log("req.body:", req.body);
+    console.log("req.files count:", req.files ? req.files.length : 0);
+
     const files = req.files;
     const { folderName } = req.body;
 
@@ -48,18 +52,101 @@ router.post("/", authenticateToken, upload.array('files'), async (req, res) => {
 
     console.log(`Import completed: ${result.jsonFiles} JSON files, ${result.binaryFiles} binary files, ${result.errors.length} errors`);
 
-    res.json({
-      success: true,
-      message: `Successfully processed ${result.totalFiles} files (${result.jsonFiles} JSON, ${result.binaryFiles} binary)`,
-      data: result.structure,
-      stats: {
-        totalFiles: result.totalFiles,
-        jsonFiles: result.jsonFiles,
-        binaryFiles: result.binaryFiles,
-        errors: result.errors.length,
-        errorDetails: result.errors
+    // Check if we need to attach the imported structure to a specific configuration property
+    const configId = req.body.configId;
+    const propertyPath = req.body.propertyPath;
+
+    console.log("=== FOLDER IMPORT ATTACHMENT DEBUG ===");
+    console.log("req.body keys:", Object.keys(req.body));
+    console.log("configId:", configId, typeof configId);
+    console.log("propertyPath:", propertyPath, typeof propertyPath);
+    console.log("Should attach:", !!(configId && propertyPath));
+
+    if (configId && propertyPath) {
+      console.log(`Attaching imported structure to config ${configId} at path: ${propertyPath}`);
+
+      // Import setValueAtPath helper from file-management route
+      const setValueAtPath = (obj, path, value) => {
+        const keys = path.split('.');
+        let current = obj;
+
+        // Navigate to the parent object, creating intermediate objects as needed
+        for (let i = 0; i < keys.length - 1; i++) {
+          const key = keys[i];
+          if (!current[key] || typeof current[key] !== 'object' || Array.isArray(current[key])) {
+            current[key] = {};
+          }
+          current = current[key];
+        }
+
+        // Set the value at the final key
+        const finalKey = keys[keys.length - 1];
+        if (value === undefined) {
+          delete current[finalKey];
+        } else {
+          current[finalKey] = value;
+        }
+      };
+
+      try {
+        // Create data update object with the imported structure
+        const dataUpdate = {};
+        setValueAtPath(dataUpdate, propertyPath, result.structure);
+
+        // Update the configuration using ConfigurationService
+        const ConfigurationService = require('../services/ConfigurationService');
+        await ConfigurationService.updateConfiguration(configId, { data: dataUpdate }, "system");
+
+        console.log(`Successfully attached imported structure to configuration ${configId}`);
+
+        res.json({
+          success: true,
+          message: `Successfully imported and attached ${result.totalFiles} files to property "${propertyPath}"`,
+          attached: true,
+          configId: configId,
+          propertyPath: propertyPath,
+          stats: {
+            totalFiles: result.totalFiles,
+            jsonFiles: result.jsonFiles,
+            binaryFiles: result.binaryFiles,
+            errors: result.errors.length,
+            errorDetails: result.errors
+          }
+        });
+      } catch (attachError) {
+        console.error("Failed to attach imported structure to configuration:", attachError);
+
+        // Return the imported structure even if attachment failed
+        res.status(500).json({
+          success: false,
+          error: "Import succeeded but failed to attach to configuration",
+          details: attachError.message,
+          data: result.structure,
+          stats: {
+            totalFiles: result.totalFiles,
+            jsonFiles: result.jsonFiles,
+            binaryFiles: result.binaryFiles,
+            errors: result.errors.length,
+            errorDetails: result.errors
+          }
+        });
       }
-    });
+    } else {
+      // Normal import without attachment (existing behavior)
+      res.json({
+        success: true,
+        message: `Successfully processed ${result.totalFiles} files (${result.jsonFiles} JSON, ${result.binaryFiles} binary)`,
+        data: result.structure,
+        attached: false,
+        stats: {
+          totalFiles: result.totalFiles,
+          jsonFiles: result.jsonFiles,
+          binaryFiles: result.binaryFiles,
+          errors: result.errors.length,
+          errorDetails: result.errors
+        }
+      });
+    }
 
   } catch (error) {
     console.error("Folder import error:", error);
@@ -77,7 +164,7 @@ router.post("/", authenticateToken, upload.array('files'), async (req, res) => {
       return res.status(400).json({
         success: false,
         error: "File too large",
-        details: "Maximum file size is 50MB"
+        details: "File size limit exceeded"
       });
     }
 
@@ -106,7 +193,7 @@ router.use((error, req, res, next) => {
       return res.status(400).json({
         success: false,
         error: "File too large",
-        details: "Maximum file size is 50MB"
+        details: "File size limit exceeded"
       });
     }
 

@@ -47,15 +47,126 @@ const Dashboard = () => {
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [configBreadcrumb, setConfigBreadcrumb] = useState(null);
 
+  // Helper function to extract actual ID from various parent_id formats
+  const extractParentId = (parentId) => {
+    if (!parentId) return null;
+
+    // If it's already a string, return it (unless it's '[object Object]')
+    if (typeof parentId === 'string') {
+      if (parentId === '[object Object]') {
+        console.warn('Found [object Object] as parent_id - database serialization issue');
+        return null;
+      }
+      return parentId;
+    }
+
+    // If it's an object, try to extract the ID
+    if (typeof parentId === 'object') {
+      // Try various common ID properties
+      if (parentId.id) return String(parentId.id);
+      if (parentId._id) return String(parentId._id);
+      if (parentId.$oid) return String(parentId.$oid); // MongoDB ObjectId format
+
+      // Try to extract from nested object structures
+      if (parentId.toString && typeof parentId.toString === 'function') {
+        const stringified = parentId.toString();
+        if (stringified !== '[object Object]') {
+          return stringified;
+        }
+      }
+
+      // If it's an object with other properties, log for debugging
+      console.warn('Complex parent_id object found:', parentId);
+      return null;
+    }
+
+    return String(parentId);
+  };
+
+  // Generate breadcrumb for any configuration by traversing its parent hierarchy
+  const generateBreadcrumb = async (config) => {
+    if (!config || !Boolean(config.archived)) {
+      return null;
+    }
+
+    try {
+      // Get all configurations to build the hierarchy map
+      const response = await configAPI.getAll(true); // Include archived
+      const allConfigs = response.data.configs || [];
+      const idMap = new Map(allConfigs.map(c => [c.id, c]));
+
+      // Build complete breadcrumb from root to current item
+      const pathNames = [];
+      let current = config;
+      const guard = new Set();
+
+      // Traverse up the hierarchy to build complete ancestry
+      while (current) {
+        // Add current item to the beginning of the path (root → ... → archived item)
+        pathNames.unshift(current.name);
+        guard.add(current.id);
+
+        const parentId = extractParentId(current.parent_id);
+
+        // Store current config for potential fallback
+        const currentConfig = current;
+
+        if (!parentId) {
+          // Fallback: try to find parent by name if parent_name is available
+          if (currentConfig.parent_name) {
+            const parentByName = allConfigs.find(c => c.name === currentConfig.parent_name);
+            if (parentByName) {
+              current = parentByName;
+              continue;
+            }
+          }
+          break; // reached root
+        }
+
+        if (guard.has(parentId)) {
+          console.warn(`Circular reference detected for ${currentConfig.name} (${currentConfig.id})`);
+          break; // prevent infinite loops
+        }
+
+        // Find parent in the configurations map
+        current = idMap.get(parentId);
+        if (!current) {
+          // Fallback: try to find parent by name if parent_name is available
+          if (currentConfig.parent_name) {
+            const parentByName = allConfigs.find(c => c.name === currentConfig.parent_name);
+            if (parentByName) {
+              current = parentByName;
+              continue;
+            }
+          }
+          break;
+        }
+      }
+
+      return pathNames.join(' → ');
+    } catch (error) {
+      console.error('Failed to generate breadcrumb:', error);
+      return null;
+    }
+  };
 
   const loadAllConfigurations = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.replace("/login");
+      return;
+    }
     try {
       const response = await configAPI.getAll();
       setAllConfigurations(response.data.configs || []);
 
     } catch (err) {
-      console.error("Failed to load all configurations:", err);
+      // Let global interceptor handle 401/network auth issues
+      if (err.response?.status === 401) return;
+      if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') return;
+
       // Don't show error toast for empty configurations
       if (err.response?.status !== 404) {
         showToast("Failed to load configurations", "error");
@@ -89,16 +200,31 @@ const Dashboard = () => {
     loadAllConfigurations();
   }, [refreshTrigger]);
 
-  const handleConfigSelect = (config) => {
-    console.log("=== handleConfigSelect called ===");
-    console.log("config:", config);
-    console.log("config.id:", config.id, typeof config.id);
-    console.log("config.id stringified:", JSON.stringify(config.id));
+  const handleConfigSelect = async (config) => {
 
     setSelectedConfig(config);
     setRawData(null);
     setShowEditor(false);
     setShowRename(false);
+
+    // Generate breadcrumb for archived configurations
+    if (Boolean(config.archived)) {
+      // Always generate a fresh breadcrumb to ensure completeness
+      // The existing _breadcrumb might be incomplete due to database issues
+      const breadcrumb = await generateBreadcrumb(config);
+
+      // Use the generated breadcrumb if available, otherwise fall back to existing
+      if (breadcrumb) {
+        setConfigBreadcrumb(breadcrumb);
+      } else if (config._breadcrumb) {
+        setConfigBreadcrumb(config._breadcrumb);
+      } else {
+        setConfigBreadcrumb(null);
+      }
+    } else {
+      setConfigBreadcrumb(null);
+    }
+
     loadConfigurationData(config);
   };
 
@@ -243,23 +369,49 @@ const Dashboard = () => {
   };
 
   const handleCommit = async () => {
-    if (
-      !selectedConfig ||
-      selectedConfig.type !== "USER" ||
-      selectedConfig.status !== "DRAFT"
-    ) {
+    console.log("=== handleCommit called ===");
+    console.log("selectedConfig:", selectedConfig);
+
+    if (!selectedConfig) {
+      console.log("No selected config");
+      showToast("No configuration selected", "error");
       return;
     }
 
+    if (selectedConfig.type !== "USER" && selectedConfig.type !== "VERSION") {
+      console.log("Invalid config type:", selectedConfig.type);
+      showToast(`Cannot commit ${selectedConfig.type} configurations. Only USER and VERSION configurations can be committed.`, "error");
+      return;
+    }
+
+    if (selectedConfig.status !== "DRAFT") {
+      console.log("Invalid config status:", selectedConfig.status);
+      showToast(`Configuration is already ${selectedConfig.status}. Only DRAFT configurations can be committed.`, "error");
+      return;
+    }
+
+    console.log("Attempting to commit config ID:", selectedConfig.id);
+
     try {
-      await configAPI.commit(selectedConfig.id);
+      const response = await configAPI.commit(selectedConfig.id);
+      console.log("Commit response:", response);
+
       setRefreshTrigger((prev) => prev + 1);
       // Reload the current config
       const updated = { ...selectedConfig, status: "COMMITTED" };
       setSelectedConfig(updated);
+
+      showToast(`Configuration "${selectedConfig.name}" committed successfully`, "success");
     } catch (err) {
       console.error("Failed to commit configuration:", err);
-      setError("Failed to commit configuration");
+      console.error("Error response:", err.response);
+      console.error("Error response data:", err.response?.data);
+      console.error("Error status:", err.response?.status);
+      console.error("Error message:", err.message);
+
+      const errorMessage = err.response?.data?.error || err.message || "Failed to commit configuration";
+      setError(`Failed to commit configuration: ${errorMessage}`);
+      showToast(`Failed to commit: ${errorMessage}`, "error");
     }
   };
 
@@ -481,11 +633,17 @@ const Dashboard = () => {
       // Send delta to server - server will handle merging with existing data
       await configAPI.update(configId, { data: deltaData });
 
-      // Optimized update: only reload data without refreshing the tree
-      // This preserves expand/collapse states and focus
+      // Optimized update: reload both resolved and raw data to ensure structure view updates
+      // This preserves expand/collapse states and focus while updating the structure view
       try {
-        const response = await configAPI.getById(configId, true);
-        setResolvedData(response.data);
+        // Load both resolved and raw data to ensure structure view updates properly
+        const [resolvedResponse, rawResponse] = await Promise.all([
+          configAPI.getById(configId, true),
+          configAPI.getRawById(configId)
+        ]);
+
+        setResolvedData(resolvedResponse.data);
+        setRawData(rawResponse.data);
 
         // Don't refresh tree for simple value updates
         // Tree refresh is only needed for structural changes (name, type, parent changes)
@@ -726,7 +884,7 @@ const Dashboard = () => {
     if (!selectedConfig || Boolean(selectedConfig.archived)) return false;
     if (selectedConfig.type === "PRODUCT" && user.role === "ADMIN") return true;
     if (selectedConfig.type === "INSTANCE") return true;
-    if (selectedConfig.type === "USER") return false; // USER configs cannot have children
+    if (selectedConfig.type === "USER") return true; // USER configs can have USER children
     if (selectedConfig.type === "COMPONENT" && user.role === "ADMIN")
       return true;
     if (selectedConfig.type === "VERSION") return false; // VERSION configs cannot have children
@@ -865,6 +1023,22 @@ const Dashboard = () => {
                   onContextMenu={handleContextMenuShow}
                 >
                   <div>
+                    {/* Breadcrumb for archived configurations */}
+                    {Boolean(selectedConfig.archived) && configBreadcrumb && (
+                      <div className="mb-3 flex flex-wrap items-center gap-1">
+                        {configBreadcrumb.split(' → ').map((part, index, array) => (
+                          <React.Fragment key={index}>
+                            <span className="px-2 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded">
+                              {part}
+                            </span>
+                            {index < array.length - 1 && (
+                              <span className="text-gray-400 text-sm">→</span>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    )}}
+
                     <h2 className={`text-xl font-semibold ${Boolean(selectedConfig.archived) ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}`}>
                       {selectedConfig.name}
                       {Boolean(selectedConfig.archived) && (
@@ -1024,6 +1198,7 @@ const Dashboard = () => {
                     onDataChange={handleDataChange}
                     configType={selectedConfig?.type}
                     selectedConfig={selectedConfig}
+                    onRefreshData={() => loadConfigurationData(selectedConfig)}
                   />
                 ) : (
                   <div className="text-center text-gray-500 p-8">
@@ -1093,6 +1268,7 @@ const Dashboard = () => {
       <SettingsModal
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
+        onDataRefresh={() => setRefreshTrigger(prev => prev + 1)}
       />
 
       {/* Delete Confirmation Dialog */}

@@ -44,9 +44,18 @@ const configurationSchema = new mongoose.Schema({
       ret.id = ret._id.toString();
       ret.created_at = ret.createdAt;
       ret.updated_at = ret.updatedAt;
+
+      // Handle parent_id - could be ObjectId or populated object
       if (ret.parent_id) {
-        ret.parent_id = ret.parent_id.toString();
+        if (typeof ret.parent_id === 'object' && ret.parent_id._id) {
+          // It's a populated object, extract just the ID
+          ret.parent_id = ret.parent_id._id.toString();
+        } else if (ret.parent_id.toString) {
+          // It's an ObjectId, convert to string
+          ret.parent_id = ret.parent_id.toString();
+        }
       }
+
       delete ret._id;
       delete ret.__v;
       delete ret.createdAt;

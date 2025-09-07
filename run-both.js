@@ -4,11 +4,11 @@ const path = require("path");
 console.log("Starting Configuration Manager...");
 
 // Start backend server
-console.log("Starting backend server on port 3002...");
+console.log("Starting backend server on port 3003...");
 const backend = spawn("node", ["index.js"], {
   cwd: path.join(__dirname, "server"),
   stdio: ["inherit", "pipe", "pipe"],
-  env: { ...process.env, PORT: "3002" },
+  env: { ...process.env, PORT: "3003" },
 });
 
 backend.stdout.on("data", (data) => {

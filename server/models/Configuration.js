@@ -96,7 +96,9 @@ class Configuration {
   static async findAll(includeArchived = false) {
     const archivedFilter = includeArchived ? '' : 'WHERE c.archived = 0';
     const result = await db.query(
-      `SELECT c.*, u.username as created_by_username,
+      `SELECT c.id, c.name, c.type, c.parent_id, c.data, c.status, c.archived,
+              c.created_at, c.updated_at, c.created_by, c.description,
+              u.username as created_by_username,
               pc.name as parent_name, pc.type as parent_type
        FROM configurations c
        LEFT JOIN users u ON c.created_by = u.id
@@ -185,8 +187,24 @@ class Configuration {
     const values = [];
 
     if (data !== undefined) {
+      // Get existing configuration to merge data properly
+      const existingConfig = await this.findById(id);
+      if (!existingConfig) {
+        throw new Error("Configuration not found");
+      }
+
+      // Merge new data with existing data instead of replacing
+      const existingData = existingConfig.data || {};
+      const mergedData = this.deepMerge(existingData, data);
+
       updateFields.push("data = ?");
-      values.push(JSON.stringify(data));
+      values.push(JSON.stringify(mergedData));
+
+      console.log(`Updating configuration ${id}:`, {
+        existingData: JSON.stringify(existingData, null, 2),
+        newData: JSON.stringify(data, null, 2),
+        mergedData: JSON.stringify(mergedData, null, 2)
+      });
     }
 
     if (description !== undefined) {
@@ -209,6 +227,26 @@ class Configuration {
     return await this.findById(id);
   }
 
+  // Helper method for deep merging objects
+  static deepMerge(target, source) {
+    const result = { ...target };
+
+    for (const key in source) {
+      if (source.hasOwnProperty(key)) {
+        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key]) &&
+            target[key] && typeof target[key] === 'object' && !Array.isArray(target[key])) {
+          // Both are objects, merge recursively
+          result[key] = this.deepMerge(target[key], source[key]);
+        } else {
+          // Replace with new value (for primitives, arrays, or null)
+          result[key] = source[key];
+        }
+      }
+    }
+
+    return result;
+  }
+
   static async updateName(id, name) {
     await db.query(
       `UPDATE configurations 
@@ -221,14 +259,23 @@ class Configuration {
   }
 
   static async commit(id) {
-    await db.query(
-      `UPDATE configurations 
+    console.log("=== Configuration.commit called ===");
+    console.log("ID:", id);
+
+    const result = await db.query(
+      `UPDATE configurations
        SET status = 'COMMITTED', updated_at = CURRENT_TIMESTAMP
               WHERE id = ? AND (type = 'USER' OR type = 'VERSION') AND status = 'DRAFT'`,
       [id],
     );
 
-    return await this.findById(id);
+    console.log("Update result:", result);
+    console.log("Rows affected:", result.changes || result.affectedRows);
+
+    const updatedConfig = await this.findById(id);
+    console.log("Updated config:", updatedConfig);
+
+    return updatedConfig;
   }
 
   static async archive(id, archiveChildren = false) {

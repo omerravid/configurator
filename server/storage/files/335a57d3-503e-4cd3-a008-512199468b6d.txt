@@ -1,7 +1,0 @@
-#standardIKKukaPathPlanner
-#Act2SideR
-<lbrR>
-<Robot,Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
-P_CLEAR_R,PTP,0.3
-#P2,BaseCor/BaseWork,-570.51506,46.7885,262.84231,-57.42436,-29.66985,-113.51647,3,15,-88.7369689941406,PTP,0.3,fcu,fcu
-#plannerSeed: -97.63; -101.7; -88.74; -101.58; 24.39; 105.41; -156.19

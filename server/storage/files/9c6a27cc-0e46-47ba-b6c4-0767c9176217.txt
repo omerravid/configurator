@@ -1,5 +1,0 @@
-#ScanR2AP
-<lbrL>
-<Robot,Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
-#P3,BaseCor/BaseWork/BaseScan,-380.0,0,0,90,-50,90.00005,5,59,-135,LIN,60,detector,fcu/tool
-P_SCAN_P4,LIN,60

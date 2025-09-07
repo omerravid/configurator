@@ -1,9 +1,0 @@
-#P_TLW_OUT_P_TLW_IN
-<lbrL>
-<Point,Base,X,Y,Z,A,B,C,Status,Turn,E1,Motion Type,vel,Tool>
-#P1,BaseCor/BaseWork/BaseTLW,0,0,-200,180,0,0,5,45,-86.1719665527344,LIN,40,ScrewInserter,fcu/tool
-P_TLW_OUT,LIN,40
-P_TLW_IN,LIN,40
-#P2,BaseCor/BaseWork/BaseTLW,0,0,0,180,0,0,5,45,-76.3678588867188,LIN,40,ScrewInserter,fcu/tool
-#P3,BaseCor/BaseWork/BaseTLW,0,0,0,145,0,0,6,45,-77.5375671386719,LIN,40,ScrewInserter,fcu/tool
-#plannerSeed: -121.1282; 83.0278; -77.5376; -112.5782; 91.2538; -26.2459; 168.1735

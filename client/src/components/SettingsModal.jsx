@@ -10,6 +10,7 @@ import {
   ClockIcon,
   DocumentArrowUpIcon,
   DocumentArrowDownIcon,
+  DocumentDuplicateIcon,
   CogIcon,
   WifiIcon,
   XCircleIcon,
@@ -23,7 +24,7 @@ import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
 import api, { userAPI, authAPI } from "../services/api";
 
-const SettingsModal = ({ isOpen, onClose }) => {
+const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
   const { showToast } = useToast();
   const { user, logout, login } = useAuth();
   const [activeTab, setActiveTab] = useState('users');
@@ -75,6 +76,13 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const [selectedBackup, setSelectedBackup] = useState('');
   const [backupLoading, setBackupLoading] = useState(false);
   const [dataStats, setDataStats] = useState({ users: 0, configurations: 0 });
+  const [selectedBackups, setSelectedBackups] = useState([]);
+  const [restoreMode, setRestoreMode] = useState('restore'); // 'restore' or 'update'
+
+  // File cleanup state
+  const [fileCleanupLoading, setFileCleanupLoading] = useState(false);
+  const [unreferencedFiles, setUnreferencedFiles] = useState([]);
+  const [showFileCleanupConfirm, setShowFileCleanupConfirm] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [uploadLoading, setUploadLoading] = useState(false);
 
@@ -228,11 +236,12 @@ const SettingsModal = ({ isOpen, onClose }) => {
       console.error('Error config URL:', error.config?.url);
 
       if (error.response?.status === 401) {
-        console.log('401 detected - showing re-auth modal');
-        showToast('Session expired. Please re-authenticate to continue.', 'info');
-        setPendingDatabaseSwitch('current'); // Special value for reloading current status
-        setShowReAuthModal(true);
-        console.log('Re-auth modal state set to true');
+        console.log('401 detected - authentication failed');
+        showToast('Session expired after database switch. Please login again.', 'warning');
+        localStorage.removeItem('token');
+        setTimeout(() => {
+          window.location.replace('/login');
+        }, 2000);
       } else {
         setDbStatus({ type: 'sqlite', connected: false, host: '' });
         setDatabases([]);
@@ -263,9 +272,11 @@ const SettingsModal = ({ isOpen, onClose }) => {
       const response = await api.get('/settings/data/backups');
       if (response.data.success) {
         setBackups(response.data.backups || []);
+        setSelectedBackups([]);
       } else {
         console.warn('Backup loading unsuccessful:', response.data.error);
         setBackups([]);
+        setSelectedBackups([]);
       }
     } catch (error) {
       console.error('Failed to load backups:', error);
@@ -308,6 +319,13 @@ const SettingsModal = ({ isOpen, onClose }) => {
       if (response.data.success) {
         showToast('Switched to embedded MongoDB successfully', 'success');
         loadDatabaseStatus();
+
+        // Reload configurations from the new database
+        if (onDataRefresh) {
+          setTimeout(() => {
+            onDataRefresh();
+          }, 500);
+        }
       } else {
         showToast(`Failed to switch: ${response.data.error}`, 'error');
       }
@@ -337,6 +355,13 @@ const SettingsModal = ({ isOpen, onClose }) => {
       if (response.data.success) {
         showToast('Switched to external MongoDB successfully', 'success');
         loadDatabaseStatus();
+
+        // Reload configurations from the new database
+        if (onDataRefresh) {
+          setTimeout(() => {
+            onDataRefresh();
+          }, 500);
+        }
       } else {
         showToast(`Failed to switch: ${response.data.error}`, 'error');
       }
@@ -361,6 +386,13 @@ const SettingsModal = ({ isOpen, onClose }) => {
       if (response.data.success) {
         showToast('Switched to SQLite successfully', 'success');
         loadDatabaseStatus();
+
+        // Reload configurations from the new database
+        if (onDataRefresh) {
+          setTimeout(() => {
+            onDataRefresh();
+          }, 500);
+        }
       } else {
         showToast(`Failed to switch: ${response.data.error}`, 'error');
       }
@@ -439,10 +471,18 @@ const SettingsModal = ({ isOpen, onClose }) => {
         showToast(`Database "${name}" is now active`, 'success');
         loadDatabaseStatus();
 
-        // After database switch, warn user about potential session changes
-        setTimeout(() => {
-          showToast('Database activated successfully. You may need to refresh the page if you experience any issues.', 'info');
-        }, 1000);
+        // Reload configurations from the new database
+        if (onDataRefresh) {
+          setTimeout(() => {
+            onDataRefresh();
+            showToast('Database activated and configurations reloaded successfully.', 'success');
+          }, 500);
+        } else {
+          // Fallback message if no onDataRefresh callback
+          setTimeout(() => {
+            showToast('Database activated successfully. You may need to refresh the page if you experience any issues.', 'info');
+          }, 1000);
+        }
       } else {
         showToast(`Failed to activate database: ${response.data.error}`, 'error');
       }
@@ -476,8 +516,23 @@ const SettingsModal = ({ isOpen, onClose }) => {
       }
     } catch (error) {
       console.error('Failed to test connection:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to test connection';
-      showToast(`Connection test failed: ${errorMessage}`, 'error');
+
+      if (error.response?.status === 401) {
+        const errorMsg = error.response?.data?.error || 'Authentication failed';
+        if (errorMsg.includes('database switch')) {
+          showToast('Authentication failed after database switch. Please login again.', 'warning');
+        } else {
+          showToast('Session expired. Please login again.', 'warning');
+        }
+        // Clear invalid token and redirect to login
+        localStorage.removeItem('token');
+        setTimeout(() => {
+          window.location.replace('/login');
+        }, 2000);
+      } else {
+        const errorMessage = error.response?.data?.error || error.message || 'Failed to test connection';
+        showToast(`Connection test failed: ${errorMessage}`, 'error');
+      }
     } finally {
       setDbLoading(false);
     }
@@ -652,20 +707,9 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const createBackup = async () => {
     setBackupLoading(true);
     try {
-      // Create backup name in format: dd-mm-yyyy-HH:MM:ss-username
-      const now = new Date();
-      const day = String(now.getDate()).padStart(2, '0');
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const year = now.getFullYear();
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
-      const username = user?.username || 'unknown';
-
-      const backupName = `${day}-${month}-${year}-${hours}:${minutes}:${seconds}-${username}`;
-
+      // Let server generate backup name with new format: MongoServerName_Username_timestamp
       const response = await api.post('/settings/data/backup', {
-        name: backupName
+        // No name provided - server will generate with new format
       });
 
       if (response.data.success) {
@@ -690,38 +734,108 @@ const SettingsModal = ({ isOpen, onClose }) => {
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to restore from backup "${selectedBackup}"? This will replace all current data. A backup of current data will be created first.`)) {
+    const isUpdateMode = restoreMode === 'update';
+    const actionText = isUpdateMode ? 'update from' : 'restore from';
+    const confirmMessage = isUpdateMode
+      ? `Are you sure you want to update from backup "${selectedBackup}"? This will override existing configurations but preserve ones not in the backup. A backup of current data will be created first.`
+      : `Are you sure you want to restore from backup "${selectedBackup}"? This will replace all current data. A backup of current data will be created first.`;
+
+    if (!window.confirm(confirmMessage)) {
       return;
     }
 
     setBackupLoading(true);
     try {
-      const response = await api.post('/settings/data/restore', {
+      const endpoint = isUpdateMode ? '/settings/data/update' : '/settings/data/restore';
+      const response = await api.post(endpoint, {
         backupName: selectedBackup
       });
 
       if (response.data.success) {
-        showToast('Data restored successfully. You will be redirected to login due to session changes.', 'success');
-        setSelectedBackup('');
+        const { adminUsersPreserved, message, isUpdate } = response.data;
 
-        // Clear token and redirect to login after restore (user IDs changed)
-        setTimeout(() => {
-          localStorage.removeItem("token");
-          window.location.replace("/login");
-        }, 2000);
+        if (isUpdate || (adminUsersPreserved && onDataRefresh)) {
+          // For updates or when admin users were preserved, we can stay logged in and just refresh the data
+          showToast(`Data ${actionText} completed successfully. Refreshing view...`, 'success');
+          setSelectedBackup('');
+
+          // Refresh the dashboard data after a short delay
+          setTimeout(() => {
+            onDataRefresh();
+          }, 1000);
+        } else {
+          // Admin users were not preserved or changed, need to re-login
+          showToast(`Data ${actionText} completed successfully. You will be redirected to login due to session changes.`, 'success');
+          setSelectedBackup('');
+
+          // Clear token and redirect to login after restore (user IDs changed)
+          setTimeout(() => {
+            localStorage.removeItem("token");
+            window.location.replace("/login");
+          }, 2000);
+        }
       } else {
-        showToast(`Failed to restore backup: ${response.data.error}`, 'error');
+        showToast(`Failed to ${actionText} backup: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to restore backup:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to restore backup';
-      showToast(`Failed to restore backup: ${errorMessage}`, 'error');
+      console.error(`Failed to ${actionText} backup:`, error);
+      const errorMessage = error.response?.data?.error || error.message || `Failed to ${actionText} backup`;
+      showToast(`Failed to ${actionText} backup: ${errorMessage}`, 'error');
     } finally {
       setBackupLoading(false);
     }
   };
 
-  const downloadBackup = async (backupName) => {
+  const toggleBackupSelection = (name) => {
+    setSelectedBackups((prev) =>
+      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
+    );
+  };
+
+  const selectAllBackups = () => {
+    setSelectedBackups((prev) => (prev.length === backups.length ? [] : backups.map(b => b.name)));
+  };
+
+  const downloadSelectedBackups = async () => {
+    if (selectedBackups.length === 0) return;
+    setBackupLoading(true);
+    try {
+      for (const name of selectedBackups) {
+        await downloadBackup(name, true);
+      }
+      showToast(`Downloaded ${selectedBackups.length} backup(s)`, 'success');
+    } catch (e) {
+      // Individual downloads handle errors
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
+  const deleteSelectedBackups = async () => {
+    if (selectedBackups.length === 0) return;
+    if (!window.confirm(`Delete ${selectedBackups.length} selected backup(s)? This cannot be undone.`)) return;
+    setBackupLoading(true);
+    try {
+      let deleted = 0, failed = 0;
+      for (const name of selectedBackups) {
+        try {
+          await api.delete(`/settings/data/backup/${name}`);
+          deleted++;
+        } catch (err) {
+          failed++;
+        }
+      }
+      if (deleted) showToast(`Deleted ${deleted} backup(s)`, 'success');
+      if (failed) showToast(`${failed} backup(s) failed to delete`, 'warning');
+      await loadBackups();
+      setSelectedBackups([]);
+      setSelectedBackup('');
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
+  const downloadBackup = async (backupName, silent = false) => {
     try {
       setBackupLoading(true);
 
@@ -729,17 +843,27 @@ const SettingsModal = ({ isOpen, onClose }) => {
         responseType: 'blob' // Important for file downloads
       });
 
-      // Create blob link to download
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      // Create blob link to download with correct filename
+      const blob = new Blob([response.data]);
+      const disposition = response.headers && (response.headers['content-disposition'] || response.headers['Content-Disposition']);
+      const contentType = (response.headers && (response.headers['content-type'] || response.headers['Content-Type'])) || '';
+      let filename = `${backupName}.json`;
+      if (disposition) {
+        const match = /filename="?([^";]+)"?/i.exec(disposition);
+        if (match && match[1]) filename = match[1];
+      } else if (contentType.includes('zip')) {
+        filename = `${backupName}.zip`;
+      }
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${backupName}.json`);
+      link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
 
-      showToast('Backup downloaded successfully', 'success');
+      if (!silent) showToast('Backup downloaded successfully', 'success');
     } catch (error) {
       console.error('Failed to download backup:', error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to download backup';
@@ -752,12 +876,11 @@ const SettingsModal = ({ isOpen, onClose }) => {
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      if (!file.name.endsWith('.json')) {
-        showToast('Please select a JSON file', 'error');
-        return;
-      }
-      if (file.size > 100 * 1024 * 1024) { // 100MB limit
-        showToast('File size must be less than 100MB', 'error');
+      const name = file.name.toLowerCase();
+      const isJson = name.endsWith('.json');
+      const isZip = name.endsWith('.zip');
+      if (!isJson && !isZip) {
+        showToast('Please select a JSON or ZIP file', 'error');
         return;
       }
       setUploadedFile(file);
@@ -770,7 +893,13 @@ const SettingsModal = ({ isOpen, onClose }) => {
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to restore from the uploaded file "${uploadedFile.name}"? This will replace all current data. A backup of current data will be created first.`)) {
+    const isUpdateMode = restoreMode === 'update';
+    const actionText = isUpdateMode ? 'update from' : 'restore from';
+    const confirmMessage = isUpdateMode
+      ? `Are you sure you want to update from the uploaded file "${uploadedFile.name}"? This will override existing configurations but preserve ones not in the backup. A backup of current data will be created first.`
+      : `Are you sure you want to restore from the uploaded file "${uploadedFile.name}"? This will replace all current data. A backup of current data will be created first.`;
+
+    if (!window.confirm(confirmMessage)) {
       return;
     }
 
@@ -779,34 +908,111 @@ const SettingsModal = ({ isOpen, onClose }) => {
       const formData = new FormData();
       formData.append('backupFile', uploadedFile);
 
-      const response = await api.post('/settings/data/upload-restore', formData, {
+      const endpoint = isUpdateMode ? '/settings/data/upload-update' : '/settings/data/upload-restore';
+      const response = await api.post(endpoint, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
       if (response.data.success) {
-        showToast('Data restored from uploaded file successfully. You will be redirected to login due to session changes.', 'success');
-        setUploadedFile(null);
+        const { adminUsersPreserved, message, isUpdate } = response.data;
 
-        // Reset file input
-        const fileInput = document.querySelector('input[type="file"]');
-        if (fileInput) fileInput.value = '';
+        if (isUpdate || (adminUsersPreserved && onDataRefresh)) {
+          // For updates or when admin users were preserved, we can stay logged in and just refresh the data
+          showToast(`Data ${actionText} uploaded file successfully. Refreshing view...`, 'success');
+          setUploadedFile(null);
 
-        // Clear token and redirect to login after restore (user IDs changed)
-        setTimeout(() => {
-          localStorage.removeItem("token");
-          window.location.replace("/login");
-        }, 2000);
+          // Reset file input
+          const fileInput = document.querySelector('input[type="file"]');
+          if (fileInput) fileInput.value = '';
+
+          // Refresh the dashboard data after a short delay
+          setTimeout(() => {
+            onDataRefresh();
+          }, 1000);
+        } else {
+          // Admin users were not preserved or changed, need to re-login
+          showToast(`Data ${actionText} uploaded file successfully. You will be redirected to login due to session changes.`, 'success');
+          setUploadedFile(null);
+
+          // Reset file input
+          const fileInput = document.querySelector('input[type="file"]');
+          if (fileInput) fileInput.value = '';
+
+          // Clear token and redirect to login after restore (user IDs changed)
+          setTimeout(() => {
+            localStorage.removeItem("token");
+            window.location.replace("/login");
+          }, 2000);
+        }
       } else {
-        showToast(`Failed to restore from uploaded file: ${response.data.error}`, 'error');
+        showToast(`Failed to ${actionText} uploaded file: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to restore from uploaded file:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to restore from uploaded file';
-      showToast(`Failed to restore from uploaded file: ${errorMessage}`, 'error');
+      console.error(`Failed to ${actionText} uploaded file:`, error);
+      const errorMessage = error.response?.data?.error || error.message || `Failed to ${actionText} uploaded file`;
+      showToast(`Failed to ${actionText} uploaded file: ${errorMessage}`, 'error');
     } finally {
       setUploadLoading(false);
+    }
+  };
+
+  const findUnreferencedFiles = async () => {
+    setFileCleanupLoading(true);
+    try {
+      const response = await api.get('/file-management/unreferenced');
+
+      if (response.data.success) {
+        setUnreferencedFiles(response.data.unreferencedFiles);
+
+        if (response.data.unreferencedCount === 0) {
+          showToast('No unreferenced files found', 'success');
+        } else {
+          setShowFileCleanupConfirm(true);
+        }
+      } else {
+        showToast(`Failed to find unreferenced files: ${response.data.error}`, 'error');
+      }
+    } catch (error) {
+      console.error('Failed to find unreferenced files:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to find unreferenced files';
+      showToast(`Failed to find unreferenced files: ${errorMessage}`, 'error');
+    } finally {
+      setFileCleanupLoading(false);
+    }
+  };
+
+  const deleteUnreferencedFiles = async () => {
+    setFileCleanupLoading(true);
+    setShowFileCleanupConfirm(false);
+
+    try {
+      const response = await api.delete('/file-management/unreferenced');
+
+      if (response.data.success) {
+        showToast(
+          `Successfully deleted ${response.data.deletedCount} unreferenced files`,
+          'success'
+        );
+        setUnreferencedFiles([]);
+
+        if (response.data.errors && response.data.errors.length > 0) {
+          console.warn('Some files could not be deleted:', response.data.errors);
+          showToast(
+            `${response.data.errors.length} files could not be deleted`,
+            'warning'
+          );
+        }
+      } else {
+        showToast(`Failed to delete unreferenced files: ${response.data.error}`, 'error');
+      }
+    } catch (error) {
+      console.error('Failed to delete unreferenced files:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to delete unreferenced files';
+      showToast(`Failed to delete unreferenced files: ${errorMessage}`, 'error');
+    } finally {
+      setFileCleanupLoading(false);
     }
   };
 
@@ -1121,10 +1327,10 @@ const SettingsModal = ({ isOpen, onClose }) => {
               <button
                 onClick={() => setShowCopyData(true)}
                 disabled={dbLoading}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center space-x-2"
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center space-x-2"
               >
-                <DocumentArrowUpIcon className="w-4 h-4" />
-                <span>Copy Data</span>
+                <DocumentDuplicateIcon className="w-4 h-4" />
+                <span>Copy Database</span>
               </button>
             </div>
           </div>
@@ -1198,84 +1404,52 @@ const SettingsModal = ({ isOpen, onClose }) => {
       {/* Copy Data Modal */}
       {showCopyData && (
         <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
-          <h4 className="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Copy Data Between Databases</h4>
+          <h4 className="text-md font-medium text-gray-900 dark:text-gray-100 mb-4">Copy Database (Backup+Restore)</h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            This uses the robust backup+restore system to copy all data from source to target database.
+            All users, configurations, and files will be copied, ensuring no data inconsistencies.
+          </p>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                  Source Database
-                </label>
-                <select
-                  value={copyDataConfig.sourceDatabase}
-                  onChange={(e) => setCopyDataConfig({...copyDataConfig, sourceDatabase: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
-                >
-                  <option value="">Select source...</option>
-                  {databases.map(db => (
-                    <option key={db.name} value={db.name}>{db.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-                  Target Database
-                </label>
-                <select
-                  value={copyDataConfig.targetDatabase}
-                  onChange={(e) => setCopyDataConfig({...copyDataConfig, targetDatabase: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
-                >
-                  <option value="">Select target...</option>
-                  {databases.filter(db => db.name !== copyDataConfig.sourceDatabase).map(db => (
-                    <option key={db.name} value={db.name}>{db.name}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Configuration Types to Copy
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                Source Database
               </label>
-              <div className="flex flex-wrap gap-2">
-                {['PRODUCT', 'INSTANCE', 'USER', 'COMPONENT', 'VERSION'].map(type => (
-                  <label key={type} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={copyDataConfig.includeConfigurationTypes.includes(type)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setCopyDataConfig({
-                            ...copyDataConfig,
-                            includeConfigurationTypes: [...copyDataConfig.includeConfigurationTypes, type]
-                          });
-                        } else {
-                          setCopyDataConfig({
-                            ...copyDataConfig,
-                            includeConfigurationTypes: copyDataConfig.includeConfigurationTypes.filter(t => t !== type)
-                          });
-                        }
-                      }}
-                      className="rounded"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{type}</span>
-                  </label>
+              <select
+                value={copyDataConfig.sourceDatabase}
+                onChange={(e) => setCopyDataConfig({...copyDataConfig, sourceDatabase: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+              >
+                <option value="">Select source...</option>
+                {databases.map(db => (
+                  <option key={db.name} value={db.name}>{db.name}</option>
                 ))}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Leave empty to copy all types</p>
+              </select>
             </div>
 
             <div>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={copyDataConfig.adminOnly}
-                  onChange={(e) => setCopyDataConfig({...copyDataConfig, adminOnly: e.target.checked})}
-                  className="rounded"
-                />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Only copy admin-created configurations</span>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                Target Database
               </label>
+              <select
+                value={copyDataConfig.targetDatabase}
+                onChange={(e) => setCopyDataConfig({...copyDataConfig, targetDatabase: e.target.value})}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
+              >
+                <option value="">Select target...</option>
+                {databases.filter(db => db.name !== copyDataConfig.sourceDatabase).map(db => (
+                  <option key={db.name} value={db.name}>{db.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+              <div className="flex items-center space-x-2">
+                <CheckCircleIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <span className="text-sm font-medium text-blue-800 dark:text-blue-200">Backup+Restore Technology</span>
+              </div>
+              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                Uses the same reliable backup and restore system for consistent data copying with automatic ID mapping and integrity preservation.
+              </p>
             </div>
           </div>
 
@@ -1297,6 +1471,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
           </div>
         </div>
       )}
+
     </div>
   );
 
@@ -1327,6 +1502,52 @@ const SettingsModal = ({ isOpen, onClose }) => {
             </button>
           </div>
 
+          {/* Restore Mode Selection */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-3 flex items-center space-x-2">
+              <CogIcon className="w-4 h-4" />
+              <span>Restore Mode</span>
+            </h4>
+            <div className="space-y-3">
+              <label className="flex items-start space-x-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="restoreMode"
+                  value="restore"
+                  checked={restoreMode === 'restore'}
+                  onChange={(e) => setRestoreMode(e.target.value)}
+                  className="mt-0.5 text-blue-600 focus:ring-blue-500"
+                />
+                <div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    Full Restore (Replace All)
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    Replaces all existing data with backup data. Creates a backup of current data first.
+                  </div>
+                </div>
+              </label>
+              <label className="flex items-start space-x-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="restoreMode"
+                  value="update"
+                  checked={restoreMode === 'update'}
+                  onChange={(e) => setRestoreMode(e.target.value)}
+                  className="mt-0.5 text-blue-600 focus:ring-blue-500"
+                />
+                <div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    Update from Backup (Merge)
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    Updates existing configurations and adds new ones. Preserves configurations not in backup.
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
           {/* Available Backups List with Download & Restore */}
           {backups.length > 0 && (
             <div className="space-y-3">
@@ -1334,14 +1555,45 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 Available Backups
               </h4>
 
+              <div className="flex items-center justify-between mb-2">
+                <label className="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300">
+                  <input type="checkbox" onChange={selectAllBackups} checked={selectedBackups.length === backups.length && backups.length > 0} />
+                  <span>Select All</span>
+                </label>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={downloadSelectedBackups}
+                    disabled={backupLoading || selectedBackups.length === 0}
+                    className="px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded font-medium transition-colors disabled:cursor-not-allowed flex items-center space-x-1 text-xs"
+                  >
+                    <DocumentArrowDownIcon className="w-3 h-3" />
+                    <span>Download Selected</span>
+                  </button>
+                  <button
+                    onClick={deleteSelectedBackups}
+                    disabled={backupLoading || selectedBackups.length === 0}
+                    className="px-3 py-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded font-medium transition-colors disabled:cursor-not-allowed flex items-center space-x-1 text-xs"
+                  >
+                    <TrashIcon className="w-3 h-3" />
+                    <span>Delete Selected</span>
+                  </button>
+                </div>
+              </div>
+
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 max-h-40 overflow-y-auto">
                 {backups.map(backup => (
                   <div key={backup.name} className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-600 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700">
                     <div className="flex items-center space-x-3">
+                      <input type="checkbox" checked={selectedBackups.includes(backup.name)} onChange={() => toggleBackupSelection(backup.name)} />
                       <ClockIcon className="w-4 h-4 text-gray-400" />
                       <span className="text-sm text-gray-900 dark:text-gray-100 font-mono">
                         {backup.name}
                       </span>
+                      {backup.type === 'full' && (
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full dark:bg-blue-900 dark:text-blue-200">
+                          Full Backup
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center space-x-2">
                       <button
@@ -1375,10 +1627,14 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 <button
                   onClick={restoreBackup}
                   disabled={backupLoading}
-                  className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  className={`w-full px-4 py-2 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2 ${
+                    restoreMode === 'update'
+                      ? 'bg-blue-600 hover:bg-blue-700'
+                      : 'bg-red-600 hover:bg-red-700'
+                  }`}
                 >
                   {backupLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <DocumentArrowDownIcon className="w-4 h-4" />}
-                  <span>Restore from "{selectedBackup}"</span>
+                  <span>{restoreMode === 'update' ? 'Update' : 'Restore'} from "{selectedBackup}"</span>
                 </button>
               )}
             </div>
@@ -1387,17 +1643,17 @@ const SettingsModal = ({ isOpen, onClose }) => {
           {/* Upload and Restore Section */}
           <div className="space-y-3">
             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200">
-              Upload & Restore from File
+              Upload & {restoreMode === 'update' ? 'Update' : 'Restore'} from File
             </h4>
 
             <div className="space-y-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                  Select Backup File (.json)
+                  Select Backup File (.json or .zip)
                 </label>
                 <input
                   type="file"
-                  accept=".json"
+                  accept=".json,.zip"
                   onChange={handleFileUpload}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-200"
                 />
@@ -1411,10 +1667,14 @@ const SettingsModal = ({ isOpen, onClose }) => {
               <button
                 onClick={uploadAndRestore}
                 disabled={!uploadedFile || uploadLoading}
-                className="w-full px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                className={`w-full px-4 py-2 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2 ${
+                  restoreMode === 'update'
+                    ? 'bg-blue-600 hover:bg-blue-700'
+                    : 'bg-orange-600 hover:bg-orange-700'
+                }`}
               >
                 {uploadLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <DocumentArrowUpIcon className="w-4 h-4" />}
-                <span>Upload & Restore</span>
+                <span>Upload & {restoreMode === 'update' ? 'Update' : 'Restore'}</span>
               </button>
             </div>
           </div>
@@ -1496,7 +1756,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 value={s3Config.secretAccessKey}
                 onChange={(e) => setS3Config({...s3Config, secretAccessKey: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100"
-                placeholder="••���•••••"
+                placeholder="••���•���•••"
               />
             </div>
           </div>
@@ -1521,6 +1781,35 @@ const SettingsModal = ({ isOpen, onClose }) => {
               <span>Use Embedded Storage</span>
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* File Cleanup Section */}
+      <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center space-x-2">
+            <TrashIcon className="w-5 h-5" />
+            <span>File Cleanup</span>
+          </h3>
+        </div>
+
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Remove files that are no longer referenced by any configuration. This helps free up storage space.
+          </p>
+
+          <button
+            onClick={findUnreferencedFiles}
+            disabled={fileCleanupLoading}
+            className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+          >
+            {fileCleanupLoading ? (
+              <ArrowPathIcon className="w-4 h-4 animate-spin" />
+            ) : (
+              <TrashIcon className="w-4 h-4" />
+            )}
+            <span>Find & Remove Unreferenced Files</span>
+          </button>
         </div>
       </div>
     </div>
@@ -1574,6 +1863,57 @@ const SettingsModal = ({ isOpen, onClose }) => {
           {activeTab === 'filesystem' && renderFileSystemTab()}
         </div>
       </div>
+
+      {/* File Cleanup Confirmation Modal */}
+      {showFileCleanupConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
+            <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-4 flex items-center space-x-2">
+              <TrashIcon className="w-5 h-5" />
+              <span>Confirm File Cleanup</span>
+            </h3>
+
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Found <strong>{unreferencedFiles.length}</strong> unreferenced files that will be permanently deleted:
+            </p>
+
+            <div className="max-h-48 overflow-y-auto bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-4">
+              {unreferencedFiles.slice(0, 10).map((file, index) => (
+                <div key={index} className="text-xs text-gray-700 dark:text-gray-300 py-1">
+                  {file.originalName} ({(file.size / 1024).toFixed(1)} KB)
+                </div>
+              ))}
+              {unreferencedFiles.length > 10 && (
+                <div className="text-xs text-gray-500 dark:text-gray-400 py-1">
+                  ... and {unreferencedFiles.length - 10} more files
+                </div>
+              )}
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowFileCleanupConfirm(false)}
+                disabled={fileCleanupLoading}
+                className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={deleteUnreferencedFiles}
+                disabled={fileCleanupLoading}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              >
+                {fileCleanupLoading ? (
+                  <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                ) : (
+                  <TrashIcon className="w-4 h-4" />
+                )}
+                <span>Delete Files</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Re-authentication Modal for Database Switching */}
       {console.log('Modal render check - showReAuthModal:', showReAuthModal, 'pendingDatabaseSwitch:', pendingDatabaseSwitch)}
@@ -1641,6 +1981,57 @@ const SettingsModal = ({ isOpen, onClose }) => {
                 className="px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
               >
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* File Cleanup Confirmation Modal */}
+      {showFileCleanupConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">
+            <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-4 flex items-center space-x-2">
+              <TrashIcon className="w-5 h-5" />
+              <span>Confirm File Cleanup</span>
+            </h3>
+
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Found <strong>{unreferencedFiles.length}</strong> unreferenced files that will be permanently deleted:
+            </p>
+
+            <div className="max-h-48 overflow-y-auto bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mb-4">
+              {unreferencedFiles.slice(0, 10).map((file, index) => (
+                <div key={index} className="text-xs text-gray-700 dark:text-gray-300 py-1">
+                  {file.originalName} ({(file.size / 1024).toFixed(1)} KB)
+                </div>
+              ))}
+              {unreferencedFiles.length > 10 && (
+                <div className="text-xs text-gray-500 dark:text-gray-400 py-1">
+                  ... and {unreferencedFiles.length - 10} more files
+                </div>
+              )}
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowFileCleanupConfirm(false)}
+                disabled={fileCleanupLoading}
+                className="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={deleteUnreferencedFiles}
+                disabled={fileCleanupLoading}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              >
+                {fileCleanupLoading ? (
+                  <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                ) : (
+                  <TrashIcon className="w-4 h-4" />
+                )}
+                <span>Delete Files</span>
               </button>
             </div>
           </div>

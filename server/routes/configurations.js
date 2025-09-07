@@ -38,15 +38,31 @@ const renameConfigSchema = Joi.object({
 // Middleware to check permissions for config operations
 const checkConfigPermissions = async (req, res, next) => {
   try {
+    console.log("=== checkConfigPermissions called ===");
+    console.log("Config ID:", req.params.id);
+    console.log("User:", req.user);
+    console.log("Method:", req.method);
+    console.log("URL:", req.url);
+
     const config = await Configuration.findById(req.params.id);
     if (!config) {
+      console.log("Configuration not found");
       return res.status(404).json({ error: "Configuration not found" });
     }
+
+    console.log("Found config:", {
+      id: config.id,
+      name: config.name,
+      type: config.type,
+      status: config.status,
+      created_by: config.created_by
+    });
 
     req.config = config;
 
     // Admin can do anything
     if (req.user.role === "ADMIN") {
+      console.log("Admin user, allowing access");
       return next();
     }
 
@@ -56,6 +72,7 @@ const checkConfigPermissions = async (req, res, next) => {
       config.type === "INSTANCE" ||
       config.type === "COMPONENT"
     ) {
+      console.log("Non-admin trying to modify PRODUCT/INSTANCE/COMPONENT");
       return res.status(403).json({
         error:
           "Only admins can modify Product/Instance/Component configurations",
@@ -64,19 +81,38 @@ const checkConfigPermissions = async (req, res, next) => {
 
     // For USER and VERSION configs, check ownership and draft status
     if (config.type === "USER" || config.type === "VERSION") {
+      console.log("Checking USER/VERSION permissions");
+      console.log("Config created_by:", config.created_by);
+      console.log("User username:", req.user.username);
+
       if (config.created_by !== req.user.username) {
+        console.log("User does not own this configuration");
         return res
           .status(403)
           .json({ error: "You can only modify your own configurations" });
       }
 
+      // Special handling for commit operations - allow committing DRAFT configurations
+      if (req.url.includes('/commit')) {
+        if (config.status !== "DRAFT") {
+          console.log("Cannot commit non-DRAFT configuration");
+          return res
+            .status(403)
+            .json({ error: "Can only commit DRAFT configurations" });
+        }
+        console.log("Commit operation allowed for DRAFT configuration");
+        return next();
+      }
+
       if (req.method !== "GET" && config.status === "COMMITTED") {
+        console.log("Cannot modify committed configuration");
         return res
           .status(403)
           .json({ error: "Cannot modify committed configurations" });
       }
     }
 
+    console.log("Permission check passed");
     next();
   } catch (error) {
     console.error("Permission check error:", error);
@@ -87,8 +123,10 @@ const checkConfigPermissions = async (req, res, next) => {
 // GET /api/configs - List all configurations
 router.get("/", authenticateTokenOrApiKey, async (req, res) => {
   try {
+    console.log("=== GET /api/configs called ===");
     const { type, status, includeArchived } = req.query;
     const showArchived = includeArchived === 'true';
+    console.log("Query params:", { type, status, includeArchived, showArchived });
 
     let configs;
     if (type) {
@@ -96,6 +134,15 @@ router.get("/", authenticateTokenOrApiKey, async (req, res) => {
     } else {
       configs = await Configuration.findAll(showArchived);
     }
+
+    console.log(`Loaded ${configs.length} configurations from database`);
+    console.log("Configurations:", configs.map(c => ({
+      id: c.id,
+      name: c.name,
+      type: c.type,
+      archived: c.archived,
+      parent_id: c.parent_id
+    })));
 
     // Filter by status if specified
     if (status) {
@@ -514,9 +561,16 @@ router.post(
   checkConfigPermissions,
   async (req, res) => {
     try {
+      console.log("=== COMMIT ROUTE CALLED ===");
+      console.log("Config ID:", req.params.id);
+      console.log("User:", req.user);
+      console.log("Config from middleware:", req.config);
+
       const config = await ConfigurationService.commitUserConfiguration(
         req.params.id,
       );
+
+      console.log("Commit successful, updated config:", config);
 
       res.json({
         message: "Configuration committed successfully",

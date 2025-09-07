@@ -4,7 +4,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 
 const app = express();
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3003;
 
 const { initializeSampleData } = require("./scripts/init-sample-data");
 
@@ -24,14 +24,65 @@ if (process.env.USE_MONGODB === 'true') {
     .then(async () => {
       console.log('Embedded MongoDB initialized successfully');
 
+      // Small delay to ensure MongoDB is fully ready
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       // Initialize DatabaseManager
       await DatabaseManager.initialize();
+
+      // Start test MongoDB instance
+      await embeddedMongo.startTestInstance();
+
+      // Manually add embedded MongoDB configurations
+      try {
+        const connectionString = embeddedMongo.getConnectionString();
+        const testConnectionString = embeddedMongo.getTestConnectionString();
+
+        if (connectionString) {
+          await DatabaseManager.addDatabase({
+            name: 'Embedded MongoDB',
+            connectionString: connectionString,
+            description: 'Primary embedded MongoDB server',
+            isEmbedded: true
+          });
+
+          // Set it as active
+          await DatabaseManager.setActiveDatabase('Embedded MongoDB');
+          console.log('Embedded MongoDB registered and set as active database');
+        }
+
+        if (testConnectionString) {
+          await DatabaseManager.addDatabase({
+            name: 'Test MongoDB',
+            connectionString: testConnectionString,
+            description: 'Secondary test MongoDB server for testing database switching',
+            isEmbedded: true
+          });
+          console.log('Test MongoDB registered as secondary database');
+
+          // Initialize test data in the test database
+          console.log('Switching to test database to initialize test data...');
+          const originalActiveDb = DatabaseManager.getActiveDatabaseName();
+
+          // Temporarily switch to test database
+          await DatabaseManager.setActiveDatabase('Test MongoDB');
+          await embeddedMongo.initializeTestData();
+
+          // Switch back to primary database
+          await DatabaseManager.setActiveDatabase(originalActiveDb);
+          console.log('Switched back to primary database');
+        }
+      } catch (error) {
+        console.log('MongoDB configuration already exists or error:', error.message);
+      }
 
       // Connect to active database
       const activeDb = DatabaseManager.getActiveDatabase();
       if (activeDb) {
         await DatabaseManager.connectToDatabase(activeDb.name);
         console.log(`Connected to active database: ${activeDb.name}`);
+      } else {
+        console.log('No active database found, using embedded MongoDB connection');
       }
 
       // Initialize default data
@@ -72,8 +123,8 @@ app.use(
     credentials: true,
   }),
 );
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "500mb" })); // Increased for large backup files
+app.use(express.urlencoded({ extended: true, limit: "500mb" }));
 
 // Make database available to all routes (only for SQLite)
 if (db) {
