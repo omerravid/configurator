@@ -80,14 +80,21 @@ const Dashboard = () => {
 
   // Generate breadcrumb for any configuration by traversing its parent hierarchy
   const generateBreadcrumb = async (config) => {
+    console.log("=== generateBreadcrumb called ===");
+    console.log("config:", config);
+    console.log("config.archived:", config.archived, "Boolean(config.archived):", Boolean(config.archived));
+
     if (!config || !Boolean(config.archived)) {
+      console.log("Config is null or not archived, returning null");
       return null;
     }
 
     try {
+      console.log("Fetching all configurations...");
       // Get all configurations to build the hierarchy map
       const response = await configAPI.getAll(true); // Include archived
       const allConfigs = response.data.configs || [];
+      console.log(`Found ${allConfigs.length} total configurations`);
       const idMap = new Map(allConfigs.map(c => [c.id, c]));
 
       // Build complete breadcrumb from root to current item
@@ -95,14 +102,20 @@ const Dashboard = () => {
       let current = config;
       const guard = new Set();
 
+      console.log("Starting breadcrumb traversal...");
       // Traverse up the hierarchy to build complete ancestry
       while (current) {
+        console.log(`Processing: ${current.name} (${current.id}), parent_id: ${current.parent_id}`);
         // Add current item to the beginning of the path (root → ... → archived item)
         pathNames.unshift(current.name);
         guard.add(current.id);
 
         const parentId = extractParentId(current.parent_id);
-        if (!parentId) break; // reached root
+        console.log(`Extracted parent ID: ${parentId}`);
+        if (!parentId) {
+          console.log("No parent ID, reached root");
+          break; // reached root
+        }
         if (guard.has(parentId)) {
           console.warn(`Circular reference detected for ${current.name} (${current.id})`);
           break; // prevent infinite loops
@@ -114,9 +127,13 @@ const Dashboard = () => {
           console.warn(`Parent ${parentId} not found for ${pathNames[pathNames.length - 1]}`);
           break;
         }
+        console.log(`Found parent: ${current.name}`);
       }
 
-      return pathNames.join(' → ');
+      const breadcrumb = pathNames.join(' → ');
+      console.log("Final breadcrumb:", breadcrumb);
+      console.log("Path names:", pathNames);
+      return breadcrumb;
     } catch (error) {
       console.error('Failed to generate breadcrumb:', error);
       return null;
