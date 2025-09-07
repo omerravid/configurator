@@ -624,6 +624,30 @@ router.post("/data/restore", authenticateToken, requireAdmin, async (req, res) =
   }
 });
 
+// Update from backup (override existing, preserve non-existing)
+router.post("/data/update", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { backupName } = req.body;
+
+    if (!backupName) {
+      return res.status(400).json({
+        success: false,
+        error: "Backup name is required"
+      });
+    }
+
+    const br = new BackupRestore();
+    const result = await br.updateFromBackup(backupName);
+    res.json(result);
+  } catch (error) {
+    console.error("Failed to update from backup:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to update from backup"
+    });
+  }
+});
+
 // Download backup file
 router.get("/data/backup/:backupName", authenticateToken, requireAdmin, async (req, res) => {
   try {
