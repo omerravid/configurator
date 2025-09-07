@@ -176,6 +176,8 @@ const Dashboard = () => {
     console.log("config:", config);
     console.log("config.id:", config.id, typeof config.id);
     console.log("config.id stringified:", JSON.stringify(config.id));
+    console.log("config.archived:", config.archived, "Boolean(config.archived):", Boolean(config.archived));
+    console.log("config._breadcrumb:", config._breadcrumb);
 
     setSelectedConfig(config);
     setRawData(null);
@@ -184,13 +186,18 @@ const Dashboard = () => {
 
     // Generate breadcrumb for archived configurations if not already present
     if (Boolean(config.archived)) {
+      console.log("Config is archived, generating breadcrumb...");
       if (config._breadcrumb) {
+        console.log("Using existing breadcrumb:", config._breadcrumb);
         setConfigBreadcrumb(config._breadcrumb);
       } else {
+        console.log("No existing breadcrumb, generating new one...");
         const breadcrumb = await generateBreadcrumb(config);
+        console.log("Generated breadcrumb:", breadcrumb);
         setConfigBreadcrumb(breadcrumb);
       }
     } else {
+      console.log("Config is not archived, clearing breadcrumb");
       setConfigBreadcrumb(null);
     }
 
