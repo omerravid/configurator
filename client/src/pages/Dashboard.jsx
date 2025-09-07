@@ -112,19 +112,35 @@ const Dashboard = () => {
       console.log("Starting breadcrumb traversal...");
       // Traverse up the hierarchy to build complete ancestry
       while (current) {
-        console.log(`Processing: ${current.name} (${current.id}), parent_id: ${current.parent_id}`);
+        console.log(`Processing: ${current.name} (${current.id}), parent_id: ${current.parent_id}, parent_name: ${current.parent_name}`);
         // Add current item to the beginning of the path (root → ... → archived item)
         pathNames.unshift(current.name);
         guard.add(current.id);
 
         const parentId = extractParentId(current.parent_id);
         console.log(`Extracted parent ID: ${parentId}`);
+
+        // Store current config for potential fallback
+        const currentConfig = current;
+
         if (!parentId) {
-          console.log("No parent ID, reached root");
+          console.log("No parent ID, trying fallback with parent_name...");
+          // Fallback: try to find parent by name if parent_name is available
+          if (currentConfig.parent_name) {
+            console.log(`Trying fallback: searching for parent by name: ${currentConfig.parent_name}`);
+            const parentByName = allConfigs.find(c => c.name === currentConfig.parent_name);
+            if (parentByName) {
+              console.log(`Found parent by name: ${parentByName.name} (${parentByName.id})`);
+              current = parentByName;
+              continue;
+            }
+          }
+          console.log("No parent found, reached root");
           break; // reached root
         }
+
         if (guard.has(parentId)) {
-          console.warn(`Circular reference detected for ${current.name} (${current.id})`);
+          console.warn(`Circular reference detected for ${currentConfig.name} (${currentConfig.id})`);
           break; // prevent infinite loops
         }
 
@@ -133,10 +149,10 @@ const Dashboard = () => {
         if (!current) {
           console.warn(`Parent ${parentId} not found for ${pathNames[pathNames.length - 1]}`);
 
-          // Fallback: try to find parent by name if parent_name is available in the current config
-          if (current && current.parent_name) {
-            console.log(`Trying fallback: searching for parent by name: ${current.parent_name}`);
-            const parentByName = allConfigs.find(c => c.name === current.parent_name);
+          // Fallback: try to find parent by name if parent_name is available
+          if (currentConfig.parent_name) {
+            console.log(`Trying fallback: searching for parent by name: ${currentConfig.parent_name}`);
+            const parentByName = allConfigs.find(c => c.name === currentConfig.parent_name);
             if (parentByName) {
               console.log(`Found parent by name: ${parentByName.name} (${parentByName.id})`);
               current = parentByName;
