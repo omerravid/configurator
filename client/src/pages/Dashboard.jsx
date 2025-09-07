@@ -905,6 +905,14 @@ const Dashboard = () => {
                   onContextMenu={handleContextMenuShow}
                 >
                   <div>
+                    {/* Breadcrumb for archived configurations */}
+                    {Boolean(selectedConfig.archived) && selectedConfig._breadcrumb && (
+                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-2 font-mono bg-gray-50 dark:bg-gray-700 px-3 py-1 rounded border">
+                        <span className="text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Path:</span>
+                        <span className="ml-2">{selectedConfig._breadcrumb}</span>
+                      </div>
+                    )}
+
                     <h2 className={`text-xl font-semibold ${Boolean(selectedConfig.archived) ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}`}>
                       {selectedConfig.name}
                       {Boolean(selectedConfig.archived) && (
