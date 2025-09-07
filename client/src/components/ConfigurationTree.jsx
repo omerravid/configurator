@@ -840,7 +840,6 @@ const ConfigurationTree = ({
           return a.type.localeCompare(b.type);
         });
 
-        console.log("Final flat archived configs:", rootConfigs.map(c => ({ id: c.id, name: c.name, type: c.type, breadcrumb: c._breadcrumb })));
       } else {
         // Active tab: only non-archived root-level configs
         rootConfigs = rootConfigs.filter(config => !Boolean(config.archived));
