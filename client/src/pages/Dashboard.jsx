@@ -235,17 +235,25 @@ const Dashboard = () => {
     setShowEditor(false);
     setShowRename(false);
 
-    // Generate breadcrumb for archived configurations if not already present
+    // Generate breadcrumb for archived configurations
     if (Boolean(config.archived)) {
       console.log("Config is archived, generating breadcrumb...");
-      if (config._breadcrumb) {
-        console.log("Using existing breadcrumb:", config._breadcrumb);
+
+      // Always generate a fresh breadcrumb to ensure completeness
+      // The existing _breadcrumb might be incomplete due to database issues
+      console.log("Existing breadcrumb:", config._breadcrumb);
+      console.log("Generating fresh breadcrumb to ensure completeness...");
+      const breadcrumb = await generateBreadcrumb(config);
+      console.log("Generated breadcrumb:", breadcrumb);
+
+      // Use the generated breadcrumb if available, otherwise fall back to existing
+      if (breadcrumb) {
+        setConfigBreadcrumb(breadcrumb);
+      } else if (config._breadcrumb) {
+        console.log("Fallback to existing breadcrumb");
         setConfigBreadcrumb(config._breadcrumb);
       } else {
-        console.log("No existing breadcrumb, generating new one...");
-        const breadcrumb = await generateBreadcrumb(config);
-        console.log("Generated breadcrumb:", breadcrumb);
-        setConfigBreadcrumb(breadcrumb);
+        setConfigBreadcrumb(null);
       }
     } else {
       console.log("Config is not archived, clearing breadcrumb");
