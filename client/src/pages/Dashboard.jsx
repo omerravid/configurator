@@ -133,13 +133,13 @@ const Dashboard = () => {
         if (!current) {
           console.warn(`Parent ${parentId} not found for ${pathNames[pathNames.length - 1]}`);
 
-          // Fallback: try to find parent by name if parent_name is available
-          const originalConfig = pathNames.length === 1 ? config : idMap.get(guard.values().next().value);
-          if (originalConfig && originalConfig.parent_name) {
-            console.log(`Trying fallback: searching for parent by name: ${originalConfig.parent_name}`);
-            current = allConfigs.find(c => c.name === originalConfig.parent_name);
-            if (current) {
-              console.log(`Found parent by name: ${current.name} (${current.id})`);
+          // Fallback: try to find parent by name if parent_name is available in the current config
+          if (current && current.parent_name) {
+            console.log(`Trying fallback: searching for parent by name: ${current.parent_name}`);
+            const parentByName = allConfigs.find(c => c.name === current.parent_name);
+            if (parentByName) {
+              console.log(`Found parent by name: ${parentByName.name} (${parentByName.id})`);
+              current = parentByName;
               continue;
             }
           }
