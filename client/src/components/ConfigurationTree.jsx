@@ -247,16 +247,6 @@ const TreeNode = ({
         });
       }
 
-      console.log(`Children for ${config.name} (${config.id}):`,
-        childrenData.map(c => ({
-          name: c.name,
-          type: c.type,
-          archived: c.archived,
-          parent_id: c.parent_id,
-          extracted_parent_id: extractParentId(c.parent_id),
-          _isPlaceholder: c._isPlaceholder
-        }))
-      );
 
       setChildren(childrenData);
       setHasLoadedChildren(true);
