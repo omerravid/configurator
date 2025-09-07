@@ -1017,20 +1017,24 @@ const Dashboard = () => {
                 >
                   <div>
                     {/* Breadcrumb for archived configurations */}
-                    {Boolean(selectedConfig.archived) && configBreadcrumb && (
-                      <div className="mb-3 flex flex-wrap items-center gap-1">
-                        {configBreadcrumb.split(' → ').map((part, index, array) => (
-                          <React.Fragment key={index}>
-                            <span className="px-2 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded">
-                              {part}
-                            </span>
-                            {index < array.length - 1 && (
-                              <span className="text-gray-400 text-sm">→</span>
-                            )}
-                          </React.Fragment>
-                        ))}
-                      </div>
-                    )}
+                    {(() => {
+                      console.log("Breadcrumb render - selectedConfig.archived:", Boolean(selectedConfig?.archived));
+                      console.log("Breadcrumb render - configBreadcrumb:", configBreadcrumb);
+                      return Boolean(selectedConfig.archived) && configBreadcrumb && (
+                        <div className="mb-3 flex flex-wrap items-center gap-1">
+                          {configBreadcrumb.split(' → ').map((part, index, array) => (
+                            <React.Fragment key={index}>
+                              <span className="px-2 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded">
+                                {part}
+                              </span>
+                              {index < array.length - 1 && (
+                                <span className="text-gray-400 text-sm">→</span>
+                              )}
+                            </React.Fragment>
+                          ))}
+                        </div>
+                      );
+                    })()}
 
                     <h2 className={`text-xl font-semibold ${Boolean(selectedConfig.archived) ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}`}>
                       {selectedConfig.name}
