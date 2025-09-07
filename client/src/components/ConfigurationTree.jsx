@@ -817,7 +817,7 @@ const ConfigurationTree = ({
             }
             return {
               ...config,
-              _breadcrumb: pathNames.join(' -> '),
+              _breadcrumb: pathNames.join(' → '),
               _flatArchive: true
             };
           });

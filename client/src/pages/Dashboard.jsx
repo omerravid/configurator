@@ -907,9 +907,17 @@ const Dashboard = () => {
                   <div>
                     {/* Breadcrumb for archived configurations */}
                     {Boolean(selectedConfig.archived) && selectedConfig._breadcrumb && (
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-2 font-mono bg-gray-50 dark:bg-gray-700 px-3 py-1 rounded border">
-                        <span className="text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wide">Path:</span>
-                        <span className="ml-2">{selectedConfig._breadcrumb}</span>
+                      <div className="mb-3 flex flex-wrap items-center gap-1">
+                        {selectedConfig._breadcrumb.split(' → ').map((part, index, array) => (
+                          <React.Fragment key={index}>
+                            <span className="px-2 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded">
+                              {part}
+                            </span>
+                            {index < array.length - 1 && (
+                              <span className="text-gray-400 text-sm">→</span>
+                            )}
+                          </React.Fragment>
+                        ))}
                       </div>
                     )}
 
