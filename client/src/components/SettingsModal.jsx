@@ -1667,10 +1667,14 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
               <button
                 onClick={uploadAndRestore}
                 disabled={!uploadedFile || uploadLoading}
-                className="w-full px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                className={`w-full px-4 py-2 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2 ${
+                  restoreMode === 'update'
+                    ? 'bg-blue-600 hover:bg-blue-700'
+                    : 'bg-orange-600 hover:bg-orange-700'
+                }`}
               >
                 {uploadLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <DocumentArrowUpIcon className="w-4 h-4" />}
-                <span>Upload & Restore</span>
+                <span>Upload & {restoreMode === 'update' ? 'Update' : 'Restore'}</span>
               </button>
             </div>
           </div>
