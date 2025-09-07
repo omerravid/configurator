@@ -734,22 +734,29 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to restore from backup "${selectedBackup}"? This will replace all current data. A backup of current data will be created first.`)) {
+    const isUpdateMode = restoreMode === 'update';
+    const actionText = isUpdateMode ? 'update from' : 'restore from';
+    const confirmMessage = isUpdateMode
+      ? `Are you sure you want to update from backup "${selectedBackup}"? This will override existing configurations but preserve ones not in the backup. A backup of current data will be created first.`
+      : `Are you sure you want to restore from backup "${selectedBackup}"? This will replace all current data. A backup of current data will be created first.`;
+
+    if (!window.confirm(confirmMessage)) {
       return;
     }
 
     setBackupLoading(true);
     try {
-      const response = await api.post('/settings/data/restore', {
+      const endpoint = isUpdateMode ? '/settings/data/update' : '/settings/data/restore';
+      const response = await api.post(endpoint, {
         backupName: selectedBackup
       });
 
       if (response.data.success) {
-        const { adminUsersPreserved, message } = response.data;
+        const { adminUsersPreserved, message, isUpdate } = response.data;
 
-        if (adminUsersPreserved && onDataRefresh) {
-          // Admin users were preserved, we can stay logged in and just refresh the data
-          showToast('Data restored successfully. Admin user preserved, refreshing view...', 'success');
+        if (isUpdate || (adminUsersPreserved && onDataRefresh)) {
+          // For updates or when admin users were preserved, we can stay logged in and just refresh the data
+          showToast(`Data ${actionText} completed successfully. Refreshing view...`, 'success');
           setSelectedBackup('');
 
           // Refresh the dashboard data after a short delay
@@ -758,7 +765,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
           }, 1000);
         } else {
           // Admin users were not preserved or changed, need to re-login
-          showToast('Data restored successfully. You will be redirected to login due to session changes.', 'success');
+          showToast(`Data ${actionText} completed successfully. You will be redirected to login due to session changes.`, 'success');
           setSelectedBackup('');
 
           // Clear token and redirect to login after restore (user IDs changed)
@@ -768,12 +775,12 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
           }, 2000);
         }
       } else {
-        showToast(`Failed to restore backup: ${response.data.error}`, 'error');
+        showToast(`Failed to ${actionText} backup: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to restore backup:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to restore backup';
-      showToast(`Failed to restore backup: ${errorMessage}`, 'error');
+      console.error(`Failed to ${actionText} backup:`, error);
+      const errorMessage = error.response?.data?.error || error.message || `Failed to ${actionText} backup`;
+      showToast(`Failed to ${actionText} backup: ${errorMessage}`, 'error');
     } finally {
       setBackupLoading(false);
     }
