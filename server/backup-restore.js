@@ -734,6 +734,299 @@ class BackupRestore {
     }
   }
 
+  // Update from backup - override existing, preserve non-existing
+  async updateFromBackup(backupPath) {
+    try {
+      console.log(`Updating from backup: ${backupPath}`);
+
+      // Determine backup file type and path
+      let backupFile;
+      let isZip = false;
+
+      if (path.isAbsolute(backupPath)) {
+        backupFile = backupPath;
+        isZip = backupPath.endsWith('.zip');
+      } else {
+        // Try ZIP first, then JSON
+        const zipPath = path.join(this.backupDir, `${backupPath}.zip`);
+        const jsonPath = path.join(this.backupDir, `${backupPath}.json`);
+
+        try {
+          await fs.access(zipPath);
+          backupFile = zipPath;
+          isZip = true;
+        } catch (error) {
+          backupFile = jsonPath;
+          isZip = false;
+        }
+      }
+
+      let backupData;
+
+      if (isZip) {
+        console.log('Extracting ZIP backup...');
+        backupData = await this.extractZipBackup(backupFile);
+      } else {
+        console.log('Reading JSON backup...');
+        backupData = JSON.parse(await fs.readFile(backupFile, 'utf8'));
+      }
+
+      if (!backupData.data || !backupData.data.users || !backupData.data.configurations) {
+        throw new Error('Invalid backup file format');
+      }
+
+      const fileCount = backupData.data.files ? backupData.data.files.length : 0;
+      console.log(`Backup contains ${backupData.data.users.length} users, ${backupData.data.configurations.length} configurations, and ${fileCount} files`);
+      console.log(`Current system: ${this.isMongoDb ? 'MongoDB' : 'SQLite'}, Backup from: ${backupData.databaseType || 'unknown'}`);
+
+      // Create a backup before updating
+      const preUpdateBackup = await this.createBackup(this.generateBackupName('system', 'pre-update'));
+      if (!preUpdateBackup.success) {
+        throw new Error(`Failed to create pre-update backup: ${preUpdateBackup.error}`);
+      }
+      console.log(`✅ Pre-update backup created: ${preUpdateBackup.file}`);
+
+      // Update configurations (upsert mode - update existing, insert new)
+      console.log('📥 Updating configurations...');
+      let updatedConfigs = 0;
+      let newConfigs = 0;
+      const configIdMapping = new Map(); // Track old config ID to new/existing config ID mapping
+
+      // Get existing configurations to check for updates
+      const existingConfigs = await this.getAllConfigurationsForBackup();
+      const existingConfigsMap = new Map();
+
+      // Create lookup maps by name and type (more reliable than ID for matching)
+      for (const config of existingConfigs) {
+        const key = `${config.name}|${config.type}|${config.parent_id || 'root'}`;
+        existingConfigsMap.set(key, config);
+      }
+
+      // Sort configurations by hierarchy (parents first)
+      const sortedConfigs = [...backupData.data.configurations].sort((a, b) => {
+        if (!a.parent_id && b.parent_id) return -1; // a is parent, b is child
+        if (a.parent_id && !b.parent_id) return 1;  // a is child, b is parent
+        return 0; // same level
+      });
+
+      for (const configData of sortedConfigs) {
+        try {
+          // Check if configuration already exists (by name, type, and parent)
+          const mappedParentId = configData.parent_id && configIdMapping.has(configData.parent_id)
+            ? configIdMapping.get(configData.parent_id)
+            : configData.parent_id;
+
+          const configKey = `${configData.name}|${configData.type}|${mappedParentId || 'root'}`;
+          const existingConfig = existingConfigsMap.get(configKey);
+
+          let resultConfig;
+          if (existingConfig) {
+            // Update existing configuration
+            resultConfig = await this.updateConfigurationFromBackup(existingConfig, configData);
+            updatedConfigs++;
+            console.log(`✅ Updated configuration: ${configData.name}`);
+          } else {
+            // Create new configuration
+            resultConfig = await this.createConfigurationFromBackup(configData, configData.created_by, configData.updated_by, mappedParentId);
+            newConfigs++;
+            console.log(`✅ Created new configuration: ${configData.name}`);
+          }
+
+          // Store the mapping from old ID to new/existing ID for future parent references
+          const oldConfigId = configData.id || configData._id;
+          const newConfigId = resultConfig.id || resultConfig._id?.toString();
+          if (oldConfigId && newConfigId) {
+            configIdMapping.set(oldConfigId, newConfigId);
+          }
+        } catch (error) {
+          console.warn(`Warning: Could not update/create configuration ${configData.name}:`, error.message);
+        }
+      }
+      console.log(`✅ Updated ${updatedConfigs} configurations, created ${newConfigs} new configurations`);
+
+      // Map configuration IDs within data structures (products that reference components/versions)
+      await this.mapConfigurationIDsInData(configIdMapping);
+
+      // Update/add files if present (upsert mode for files too)
+      let updatedFiles = 0;
+      let newFiles = 0;
+      if (backupData.data.files && backupData.data.files.length > 0 && isZip) {
+        console.log('📥 Updating files...');
+        const fileResult = await this.updateFilesFromBackup(backupData.data.files, backupFile);
+        updatedFiles = fileResult.updated;
+        newFiles = fileResult.created;
+        console.log(`✅ Updated ${updatedFiles} files, added ${newFiles} new files`);
+      }
+
+      console.log('✅ Update completed successfully');
+      return {
+        success: true,
+        message: `Update completed. ${updatedConfigs} configurations updated, ${newConfigs} configurations created, ${updatedFiles} files updated, ${newFiles} files added. Pre-update backup saved.`,
+        stats: {
+          configurationsUpdated: updatedConfigs,
+          configurationsCreated: newConfigs,
+          filesUpdated: updatedFiles,
+          filesCreated: newFiles
+        },
+        preUpdateBackup: preUpdateBackup.file,
+        isUpdate: true
+      };
+
+    } catch (error) {
+      console.error('❌ Update failed:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  // Update from uploaded file - override existing, preserve non-existing
+  async updateFromUploadedFile(uploadedFilePath) {
+    try {
+      console.log(`Updating from uploaded file: ${uploadedFilePath}`);
+
+      // Detect file type (JSON or ZIP) using extension and magic header
+      let isZip = uploadedFilePath.toLowerCase().endsWith('.zip');
+
+      if (!isZip) {
+        try {
+          const fh = await fs.open(uploadedFilePath, 'r');
+          const header = Buffer.alloc(4);
+          await fh.read(header, 0, 4, 0);
+          await fh.close();
+          // ZIP files start with 'PK\x03\x04'
+          if (header[0] === 0x50 && header[1] === 0x4b && header[2] === 0x03 && header[3] === 0x04) {
+            isZip = true;
+          }
+        } catch (e) {
+          // Ignore header read errors; we'll try JSON parse next
+        }
+      }
+
+      let backupData;
+      try {
+        if (isZip) {
+          console.log('Detected ZIP backup upload');
+          backupData = await this.extractZipBackup(uploadedFilePath);
+        } else {
+          console.log('Detected JSON backup upload');
+          backupData = JSON.parse(await fs.readFile(uploadedFilePath, 'utf8'));
+        }
+      } catch (parseError) {
+        throw new Error('The uploaded file is not a valid backup. Expected a JSON with "data" or a ZIP containing database.json.');
+      }
+
+      if (!backupData.data || !backupData.data.users || !backupData.data.configurations) {
+        throw new Error('Invalid backup file format - missing required data sections');
+      }
+
+      const fileCount = backupData.data.files ? backupData.data.files.length : 0;
+      console.log(`Uploaded backup contains ${backupData.data.users.length} users, ${backupData.data.configurations.length} configurations, and ${fileCount} files`);
+      console.log(`Current system: ${this.isMongoDb ? 'MongoDB' : 'SQLite'}, Backup from: ${backupData.databaseType || 'unknown'}`);
+
+      // Create a backup before updating
+      const preUpdateBackup = await this.createBackup(this.generateBackupName('system', 'pre-upload-update'));
+      if (!preUpdateBackup.success) {
+        throw new Error(`Failed to create pre-update backup: ${preUpdateBackup.error}`);
+      }
+      console.log(`✅ Pre-update backup created: ${preUpdateBackup.file}`);
+
+      // Update configurations (upsert mode - update existing, insert new)
+      console.log('📥 Updating configurations...');
+      let updatedConfigs = 0;
+      let newConfigs = 0;
+      const configIdMapping = new Map(); // Track old config ID to new/existing config ID mapping
+
+      // Get existing configurations to check for updates
+      const existingConfigs = await this.getAllConfigurationsForBackup();
+      const existingConfigsMap = new Map();
+
+      // Create lookup maps by name and type (more reliable than ID for matching)
+      for (const config of existingConfigs) {
+        const key = `${config.name}|${config.type}|${config.parent_id || 'root'}`;
+        existingConfigsMap.set(key, config);
+      }
+
+      // Sort configurations by hierarchy (parents first)
+      const sortedConfigs = [...backupData.data.configurations].sort((a, b) => {
+        if (!a.parent_id && b.parent_id) return -1; // a is parent, b is child
+        if (a.parent_id && !b.parent_id) return 1;  // a is child, b is parent
+        return 0; // same level
+      });
+
+      for (const configData of sortedConfigs) {
+        try {
+          // Check if configuration already exists (by name, type, and parent)
+          const mappedParentId = configData.parent_id && configIdMapping.has(configData.parent_id)
+            ? configIdMapping.get(configData.parent_id)
+            : configData.parent_id;
+
+          const configKey = `${configData.name}|${configData.type}|${mappedParentId || 'root'}`;
+          const existingConfig = existingConfigsMap.get(configKey);
+
+          let resultConfig;
+          if (existingConfig) {
+            // Update existing configuration
+            resultConfig = await this.updateConfigurationFromBackup(existingConfig, configData);
+            updatedConfigs++;
+            console.log(`✅ Updated configuration: ${configData.name}`);
+          } else {
+            // Create new configuration
+            resultConfig = await this.createConfigurationFromBackup(configData, configData.created_by, configData.updated_by, mappedParentId);
+            newConfigs++;
+            console.log(`✅ Created new configuration: ${configData.name}`);
+          }
+
+          // Store the mapping from old ID to new/existing ID for future parent references
+          const oldConfigId = configData.id || configData._id;
+          const newConfigId = resultConfig.id || resultConfig._id?.toString();
+          if (oldConfigId && newConfigId) {
+            configIdMapping.set(oldConfigId, newConfigId);
+          }
+        } catch (error) {
+          console.warn(`Warning: Could not update/create configuration ${configData.name}:`, error.message);
+        }
+      }
+      console.log(`✅ Updated ${updatedConfigs} configurations, created ${newConfigs} new configurations`);
+
+      // Map configuration IDs within data structures (products that reference components/versions)
+      await this.mapConfigurationIDsInData(configIdMapping);
+
+      // Update/add files if present (upsert mode for files too)
+      let updatedFiles = 0;
+      let newFiles = 0;
+      if (isZip && fileCount > 0) {
+        console.log('📥 Updating files...');
+        const fileResult = await this.updateFilesFromBackup(backupData.data.files, uploadedFilePath);
+        updatedFiles = fileResult.updated;
+        newFiles = fileResult.created;
+        console.log(`✅ Updated ${updatedFiles} files, added ${newFiles} new files`);
+      }
+
+      console.log('✅ Update from uploaded file completed successfully');
+      return {
+        success: true,
+        message: `Update completed from uploaded file. ${updatedConfigs} configurations updated, ${newConfigs} configurations created${isZip ? `, ${updatedFiles} files updated, ${newFiles} files added` : ''}. Pre-update backup saved.`,
+        stats: {
+          configurationsUpdated: updatedConfigs,
+          configurationsCreated: newConfigs,
+          filesUpdated: updatedFiles,
+          filesCreated: newFiles
+        },
+        preUpdateBackup: preUpdateBackup.file,
+        isUpdate: true
+      };
+
+    } catch (error) {
+      console.error('❌ Update from uploaded file failed:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
   async restoreFromUploadedFile(uploadedFilePath) {
     try {
       console.log(`Restoring from uploaded file: ${uploadedFilePath}`);
@@ -911,7 +1204,7 @@ class BackupRestore {
       if (isZip && fileCount > 0) {
         console.log('📥 Restoring files...');
         restoredFiles = await this.restoreFilesFromBackup(backupData.data.files, uploadedFilePath);
-        console.log(`✅ Restored ${restoredFiles} files`);
+        console.log(`��� Restored ${restoredFiles} files`);
       }
 
       console.log('✅ Restore from uploaded file completed successfully');
