@@ -47,7 +47,81 @@ const Dashboard = () => {
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [configBreadcrumb, setConfigBreadcrumb] = useState(null);
 
+  // Helper function to extract actual ID from various parent_id formats
+  const extractParentId = (parentId) => {
+    if (!parentId) return null;
+
+    // If it's already a string, return it (unless it's '[object Object]')
+    if (typeof parentId === 'string') {
+      if (parentId === '[object Object]') {
+        console.warn('Found [object Object] as parent_id - database serialization issue');
+        return null;
+      }
+      return parentId;
+    }
+
+    // If it's an object, try to extract the ID
+    if (typeof parentId === 'object') {
+      if (parentId.id) return parentId.id;
+      if (parentId._id) return parentId._id;
+      if (parentId.toString && typeof parentId.toString === 'function') {
+        const stringified = parentId.toString();
+        if (stringified !== '[object Object]') {
+          return stringified;
+        }
+      }
+      return null;
+    }
+
+    return String(parentId);
+  };
+
+  // Generate breadcrumb for any configuration by traversing its parent hierarchy
+  const generateBreadcrumb = async (config) => {
+    if (!config || !Boolean(config.archived)) {
+      return null;
+    }
+
+    try {
+      // Get all configurations to build the hierarchy map
+      const response = await configAPI.getAll(true); // Include archived
+      const allConfigs = response.data.configs || [];
+      const idMap = new Map(allConfigs.map(c => [c.id, c]));
+
+      // Build complete breadcrumb from root to current item
+      const pathNames = [];
+      let current = config;
+      const guard = new Set();
+
+      // Traverse up the hierarchy to build complete ancestry
+      while (current) {
+        // Add current item to the beginning of the path (root → ... → archived item)
+        pathNames.unshift(current.name);
+        guard.add(current.id);
+
+        const parentId = extractParentId(current.parent_id);
+        if (!parentId) break; // reached root
+        if (guard.has(parentId)) {
+          console.warn(`Circular reference detected for ${current.name} (${current.id})`);
+          break; // prevent infinite loops
+        }
+
+        // Find parent in the configurations map
+        current = idMap.get(parentId);
+        if (!current) {
+          console.warn(`Parent ${parentId} not found for ${pathNames[pathNames.length - 1]}`);
+          break;
+        }
+      }
+
+      return pathNames.join(' → ');
+    } catch (error) {
+      console.error('Failed to generate breadcrumb:', error);
+      return null;
+    }
+  };
 
   const loadAllConfigurations = async () => {
     const token = localStorage.getItem("token");
