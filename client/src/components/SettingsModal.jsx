@@ -1627,10 +1627,14 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
                 <button
                   onClick={restoreBackup}
                   disabled={backupLoading}
-                  className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  className={`w-full px-4 py-2 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed flex items-center justify-center space-x-2 ${
+                    restoreMode === 'update'
+                      ? 'bg-blue-600 hover:bg-blue-700'
+                      : 'bg-red-600 hover:bg-red-700'
+                  }`}
                 >
                   {backupLoading ? <ArrowPathIcon className="w-4 h-4 animate-spin" /> : <DocumentArrowDownIcon className="w-4 h-4" />}
-                  <span>Restore from "{selectedBackup}"</span>
+                  <span>{restoreMode === 'update' ? 'Update' : 'Restore'} from "{selectedBackup}"</span>
                 </button>
               )}
             </div>
