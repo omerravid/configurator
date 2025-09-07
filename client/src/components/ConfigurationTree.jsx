@@ -787,9 +787,6 @@ const ConfigurationTree = ({
 
       // Filter by archived status based on active tab
       if (activeTab === 'archived') {
-        console.log("=== ARCHIVE VIEW (FLAT) DEBUG ===");
-        console.log("Total configs loaded:", allConfigs.length);
-        console.log("All configs:", allConfigs.map(c => ({ id: c.id, name: c.name, type: c.type, archived: c.archived, parent_id: c.parent_id })));
 
         // Build a flat list of ALL archived configurations (no hierarchy)
         const idMap = new Map(allConfigs.map(c => [c.id, c]));
