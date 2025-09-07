@@ -64,14 +64,21 @@ const Dashboard = () => {
 
     // If it's an object, try to extract the ID
     if (typeof parentId === 'object') {
-      if (parentId.id) return parentId.id;
-      if (parentId._id) return parentId._id;
+      // Try various common ID properties
+      if (parentId.id) return String(parentId.id);
+      if (parentId._id) return String(parentId._id);
+      if (parentId.$oid) return String(parentId.$oid); // MongoDB ObjectId format
+
+      // Try to extract from nested object structures
       if (parentId.toString && typeof parentId.toString === 'function') {
         const stringified = parentId.toString();
         if (stringified !== '[object Object]') {
           return stringified;
         }
       }
+
+      // If it's an object with other properties, log for debugging
+      console.warn('Complex parent_id object found:', parentId);
       return null;
     }
 
