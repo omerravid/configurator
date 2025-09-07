@@ -801,23 +801,42 @@ const ConfigurationTree = ({
         const archivedFlat = allConfigs
           .filter(config => Boolean(config.archived))
           .map(config => {
-            // Build breadcrumb from root to current
+            // Build complete breadcrumb from root to archived item
             const pathNames = [];
+            const pathTypes = [];
             let current = config;
             const guard = new Set();
+
+            // Traverse up the hierarchy to build complete ancestry
             while (current) {
-              // Unshift to build from root to leaf
+              // Add current item to the beginning of the path (root → ... → archived item)
               pathNames.unshift(current.name);
+              pathTypes.unshift(current.type);
               guard.add(current.id);
+
               const parentId = extractParentId(current.parent_id);
-              if (!parentId) break;
-              if (guard.has(parentId)) break; // prevent cycles
+              if (!parentId) break; // reached root
+              if (guard.has(parentId)) {
+                console.warn(`Circular reference detected for ${current.name} (${current.id})`);
+                break; // prevent infinite loops
+              }
+
+              // Find parent in the configurations map
               current = idMap.get(parentId);
-              if (!current) break;
+              if (!current) {
+                console.warn(`Parent ${parentId} not found for ${pathNames[pathNames.length - 1]}`);
+                break;
+              }
             }
+
+            // Create enriched breadcrumb with full hierarchy
+            const breadcrumb = pathNames.join(' → ');
+
             return {
               ...config,
-              _breadcrumb: pathNames.join(' → '),
+              _breadcrumb: breadcrumb,
+              _fullPath: pathNames,
+              _pathTypes: pathTypes,
               _flatArchive: true
             };
           });
