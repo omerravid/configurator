@@ -171,7 +171,7 @@ const Dashboard = () => {
     loadAllConfigurations();
   }, [refreshTrigger]);
 
-  const handleConfigSelect = (config) => {
+  const handleConfigSelect = async (config) => {
     console.log("=== handleConfigSelect called ===");
     console.log("config:", config);
     console.log("config.id:", config.id, typeof config.id);
@@ -181,6 +181,15 @@ const Dashboard = () => {
     setRawData(null);
     setShowEditor(false);
     setShowRename(false);
+
+    // Generate breadcrumb for archived configurations if not already present
+    if (Boolean(config.archived) && !config._breadcrumb) {
+      const breadcrumb = await generateBreadcrumb(config);
+      setConfigBreadcrumb(breadcrumb);
+    } else {
+      setConfigBreadcrumb(config._breadcrumb || null);
+    }
+
     loadConfigurationData(config);
   };
 
