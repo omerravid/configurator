@@ -781,10 +781,6 @@ const ConfigurationTree = ({
       const response = await configAPI.getAll(includeArchived);
       const allConfigs = response.data.configs || [];
 
-      console.log("=== CONFIG LOADING DEBUG ===");
-      console.log("Active tab:", activeTab);
-      console.log("Include archived parameter:", includeArchived);
-      console.log("Configurations loaded:", allConfigs.length);
 
       // Filter to show only root-level configs (no parent) - includes PRODUCT and COMPONENT
       let rootConfigs = allConfigs.filter(config => !config.parent_id);
