@@ -87,21 +87,14 @@ const Dashboard = () => {
 
   // Generate breadcrumb for any configuration by traversing its parent hierarchy
   const generateBreadcrumb = async (config) => {
-    console.log("=== generateBreadcrumb called ===");
-    console.log("config:", config);
-    console.log("config.archived:", config.archived, "Boolean(config.archived):", Boolean(config.archived));
-
     if (!config || !Boolean(config.archived)) {
-      console.log("Config is null or not archived, returning null");
       return null;
     }
 
     try {
-      console.log("Fetching all configurations...");
       // Get all configurations to build the hierarchy map
       const response = await configAPI.getAll(true); // Include archived
       const allConfigs = response.data.configs || [];
-      console.log(`Found ${allConfigs.length} total configurations`);
       const idMap = new Map(allConfigs.map(c => [c.id, c]));
 
       // Build complete breadcrumb from root to current item
@@ -109,33 +102,26 @@ const Dashboard = () => {
       let current = config;
       const guard = new Set();
 
-      console.log("Starting breadcrumb traversal...");
       // Traverse up the hierarchy to build complete ancestry
       while (current) {
-        console.log(`Processing: ${current.name} (${current.id}), parent_id: ${current.parent_id}, parent_name: ${current.parent_name}`);
         // Add current item to the beginning of the path (root → ... → archived item)
         pathNames.unshift(current.name);
         guard.add(current.id);
 
         const parentId = extractParentId(current.parent_id);
-        console.log(`Extracted parent ID: ${parentId}`);
 
         // Store current config for potential fallback
         const currentConfig = current;
 
         if (!parentId) {
-          console.log("No parent ID, trying fallback with parent_name...");
           // Fallback: try to find parent by name if parent_name is available
           if (currentConfig.parent_name) {
-            console.log(`Trying fallback: searching for parent by name: ${currentConfig.parent_name}`);
             const parentByName = allConfigs.find(c => c.name === currentConfig.parent_name);
             if (parentByName) {
-              console.log(`Found parent by name: ${parentByName.name} (${parentByName.id})`);
               current = parentByName;
               continue;
             }
           }
-          console.log("No parent found, reached root");
           break; // reached root
         }
 
@@ -147,27 +133,19 @@ const Dashboard = () => {
         // Find parent in the configurations map
         current = idMap.get(parentId);
         if (!current) {
-          console.warn(`Parent ${parentId} not found for ${pathNames[pathNames.length - 1]}`);
-
           // Fallback: try to find parent by name if parent_name is available
           if (currentConfig.parent_name) {
-            console.log(`Trying fallback: searching for parent by name: ${currentConfig.parent_name}`);
             const parentByName = allConfigs.find(c => c.name === currentConfig.parent_name);
             if (parentByName) {
-              console.log(`Found parent by name: ${parentByName.name} (${parentByName.id})`);
               current = parentByName;
               continue;
             }
           }
           break;
         }
-        console.log(`Found parent: ${current.name}`);
       }
 
-      const breadcrumb = pathNames.join(' → ');
-      console.log("Final breadcrumb:", breadcrumb);
-      console.log("Path names:", pathNames);
-      return breadcrumb;
+      return pathNames.join(' → ');
     } catch (error) {
       console.error('Failed to generate breadcrumb:', error);
       return null;
@@ -223,16 +201,6 @@ const Dashboard = () => {
   }, [refreshTrigger]);
 
   const handleConfigSelect = async (config) => {
-    console.log("=== handleConfigSelect called ===");
-    console.log("config:", config);
-    console.log("config.id:", config.id, typeof config.id);
-    console.log("config.id stringified:", JSON.stringify(config.id));
-    console.log("config.archived:", config.archived, "Boolean(config.archived):", Boolean(config.archived));
-    console.log("config._breadcrumb:", config._breadcrumb);
-    console.log("config.parent_id:", config.parent_id, typeof config.parent_id);
-    console.log("config.parent_name:", config.parent_name);
-    console.log("config.name:", config.name);
-    console.log("config.type:", config.type);
 
     setSelectedConfig(config);
     setRawData(null);
@@ -241,26 +209,19 @@ const Dashboard = () => {
 
     // Generate breadcrumb for archived configurations
     if (Boolean(config.archived)) {
-      console.log("Config is archived, generating breadcrumb...");
-
       // Always generate a fresh breadcrumb to ensure completeness
       // The existing _breadcrumb might be incomplete due to database issues
-      console.log("Existing breadcrumb:", config._breadcrumb);
-      console.log("Generating fresh breadcrumb to ensure completeness...");
       const breadcrumb = await generateBreadcrumb(config);
-      console.log("Generated breadcrumb:", breadcrumb);
 
       // Use the generated breadcrumb if available, otherwise fall back to existing
       if (breadcrumb) {
         setConfigBreadcrumb(breadcrumb);
       } else if (config._breadcrumb) {
-        console.log("Fallback to existing breadcrumb");
         setConfigBreadcrumb(config._breadcrumb);
       } else {
         setConfigBreadcrumb(null);
       }
     } else {
-      console.log("Config is not archived, clearing breadcrumb");
       setConfigBreadcrumb(null);
     }
 
@@ -1063,24 +1024,20 @@ const Dashboard = () => {
                 >
                   <div>
                     {/* Breadcrumb for archived configurations */}
-                    {(() => {
-                      console.log("Breadcrumb render - selectedConfig.archived:", Boolean(selectedConfig?.archived));
-                      console.log("Breadcrumb render - configBreadcrumb:", configBreadcrumb);
-                      return Boolean(selectedConfig.archived) && configBreadcrumb && (
-                        <div className="mb-3 flex flex-wrap items-center gap-1">
-                          {configBreadcrumb.split(' → ').map((part, index, array) => (
-                            <React.Fragment key={index}>
-                              <span className="px-2 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded">
-                                {part}
-                              </span>
-                              {index < array.length - 1 && (
-                                <span className="text-gray-400 text-sm">→</span>
-                              )}
-                            </React.Fragment>
-                          ))}
-                        </div>
-                      );
-                    })()}
+                    {Boolean(selectedConfig.archived) && configBreadcrumb && (
+                      <div className="mb-3 flex flex-wrap items-center gap-1">
+                        {configBreadcrumb.split(' → ').map((part, index, array) => (
+                          <React.Fragment key={index}>
+                            <span className="px-2 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded">
+                              {part}
+                            </span>
+                            {index < array.length - 1 && (
+                              <span className="text-gray-400 text-sm">→</span>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    )}}
 
                     <h2 className={`text-xl font-semibold ${Boolean(selectedConfig.archived) ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}`}>
                       {selectedConfig.name}
