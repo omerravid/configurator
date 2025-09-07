@@ -77,6 +77,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
   const [backupLoading, setBackupLoading] = useState(false);
   const [dataStats, setDataStats] = useState({ users: 0, configurations: 0 });
   const [selectedBackups, setSelectedBackups] = useState([]);
+  const [restoreMode, setRestoreMode] = useState('restore'); // 'restore' or 'update'
 
   // File cleanup state
   const [fileCleanupLoading, setFileCleanupLoading] = useState(false);
