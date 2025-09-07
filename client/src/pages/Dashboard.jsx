@@ -183,11 +183,15 @@ const Dashboard = () => {
     setShowRename(false);
 
     // Generate breadcrumb for archived configurations if not already present
-    if (Boolean(config.archived) && !config._breadcrumb) {
-      const breadcrumb = await generateBreadcrumb(config);
-      setConfigBreadcrumb(breadcrumb);
+    if (Boolean(config.archived)) {
+      if (config._breadcrumb) {
+        setConfigBreadcrumb(config._breadcrumb);
+      } else {
+        const breadcrumb = await generateBreadcrumb(config);
+        setConfigBreadcrumb(breadcrumb);
+      }
     } else {
-      setConfigBreadcrumb(config._breadcrumb || null);
+      setConfigBreadcrumb(null);
     }
 
     loadConfigurationData(config);
