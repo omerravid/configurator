@@ -1643,7 +1643,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
           {/* Upload and Restore Section */}
           <div className="space-y-3">
             <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200">
-              Upload & Restore from File
+              Upload & {restoreMode === 'update' ? 'Update' : 'Restore'} from File
             </h4>
 
             <div className="space-y-3">
