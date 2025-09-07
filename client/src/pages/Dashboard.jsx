@@ -132,6 +132,16 @@ const Dashboard = () => {
         current = idMap.get(parentId);
         if (!current) {
           console.warn(`Parent ${parentId} not found for ${pathNames[pathNames.length - 1]}`);
+
+          // Fallback: try to find parent by name if parent_name is available
+          if (current !== config && config.parent_name) {
+            console.log(`Trying fallback: searching for parent by name: ${config.parent_name}`);
+            current = allConfigs.find(c => c.name === config.parent_name);
+            if (current) {
+              console.log(`Found parent by name: ${current.name} (${current.id})`);
+              continue;
+            }
+          }
           break;
         }
         console.log(`Found parent: ${current.name}`);
