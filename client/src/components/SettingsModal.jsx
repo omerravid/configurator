@@ -893,7 +893,13 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to restore from the uploaded file "${uploadedFile.name}"? This will replace all current data. A backup of current data will be created first.`)) {
+    const isUpdateMode = restoreMode === 'update';
+    const actionText = isUpdateMode ? 'update from' : 'restore from';
+    const confirmMessage = isUpdateMode
+      ? `Are you sure you want to update from the uploaded file "${uploadedFile.name}"? This will override existing configurations but preserve ones not in the backup. A backup of current data will be created first.`
+      : `Are you sure you want to restore from the uploaded file "${uploadedFile.name}"? This will replace all current data. A backup of current data will be created first.`;
+
+    if (!window.confirm(confirmMessage)) {
       return;
     }
 
@@ -902,18 +908,19 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
       const formData = new FormData();
       formData.append('backupFile', uploadedFile);
 
-      const response = await api.post('/settings/data/upload-restore', formData, {
+      const endpoint = isUpdateMode ? '/settings/data/upload-update' : '/settings/data/upload-restore';
+      const response = await api.post(endpoint, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
       if (response.data.success) {
-        const { adminUsersPreserved, message } = response.data;
+        const { adminUsersPreserved, message, isUpdate } = response.data;
 
-        if (adminUsersPreserved && onDataRefresh) {
-          // Admin users were preserved, we can stay logged in and just refresh the data
-          showToast('Data restored from uploaded file successfully. Admin user preserved, refreshing view...', 'success');
+        if (isUpdate || (adminUsersPreserved && onDataRefresh)) {
+          // For updates or when admin users were preserved, we can stay logged in and just refresh the data
+          showToast(`Data ${actionText} uploaded file successfully. Refreshing view...`, 'success');
           setUploadedFile(null);
 
           // Reset file input
@@ -926,7 +933,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
           }, 1000);
         } else {
           // Admin users were not preserved or changed, need to re-login
-          showToast('Data restored from uploaded file successfully. You will be redirected to login due to session changes.', 'success');
+          showToast(`Data ${actionText} uploaded file successfully. You will be redirected to login due to session changes.`, 'success');
           setUploadedFile(null);
 
           // Reset file input
@@ -940,12 +947,12 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
           }, 2000);
         }
       } else {
-        showToast(`Failed to restore from uploaded file: ${response.data.error}`, 'error');
+        showToast(`Failed to ${actionText} uploaded file: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to restore from uploaded file:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to restore from uploaded file';
-      showToast(`Failed to restore from uploaded file: ${errorMessage}`, 'error');
+      console.error(`Failed to ${actionText} uploaded file:`, error);
+      const errorMessage = error.response?.data?.error || error.message || `Failed to ${actionText} uploaded file`;
+      showToast(`Failed to ${actionText} uploaded file: ${errorMessage}`, 'error');
     } finally {
       setUploadLoading(false);
     }
