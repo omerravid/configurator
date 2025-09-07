@@ -876,7 +876,6 @@ const ConfigurationTree = ({
         const parentConfig = allConfigs.find(c => c.id === configId);
         if (parentConfig && parentConfig.type === 'COMPONENT') {
           // This is likely a version of this component
-          console.log(`WORKAROUND: Assuming ${config.name} (VERSION) is child of ${parentConfig.name} (COMPONENT)`);
           return true;
         }
       }
@@ -884,28 +883,18 @@ const ConfigurationTree = ({
       return false;
     });
 
-    console.log(`  Checking children of ${configId}:`, children.map(c => ({
-      id: c.id,
-      name: c.name,
-      type: c.type,
-      archived: c.archived,
-      raw_parent_id: c.parent_id
-    })));
 
     for (const child of children) {
       // If this child is archived, we found an archived descendant
       if (Boolean(child.archived)) {
-        console.log(`    Found archived child: ${child.name} (${child.id})`);
         return true;
       }
       // Recursively check this child's descendants
       if (hasArchivedDescendants(child.id, allConfigs)) {
-        console.log(`    Found archived descendant under: ${child.name} (${child.id})`);
         return true;
       }
     }
 
-    console.log(`    No archived descendants found for ${configId}`);
     return false;
   };
 
