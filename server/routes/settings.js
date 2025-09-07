@@ -810,6 +810,94 @@ router.post("/data/upload-restore", authenticateToken, requireAdmin, async (req,
   }
 });
 
+// Upload and update from backup file (override existing, preserve non-existing)
+router.post("/data/upload-update", authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    // Use multer middleware for file upload
+    const multer = require('multer');
+    const path = require('path');
+    const fs = require('fs');
+
+    // Configure multer for temporary file storage - NO SIZE LIMITS
+    const upload = multer({
+      dest: path.join(__dirname, '../temp-uploads'),
+      limits: {
+        fileSize: Infinity, // Explicitly set to unlimited
+        files: 1,
+        fields: 10,
+        fieldSize: 1000000 // 1MB for text fields
+      },
+      fileFilter: (req, file, cb) => {
+        console.log(`[BACKUP UPDATE UPLOAD] Receiving file: ${file.originalname}, size: ${file.size || 'unknown'}, mimetype: ${file.mimetype}`);
+
+        // Allow JSON or ZIP by extension OR common mimetypes
+        const name = (file.originalname || '').toLowerCase();
+        const type = (file.mimetype || '').toLowerCase();
+        const isJson = name.endsWith('.json') || type === 'application/json' || type === 'text/json';
+        const isZip = name.endsWith('.zip') || type === 'application/zip' || type === 'application/x-zip-compressed' || type === 'application/octet-stream';
+
+        if (isJson || isZip) {
+          cb(null, true);
+        } else {
+          cb(new Error('Only JSON and ZIP files are allowed'), false);
+        }
+      }
+    });
+
+    // Handle the upload
+    upload.single('backupFile')(req, res, async (err) => {
+      try {
+        if (err) {
+          return res.status(400).json({
+            success: false,
+            error: `Upload error: ${err.message}`
+          });
+        }
+
+        if (!req.file) {
+          return res.status(400).json({
+            success: false,
+            error: "No backup file uploaded"
+          });
+        }
+
+        const br = new BackupRestore();
+        const result = await br.updateFromUploadedFile(req.file.path);
+
+        // Clean up temporary file
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (cleanupError) {
+          console.warn('Failed to clean up temporary file:', cleanupError);
+        }
+
+        res.json(result);
+      } catch (uploadError) {
+        // Clean up temporary file on error
+        if (req.file?.path) {
+          try {
+            fs.unlinkSync(req.file.path);
+          } catch (cleanupError) {
+            console.warn('Failed to clean up temporary file:', cleanupError);
+          }
+        }
+
+        console.error("Failed to update from uploaded file:", uploadError);
+        res.status(500).json({
+          success: false,
+          error: `Failed to update from uploaded file: ${uploadError.message}`
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Failed to handle upload:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to handle upload"
+    });
+  }
+});
+
 // Migrate to embedded MongoDB (SAFEST OPTION)
 router.post("/mongodb/migrate-embedded", authenticateToken, requireAdmin, async (req, res) => {
   try {
