@@ -631,7 +631,7 @@ class BackupRestore {
     } else {
       const db = require('./models/database');
       const { Configuration } = require('./models');
-      
+
       await db.query(
         `INSERT INTO configurations (id, name, type, parent_id, data, created_by, updated_by, description, status, archived, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -652,6 +652,117 @@ class BackupRestore {
       );
 
       return await Configuration.findById(configData.id || configData._id);
+    }
+  }
+
+  // Update existing configuration from backup data
+  async updateConfigurationFromBackup(existingConfig, backupData) {
+    if (this.isMongoDb) {
+      const mongoose = require('mongoose');
+      const ConfigurationModel = mongoose.model('Configuration');
+
+      const updatedConfig = await ConfigurationModel.findByIdAndUpdate(
+        existingConfig._id,
+        {
+          data: backupData.data || {},
+          status: backupData.status || existingConfig.status,
+          description: backupData.description || existingConfig.description,
+          archived: backupData.archived !== undefined ? backupData.archived : existingConfig.archived,
+          updatedAt: new Date()
+        },
+        { new: true }
+      );
+
+      return updatedConfig;
+    } else {
+      const { Configuration } = require('./models');
+
+      await Configuration.update(existingConfig.id, {
+        data: backupData.data || {},
+        status: backupData.status || existingConfig.status,
+        description: backupData.description || existingConfig.description,
+        archived: backupData.archived !== undefined ? backupData.archived : existingConfig.archived,
+        updated_at: new Date().toISOString()
+      });
+
+      return await Configuration.findById(existingConfig.id);
+    }
+  }
+
+  // Update/add files from backup (upsert mode)
+  async updateFilesFromBackup(fileMetadata, zipFile) {
+    const tempDir = path.join(__dirname, 'temp-restore');
+    const storageDir = path.join(__dirname, 'storage/files');
+    let updatedCount = 0;
+    let createdCount = 0;
+
+    try {
+      // Ensure temp and storage directories exist
+      await fs.mkdir(tempDir, { recursive: true });
+      await fs.mkdir(storageDir, { recursive: true });
+
+      // Extract ZIP to temp directory
+      await new Promise((resolve, reject) => {
+        require('fs').createReadStream(zipFile)
+          .pipe(unzipper.Extract({ path: tempDir }))
+          .on('close', resolve)
+          .on('error', reject);
+      });
+
+      // Copy files from temp/files to storage/files
+      const tempFilesDir = path.join(tempDir, 'files');
+
+      try {
+        await fs.access(tempFilesDir);
+
+        for (const fileInfo of fileMetadata) {
+          try {
+            const sourcePath = path.join(tempFilesDir, fileInfo.fileName);
+            const metaSourcePath = path.join(tempFilesDir, fileInfo.fileName + '.meta.json');
+            const destPath = path.join(storageDir, fileInfo.fileName);
+            const metaDestPath = path.join(storageDir, fileInfo.fileName + '.meta.json');
+
+            // Check if file already exists
+            let exists = false;
+            try {
+              await fs.access(destPath);
+              exists = true;
+            } catch (error) {
+              // File doesn't exist
+            }
+
+            // Copy the actual file
+            await fs.copyFile(sourcePath, destPath);
+
+            // Copy the metadata file
+            await fs.copyFile(metaSourcePath, metaDestPath);
+
+            if (exists) {
+              updatedCount++;
+              console.log(`✅ Updated file: ${fileInfo.originalName}`);
+            } else {
+              createdCount++;
+              console.log(`✅ Added new file: ${fileInfo.originalName}`);
+            }
+          } catch (error) {
+            console.warn(`Warning: Could not update/add file ${fileInfo.fileName}:`, error.message);
+          }
+        }
+      } catch (error) {
+        console.warn('No files directory found in backup');
+      }
+
+      return { updated: updatedCount, created: createdCount };
+    } catch (error) {
+      console.error('Error updating files:', error);
+      return { updated: updatedCount, created: createdCount };
+    } finally {
+      // Clean up temp directory
+      try {
+        await fs.rm(tempDir, { recursive: true, force: true });
+      } catch (cleanupError) {
+        console.warn('Could not clean up temp directory:', cleanupError.message);
+      }
     }
   }
 
@@ -1204,7 +1315,7 @@ class BackupRestore {
       if (isZip && fileCount > 0) {
         console.log('📥 Restoring files...');
         restoredFiles = await this.restoreFilesFromBackup(backupData.data.files, uploadedFilePath);
-        console.log(`��� Restored ${restoredFiles} files`);
+        console.log(`✅ Restored ${restoredFiles} files`);
       }
 
       console.log('✅ Restore from uploaded file completed successfully');
