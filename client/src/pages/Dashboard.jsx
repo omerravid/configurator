@@ -229,6 +229,10 @@ const Dashboard = () => {
     console.log("config.id stringified:", JSON.stringify(config.id));
     console.log("config.archived:", config.archived, "Boolean(config.archived):", Boolean(config.archived));
     console.log("config._breadcrumb:", config._breadcrumb);
+    console.log("config.parent_id:", config.parent_id, typeof config.parent_id);
+    console.log("config.parent_name:", config.parent_name);
+    console.log("config.name:", config.name);
+    console.log("config.type:", config.type);
 
     setSelectedConfig(config);
     setRawData(null);
