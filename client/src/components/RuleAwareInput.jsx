@@ -176,7 +176,8 @@ const RuleAwareInput = ({
       return true;
     } catch (error) {
       // Don't show errors if request was aborted (user is still typing)
-      if (error.name === 'AbortError') {
+      const isAbort = error && (error.name === 'AbortError' || (typeof error.message === 'string' && /aborted|abort|signal is aborted/i.test(error.message)));
+      if (isAbort) {
         console.log('Validation request aborted - user is still typing');
         return false;
       }
