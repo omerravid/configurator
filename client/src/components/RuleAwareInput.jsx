@@ -227,7 +227,11 @@ const RuleAwareInput = ({
 
     // Cancel previous validation request if still in progress
     if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
+      try {
+        abortControllerRef.current.abort();
+      } catch (abortErr) {
+        console.warn('Abort failed:', abortErr);
+      }
       abortControllerRef.current = null;
     }
 
