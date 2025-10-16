@@ -25,13 +25,16 @@ const StructuralTreeNode = ({
   const [contextMenu, setContextMenu] = useState(null);
 
   // Get the actual value from provenance-wrapped object
-  const actualValue = typeof nodeData === "object" && nodeData?._actual_value !== undefined 
-    ? nodeData._actual_value 
+  const actualValue = typeof nodeData === "object" && nodeData?._actual_value !== undefined
+    ? nodeData._actual_value
     : nodeData;
 
-  const keyName = Object.keys(actualValue || {}).length === 1 
-    ? Object.keys(actualValue)[0]
-    : null;
+  const isRootNode = path === "root";
+  const keyName = isRootNode ? "root" : (
+    typeof actualValue === "object" && actualValue !== null && !Array.isArray(actualValue)
+      ? path.split(".").pop()
+      : null
+  );
 
   const isExpanded = expandedPaths.has(path);
   const isArray = Array.isArray(actualValue);
