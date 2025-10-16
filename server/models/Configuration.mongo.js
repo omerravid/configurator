@@ -279,6 +279,7 @@ class Configuration {
       for (const key in src) {
         if (src.hasOwnProperty(key)) {
           // Handle deletion: if source value is null or undefined, delete the property
+          // null is used as the deletion marker since undefined doesn't serialize in JSON
           if (src[key] === null || src[key] === undefined) {
             delete obj[key];
           } else if (src[key] && typeof src[key] === 'object' && !Array.isArray(src[key])) {
