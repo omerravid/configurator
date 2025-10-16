@@ -499,7 +499,7 @@ const RuleAwareInput = ({
           onClick={onCancel}
           className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600"
         >
-          ✕
+          Cancel
         </button>
       </div>
       {validationError && (
