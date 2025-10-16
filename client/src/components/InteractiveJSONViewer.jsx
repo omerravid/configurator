@@ -1117,8 +1117,8 @@ const InteractiveJSONViewer = ({
           if (parentPath) {
             onDataChange(parentPath, newParentValue);
           } else {
-            // Removing from root level - set the key to undefined to delete it
-            onDataChange(key, undefined);
+            // Removing from root level - use null as deletion marker (undefined doesn't serialize in JSON)
+            onDataChange(key, null);
           }
 
           // Clear selection if the removed item was selected or its parent
