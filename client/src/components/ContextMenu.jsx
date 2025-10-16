@@ -21,7 +21,7 @@ const ContextMenu = ({ x, y, onClose, items }) => {
     };
   }, [onClose]);
 
-  if (!items || items.length === 0) return null;
+  if (!items || items.length === 0 || x === undefined || y === undefined) return null;
 
   return (
     <div
