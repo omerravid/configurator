@@ -18,14 +18,14 @@ const createConfigSchema = Joi.object({
       Joi.allow(null, ""), // Allow null or empty string
     )
     .optional(),
-  data: Joi.object().required(),
+  data: Joi.object().required().unknown(true).allow(null),
   description: Joi.alternatives()
     .try(Joi.string().max(500), Joi.allow("", null))
     .optional(),
 });
 
 const updateConfigSchema = Joi.object({
-  data: Joi.object().optional(),
+  data: Joi.object().optional().unknown(true).allow(null),
   description: Joi.alternatives()
     .try(Joi.string().max(500), Joi.allow("", null))
     .optional(),
