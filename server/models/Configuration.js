@@ -233,7 +233,10 @@ class Configuration {
 
     for (const key in source) {
       if (source.hasOwnProperty(key)) {
-        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key]) &&
+        if (source[key] === undefined) {
+          // Explicitly delete properties when source value is undefined
+          delete result[key];
+        } else if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key]) &&
             target[key] && typeof target[key] === 'object' && !Array.isArray(target[key])) {
           // Both are objects, merge recursively
           result[key] = this.deepMerge(target[key], source[key]);
