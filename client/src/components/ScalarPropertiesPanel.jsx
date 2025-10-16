@@ -1455,8 +1455,8 @@ const ScalarPropertiesPanel = ({
         onClick: () => handleEditStart(propertyName, value),
       });
 
-      // Reset to inherited value if this property has local overrides
-      if (propertyHasLocalOverride(value)) {
+      // Reset to inherited value if this property has local overrides (not for COMPONENT configs)
+      if (propertyHasLocalOverride(value) && configType !== "COMPONENT") {
         menuItems.push({
           label: "Reset to Inherited",
           icon: () => <span className="text-orange-500 text-sm font-bold">↺</span>,
