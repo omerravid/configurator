@@ -276,7 +276,11 @@ const RuleAwareInput = ({
         validationTimeoutRef.current = null;
       }
       if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+        try {
+          abortControllerRef.current.abort();
+        } catch (abortErr) {
+          console.warn('Abort failed on Escape:', abortErr);
+        }
         abortControllerRef.current = null;
       }
       onCancel();
