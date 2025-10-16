@@ -263,14 +263,14 @@ const StructuralTreeNode = ({
                   className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 focus:outline-none"
                   title="Apply"
                 >
-                  ✓
+                  <CheckIcon className="w-4 h-4" />
                 </button>
                 <button
                   onClick={handleRenameCancel}
                   className="px-2 py-1 bg-gray-500 text-white text-xs rounded hover:bg-gray-600 focus:outline-none"
                   title="Cancel"
                 >
-                  Cancel
+                  <XMarkIcon className="w-4 h-4" />
                 </button>
               </div>
             ) : (
