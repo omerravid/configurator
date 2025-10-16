@@ -2092,7 +2092,7 @@ const ScalarPropertiesPanel = ({
                       >
                         + Add
                       </button>
-                      {arrayHasLocalOverride(arrayValue) && (
+                      {arrayHasLocalOverride(arrayValue) && configType !== "COMPONENT" && (
                         <button
                           onClick={() => handleArrayReset(arrayName)}
                           className="px-2 py-1 text-xs bg-orange-600 text-white rounded hover:bg-orange-700"
