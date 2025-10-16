@@ -325,7 +325,7 @@ const StructuralTreeNode = ({
   };
 
   return (
-    <div className={`ml-${level * 2}`}>
+    <div style={{ marginLeft: `${level * 0.5}rem` }}>
       {renderNode()}
       <ContextMenu
         x={contextMenu?.x}
