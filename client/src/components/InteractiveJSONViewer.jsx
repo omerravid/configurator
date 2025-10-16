@@ -1193,10 +1193,10 @@ const InteractiveJSONViewer = ({
     if (!onDataChange) return;
     const cleanPath = path.replace(/^root\./, "");
 
-    console.log("Deleting property:", { path, propertyName, cleanPath });
+    console.log("Deleting property:", { path, propertyName, cleanPath, selectedStructuralPath: path });
 
-    if (!cleanPath && propertyName) {
-      // Deleting from root level
+    if (!cleanPath || cleanPath === "root" || path === "root") {
+      // Deleting from root level - send just the property with undefined value
       onDataChange(propertyName, undefined);
     } else {
       // Get the parent object and remove the property
