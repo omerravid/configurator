@@ -1105,27 +1105,15 @@ const InteractiveJSONViewer = ({
       }
       case "remove": {
         const cleanPath = path.replace(/^root\./, "");
-        const pathParts = cleanPath.split(".");
-        const parentPath = pathParts.slice(0, -1).join(".");
-        const key = pathParts[pathParts.length - 1];
 
-        const parentValue = getValueAtPath(currentData, parentPath ? `root.${parentPath}` : "root");
-        if (parentValue && typeof parentValue === "object") {
-          const newParentValue = { ...parentValue };
-          delete newParentValue[key];
+        // For all removal cases, send null as the deletion marker at the specific path
+        // This tells deepMerge to delete that property
+        onDataChange(cleanPath, null);
 
-          if (parentPath) {
-            onDataChange(parentPath, newParentValue);
-          } else {
-            // Removing from root level - use null as deletion marker (undefined doesn't serialize in JSON)
-            onDataChange(key, null);
-          }
-
-          // Clear selection if the removed item was selected or its parent
-          if (selectedStructuralPath === path || selectedStructuralPath.startsWith(path + ".")) {
-            setSelectedStructuralPath("root");
-            // The useEffect will update selectedStructuralValue when data changes
-          }
+        // Clear selection if the removed item was selected or its parent
+        if (selectedStructuralPath === path || selectedStructuralPath.startsWith(path + ".")) {
+          setSelectedStructuralPath("root");
+          // The useEffect will update selectedStructuralValue when data changes
         }
         break;
       }
