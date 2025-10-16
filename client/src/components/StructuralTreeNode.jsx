@@ -1,12 +1,5 @@
-import {
-  ChevronDownIcon,
-  ChevronRightIcon,
-  PlusIcon,
-  TrashIcon,
-  PencilIcon,
-  ClipboardIcon,
-  DocumentDuplicateIcon,
-} from "@heroicons/react/24/outline";
+import React, { useState } from 'react';
+import { ChevronDownIcon, ChevronRightIcon, PlusIcon, TrashIcon, PencilIcon, ClipboardIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 import { useToast } from "../context/ToastContext";
 import ContextMenu from "./ContextMenu";
 
