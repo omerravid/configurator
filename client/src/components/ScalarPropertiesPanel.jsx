@@ -1539,7 +1539,7 @@ const ScalarPropertiesPanel = ({
             <ArrowUpTrayIcon className="w-4 h-4" />
             <span>Upload File</span>
           </button>
-          {hasLocalOverrides() && (
+          {hasLocalOverrides() && configType !== "COMPONENT" && (
             <>
               <span className="text-gray-300 mx-2">|</span>
               <button
