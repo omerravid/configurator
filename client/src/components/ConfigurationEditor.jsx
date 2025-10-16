@@ -285,6 +285,13 @@ const ConfigurationEditor = ({
         console.log("Creating configuration with payload:", createPayload);
 
         // Note: USER configurations are automatically created as DRAFT by the backend
+        // Validate payload before sending
+        if (typeof createPayload.data !== 'object' || Array.isArray(createPayload.data)) {
+          setError('Top-level configuration data must be a JSON object');
+          setLoading(false);
+          return;
+        }
+
         await configAPI.create(createPayload);
       } else {
         // Handle update
@@ -296,10 +303,22 @@ const ConfigurationEditor = ({
           data = JSON.parse(formData.data);
         }
 
-        await configAPI.update(config.id, {
-          data,
-          description: formData.description,
-        });
+        // Validate data is an object (top-level must be object)
+        if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+          setError('Top-level configuration data must be a JSON object');
+          setLoading(false);
+          return;
+        }
+
+        try {
+          await configAPI.update(config.id, {
+            data,
+            description: formData.description,
+          });
+        } catch (apiErr) {
+          console.error('API update error details:', apiErr.response?.data || apiErr.message || apiErr);
+          throw apiErr; // rethrow to be handled by outer catch
+        }
       }
 
       onClose(true);
