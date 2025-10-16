@@ -1195,17 +1195,16 @@ const InteractiveJSONViewer = ({
 
     console.log("Deleting property:", { path, propertyName, cleanPath, selectedStructuralPath: path });
 
+    // For all deletions, send null as the deletion marker
+    // This works for both root level and nested properties
     if (!cleanPath || cleanPath === "root" || path === "root") {
-      // Deleting from root level - send null (undefined doesn't serialize in JSON)
+      // Deleting from root level - send {propertyName: null}
       onDataChange(propertyName, null);
     } else {
-      // Get the parent object and remove the property
-      const parentValue = selectedStructuralValue;
-      if (parentValue && typeof parentValue === "object") {
-        const newParentValue = { ...parentValue };
-        delete newParentValue[propertyName];
-        onDataChange(cleanPath, newParentValue);
-      }
+      // Deleting from nested level - send {propertyName: null} at the nested path
+      // This creates delta like {parent: {child: {propertyName: null}}}
+      // which tells deepMerge to delete propertyName from parent.child
+      onDataChange(cleanPath + "." + propertyName, null);
     }
   };
 
