@@ -544,7 +544,7 @@ const Dashboard = () => {
       } else {
         // Normal property edits: use raw data to preserve inheritance
         const rawResponse = await configAPI.getRawById(configId);
-        currentData = rawResponse.data.data || {};
+        currentData = rawResponse.data.resolved || {};
       }
 
       // Special case: if path is "_root_", replace the entire data object
