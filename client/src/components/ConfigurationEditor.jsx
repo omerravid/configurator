@@ -722,9 +722,10 @@ const ConfigurationEditor = ({
             {showRename && (
               <button
                 onClick={() => setShowRename(false)}
-                className="text-sm text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                title="Cancel rename"
               >
-                Cancel Rename
+                <XMarkIcon className="w-6 h-6" />
               </button>
             )}
             <button
