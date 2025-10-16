@@ -233,8 +233,8 @@ class Configuration {
 
     for (const key in source) {
       if (source.hasOwnProperty(key)) {
-        if (source[key] === undefined) {
-          // Explicitly delete properties when source value is undefined
+        if (source[key] === undefined || source[key] === null) {
+          // Explicitly delete properties when source value is undefined or null
           delete result[key];
         } else if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key]) &&
             target[key] && typeof target[key] === 'object' && !Array.isArray(target[key])) {
