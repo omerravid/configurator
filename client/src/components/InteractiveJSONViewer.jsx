@@ -1387,17 +1387,20 @@ const InteractiveJSONViewer = ({
             </div>
             <div className="p-2">
               <StructuralTreeNode
-                keyName="root"
-                value={getCurrentData()}
-                isRoot={true}
+                nodeData={getCurrentData()}
+                path="root"
+                level={0}
                 isEditable={isEditable}
-                expandedPaths={expandedPaths}
-                onExpandToggle={handleExpandToggle}
-                onNodeSelect={handleStructuralNodeSelect}
-                selectedPath={selectedStructuralPath}
-                onStructuralChange={handleStructuralChange}
                 configType={configType}
-                configName={title}
+                onValueChange={handleValueChange}
+                onPropertyAdd={handlePropertyAdd}
+                onPropertyDelete={handlePropertyDelete}
+                onStructuralChange={handleStructuralChange}
+                expandedPaths={expandedPaths}
+                setExpandedPaths={setExpandedPaths}
+                selectedPath={selectedStructuralPath}
+                onSelectPath={handleStructuralNodeSelect}
+                selectedValue={selectedStructuralValue}
               />
             </div>
           </div>
