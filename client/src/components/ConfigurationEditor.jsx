@@ -326,6 +326,7 @@ const ConfigurationEditor = ({
       console.error("Failed to save configuration:", err);
       const errorMessage =
         err.response?.data?.error ||
+        (err.response?.data ? JSON.stringify(err.response.data) : null) ||
         err.message ||
         "Failed to save configuration";
       setError(errorMessage);
