@@ -2101,6 +2101,24 @@ const ScalarPropertiesPanel = ({
                           Reset
                         </button>
                       )}
+                      <button
+                        onClick={() => {
+                          if (window.confirm(`Are you sure you want to delete the entire "${arrayName}" array?`)) {
+                            let arrayPath;
+                            if (selectedPath === "root") {
+                              arrayPath = `root.${arrayName}`;
+                            } else {
+                              arrayPath = `${selectedPath}.${arrayName}`;
+                            }
+                            onValueChange?.(arrayPath, null);
+                            showToast(`Array "${arrayName}" deleted`, "success");
+                          }
+                        }}
+                        className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
+                        title="Delete entire array"
+                      >
+                        Delete
+                      </button>
                     </div>
                   )}
                 </div>
