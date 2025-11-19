@@ -10,18 +10,21 @@ import (
 	"your.module/config-manager/internal/backup"
 	"your.module/config-manager/internal/files"
 	"your.module/config-manager/internal/logger"
+	db "your.module/config-manager/internal/mongo"
 )
 
 type SettingsHandler struct {
 	backupSvc  *backup.Service
 	storageMgr *files.StorageManager
+	db         *db.Client
 	log        *logger.Logger
 }
 
-func NewSettingsHandler(backupSvc *backup.Service, storageMgr *files.StorageManager, log *logger.Logger) *SettingsHandler {
+func NewSettingsHandler(backupSvc *backup.Service, storageMgr *files.StorageManager, dbClient *db.Client, log *logger.Logger) *SettingsHandler {
 	return &SettingsHandler{
 		backupSvc:  backupSvc,
 		storageMgr: storageMgr,
+		db:         dbClient,
 		log:        log,
 	}
 }
@@ -31,7 +34,9 @@ func (h *SettingsHandler) Register(r *gin.RouterGroup) {
 	r.GET("/settings/data/backups", h.listBackups)
 	r.GET("/settings/data/backup/:backupName", h.downloadBackup)
 	r.POST("/settings/data/restore", h.restoreBackup)
+	r.POST("/settings/data/upload-restore", h.uploadAndRestore)
 	r.DELETE("/settings/data/backup/:backupName", h.deleteBackup)
+	r.GET("/settings/data/status", h.dataStatus)
 
 	// Storage status
 	r.GET("/settings/storage", h.storageStatus)
@@ -69,9 +74,18 @@ func (h *SettingsHandler) listBackups(c *gin.Context) {
 		return
 	}
 
+	// Transform string array to array of objects with 'name' property for frontend compatibility
+	backupObjects := make([]gin.H, 0, len(backups))
+	for _, backup := range backups {
+		backupObjects = append(backupObjects, gin.H{
+			"name": backup,
+			"type": "full", // All backups are full backups in Go implementation
+		})
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"backups": backups,
+		"backups": backupObjects,
 	})
 }
 
@@ -146,6 +160,81 @@ func (h *SettingsHandler) deleteBackup(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "Backup deleted successfully",
+	})
+}
+
+func (h *SettingsHandler) dataStatus(c *gin.Context) {
+	h.log.InfoCtx(c.Request.Context(), "Getting data statistics")
+
+	// Count users
+	userCount, err := h.db.Users.CountDocuments(c.Request.Context(), gin.H{})
+	if err != nil {
+		h.log.ErrorCtx(c.Request.Context(), "Failed to count users", logger.Error(err))
+		userCount = 0
+	}
+
+	// Count configurations
+	configCount, err := h.db.Configurations.CountDocuments(c.Request.Context(), gin.H{})
+	if err != nil {
+		h.log.ErrorCtx(c.Request.Context(), "Failed to count configurations", logger.Error(err))
+		configCount = 0
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"stats": gin.H{
+			"users":          userCount,
+			"configurations": configCount,
+		},
+	})
+}
+
+func (h *SettingsHandler) uploadAndRestore(c *gin.Context) {
+	h.log.InfoCtx(c.Request.Context(), "Upload and restore backup")
+
+	// Get uploaded file
+	file, err := c.FormFile("backupFile")
+	if err != nil {
+		h.log.ErrorCtx(c.Request.Context(), "Failed to get uploaded file", logger.Error(err))
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "No backup file provided",
+		})
+		return
+	}
+
+	// Save uploaded file to temporary location
+	tempPath := filepath.Join(os.TempDir(), file.Filename)
+	if err := c.SaveUploadedFile(file, tempPath); err != nil {
+		h.log.ErrorCtx(c.Request.Context(), "Failed to save uploaded file", logger.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "Failed to save uploaded file",
+		})
+		return
+	}
+	defer os.Remove(tempPath) // Clean up temp file
+
+	h.log.InfoCtx(c.Request.Context(), "Uploaded file saved",
+		logger.String("filename", file.Filename),
+		logger.String("tempPath", tempPath))
+
+	// Restore from the uploaded file
+	if err := h.backupSvc.RestoreBackup(c.Request.Context(), tempPath); err != nil {
+		h.log.ErrorCtx(c.Request.Context(), "Failed to restore from uploaded file", logger.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "Failed to restore backup: " + err.Error(),
+		})
+		return
+	}
+
+	h.log.InfoCtx(c.Request.Context(), "Backup restored successfully from uploaded file")
+
+	c.JSON(http.StatusOK, gin.H{
+		"success":             true,
+		"message":             "Backup restored successfully from uploaded file",
+		"adminUsersPreserved": true, // For frontend compatibility
 	})
 }
 

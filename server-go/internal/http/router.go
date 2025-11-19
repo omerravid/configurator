@@ -73,7 +73,7 @@ func NewRouter(cfg config.Config, log *logger.Logger, mc *mongo.Client) *gin.Eng
 
 	// Settings/Backup
 	backupSvc := backup.New(cfg)
-	sh := handlers.NewSettingsHandler(backupSvc, storageMgr, log)
+	sh := handlers.NewSettingsHandler(backupSvc, storageMgr, mc, log)
 	sh.Register(api)
 
 	return r

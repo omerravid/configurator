@@ -94,11 +94,26 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
   const [editingUserId, setEditingUserId] = useState(null);
   const [editingUserRole, setEditingUserRole] = useState('');
 
+  // Track if data was restored/changed
+  const [dataChanged, setDataChanged] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       loadAllStatus();
+      setDataChanged(false); // Reset on open
     }
   }, [isOpen]);
+
+  // Handle modal close with refresh if data changed
+  const handleClose = () => {
+    if (dataChanged && onDataRefresh) {
+      onDataRefresh();
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+    }
+    onClose();
+  };
 
   // Debug modal state changes
   useEffect(() => {
@@ -756,13 +771,11 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
 
         if (isUpdate || (adminUsersPreserved && onDataRefresh)) {
           // For updates or when admin users were preserved, we can stay logged in and just refresh the data
-          showToast(`Data ${actionText} completed successfully. Refreshing view...`, 'success');
+          showToast(`Data ${actionText} completed successfully. Close settings to refresh.`, 'success');
           setSelectedBackup('');
-
-          // Refresh the dashboard data after a short delay
-          setTimeout(() => {
-            onDataRefresh();
-          }, 1000);
+          setDataChanged(true); // Mark that data has changed
+          loadBackups(); // Reload backup list
+          loadDataStats(); // Reload stats
         } else {
           // Admin users were not preserved or changed, need to re-login
           showToast(`Data ${actionText} completed successfully. You will be redirected to login due to session changes.`, 'success');
@@ -879,8 +892,9 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
       const name = file.name.toLowerCase();
       const isJson = name.endsWith('.json');
       const isZip = name.endsWith('.zip');
-      if (!isJson && !isZip) {
-        showToast('Please select a JSON or ZIP file', 'error');
+      const isArchive = name.endsWith('.archive');
+      if (!isJson && !isZip && !isArchive) {
+        showToast('Please select a JSON, ZIP, or ARCHIVE file', 'error');
         return;
       }
       setUploadedFile(file);
@@ -920,17 +934,17 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
 
         if (isUpdate || (adminUsersPreserved && onDataRefresh)) {
           // For updates or when admin users were preserved, we can stay logged in and just refresh the data
-          showToast(`Data ${actionText} uploaded file successfully. Refreshing view...`, 'success');
+          showToast(`Data ${actionText} uploaded file successfully. Close settings to refresh.`, 'success');
           setUploadedFile(null);
+          setDataChanged(true); // Mark that data has changed
 
           // Reset file input
           const fileInput = document.querySelector('input[type="file"]');
           if (fileInput) fileInput.value = '';
 
-          // Refresh the dashboard data after a short delay
-          setTimeout(() => {
-            onDataRefresh();
-          }, 1000);
+          // Reload backup list and stats
+          loadBackups();
+          loadDataStats();
         } else {
           // Admin users were not preserved or changed, need to re-login
           showToast(`Data ${actionText} uploaded file successfully. You will be redirected to login due to session changes.`, 'success');
@@ -1649,11 +1663,11 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
             <div className="space-y-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                  Select Backup File (.json or .zip)
+                  Select Backup File (.json, .zip, or .archive)
                 </label>
                 <input
                   type="file"
-                  accept=".json,.zip"
+                  accept=".json,.zip,.archive"
                   onChange={handleFileUpload}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-200"
                 />
@@ -1825,7 +1839,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
             <span>System Settings</span>
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
           >
             <XMarkIcon className="w-6 h-6" />
