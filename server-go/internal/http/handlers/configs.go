@@ -36,6 +36,7 @@ func NewConfigsHandler(dbClient *db.Client, storage *files.StorageManager, log *
 func (h *ConfigsHandler) Register(r *gin.RouterGroup, checkPermissions, requireAdmin gin.HandlerFunc) {
 	// Public read endpoints (still require auth via group)
 	r.GET("/configs", h.list)
+	r.GET("/configs/components", h.components) // Must be before /:id to avoid route conflict
 	r.GET("/configs/:id", h.getResolved)
 	r.GET("/configs/:id/data", h.getResolvedData)
 	r.GET("/configs/:id/children", h.children)
@@ -496,4 +497,81 @@ func (h *ConfigsHandler) restore(c *gin.Context) {
 	var cfg types.Configuration
 	_ = h.db.Configurations.FindOne(c, bson.M{"_id": oid}).Decode(&cfg)
 	c.JSON(http.StatusOK, gin.H{"message": "Configuration restored successfully", "config": cfg})
+}
+
+// components returns all COMPONENT configurations with their versions
+func (h *ConfigsHandler) components(c *gin.Context) {
+	h.log.InfoCtx(c.Request.Context(), "Listing components with versions")
+
+	// Find all COMPONENT type configurations
+	cursor, err := h.db.Configurations.Find(c.Request.Context(), bson.M{
+		"type":     "COMPONENT",
+		"archived": bson.M{"$ne": true},
+	})
+	if err != nil {
+		h.log.ErrorCtx(c.Request.Context(), "Failed to find components", logger.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+	defer cursor.Close(c.Request.Context())
+
+	var components []types.Configuration
+	if err := cursor.All(c.Request.Context(), &components); err != nil {
+		h.log.ErrorCtx(c.Request.Context(), "Failed to decode components", logger.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	// For each component, get its versions (child configurations with type VERSION)
+	type ComponentWithVersions struct {
+		types.Configuration
+		Versions []types.Configuration `json:"versions"`
+	}
+
+	result := make([]ComponentWithVersions, 0, len(components))
+	for _, component := range components {
+		// Find child versions
+		versionCursor, err := h.db.Configurations.Find(c.Request.Context(), bson.M{
+			"parent_id": component.ID,
+			"type":      "VERSION",
+			"archived":  bson.M{"$ne": true},
+		})
+		if err != nil {
+			h.log.WarnCtx(c.Request.Context(), "Failed to find versions for component",
+				logger.String("componentId", component.ID),
+				logger.Error(err))
+			// Continue with empty versions
+			result = append(result, ComponentWithVersions{
+				Configuration: component,
+				Versions:      []types.Configuration{},
+			})
+			continue
+		}
+
+		var versions []types.Configuration
+		if err := versionCursor.All(c.Request.Context(), &versions); err != nil {
+			h.log.WarnCtx(c.Request.Context(), "Failed to decode versions",
+				logger.String("componentId", component.ID),
+				logger.Error(err))
+			versions = []types.Configuration{}
+		}
+		versionCursor.Close(c.Request.Context())
+
+		// Include the component itself as the root version
+		rootVersion := component
+		rootVersion.Name = component.Name + " (root)"
+		allVersions := append([]types.Configuration{rootVersion}, versions...)
+
+		result = append(result, ComponentWithVersions{
+			Configuration: component,
+			Versions:      allVersions,
+		})
+	}
+
+	h.log.InfoCtx(c.Request.Context(), "Components listed successfully",
+		logger.Int("count", len(result)))
+
+	c.JSON(http.StatusOK, gin.H{
+		"components": result,
+	})
 }
