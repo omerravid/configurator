@@ -1,3 +1,4 @@
+# Original gitignore - TODO: review and change
 node_modules
 server/node_modules
 server/storage
@@ -5,3 +6,83 @@ server/backups
 server/temp-uploads
 client/node_modules
 ConfigurationManager.Client/obj
+
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.wasm
+
+# Go build artifacts
+bin/
+build/
+dist/
+coverage/
+*.prof
+*.pprof
+
+# Go modules
+vendor/
+
+# Logs
+*.log
+logs/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS / Misc
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.cache
+*.bak
+
+# Config overrides
+.env
+.env.*
+config.yaml
+configs/*.yaml
+configs/*.json
+configs/*.toml
+configs/local/*
+configs/dev/*
+configs/test/*
+
+# Docker
+docker-data/
+*.pid
+
+# Kubernetes / Helm
+charts/*/charts
+charts/*/tmp
+charts/*/values.yaml
+deployments/generated/
+helm-release/
+
+# Test assets
+testdata/
+mock/
+mocks/
+
+# Tools
+.coverage
+.gocov
+.gocache/
+.gotools/
+
+# Sensitive output
+secrets/
+secret.*
+keys/
+*.key
+*.pem
