@@ -118,14 +118,14 @@ func TestGenerateToken_DifferentRoles_EncodesCorrectly(t *testing.T) {
 func TestGenerateToken_CheckIssuedAt_SetToCurrentTime(t *testing.T) {
 	// Arrange
 	secret := "test-secret"
-	beforeGeneration := time.Now()
+	beforeGeneration := time.Now().Add(-1 * time.Second) // Allow 1 second tolerance
 
 	// Act
 	tokenString, err := GenerateToken(secret, "user123", "testuser", "USER", 1*time.Hour)
 
 	// Assert
 	require.NoError(t, err)
-	afterGeneration := time.Now()
+	afterGeneration := time.Now().Add(1 * time.Second) // Allow 1 second tolerance
 
 	token, _ := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil
@@ -134,7 +134,7 @@ func TestGenerateToken_CheckIssuedAt_SetToCurrentTime(t *testing.T) {
 	claims := token.Claims.(*Claims)
 	issuedAt := claims.IssuedAt.Time
 
-	assert.True(t, issuedAt.After(beforeGeneration) || issuedAt.Equal(beforeGeneration),
+	assert.True(t, issuedAt.After(beforeGeneration) && issuedAt.Before(afterGeneration),
 		"IssuedAt should be at or after token generation started")
 	assert.True(t, issuedAt.Before(afterGeneration) || issuedAt.Equal(afterGeneration),
 		"IssuedAt should be at or before token generation completed")

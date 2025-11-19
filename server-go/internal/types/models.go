@@ -19,14 +19,14 @@ type User struct {
 }
 
 type LoginRequest struct {
-	Username string `json:"username" validate:"required,min=3,max=50"`
-	Password string `json:"password" validate:"required,min=6"`
+	Username string `json:"username" binding:"required,min=3,max=50"`
+	Password string `json:"password" binding:"required,min=6"`
 }
 
 type RegisterRequest struct {
-	Username string `json:"username" validate:"required,min=3,max=50"`
-	Password string `json:"password" validate:"required,min=6"`
-	Role     Role   `json:"role" validate:"omitempty,oneof=ADMIN USER"`
+	Username string `json:"username" binding:"required,min=3,max=50"`
+	Password string `json:"password" binding:"required,min=6"`
+	Role     Role   `json:"role" binding:"omitempty,oneof=ADMIN USER"`
 }
 
 type AuthResponse struct {

@@ -1,12 +1,10 @@
 package testutil
 
 import (
-	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/require"
 
 	"your.module/config-manager/internal/config"
 	"your.module/config-manager/internal/logger"
@@ -33,21 +31,20 @@ func SetupTestServer(t *testing.T) *TestServer {
 
 	// Setup test config
 	cfg := config.Config{
-		JWTSecret:         "test-jwt-secret",
-		APIKey:            "test-api-key",
-		ServerPort:        "3004",
-		MongoURI:          "mongodb://localhost:27017",
-		MongoDB:           db.DB.Name(),
-		StorageType:       "embedded",
-		EmbeddedPath:      t.TempDir(),
-		ServerBaseURL:     "http://localhost:3004",
-		MongodumpPath:     "/usr/bin/mongodump",
-		MongorestorePath:  "/usr/bin/mongorestore",
+		JWTSecret:        "test-jwt-secret",
+		APIKey:           "test-api-key",
+		ServerPort:       "3004",
+		MongoURI:         "mongodb://localhost:27017",
+		MongoDB:          db.DB.Name(),
+		StorageType:      "embedded",
+		EmbeddedPath:     t.TempDir(),
+		ServerBaseURL:    "http://localhost:3004",
+		MongodumpPath:    "/usr/bin/mongodump",
+		MongorestorePath: "/usr/bin/mongorestore",
 	}
 
 	// Setup logger
-	log, err := logger.New(false) // debug mode off for tests
-	require.NoError(t, err)
+	log := logger.New(logger.InfoLevel) // info level for tests
 
 	router := gin.New()
 	router.Use(gin.Recovery())
@@ -81,11 +78,11 @@ func (ts *TestServer) MakeRequest(req Request) *httptest.ResponseRecorder {
 	// header setting, etc.
 	w := httptest.NewRecorder()
 	httpReq := httptest.NewRequest(req.Method, req.URL, nil)
-	
+
 	for key, val := range req.Headers {
 		httpReq.Header.Set(key, val)
 	}
-	
+
 	ts.Router.ServeHTTP(w, httpReq)
 	return w
 }
@@ -98,4 +95,3 @@ func (ts *TestServer) MakeAuthenticatedRequest(req Request, token string) *httpt
 	req.Headers["Authorization"] = "Bearer " + token
 	return ts.MakeRequest(req)
 }
-

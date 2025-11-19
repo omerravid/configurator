@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
@@ -159,7 +161,7 @@ func (h *AuthHandler) register(c *gin.Context) {
 	)
 
 	c.JSON(http.StatusCreated, types.AuthResponse{
-		Message: "User created successfully",
+		Message: "User registered successfully",
 		Token:   tok,
 		User: gin.H{
 			"id":       toString(id),
@@ -188,16 +190,16 @@ func (h *AuthHandler) refresh(c *gin.Context) {
 
 	// Handle jwt.MapClaims (same pattern as other handlers)
 	var m map[string]any
-	m, ok = claims.(map[string]any)
-	if !ok {
-		// Try jwt.MapClaims
-		if jwtClaims, ok := claims.(map[string]interface{}); ok {
-			m = jwtClaims
-		} else {
-			h.log.ErrorCtx(ctx, "Token refresh failed - invalid user context type")
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user context"})
-			return
-		}
+	switch v := claims.(type) {
+	case map[string]any:
+		m = v
+	case jwt.MapClaims:
+		m = map[string]any(v)
+	default:
+		h.log.ErrorCtx(ctx, "Token refresh failed - invalid user context type",
+			logger.String("type", fmt.Sprintf("%T", claims)))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user context"})
+		return
 	}
 
 	id, _ := m["userId"].(string)

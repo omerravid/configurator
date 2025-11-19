@@ -30,7 +30,7 @@ func setupAuthMiddlewareTest(t *testing.T) (*gin.Engine, AuthConfig, func()) {
 	}
 
 	router := gin.New()
-	
+
 	return router, authCfg, func() {}
 }
 
@@ -104,12 +104,12 @@ func TestAuth_ValidAPIKey_SetsUserContext(t *testing.T) {
 	router.GET("/test", Auth(authCfg), func(c *gin.Context) {
 		userCtx, exists := c.Get("user")
 		assert.True(t, exists)
-		
+
 		userMap := userCtx.(map[string]interface{})
 		assert.Equal(t, "api-service", userMap["username"])
 		assert.Equal(t, "ADMIN", userMap["role"])
 		assert.True(t, userMap["isApiKey"].(bool))
-		
+
 		c.JSON(http.StatusOK, gin.H{"success": true})
 	})
 
@@ -165,11 +165,7 @@ func TestRequireAdmin_AdminRole_Allows(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
 
-	router.GET("/admin", RequireAdmin(), func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"success": true})
-	})
-
-	// Mock user context with admin role
+	// Mock user context with admin role (middleware must be added BEFORE routes)
 	router.Use(func(c *gin.Context) {
 		c.Set("user", map[string]interface{}{
 			"userId":   "admin-123",
@@ -177,6 +173,10 @@ func TestRequireAdmin_AdminRole_Allows(t *testing.T) {
 			"role":     "ADMIN",
 		})
 		c.Next()
+	})
+
+	router.GET("/admin", RequireAdmin(), func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"success": true})
 	})
 
 	// Act
@@ -263,7 +263,7 @@ func TestCheckConfigPermissions_AdminUser_AllowsAnyConfig(t *testing.T) {
 
 	// Act
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPUT, "/configs/"+config.ID, nil)
+	req := httptest.NewRequest(http.MethodPut, "/configs/"+config.ID, nil)
 	router.ServeHTTP(w, req)
 
 	// Assert
@@ -301,7 +301,7 @@ func TestCheckConfigPermissions_UserModifyingOwnConfig_Allows(t *testing.T) {
 
 	// Act
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPUT, "/configs/"+config.ID, nil)
+	req := httptest.NewRequest(http.MethodPut, "/configs/"+config.ID, nil)
 	router.ServeHTTP(w, req)
 
 	// Assert
@@ -337,7 +337,7 @@ func TestCheckConfigPermissions_UserModifyingOthersConfig_ReturnsForbidden(t *te
 
 	// Act
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPUT, "/configs/"+config.ID, nil)
+	req := httptest.NewRequest(http.MethodPut, "/configs/"+config.ID, nil)
 	router.ServeHTTP(w, req)
 
 	// Assert
@@ -373,7 +373,7 @@ func TestCheckConfigPermissions_UserModifyingProductConfig_ReturnsForbidden(t *t
 
 	// Act
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPUT, "/configs/"+config.ID, nil)
+	req := httptest.NewRequest(http.MethodPut, "/configs/"+config.ID, nil)
 	router.ServeHTTP(w, req)
 
 	// Assert
@@ -412,7 +412,7 @@ func TestCheckConfigPermissions_ModifyingCommittedConfig_ReturnsForbidden(t *tes
 
 	// Act
 	w := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodPUT, "/configs/"+config.ID, nil)
+	req := httptest.NewRequest(http.MethodPut, "/configs/"+config.ID, nil)
 	router.ServeHTTP(w, req)
 
 	// Assert
@@ -432,4 +432,3 @@ func generateTokenWithWrongSecret(t *testing.T) string {
 	token, _ := auth.GenerateToken("wrong-secret", "user123", "testuser", "USER", 1*time.Hour)
 	return token
 }
-

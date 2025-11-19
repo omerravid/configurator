@@ -34,17 +34,14 @@ func SetupTestDB(t *testing.T) (*mongoClient.Client, func()) {
 
 	// Create our custom client wrapper
 	testClient := &mongoClient.Client{
-		MongoClient:    client,
 		DB:             db,
 		Users:          db.Collection("users"),
 		Configurations: db.Collection("configurations"),
 		Rules:          db.Collection("rules"),
 	}
 
-	// Create indexes if the function exists
-	// Note: You may need to implement this or comment it out
-	// err = mongoClient.CreateIndexes(context.Background(), testClient)
-	// require.NoError(t, err, "Failed to create indexes")
+	// Create indexes for test database
+	mongoClient.EnsureIndexes(context.Background(), testClient)
 
 	cleanup := func() {
 		ctx := context.Background()
@@ -67,4 +64,3 @@ func SetupTestDBWithData(t *testing.T, seedFunc func(*mongoClient.Client)) (*mon
 
 	return client, cleanup
 }
-

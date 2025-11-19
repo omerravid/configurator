@@ -17,7 +17,7 @@ func GetValueAtPath(data map[string]interface{}, path string, minimal bool) (int
 	i := 0
 	pathSoFar := ""
 
-	for i < len(path) && current != nil {
+	for i < len(path) {
 		// Check for array notation [index]
 		if i < len(path) && path[i] == '[' {
 			// Find closing bracket
@@ -84,6 +84,10 @@ func GetValueAtPath(data map[string]interface{}, path string, minimal bool) (int
 			// Navigate to property
 			obj, ok := actualCurrent.(map[string]interface{})
 			if !ok {
+				// Check if actualCurrent is nil
+				if actualCurrent == nil {
+					return nil, fmt.Errorf("cannot access property '%s' on nil value at path: %s", propName, pathSoFar)
+				}
 				return nil, fmt.Errorf("cannot access property '%s' at path: %s (not an object)", propName, pathSoFar)
 			}
 

@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"your.module/config-manager/internal/types"
 	"your.module/config-manager/tests/fixtures"
 	"your.module/config-manager/tests/testutil"
 )
@@ -29,38 +28,38 @@ func TestValidateNumeric_AllOperators_WorksCorrectly(t *testing.T) {
 		{"greater - true", "greater", 10.0, 15.0, true},
 		{"greater - false", "greater", 10.0, 5.0, false},
 		{"greater - equal", "greater", 10.0, 10.0, false},
-		
+
 		// Smaller than
 		{"smaller - true", "smaller", 10.0, 5.0, true},
 		{"smaller - false", "smaller", 10.0, 15.0, false},
 		{"smaller - equal", "smaller", 10.0, 10.0, false},
-		
+
 		// Equals
 		{"equals - true", "equals", 10.0, 10.0, true},
 		{"equals - false int", "equals", 10.0, 11.0, false},
 		{"equals - false float", "equals", 10.5, 10.6, false},
-		
+
 		// Greater or equals
 		{"greaterEquals - greater", "greaterEquals", 10.0, 15.0, true},
 		{"greaterEquals - equal", "greaterEquals", 10.0, 10.0, true},
 		{"greaterEquals - smaller", "greaterEquals", 10.0, 5.0, false},
-		
+
 		// Smaller or equals
 		{"smallerEquals - smaller", "smallerEquals", 10.0, 5.0, true},
 		{"smallerEquals - equal", "smallerEquals", 10.0, 10.0, true},
 		{"smallerEquals - greater", "smallerEquals", 10.0, 15.0, false},
-		
+
 		// Type conversions
 		{"int to float", "equals", 10.0, 10, true},
 		{"string number", "equals", 10.0, "10", true},
 		{"float32", "equals", 10.0, float32(10.0), true},
 		{"int64", "equals", 10.0, int64(10), true},
-		
+
 		// Edge cases
 		{"negative numbers", "greater", -5.0, -3.0, true},
 		{"zero comparison", "greater", 0.0, 1.0, true},
 		{"decimal precision", "equals", 10.123, 10.123, true},
-		
+
 		// Invalid operator
 		{"invalid operator", "invalid", 10.0, 10.0, false},
 	}
@@ -211,7 +210,7 @@ func TestValidateValue_WithDatabase_ValidatesCorrectly(t *testing.T) {
 	defer cleanup()
 
 	ctx := mongo.NewSessionContext(context.Background(), nil)
-	
+
 	service := New(db.Rules, db.Configurations)
 
 	// Insert a test configuration
@@ -243,7 +242,7 @@ func TestValidateValue_WithDatabase_ValidatesCorrectly(t *testing.T) {
 			// Assert
 			require.NoError(t, err)
 			assert.Equal(t, tt.wantValid, result.IsValid)
-			
+
 			if !tt.wantValid {
 				assert.NotEmpty(t, result.Errors, "Should have error messages")
 			}
@@ -332,7 +331,7 @@ func TestFindByConfigurationAndPathWithInheritance_WalksParentChain(t *testing.T
 	// Assert
 	require.NoError(t, err)
 	assert.Len(t, rules, 2, "Should find rules from product and instance")
-	
+
 	// Verify both rules are present
 	ruleIDs := make(map[string]bool)
 	for _, rule := range rules {
@@ -341,4 +340,3 @@ func TestFindByConfigurationAndPathWithInheritance_WalksParentChain(t *testing.T
 	assert.True(t, ruleIDs["product-rule"], "Should include product rule")
 	assert.True(t, ruleIDs["instance-rule"], "Should include instance rule")
 }
-

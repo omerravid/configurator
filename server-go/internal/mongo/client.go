@@ -35,11 +35,11 @@ func Connect(cfg config.Config, log *logger.Logger) (*Client, func(context.Conte
 		Configurations: db.Collection("configurations"),
 		Rules:          db.Collection("rules"),
 	}
-	ensureIndexes(ctx, c)
+	EnsureIndexes(ctx, c)
 	return c, cl.Disconnect
 }
 
-func ensureIndexes(ctx context.Context, c *Client) {
+func EnsureIndexes(ctx context.Context, c *Client) {
 	// users.username unique
 	_, _ = c.Users.Indexes().CreateOne(ctx, mongo.IndexModel{
 		Keys:    bson.D{{Key: "username", Value: 1}},

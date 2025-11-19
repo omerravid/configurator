@@ -95,15 +95,18 @@ func RequireAdmin() gin.HandlerFunc {
 func CheckConfigPermissions(db *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		configID := c.Param("id")
-		oid, err := primitive.ObjectIDFromHex(configID)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid configuration ID"})
-			return
+		
+		// Try to parse as ObjectID first, fall back to string ID
+		var filter bson.M
+		if oid, err := primitive.ObjectIDFromHex(configID); err == nil {
+			filter = bson.M{"_id": oid}
+		} else {
+			filter = bson.M{"_id": configID}
 		}
 
 		// Fetch the configuration
 		var config types.Configuration
-		err = db.Configurations.FindOne(c, bson.M{"_id": oid}).Decode(&config)
+		err := db.Configurations.FindOne(c, filter).Decode(&config)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "Configuration not found"})
 			return

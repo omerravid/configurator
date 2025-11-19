@@ -15,6 +15,7 @@ import (
 
 	"your.module/config-manager/internal/auth"
 	"your.module/config-manager/internal/config"
+	"your.module/config-manager/internal/http/middleware"
 	"your.module/config-manager/internal/logger"
 	"your.module/config-manager/internal/types"
 	"your.module/config-manager/tests/fixtures"
@@ -29,20 +30,25 @@ func setupAuthTest(t *testing.T) (*gin.Engine, *AuthHandler, func()) {
 	gin.SetMode(gin.TestMode)
 
 	db, cleanupDB := testutil.SetupTestDB(t)
-	
+
 	cfg := config.Config{
 		JWTSecret: "test-secret",
 		APIKey:    "test-api-key",
 	}
 
-	log, _ := logger.New(false)
+	log := logger.New(logger.InfoLevel)
 
 	handler := NewAuthHandler(cfg, db, log)
-	
+
 	router := gin.New()
-	handler.Register(router, gin.HandlerFunc(func(c *gin.Context) {
-		c.Next() // Mock auth middleware for protected routes
-	}))
+
+	// Use actual auth middleware for protected routes
+	authMiddleware := middleware.Auth(middleware.AuthConfig{
+		JWTSecret: cfg.JWTSecret,
+		APIKey:    cfg.APIKey,
+	})
+
+	handler.Register(router, authMiddleware)
 
 	cleanup := func() {
 		cleanupDB()
@@ -83,7 +89,7 @@ func TestLogin_ValidCredentials_ReturnsToken(t *testing.T) {
 
 	assert.Equal(t, "Login successful", response.Message)
 	assert.NotEmpty(t, response.Token, "Token should not be empty")
-	
+
 	// Verify token is valid
 	assert.NotNil(t, response.User)
 }
@@ -288,7 +294,7 @@ func TestMe_ValidToken_ReturnsUserInfo(t *testing.T) {
 
 	var response map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &response)
-	
+
 	userObj := response["user"].(map[string]interface{})
 	assert.Equal(t, user.Username, userObj["username"])
 	assert.Equal(t, string(user.Role), userObj["role"])
@@ -321,8 +327,8 @@ func TestRefresh_ValidToken_ReturnsNewToken(t *testing.T) {
 	oldToken, err := auth.GenerateToken(handler.cfg.JWTSecret, user.ID, user.Username, string(user.Role), 24*time.Hour)
 	require.NoError(t, err)
 
-	// Wait a tiny bit to ensure new token is different
-	time.Sleep(10 * time.Millisecond)
+	// Wait at least 1 second to ensure new token has different timestamp
+	time.Sleep(1 * time.Second)
 
 	// Act
 	w := httptest.NewRecorder()
@@ -333,10 +339,11 @@ func TestRefresh_ValidToken_ReturnsNewToken(t *testing.T) {
 	// Assert
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response types.AuthResponse
+	var response map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &response)
-	
-	assert.NotEmpty(t, response.Token)
-	assert.NotEqual(t, oldToken, response.Token, "New token should be different from old token")
-}
 
+	newToken, ok := response["token"].(string)
+	assert.True(t, ok, "Response should contain token")
+	assert.NotEmpty(t, newToken)
+	assert.NotEqual(t, oldToken, newToken, "New token should be different from old token")
+}
