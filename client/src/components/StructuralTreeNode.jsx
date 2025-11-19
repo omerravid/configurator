@@ -131,12 +131,18 @@ const StructuralTreeNode = ({
           const cleanPath = path.startsWith("root.") ? path.substring(5) : path;
           const textArea = document.createElement("textarea");
           textArea.value = cleanPath;
+          textArea.style.position = "fixed";
+          textArea.style.opacity = "0";
           document.body.appendChild(textArea);
+          textArea.select();
+          textArea.setSelectionRange(0, 99999); // For mobile
           const successful = document.execCommand("copy");
+          document.body.removeChild(textArea);
           if (successful) {
             showToast("Path copied to clipboard", "success");
+          } else {
+            showToast("Failed to copy path to clipboard", "error");
           }
-          document.body.removeChild(textArea);
         } catch (err) {
           console.error("Failed to copy path:", err);
           showToast("Failed to copy path to clipboard", "error");
