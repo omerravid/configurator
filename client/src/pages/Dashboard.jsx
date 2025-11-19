@@ -200,12 +200,68 @@ const Dashboard = () => {
     loadAllConfigurations();
   }, [refreshTrigger]);
 
+  // Restore selected configuration after page reload (from backup restore)
+  // This should only run once when configurations are first loaded
+  const [hasAttemptedRestore, setHasAttemptedRestore] = useState(false);
+  
+  useEffect(() => {
+    // Only attempt restore once, when configurations are loaded and we haven't tried yet
+    if (hasAttemptedRestore || allConfigurations.length === 0) {
+      return;
+    }
+    
+    // Check for restoreConfigId first (from backup restore), then fall back to lastSelectedConfigId
+    const restoreConfigId = sessionStorage.getItem('restoreConfigId');
+    const lastSelectedId = sessionStorage.getItem('lastSelectedConfigId');
+    const configIdToRestore = restoreConfigId || lastSelectedId;
+    
+    console.log('=== Restore Config Debug ===');
+    console.log('restoreConfigId from sessionStorage:', restoreConfigId);
+    console.log('lastSelectedConfigId from sessionStorage:', lastSelectedId);
+    console.log('Will restore:', configIdToRestore);
+    console.log('allConfigurations.length:', allConfigurations.length);
+    
+    if (configIdToRestore) {
+      console.log('Looking for config with ID:', configIdToRestore);
+      console.log('Available config IDs:', allConfigurations.map(c => c.id));
+      
+      // Find the configuration with this ID
+      const configToRestore = allConfigurations.find(c => c.id === configIdToRestore);
+      console.log('Found config to restore:', configToRestore);
+      
+      if (configToRestore) {
+        console.log('Restoring config:', configToRestore.name);
+        setSelectedConfig(configToRestore);
+        loadConfigurationData(configToRestore);
+      } else {
+        console.warn('Config not found with ID:', configIdToRestore);
+      }
+      
+      // Clean up the restoreConfigId (one-time use), but keep lastSelectedConfigId
+      if (restoreConfigId) {
+        sessionStorage.removeItem('restoreConfigId');
+      }
+      setHasAttemptedRestore(true);
+    } else {
+      // No restore needed, mark as attempted so we don't check again
+      setHasAttemptedRestore(true);
+    }
+  }, [allConfigurations, hasAttemptedRestore]);
+
   const handleConfigSelect = async (config) => {
 
     setSelectedConfig(config);
     setRawData(null);
     setShowEditor(false);
     setShowRename(false);
+
+    if (config) {
+      // Save selected config ID to sessionStorage for persistence across refreshes
+      sessionStorage.setItem('lastSelectedConfigId', config.id);
+    } else {
+      // Clear if no config selected
+      sessionStorage.removeItem('lastSelectedConfigId');
+    }
 
     // Generate breadcrumb for archived configurations
     if (Boolean(config.archived)) {
@@ -1269,6 +1325,7 @@ const Dashboard = () => {
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
         onDataRefresh={() => setRefreshTrigger(prev => prev + 1)}
+        selectedConfigId={selectedConfig?.id}
       />
 
       {/* Delete Confirmation Dialog */}

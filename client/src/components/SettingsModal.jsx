@@ -24,7 +24,7 @@ import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
 import api, { userAPI, authAPI } from "../services/api";
 
-const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
+const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => {
   const { showToast } = useToast();
   const { user, logout, login } = useAuth();
   const [activeTab, setActiveTab] = useState('users');
@@ -106,9 +106,23 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh }) => {
 
   // Handle modal close with refresh if data changed
   const handleClose = () => {
+    console.log('=== Settings Modal Close ===');
+    console.log('dataChanged:', dataChanged);
+    console.log('selectedConfigId:', selectedConfigId);
+    
     if (dataChanged && onDataRefresh) {
+      // Save the currently selected configuration ID to sessionStorage before reload
+      // This will be picked up by Dashboard after the page reloads
+      if (selectedConfigId) {
+        console.log('Saving config ID to sessionStorage:', selectedConfigId);
+        sessionStorage.setItem('restoreConfigId', selectedConfigId);
+      } else {
+        console.warn('No selectedConfigId to save');
+      }
+      
       onDataRefresh();
       setTimeout(() => {
+        console.log('Reloading page...');
         window.location.reload();
       }, 100);
     }

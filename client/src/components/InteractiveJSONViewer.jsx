@@ -166,6 +166,7 @@ const TreeNode = ({
   expandedPaths = new Set(),
   onExpandToggle = () => {},
   onGetActiveTooltipPath,
+  selectedConfig,
 }) => {
   const { showToast } = useToast();
   const [editValue, setEditValue] = useState("");
@@ -672,6 +673,7 @@ const TreeNode = ({
         expandedPaths={expandedPaths}
         onExpandToggle={onExpandToggle}
         onGetActiveTooltipPath={onGetActiveTooltipPath}
+        selectedConfig={selectedConfig}
       />
     ));
   };
@@ -693,6 +695,7 @@ const TreeNode = ({
         expandedPaths={expandedPaths}
         onExpandToggle={onExpandToggle}
         onGetActiveTooltipPath={onGetActiveTooltipPath}
+        selectedConfig={selectedConfig}
       />
     ));
   };
@@ -836,10 +839,14 @@ const InteractiveJSONViewer = ({
   const [showInheritanceChain, setShowInheritanceChain] = useState(false);
   // Global state to preserve expand/collapse states across data updates
   const [expandedPaths, setExpandedPaths] = useState(new Set());
-  // Mode toggle between Flat and Structural view
-  const [viewMode, setViewMode] = useState("structural");
-  // Mode toggle between All and Changes view
-  const [dataMode, setDataMode] = useState("all");
+  // Mode toggle between Flat and Structural view - persist across refreshes
+  const [viewMode, setViewMode] = useState(() => {
+    return sessionStorage.getItem('jsonViewerMode') || "structural";
+  });
+  // Mode toggle between All and Changes view - persist across refreshes
+  const [dataMode, setDataMode] = useState(() => {
+    return sessionStorage.getItem('jsonViewerDataMode') || "all";
+  });
   // Structural mode state
   const [selectedStructuralPath, setSelectedStructuralPath] = useState("root");
   const [selectedStructuralValue, setSelectedStructuralValue] = useState(data);
@@ -1225,7 +1232,10 @@ const InteractiveJSONViewer = ({
           {/* View Mode Toggle */}
           <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
             <button
-              onClick={() => setViewMode("flat")}
+              onClick={() => {
+                setViewMode("flat");
+                sessionStorage.setItem('jsonViewerMode', 'flat');
+              }}
               className={`flex items-center space-x-1 px-3 py-1 rounded text-sm font-medium transition-colors ${
                 viewMode === "flat"
                   ? "bg-white text-gray-900 shadow-sm"
@@ -1236,7 +1246,10 @@ const InteractiveJSONViewer = ({
               <span>Flat</span>
             </button>
             <button
-              onClick={() => setViewMode("structural")}
+              onClick={() => {
+                setViewMode("structural");
+                sessionStorage.setItem('jsonViewerMode', 'structural');
+              }}
               className={`flex items-center space-x-1 px-3 py-1 rounded text-sm font-medium transition-colors ${
                 viewMode === "structural"
                   ? "bg-white text-gray-900 shadow-sm"
@@ -1251,7 +1264,10 @@ const InteractiveJSONViewer = ({
           {/* Data Mode Toggle */}
           <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
             <button
-              onClick={() => setDataMode("all")}
+              onClick={() => {
+                setDataMode("all");
+                sessionStorage.setItem('jsonViewerDataMode', 'all');
+              }}
               className={`flex items-center space-x-1 px-3 py-1 rounded text-sm font-medium transition-colors ${
                 dataMode === "all"
                   ? "bg-white text-gray-900 shadow-sm"
@@ -1261,7 +1277,10 @@ const InteractiveJSONViewer = ({
               <span>All</span>
             </button>
             <button
-              onClick={() => setDataMode("changes")}
+              onClick={() => {
+                setDataMode("changes");
+                sessionStorage.setItem('jsonViewerDataMode', 'changes');
+              }}
               className={`flex items-center space-x-1 px-3 py-1 rounded text-sm font-medium transition-colors ${
                 dataMode === "changes"
                   ? "bg-white text-gray-900 shadow-sm"
@@ -1355,6 +1374,7 @@ const InteractiveJSONViewer = ({
             expandedPaths={expandedPaths}
             onExpandToggle={handleExpandToggle}
             onGetActiveTooltipPath={getActiveTooltipPath}
+            selectedConfig={selectedConfig}
           />
         </div>
       ) : hasNoChanges ? (
