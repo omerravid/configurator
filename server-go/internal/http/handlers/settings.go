@@ -93,6 +93,7 @@ func (h *SettingsHandler) downloadBackup(c *gin.Context) {
 func (h *SettingsHandler) restoreBackup(c *gin.Context) {
 	var req struct {
 		BackupName string `json:"backupName"`
+		Filename   string `json:"filename"` // Support both field names
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -102,7 +103,21 @@ func (h *SettingsHandler) restoreBackup(c *gin.Context) {
 		return
 	}
 
-	path := h.backupSvc.GetBackupPath(req.BackupName)
+	// Support both 'backupName' and 'filename' for compatibility
+	name := req.BackupName
+	if name == "" {
+		name = req.Filename
+	}
+
+	if name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"error":   "Backup name or filename is required",
+		})
+		return
+	}
+
+	path := h.backupSvc.GetBackupPath(name)
 	if err := h.backupSvc.RestoreBackup(c.Request.Context(), path); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,

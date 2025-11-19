@@ -169,7 +169,7 @@ curl $BASE_URL/api/users \
 #### 3.3 Get User by ID
 ```bash
 # Get user ID from list, then:
-curl $BASE_URL/api/users/{userId} \
+curl $BASE_URL/api/users/{691b17d44675e90aa8f250a4} \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 **Expected**: User details
@@ -185,7 +185,7 @@ curl -X PUT $BASE_URL/api/users/{userId}/role \
 
 #### 3.5 Delete User (Not Self)
 ```bash
-curl -X DELETE $BASE_URL/api/users/{userId} \
+curl -X DELETE $BASE_URL/api/users/691b17d44675e90aa8f250a4 \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 **Expected**: `"message": "User deleted successfully"`
@@ -200,7 +200,7 @@ curl -X DELETE $BASE_URL/api/users/{adminUserId} \
 
 #### 3.7 Get User's Configurations
 ```bash
-curl $BASE_URL/api/users/{userId}/configurations \
+curl $BASE_URL/api/users/690b3cce0cf869cf9bed3848/configurations \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 **Expected**: Array of configurations owned by user
@@ -628,7 +628,7 @@ curl $BASE_URL/api/files/{storageKey} \
 
 #### 8.4 Get File Info
 ```bash
-curl $BASE_URL/api/files/{storageKey}/info \
+curl $BASE_URL/api/files/4cd743de4838ef6507d8ca93155ea2bc.txt/info \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 **Expected**: File metadata + download URL
@@ -833,28 +833,28 @@ curl -X POST $BASE_URL/api/configs \
 
 #### 10.2 Access Array Element
 ```bash
-curl "$BASE_URL/api/configs/by-name/ArrayTestConfig/data?path=items[0]&minimal=true" \
+curl "$BASE_URL/api/configs/by-name/ArrayTestConfig/data?path=items%5B0%5D&minimal=true" \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 **Expected**: `{"name": "First", "value": 10}`
 
 #### 10.3 Access Nested Property in Array
 ```bash
-curl "$BASE_URL/api/configs/by-name/ArrayTestConfig/data?path=items[1].name&minimal=true" \
+curl "$BASE_URL/api/configs/by-name/ArrayTestConfig/data?path=items\[1\].name&minimal=true" \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 **Expected**: `"Second"`
 
 #### 10.4 Access Nested Array Element
 ```bash
-curl "$BASE_URL/api/configs/by-name/ArrayTestConfig/data?path=matrix[1][2]&minimal=true" \
+curl "$BASE_URL/api/configs/by-name/ArrayTestConfig/data?path=matrix\[1\]\[2\]&minimal=true" \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 **Expected**: `6`
 
 #### 10.5 Invalid Array Index
 ```bash
-curl "$BASE_URL/api/configs/by-name/ArrayTestConfig/data?path=items[99]&minimal=true" \
+curl "$BASE_URL/api/configs/by-name/ArrayTestConfig/data?path=items\[99\]&minimal=true" \
   -H "Authorization: Bearer $ADMIN_TOKEN"
 ```
 **Expected**: `404 Not Found` - "array index 99 out of bounds"
@@ -891,7 +891,7 @@ curl $BASE_URL/api/settings/data/backup/$BACKUP_NAME \
 curl -X POST $BASE_URL/api/settings/data/restore \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"filename": "$BACKUP_NAME"}'
+  -d "{\"backupName\": \"$BACKUP_NAME\"}"
 ```
 **Expected**: Database restored successfully
 

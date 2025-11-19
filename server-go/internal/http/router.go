@@ -15,7 +15,10 @@ import (
 
 func NewRouter(cfg config.Config, log *logger.Logger, mc *mongo.Client) *gin.Engine {
 	r := gin.New()
-	r.Use(gin.Logger(), gin.Recovery())
+	r.Use(gin.Recovery())
+
+	// Add structured request logging middleware
+	r.Use(middleware.RequestLogging(log))
 
 	r.GET("/api/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "OK"})

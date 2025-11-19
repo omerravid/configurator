@@ -22,8 +22,8 @@ services:
       - STORAGE_TYPE=embedded
       - EMBEDDED_STORAGE_PATH=/data/files
       - SERVER_BASE_URL=http://localhost:3004
-      - BACKUP_BIN_MONGODUMP=/usr/bin/mongodump
-      - BACKUP_BIN_MONGORESTORE=/usr/bin/mongorestore
+      - BACKUP_BIN_MONGODUMP=/usr/local/bin/mongodump
+      - BACKUP_BIN_MONGORESTORE=/usr/local/bin/mongorestore
       - LOG_LEVEL=info
     ports:
       - "3004:3004"
