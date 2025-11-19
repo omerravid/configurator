@@ -189,6 +189,12 @@ const TreeNode = ({
   const [showInheritanceView, setShowInheritanceView] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
 
+  // Load children if node is expanded on mount
+  useEffect(() => {
+    if (isExpanded && !hasLoadedChildren && !loadingChildren) {
+      loadChildren();
+    }
+  }, [isExpanded]);
 
   const loadChildren = async () => {
     if (hasLoadedChildren) return;
@@ -747,12 +753,8 @@ const ConfigurationTree = ({
 
   // Check if a node should be expanded
   const isNodeExpanded = (configId, level = 0) => {
-    // If explicitly set in state, use that
-    if (expandedNodes.has(configId)) {
-      return true;
-    }
-    // Start with all items collapsed so expansion can be tested
-    return false;
+    // Return the actual state from expandedNodes Set
+    return expandedNodes.has(configId);
   };
 
   const loadRootConfigurations = async () => {
