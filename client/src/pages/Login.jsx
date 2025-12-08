@@ -141,16 +141,18 @@ const Login = () => {
           </div>
         </form>
 
-        <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg transition-colors">
-          <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
-            Demo Credentials:
-          </h3>
-          <p className="text-xs text-blue-700 dark:text-blue-300">
-            Username: <strong>admin</strong>
-            <br />
-            Password: <strong>admin123</strong>
-          </p>
-        </div>
+        {import.meta.env.DEV && import.meta.env.VITE_SHOW_DEMO_CREDENTIALS === 'true' && (
+          <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg transition-colors">
+            <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
+              Demo Credentials:
+            </h3>
+            <p className="text-xs text-blue-700 dark:text-blue-300">
+              Username: <strong>{import.meta.env.VITE_DEMO_USERNAME || 'admin'}</strong>
+              <br />
+              Password: <strong>{import.meta.env.VITE_DEMO_PASSWORD || 'admin123'}</strong>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from "react";
 import { authAPI } from "../services/api";
+import { logger } from "../utils/logger";
+import { getToken, setToken, removeToken } from "../utils/tokenStorage";
 
 const AuthContext = createContext();
 
@@ -35,7 +37,7 @@ const authReducer = (state, action) => {
 const initialState = {
   isAuthenticated: false,
   user: null,
-  token: localStorage.getItem("token"),
+  token: getToken(),
   loading: false,
   error: null,
 };
@@ -44,7 +46,7 @@ export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = getToken();
     if (token) {
       // Verify token and get user info
       authAPI
@@ -59,8 +61,8 @@ export const AuthProvider = ({ children }) => {
           });
         })
         .catch((error) => {
-          console.log("Token validation failed:", error.message);
-          localStorage.removeItem("token");
+          logger.debug("Token validation failed", { message: error.message });
+          removeToken();
           dispatch({ type: "LOGOUT" });
           // If we're not already on login page, redirect
           if (window.location.pathname !== "/login") {
@@ -76,7 +78,7 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.login(username, password);
       const { token, user } = response.data;
 
-      localStorage.setItem("token", token);
+      setToken(token);
       dispatch({
         type: "LOGIN_SUCCESS",
         payload: { user, token },
@@ -95,7 +97,7 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.register(username, password, role);
       const { token, user } = response.data;
 
-      localStorage.setItem("token", token);
+      setToken(token);
       dispatch({
         type: "LOGIN_SUCCESS",
         payload: { user, token },
@@ -109,7 +111,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    removeToken();
     dispatch({ type: "LOGOUT" });
   };
 

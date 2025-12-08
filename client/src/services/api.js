@@ -1,4 +1,6 @@
 import axios from "axios";
+import { logger } from "../utils/logger";
+import { getToken, removeToken } from "../utils/tokenStorage";
 
 const API_BASE = "/api";
 
@@ -12,7 +14,7 @@ const api = axios.create({
 
 // Add auth token to requests
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const token = getToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -40,7 +42,7 @@ api.interceptors.response.use(
         // Prevent multiple redirects
         if (!window.__redirecting401 && window.location.pathname !== '/login') {
           window.__redirecting401 = true;
-          try { localStorage.removeItem('token'); } catch {}
+          removeToken();
           window.location.replace('/login');
         }
       }
@@ -83,21 +85,17 @@ export const configAPI = {
 
   // Update configuration
   update: (id, data) => {
-    console.log("=== configAPI.update called ===");
-    console.log("id:", id);
-    console.log("id type:", typeof id);
-    console.log("id stringified:", JSON.stringify(id));
-    console.log("URL will be:", `/configs/${id}`);
+    logger.debug("configAPI.update called", { id, idType: typeof id });
 
     // Check if id is an object and warn
     if (typeof id === 'object' && id !== null) {
-      console.error("ERROR: ID is an object, not a string!", id);
+      logger.error("Invalid ID type: received object instead of string", null, { id });
       throw new Error(`Invalid ID type: received object instead of string. ID: ${JSON.stringify(id)}`);
     }
 
     // Ensure id is converted to string
     const stringId = String(id);
-    console.log("Using stringId:", stringId);
+    logger.debug("Using stringId", { stringId });
 
     return api.put(`/configs/${stringId}`, data);
   },

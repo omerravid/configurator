@@ -22,6 +22,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
+import { logger } from "../utils/logger";
 import api, { userAPI, authAPI } from "../services/api";
 
 const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => {
@@ -106,23 +107,21 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
 
   // Handle modal close with refresh if data changed
   const handleClose = () => {
-    console.log('=== Settings Modal Close ===');
-    console.log('dataChanged:', dataChanged);
-    console.log('selectedConfigId:', selectedConfigId);
+    logger.debug("Settings Modal Close", { dataChanged, selectedConfigId });
     
     if (dataChanged && onDataRefresh) {
       // Save the currently selected configuration ID to sessionStorage before reload
       // This will be picked up by Dashboard after the page reloads
       if (selectedConfigId) {
-        console.log('Saving config ID to sessionStorage:', selectedConfigId);
+        logger.debug("Saving config ID to sessionStorage", { selectedConfigId });
         sessionStorage.setItem('restoreConfigId', selectedConfigId);
       } else {
-        console.warn('No selectedConfigId to save');
+        logger.warn("No selectedConfigId to save");
       }
       
       onDataRefresh();
       setTimeout(() => {
-        console.log('Reloading page...');
+        logger.debug("Reloading page");
         window.location.reload();
       }, 100);
     }
@@ -131,9 +130,9 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
 
   // Debug modal state changes
   useEffect(() => {
-    console.log('Modal state changed - showReAuthModal:', showReAuthModal);
+    logger.debug("Modal state changed", { showReAuthModal });
     if (showReAuthModal) {
-      console.log('Re-auth modal should be visible now');
+      logger.debug("Re-auth modal should be visible now");
     }
   }, [showReAuthModal]);
 
@@ -151,7 +150,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
     results.forEach((result, index) => {
       if (result.status === 'rejected') {
         const functionNames = ['loadDatabaseStatus', 'loadStorageStatus', 'loadBackups', 'loadDataStats', 'loadUsers'];
-        console.error(`${functionNames[index]} failed:`, result.reason);
+        logger.error(`${functionNames[index]} failed`, result.reason);
       }
     });
   };
@@ -163,7 +162,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
       const response = await userAPI.getAll();
       setUsers(response.data.users || []);
     } catch (error) {
-      console.error('Failed to load users:', error);
+      logger.error("Failed to load users", error);
       showToast('Failed to load users', 'error');
       setUsers([]);
     } finally {
@@ -185,7 +184,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
       setShowCreateUser(false);
       loadUsers();
     } catch (error) {
-      console.error('Failed to create user:', error);
+      logger.error("Failed to create user", error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to create user';
       showToast(`Failed to create user: ${errorMessage}`, 'error');
     } finally {
@@ -201,7 +200,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
       setEditingUserId(null);
       loadUsers();
     } catch (error) {
-      console.error('Failed to update user role:', error);
+      logger.error("Failed to update user role", error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to update user role';
       showToast(`Failed to update user role: ${errorMessage}`, 'error');
     } finally {
@@ -220,7 +219,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
       showToast('User deleted successfully', 'success');
       loadUsers();
     } catch (error) {
-      console.error('Failed to delete user:', error);
+      logger.error("Failed to delete user", error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to delete user';
       showToast(`Failed to delete user: ${errorMessage}`, 'error');
     } finally {
@@ -260,12 +259,13 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         // Ignore legacy API errors
       }
     } catch (error) {
-      console.error('Failed to load database status:', error);
-      console.error('Error status:', error.response?.status);
-      console.error('Error config URL:', error.config?.url);
+      logger.error("Failed to load database status", error, { 
+        status: error.response?.status,
+        url: error.config?.url
+      });
 
       if (error.response?.status === 401) {
-        console.log('401 detected - authentication failed');
+        logger.debug("401 detected - authentication failed");
         showToast('Session expired after database switch. Please login again.', 'warning');
         localStorage.removeItem('token');
         setTimeout(() => {
@@ -287,11 +287,11 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
           configured: response.data.status.isConfigured
         });
       } else {
-        console.warn('Storage status loading unsuccessful:', response.data.error);
+        logger.warn("Storage status loading unsuccessful", { error: response.data.error });
         setStorageStatus({ type: 'embedded', configured: false });
       }
     } catch (error) {
-      console.error('Failed to load storage status:', error);
+      logger.error("Failed to load storage status", error);
       setStorageStatus({ type: 'embedded', configured: false });
     }
   };
@@ -303,7 +303,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         setBackups(response.data.backups || []);
         setSelectedBackups([]);
       } else {
-        console.warn('Backup loading unsuccessful:', response.data.error);
+        logger.warn("Backup loading unsuccessful", { error: response.data.error });
         setBackups([]);
         setSelectedBackups([]);
       }
@@ -324,11 +324,11 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
       if (response.data.success) {
         setDataStats(response.data.stats);
       } else {
-        console.warn('Data stats loading unsuccessful:', response.data.error);
+        logger.warn("Data stats loading unsuccessful", { error: response.data.error });
         setDataStats({ users: 0, configurations: 0 });
       }
     } catch (error) {
-      console.error('Failed to load data stats:', error);
+      logger.error("Failed to load data stats", error);
       if (error.response?.status === 401) {
         showToast('Session expired. Please login again.', 'error');
         forceLogout();
@@ -359,7 +359,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         showToast(`Failed to switch: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to switch to embedded MongoDB:', error);
+      logger.error("Failed to switch to embedded MongoDB", error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to switch to embedded MongoDB';
       showToast(`Failed to switch: ${errorMessage}`, 'error');
     } finally {
@@ -395,7 +395,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         showToast(`Failed to switch: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to switch to external MongoDB:', error);
+      logger.error("Failed to switch to external MongoDB", error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to switch to external MongoDB';
       showToast(`Failed to switch: ${errorMessage}`, 'error');
     } finally {
@@ -426,7 +426,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         showToast(`Failed to switch: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to switch to SQLite:', error);
+      logger.error("Failed to switch to SQLite", error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to switch to SQLite';
       showToast(`Failed to switch: ${errorMessage}`, 'error');
     } finally {
@@ -454,7 +454,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         showToast(`Failed to add database: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to add database:', error);
+      logger.error("Failed to add database", error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to add database';
       showToast(`Failed to add database: ${errorMessage}`, 'error');
     } finally {
@@ -478,7 +478,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         showToast(`Failed to delete database: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to delete database:', error);
+      logger.error("Failed to delete database", error);
       if (error.response?.status === 401) {
         showToast('Authentication failed. Please login again.', 'error');
         forceLogout();
@@ -516,7 +516,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         showToast(`Failed to activate database: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to activate database:', error);
+      logger.error("Failed to activate database", error);
       if (error.response?.status === 401) {
         // Instead of logging out, prompt for re-authentication
         showToast('Authentication required for database switch. Please confirm your password.', 'info');
@@ -544,7 +544,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         showToast(`Connection test failed: ${response.data.message}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to test connection:', error);
+      logger.error("Failed to test connection", error);
 
       if (error.response?.status === 401) {
         const errorMsg = error.response?.data?.error || 'Authentication failed';
@@ -600,7 +600,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         showToast(`Failed to copy data: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to copy data:', error);
+      logger.error("Failed to copy data", error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to copy data';
       showToast(`Failed to copy data: ${errorMessage}`, 'error');
     } finally {
@@ -670,7 +670,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         showToast(`Failed to migrate database: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to migrate database:', error);
+      logger.error("Failed to migrate database", error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to migrate database';
       showToast(`Failed to migrate database: ${errorMessage}`, 'error');
     } finally {
@@ -701,7 +701,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         showToast(`Failed to configure S3: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to configure S3 storage:', error);
+      logger.error("Failed to configure S3 storage", error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to configure S3 storage';
       showToast(`Failed to configure S3: ${errorMessage}`, 'error');
     } finally {
@@ -725,7 +725,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         showToast(`Failed to switch: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to switch to embedded storage:', error);
+      logger.error("Failed to switch to embedded storage", error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to switch to embedded storage';
       showToast(`Failed to switch: ${errorMessage}`, 'error');
     } finally {
@@ -749,7 +749,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         showToast(`Failed to create backup: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to create backup:', error);
+      logger.error("Failed to create backup", error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to create backup';
       showToast(`Failed to create backup: ${errorMessage}`, 'error');
     } finally {
@@ -805,7 +805,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         showToast(`Failed to ${actionText} backup: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error(`Failed to ${actionText} backup:`, error);
+      logger.error(`Failed to ${actionText} backup`, error);
       const errorMessage = error.response?.data?.error || error.message || `Failed to ${actionText} backup`;
       showToast(`Failed to ${actionText} backup: ${errorMessage}`, 'error');
     } finally {
@@ -892,7 +892,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
 
       if (!silent) showToast('Backup downloaded successfully', 'success');
     } catch (error) {
-      console.error('Failed to download backup:', error);
+      logger.error("Failed to download backup", error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to download backup';
       showToast(`Failed to download backup: ${errorMessage}`, 'error');
     } finally {
@@ -978,7 +978,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         showToast(`Failed to ${actionText} uploaded file: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error(`Failed to ${actionText} uploaded file:`, error);
+      logger.error(`Failed to ${actionText} uploaded file`, error);
       const errorMessage = error.response?.data?.error || error.message || `Failed to ${actionText} uploaded file`;
       showToast(`Failed to ${actionText} uploaded file: ${errorMessage}`, 'error');
     } finally {
@@ -1003,7 +1003,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         showToast(`Failed to find unreferenced files: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to find unreferenced files:', error);
+      logger.error("Failed to find unreferenced files", error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to find unreferenced files';
       showToast(`Failed to find unreferenced files: ${errorMessage}`, 'error');
     } finally {
@@ -1026,7 +1026,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         setUnreferencedFiles([]);
 
         if (response.data.errors && response.data.errors.length > 0) {
-          console.warn('Some files could not be deleted:', response.data.errors);
+          logger.warn("Some files could not be deleted", { errors: response.data.errors });
           showToast(
             `${response.data.errors.length} files could not be deleted`,
             'warning'
@@ -1036,7 +1036,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
         showToast(`Failed to delete unreferenced files: ${response.data.error}`, 'error');
       }
     } catch (error) {
-      console.error('Failed to delete unreferenced files:', error);
+      logger.error("Failed to delete unreferenced files", error);
       const errorMessage = error.response?.data?.error || error.message || 'Failed to delete unreferenced files';
       showToast(`Failed to delete unreferenced files: ${errorMessage}`, 'error');
     } finally {
@@ -1944,7 +1944,7 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
       )}
 
       {/* Re-authentication Modal for Database Switching */}
-      {console.log('Modal render check - showReAuthModal:', showReAuthModal, 'pendingDatabaseSwitch:', pendingDatabaseSwitch)}
+      {logger.debug('Modal render check', { showReAuthModal, pendingDatabaseSwitch })}
       {showReAuthModal && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-4 p-6">

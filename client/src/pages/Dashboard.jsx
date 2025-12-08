@@ -11,6 +11,7 @@ import SettingsModal from "../components/SettingsModal";
 import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
 import { useToast } from "../context/ToastContext";
 import { configAPI } from "../services/api";
+import { logger } from "../utils/logger";
 import {
   PlusIcon,
   PencilIcon,
@@ -126,7 +127,7 @@ const Dashboard = () => {
         }
 
         if (guard.has(parentId)) {
-          console.warn(`Circular reference detected for ${currentConfig.name} (${currentConfig.id})`);
+          logger.warn("Circular reference detected", { name: currentConfig.name, id: currentConfig.id });
           break; // prevent infinite loops
         }
 
@@ -147,7 +148,7 @@ const Dashboard = () => {
 
       return pathNames.join(' → ');
     } catch (error) {
-      console.error('Failed to generate breadcrumb:', error);
+      logger.error("Failed to generate breadcrumb", error);
       return null;
     }
   };
@@ -188,7 +189,7 @@ const Dashboard = () => {
       setResolvedData(resolvedResponse.data);
       setRawData(rawResponse.data);
     } catch (err) {
-      console.error("Failed to load configuration data:", err);
+      logger.error("Failed to load configuration data", err);
       setError("Failed to load configuration data");
     } finally {
       setLoading(false);
@@ -215,26 +216,26 @@ const Dashboard = () => {
     const lastSelectedId = sessionStorage.getItem('lastSelectedConfigId');
     const configIdToRestore = restoreConfigId || lastSelectedId;
     
-    console.log('=== Restore Config Debug ===');
-    console.log('restoreConfigId from sessionStorage:', restoreConfigId);
-    console.log('lastSelectedConfigId from sessionStorage:', lastSelectedId);
-    console.log('Will restore:', configIdToRestore);
-    console.log('allConfigurations.length:', allConfigurations.length);
+    logger.debug("Restore Config Debug", { 
+      restoreConfigId, 
+      lastSelectedId, 
+      configIdToRestore, 
+      configurationsCount: allConfigurations.length 
+    });
     
     if (configIdToRestore) {
-      console.log('Looking for config with ID:', configIdToRestore);
-      console.log('Available config IDs:', allConfigurations.map(c => c.id));
+      logger.debug("Looking for config", { configIdToRestore, availableIds: allConfigurations.map(c => c.id) });
       
       // Find the configuration with this ID
       const configToRestore = allConfigurations.find(c => c.id === configIdToRestore);
-      console.log('Found config to restore:', configToRestore);
+      logger.debug("Found config to restore", { config: configToRestore?.name });
       
       if (configToRestore) {
-        console.log('Restoring config:', configToRestore.name);
+        logger.debug("Restoring config", { name: configToRestore.name });
         setSelectedConfig(configToRestore);
         loadConfigurationData(configToRestore);
       } else {
-        console.warn('Config not found with ID:', configIdToRestore);
+        logger.warn("Config not found with ID", { configIdToRestore });
       }
       
       // Clean up the restoreConfigId (one-time use), but keep lastSelectedConfigId
@@ -334,7 +335,7 @@ const Dashboard = () => {
         (typeof sourceData === "object" && Object.keys(sourceData).length === 0)
       ) {
         // For empty configurations, use an empty object
-        console.log("Source configuration has no data, using empty object");
+        logger.debug("Source configuration has no data, using empty object");
       }
 
       // Generate unique name with _copy suffix
@@ -386,14 +387,14 @@ const Dashboard = () => {
               loadConfigurationData(newConfig);
             }
           } catch (err) {
-            console.error("Failed to select newly created configuration:", err);
+            logger.error("Failed to select newly created configuration", err);
           }
         }, 500);
       }
 
       showToast(`Configuration duplicated as "${copyName}"`);
     } catch (err) {
-      console.error("Failed to duplicate configuration:", err);
+      logger.error("Failed to duplicate configuration", err);
       const errorMessage =
         err.response?.data?.error ||
         err.message ||
@@ -425,32 +426,31 @@ const Dashboard = () => {
   };
 
   const handleCommit = async () => {
-    console.log("=== handleCommit called ===");
-    console.log("selectedConfig:", selectedConfig);
+    logger.debug("handleCommit called", { selectedConfig });
 
     if (!selectedConfig) {
-      console.log("No selected config");
+      logger.debug("No selected config");
       showToast("No configuration selected", "error");
       return;
     }
 
     if (selectedConfig.type !== "USER" && selectedConfig.type !== "VERSION") {
-      console.log("Invalid config type:", selectedConfig.type);
+      logger.debug("Invalid config type", { type: selectedConfig.type });
       showToast(`Cannot commit ${selectedConfig.type} configurations. Only USER and VERSION configurations can be committed.`, "error");
       return;
     }
 
     if (selectedConfig.status !== "DRAFT") {
-      console.log("Invalid config status:", selectedConfig.status);
+      logger.debug("Invalid config status", { status: selectedConfig.status });
       showToast(`Configuration is already ${selectedConfig.status}. Only DRAFT configurations can be committed.`, "error");
       return;
     }
 
-    console.log("Attempting to commit config ID:", selectedConfig.id);
+    logger.debug("Attempting to commit config", { id: selectedConfig.id });
 
     try {
       const response = await configAPI.commit(selectedConfig.id);
-      console.log("Commit response:", response);
+      logger.debug("Commit response", { response });
 
       setRefreshTrigger((prev) => prev + 1);
       // Reload the current config
@@ -459,11 +459,10 @@ const Dashboard = () => {
 
       showToast(`Configuration "${selectedConfig.name}" committed successfully`, "success");
     } catch (err) {
-      console.error("Failed to commit configuration:", err);
-      console.error("Error response:", err.response);
-      console.error("Error response data:", err.response?.data);
-      console.error("Error status:", err.response?.status);
-      console.error("Error message:", err.message);
+      logger.error("Failed to commit configuration", err, { 
+        response: err.response?.data,
+        status: err.response?.status
+      });
 
       const errorMessage = err.response?.data?.error || err.message || "Failed to commit configuration";
       setError(`Failed to commit configuration: ${errorMessage}`);
@@ -490,7 +489,7 @@ const Dashboard = () => {
 
       showToast(`Configuration "${config.name}" deleted successfully`);
     } catch (err) {
-      console.error("Failed to delete configuration:", err);
+      logger.error("Failed to delete configuration", err);
       const errorMessage = err.response?.data?.error || err.message || "Failed to delete configuration";
       setError(`Failed to delete configuration: ${errorMessage}`);
       showToast(`Failed to delete: ${errorMessage}`, "error");
@@ -509,7 +508,7 @@ const Dashboard = () => {
       setRefreshTrigger((prev) => prev + 1);
       showToast(`Configuration "${config.name}" archived successfully`);
     } catch (err) {
-      console.error("Failed to archive configuration:", err);
+      logger.error("Failed to archive configuration", err);
       const errorMessage = err.response?.data?.error || err.message || "Failed to archive configuration";
       setError(`Failed to archive configuration: ${errorMessage}`);
       showToast(`Failed to archive: ${errorMessage}`, "error");
@@ -526,7 +525,7 @@ const Dashboard = () => {
 
       showToast(`Configuration "${config.name}" restored successfully`);
     } catch (err) {
-      console.error("Failed to restore configuration:", err);
+      logger.error("Failed to restore configuration", err);
       const errorMessage = err.response?.data?.error || err.message || "Failed to restore configuration";
       setError(`Failed to restore configuration: ${errorMessage}`, "error");
     }
@@ -574,21 +573,18 @@ const Dashboard = () => {
     if (!selectedConfig || !canEdit()) return;
 
     try {
-      console.log("=== handleDataChange - INHERITANCE DEBUG ===");
-      console.log("SELECTED CONFIG (what will be updated):");
-      console.log("  - Name:", selectedConfig.name);
-      console.log("  - Type:", selectedConfig.type);
-      console.log("  - ID:", selectedConfig.id);
-      console.log("PATH BEING EDITED:", path);
-      console.log("NEW VALUE:", newValue);
-      console.log("INHERITANCE EXPECTATION:");
-      console.log("  - If editing COMPONENT: should modify component directly");
-      console.log("  - If editing INSTANCE: should create override in instance");
-      console.log("  - If editing USER: should create override in user config");
+      logger.debug("handleDataChange - INHERITANCE DEBUG", {
+        selectedConfigName: selectedConfig.name,
+        selectedConfigType: selectedConfig.type,
+        selectedConfigId: selectedConfig.id,
+        path,
+        newValue,
+        expectation: `If editing ${selectedConfig.type}: should ${selectedConfig.type === 'COMPONENT' ? 'modify component directly' : 'create override'}`
+      });
 
       // Ensure selectedConfig.id is a string
       const configId = typeof selectedConfig.id === 'string' ? selectedConfig.id : String(selectedConfig.id);
-      console.log("configId after string conversion:", configId);
+      logger.debug("ConfigId after string conversion", { configId });
 
       // For component removal in products, we need the resolved data to see all components
       // For other edits, use raw data to preserve inheritance
@@ -618,7 +614,7 @@ const Dashboard = () => {
       // For child configurations, validate the path exists in parent
       // Note: INSTANCE configurations should be allowed to override component properties more freely
       if (selectedConfig.type !== "PRODUCT" && selectedConfig.type !== "INSTANCE" && selectedConfig.parent_id) {
-        console.log("Performing path validation for non-PRODUCT, non-INSTANCE configuration");
+        logger.debug("Performing path validation for non-PRODUCT, non-INSTANCE configuration");
         try {
           // Ensure parent_id is a string
           const parentId = typeof selectedConfig.parent_id === 'string' ? selectedConfig.parent_id : String(selectedConfig.parent_id);
@@ -656,16 +652,16 @@ const Dashboard = () => {
             );
           }
         } catch (pathCheckError) {
-          console.error("Path validation error:", pathCheckError);
+          logger.error("Path validation error", pathCheckError);
           throw pathCheckError;
         }
       } else if (selectedConfig.type === "INSTANCE") {
-        console.log("Skipping path validation for INSTANCE - allowing component override");
+        logger.debug("Skipping path validation for INSTANCE - allowing component override");
       }
 
       // Remove "root." prefix if present
       const cleanPath = path.startsWith("root.") ? path.substring(5) : path;
-      console.log("Original path:", path, "Clean path:", cleanPath);
+      logger.debug("Path cleaning", { originalPath: path, cleanPath });
 
       const pathParts = cleanPath.split(".");
 
@@ -684,7 +680,7 @@ const Dashboard = () => {
       const lastKey = pathParts[pathParts.length - 1];
       current[lastKey] = newValue;
 
-      console.log("Sending delta update:", deltaData);
+      logger.debug("Sending delta update", { deltaData });
 
       // Send delta to server - server will handle merging with existing data
       await configAPI.update(configId, { data: deltaData });
@@ -708,13 +704,13 @@ const Dashboard = () => {
         // Show success toast
         showToast(`Updated ${path} successfully`);
       } catch (reloadError) {
-        console.warn("Failed to reload configuration data:", reloadError);
+        logger.warn("Failed to reload configuration data", reloadError);
         // Fallback to full reload if optimized update fails
         await loadConfigurationData(selectedConfig);
         showToast(`Updated ${path} successfully`);
       }
     } catch (err) {
-      console.error("Failed to update configuration:", err);
+      logger.error("Failed to update configuration", err);
       const errorMessage =
         err.response?.data?.error ||
         err.message ||
@@ -798,7 +794,7 @@ const Dashboard = () => {
       setRefreshTrigger(prev => prev + 1);
 
     } catch (error) {
-      console.error("Failed to add component:", error);
+      logger.error("Failed to add component", error);
       showToast("Failed to add component to product", "error");
     }
   };
