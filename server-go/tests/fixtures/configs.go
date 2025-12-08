@@ -9,12 +9,12 @@ import (
 // ProductConfig returns a basic PRODUCT configuration
 func ProductConfig(name string) types.Configuration {
 	return types.Configuration{
-		ID:        "product-" + name,
-		Name:      name,
-		Type:      types.ConfigProduct,
-		Status:    types.StatusCommitted,
+		ID:     "product-" + name,
+		Name:   name,
+		Type:   types.ConfigProduct,
+		Status: types.StatusCommitted,
 		Data: map[string]interface{}{
-			"price": 100,
+			"price":  100,
 			"weight": 50,
 			"dimensions": map[string]interface{}{
 				"width":  10,
@@ -118,4 +118,9 @@ func ProductWithComponentRef(name, componentID, versionID string) types.Configur
 		UpdatedAt: time.Now(),
 	}
 }
+
+
+
+
+
 

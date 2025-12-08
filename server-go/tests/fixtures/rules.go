@@ -59,3 +59,8 @@ func CollectionRule(configID, path string, validValues []interface{}) types.Rule
 	}
 }
 
+
+
+
+
+

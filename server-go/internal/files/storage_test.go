@@ -21,7 +21,7 @@ func setupEmbeddedStorage(t *testing.T) (*EmbeddedStorage, string, func()) {
 	t.Helper()
 
 	tempDir := t.TempDir()
-	
+
 	cfg := config.Config{
 		EmbeddedPath:  tempDir,
 		ServerBaseURL: "http://localhost:3004",
@@ -107,9 +107,9 @@ func TestEmbeddedStorage_StoreFile_PreservesFileExtension(t *testing.T) {
 	defer cleanup()
 
 	tests := []struct {
-		name          string
-		filename      string
-		expectedExt   string
+		name        string
+		filename    string
+		expectedExt string
 	}{
 		{"text file", "document.txt", ".txt"},
 		{"image file", "photo.jpg", ".jpg"},
@@ -158,7 +158,7 @@ func TestEmbeddedStorage_StoreFile_HandlesLargeFiles(t *testing.T) {
 	defer cleanup()
 
 	ctx := context.Background()
-	
+
 	// Create a 1MB file
 	largeData := make([]byte, 1024*1024)
 	for i := range largeData {
@@ -256,7 +256,7 @@ func TestEmbeddedStorage_DeleteFile_RemovesFileAndMetadata(t *testing.T) {
 	defer cleanup()
 
 	ctx := context.Background()
-	
+
 	// Store a file
 	metadata, err := storage.StoreFile(ctx, []byte("test"), "test.txt", "text/plain")
 	require.NoError(t, err)
@@ -435,7 +435,7 @@ func TestEmbeddedStorage_BinaryFiles_HandlesCorrectly(t *testing.T) {
 	defer cleanup()
 
 	ctx := context.Background()
-	
+
 	// Create binary data (image-like)
 	binaryData := []byte{0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46}
 
@@ -506,11 +506,11 @@ func TestGenerateFileID_CreatesUniqueIDs(t *testing.T) {
 	ids := make(map[string]bool)
 	for i := 0; i < 100; i++ {
 		id := generateFileID()
-		
+
 		// Assert - Should be unique
 		assert.False(t, ids[id], "Duplicate ID generated: %s", id)
 		ids[id] = true
-		
+
 		// Should be hex string
 		assert.NotEmpty(t, id)
 		assert.Len(t, id, 32) // 16 bytes = 32 hex chars
@@ -534,7 +534,7 @@ func TestFileMetadata_AllFields_PopulatedCorrectly(t *testing.T) {
 
 	// Assert
 	require.NoError(t, err)
-	
+
 	assert.NotEmpty(t, metadata.FileID)
 	assert.Equal(t, filename, metadata.OriginalName)
 	assert.Equal(t, mimeType, metadata.MimeType)
@@ -562,4 +562,9 @@ func TestS3Storage_Integration_RequiresAWSCredentials(t *testing.T) {
 	// metadata, err := storage.StoreFile(ctx, data, filename, mimeType)
 	// assert.NoError(t, err)
 }
+
+
+
+
+
 

@@ -340,3 +340,9 @@ func TestFindByConfigurationAndPathWithInheritance_WalksParentChain(t *testing.T
 	assert.True(t, ruleIDs["product-rule"], "Should include product rule")
 	assert.True(t, ruleIDs["instance-rule"], "Should include instance rule")
 }
+
+
+
+
+
+
