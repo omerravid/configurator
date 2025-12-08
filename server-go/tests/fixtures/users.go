@@ -51,3 +51,8 @@ func RegisterRequest(username, password string, role types.Role) types.RegisterR
 	}
 }
 
+
+
+
+
+
