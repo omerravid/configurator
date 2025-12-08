@@ -16,7 +16,7 @@ import { configAPI } from "../services/api";
 import { useToast } from "../context/ToastContext";
 import ContextMenu from "./ContextMenu";
 
-const ConfigTypeIcon = ({ type, status }) => {
+const ConfigTypeIcon = React.memo(({ type, status }) => {
   const getIcon = () => {
     switch (type) {
       case "PRODUCT":
@@ -73,7 +73,7 @@ const ConfigTypeIcon = ({ type, status }) => {
   };
 
   return getIcon();
-};
+});
 
 const InheritanceView = ({ config, onClose }) => {
   const [inheritanceData, setInheritanceData] = useState(null);

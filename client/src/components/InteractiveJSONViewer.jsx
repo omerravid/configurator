@@ -46,7 +46,7 @@ const safeToString = (val) => {
   return String(actualVal);
 };
 
-const ProvenanceTooltip = ({ source, isVisible, position, path }) => {
+const ProvenanceTooltip = React.memo(({ source, isVisible, position, path }) => {
   if (!isVisible || !source) return null;
 
   // Safely extract values from source object
