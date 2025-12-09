@@ -264,3 +264,4 @@ export const shimmerStyles = `
 
 export default Skeleton;
 
+

@@ -318,3 +318,4 @@ ShortcutsHelpDialog.propTypes = {
 
 export default CommandPalette;
 
+
