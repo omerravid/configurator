@@ -213,6 +213,14 @@ router.post("/", authenticateToken, async (req, res) => {
 
     const { name, type, parent_id, data, description } = value;
 
+    console.log('[CREATE CONFIG] Request body:', {
+      name,
+      type,
+      parent_id,
+      dataKeys: data ? Object.keys(data) : null,
+      description
+    });
+
     // Check permissions
     if (
       (type === "PRODUCT" || type === "INSTANCE" || type === "COMPONENT") &&
@@ -228,6 +236,7 @@ router.post("/", authenticateToken, async (req, res) => {
     const cleanParentId =
       parent_id && parent_id.trim() !== "" ? parent_id : null;
 
+    console.log('[CREATE CONFIG] Clean parent_id:', cleanParentId);
 
     // Create configuration using service
     const config = await ConfigurationService.createConfiguration({
@@ -237,6 +246,13 @@ router.post("/", authenticateToken, async (req, res) => {
       data,
       createdBy: req.user.username,
       description: description || "",
+    });
+
+    console.log('[CREATE CONFIG] Created config:', {
+      id: config.id,
+      name: config.name,
+      type: config.type,
+      parent_id: config.parent_id,
     });
 
     res.status(201).json({

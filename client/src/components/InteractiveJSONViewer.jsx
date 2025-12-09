@@ -830,6 +830,16 @@ const InteractiveJSONViewer = ({
   selectedConfig,
   onRefreshData, // New prop for triggering data refresh
 }) => {
+  console.log('[InteractiveJSONViewer] Received props:', {
+    dataKeys: data ? Object.keys(data) : 'null',
+    dataEmpty: !data || Object.keys(data).length === 0,
+    rawDataKeys: rawData ? Object.keys(rawData) : 'null',
+    metadataChainLength: metadata?.chainLength,
+    metadataChain: metadata?.chain,
+    selectedConfigName: selectedConfig?.name,
+    selectedConfigType: selectedConfig?.type,
+  });
+  
   const [hoveredSource, setHoveredSource] = useState(null);
   const [hoveredPath, setHoveredPath] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -847,6 +857,17 @@ const InteractiveJSONViewer = ({
   const [dataMode, setDataMode] = useState(() => {
     return sessionStorage.getItem('jsonViewerDataMode') || "all";
   });
+  
+  // Auto-switch to "all" mode if in "changes" mode but there are no changes
+  // This prevents showing an empty view for newly created configs
+  useEffect(() => {
+    if (dataMode === "changes" && (!rawData || Object.keys(rawData).length === 0)) {
+      console.log('[InteractiveJSONViewer] No changes detected, switching to "all" mode');
+      setDataMode("all");
+      sessionStorage.setItem('jsonViewerDataMode', "all");
+    }
+  }, [dataMode, rawData]);
+  
   // Structural mode state
   const [selectedStructuralPath, setSelectedStructuralPath] = useState("root");
   const [selectedStructuralValue, setSelectedStructuralValue] = useState(data);

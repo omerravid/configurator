@@ -34,10 +34,6 @@ const GlobalShortcuts = ({
         logger.debug('Shortcut triggered', { shortcut: 'SEARCH' });
         if (onOpenCommandPalette) {
           onOpenCommandPalette();
-        } else {
-          notifications.info('Command Palette', {
-            message: 'Command palette will be available after Step 3',
-          });
         }
       },
       description: 'Open command palette',

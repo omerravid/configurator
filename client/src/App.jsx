@@ -4,14 +4,17 @@ import {
   Routes,
   Route,
   Navigate,
+  useNavigate,
 } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
-import { ThemeProvider } from "./context/ThemeContext";
-import { NotificationProvider } from "./context/NotificationContext";
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
+import { NotificationProvider, useNotifications } from "./context/NotificationContext";
+import { CommandRegistryProvider, useCommandRegistry } from "./context/CommandRegistryContext";
 import LoadingSpinner from "./components/LoadingSpinner";
 import ErrorBoundary from "./components/ErrorBoundary";
 import GlobalShortcuts from "./components/GlobalShortcuts";
+import CommandPalette from "./components/CommandPalette";
 
 // Lazy load pages for code splitting
 const Login = lazy(() => import("./pages/Login"));
@@ -39,19 +42,68 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const AppRoutes = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
+  const { toggleTheme } = useTheme();
+  const notifications = useNotifications();
+  const { getAllCommands } = useCommandRegistry();
+  const navigate = useNavigate();
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+
+  // Global app commands (available everywhere)
+  const globalCommands = [
+    {
+      id: 'toggle-theme',
+      label: 'Toggle Dark/Light Theme',
+      description: 'Switch between dark and light mode',
+      category: 'Appearance',
+      shortcut: 'ctrl+shift+l',
+      action: () => {
+        toggleTheme();
+        notifications.success('Theme toggled');
+      },
+    },
+    {
+      id: 'logout',
+      label: 'Logout',
+      description: 'Sign out of your account',
+      category: 'Account',
+      action: () => {
+        logout();
+        navigate('/login');
+        notifications.info('Logged out successfully');
+      },
+    },
+    {
+      id: 'go-home',
+      label: 'Go to Dashboard',
+      description: 'Navigate to main dashboard',
+      category: 'Navigation',
+      action: () => {
+        navigate('/');
+      },
+    },
+    {
+      id: 'show-shortcuts',
+      label: 'Show Keyboard Shortcuts',
+      description: 'View all available keyboard shortcuts',
+      category: 'Help',
+      shortcut: '?',
+      action: () => {
+        // This is handled by GlobalShortcuts
+        notifications.info('Press ? to show shortcuts');
+      },
+    },
+  ];
 
   return (
     <GlobalShortcuts
       onOpenCommandPalette={() => setCommandPaletteOpen(true)}
       onOpenSettings={() => {
-        // Will be handled by Dashboard in later steps
+        // Will be handled by Dashboard
         console.log('Settings shortcut triggered');
       }}
       onRefresh={() => {
-        // Custom refresh logic can be added here
-        console.log('Refresh shortcut triggered');
+        window.location.reload();
       }}
     >
       <Suspense fallback={<PageLoader />}>
@@ -71,6 +123,16 @@ const AppRoutes = () => {
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Suspense>
+
+      {/* Command Palette */}
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        commands={[...globalCommands, ...getAllCommands()]}
+        onExecute={(command) => {
+          console.log('Command executed:', command.id);
+        }}
+      />
     </GlobalShortcuts>
   );
 };
@@ -82,11 +144,13 @@ function App() {
         <NotificationProvider position="top-right" maxNotifications={5}>
           <ToastProvider>
             <AuthProvider>
-              <Router>
-                <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-                  <AppRoutes />
-                </div>
-              </Router>
+              <CommandRegistryProvider>
+                <Router>
+                  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+                    <AppRoutes />
+                  </div>
+                </Router>
+              </CommandRegistryProvider>
             </AuthProvider>
           </ToastProvider>
         </NotificationProvider>

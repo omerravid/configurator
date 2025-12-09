@@ -5,6 +5,7 @@ import {
   TrashIcon 
 } from "@heroicons/react/24/outline";
 import { configAPI } from "../services/api";
+import { useEscapeKey } from "../utils/accessibility.jsx";
 
 const DeleteConfirmDialog = ({ config, isOpen, onConfirm, onCancel }) => {
   const [children, setChildren] = useState([]);
@@ -15,6 +16,9 @@ const DeleteConfirmDialog = ({ config, isOpen, onConfirm, onCancel }) => {
       loadChildren();
     }
   }, [isOpen, config]);
+
+  // Handle ESC key to close dialog
+  useEscapeKey(() => onCancel(), isOpen);
 
   const loadChildren = async () => {
     setLoading(true);
@@ -104,7 +108,7 @@ const DeleteConfirmDialog = ({ config, isOpen, onConfirm, onCancel }) => {
           </button>
           {!hasChildren && !loading && (
             <button
-              onClick={() => onConfirm(config)}
+              onClick={onConfirm}
               className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors flex items-center space-x-2"
             >
               <TrashIcon className="w-4 h-4" />

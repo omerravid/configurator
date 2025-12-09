@@ -206,8 +206,15 @@ class ConfigurationService {
       throw new Error(`Configuration not found: ${configIdOrName}`);
     }
 
+    console.log(`[ConfigService] Resolving config: ${config.name} (${config.id}, type: ${config.type})`);
+
     // Get the inheritance chain
     const chain = await Configuration.getInheritanceChain(config.id);
+
+    console.log(`[ConfigService] Inheritance chain length: ${chain.length}`);
+    chain.forEach((c, i) => {
+      console.log(`  [${i}] ${c.name} (${c.type}) - data keys: ${Object.keys(c.data || {}).join(', ')}`);
+    });
 
     if (chain.length === 0) {
       throw new Error(
@@ -236,6 +243,8 @@ class ConfigurationService {
       let levelData =
         typeof level.data === "string" ? JSON.parse(level.data) : level.data;
 
+      console.log(`  [ConfigService] Merging level: ${level.name}, data:`, JSON.stringify(levelData, null, 2).substring(0, 200));
+
       // If this is a PRODUCT configuration, expand component references
       if (level.type === "PRODUCT") {
         levelData = await this.expandComponentReferences(levelData, includeProvenance);
@@ -251,7 +260,11 @@ class ConfigurationService {
         source,
         includeProvenance,
       );
+      
+      console.log(`  [ConfigService] After merge, resolved keys: ${Object.keys(resolved).join(', ')}`);
     }
+
+    console.log(`[ConfigService] Final resolved config keys: ${Object.keys(resolved).join(', ')}`);
 
     return {
       resolved,

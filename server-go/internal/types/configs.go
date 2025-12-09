@@ -57,5 +57,10 @@ type ResolveResult struct {
 		ConfigName  string `json:"configName"`
 		ConfigType  string `json:"configType"`
 		ChainLength int    `json:"chainLength"`
+		Chain       []struct {
+			ID   string `json:"id"`
+			Name string `json:"name"`
+			Type string `json:"type"`
+		} `json:"chain"`
 	} `json:"metadata"`
 }

@@ -11,6 +11,7 @@ import {
   CheckIcon,
   TrashIcon,
   LockClosedIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { configAPI } from "../services/api";
 import { useToast } from "../context/ToastContext";
@@ -365,26 +366,42 @@ const TreeNode = ({
         });
       }
 
-      if (canArchive()) {
+      // For admins, show both Archive and Delete options
+      if (user?.role === "ADMIN" && !Boolean(config.archived)) {
         menuItems.push({
           label: `Archive "${config.name}"`,
           icon: TrashIcon,
           onClick: () => onArchive(config),
         });
+        menuItems.push({
+          label: `Permanently Delete "${config.name}"`,
+          icon: XMarkIcon,
+          onClick: () => onDelete(config),
+        });
       } else if (canDelete()) {
+        // Non-admins can only delete their own DRAFT USER configs
         menuItems.push({
           label: `Delete "${config.name}"`,
-          icon: TrashIcon,
+          icon: XMarkIcon,
           onClick: () => onDelete(config),
         });
       }
     } else {
-      // Items for archived configurations (view only + restore)
+      // Items for archived configurations (restore + delete for admins)
       if (canRestore()) {
         menuItems.push({
           label: `Restore "${config.name}"`,
           icon: CheckIcon,
           onClick: () => onRestore(config),
+        });
+      }
+      
+      // Admins can also delete archived configurations
+      if (user?.role === "ADMIN") {
+        menuItems.push({
+          label: `Permanently Delete "${config.name}"`,
+          icon: XMarkIcon,
+          onClick: () => onDelete(config),
         });
       }
     }

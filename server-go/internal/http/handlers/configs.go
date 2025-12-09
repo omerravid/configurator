@@ -52,6 +52,7 @@ func (h *ConfigsHandler) Register(r *gin.RouterGroup, checkPermissions, requireA
 	r.PUT("/configs/:id/rename", requireAdmin, h.rename)
 	r.POST("/configs/:id/archive", requireAdmin, h.archive)
 	r.POST("/configs/:id/restore", requireAdmin, h.restore)
+	r.DELETE("/configs/:id", checkPermissions, h.delete) // Add delete endpoint
 
 	// Commit - requires permission check (allows DRAFT owners)
 	r.POST("/configs/:id/commit", checkPermissions, h.commit)
@@ -98,7 +99,7 @@ func (h *ConfigsHandler) create(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
 		return
 	}
-	
+
 	// Handle jwt.MapClaims (same pattern as other handlers)
 	var ucm map[string]any
 	ucm, ok = uc.(map[string]any)
@@ -111,7 +112,7 @@ func (h *ConfigsHandler) create(c *gin.Context) {
 			return
 		}
 	}
-	
+
 	createdBy, _ := ucm["username"].(string)
 	userRole, _ := ucm["role"].(string)
 
@@ -497,6 +498,44 @@ func (h *ConfigsHandler) restore(c *gin.Context) {
 	var cfg types.Configuration
 	_ = h.db.Configurations.FindOne(c, bson.M{"_id": oid}).Decode(&cfg)
 	c.JSON(http.StatusOK, gin.H{"message": "Configuration restored successfully", "config": cfg})
+}
+
+func (h *ConfigsHandler) delete(c *gin.Context) {
+	id := c.Param("id")
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id"})
+		return
+	}
+
+	// Check if configuration exists
+	var cfg types.Configuration
+	if err := h.db.Configurations.FindOne(c, bson.M{"_id": oid}).Decode(&cfg); err != nil {
+		if err == mongodrv.ErrNoDocuments {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Configuration not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	// Perform the deletion
+	if _, err := h.db.Configurations.DeleteOne(c, bson.M{"_id": oid}); err != nil {
+		h.log.ErrorCtx(c.Request.Context(), "Failed to delete configuration",
+			logger.String("id", id),
+			logger.Error(err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	h.log.InfoCtx(c.Request.Context(), "Configuration deleted successfully",
+		logger.String("id", id),
+		logger.String("name", cfg.Name))
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Configuration deleted successfully",
+		"config":  cfg,
+	})
 }
 
 // components returns all COMPONENT configurations with their versions

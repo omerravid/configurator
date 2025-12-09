@@ -4,6 +4,7 @@ import { useToast } from "../context/ToastContext";
 import { configAPI } from "../services/api";
 import { XMarkIcon, FolderArrowDownIcon } from "@heroicons/react/24/outline";
 import ComponentSelector from "./ComponentSelector";
+import { useEscapeKey } from "../utils/accessibility.jsx";
 
 const ConfigurationEditor = ({
   config,
@@ -105,6 +106,9 @@ const ConfigurationEditor = ({
     data: isCreatingProduct ? "{\n  \n}" : "{}",
   });
 
+  // Handle ESC key to close modal
+  useEscapeKey(() => onClose(false));
+
   // Load the raw configuration data (not resolved) when editing
   useEffect(() => {
     const loadRawConfigData = async () => {
@@ -153,6 +157,12 @@ const ConfigurationEditor = ({
       ) {
         // CREATING a child configuration (config is the parent)
         // Start with empty data, not the parent's data
+        console.log('[ConfigEditor] Setting up child creation form:', {
+          parentId: config.id,
+          parentName: config.name,
+          parentType: config.type,
+        });
+        
         setFormData((prev) => ({
           ...prev,
           name: "", // Empty name for new config
@@ -251,6 +261,8 @@ const ConfigurationEditor = ({
     setError(null);
 
     try {
+      let createdConfig = null; // Track newly created configuration
+      
       if (showRename) {
         // Handle rename
         await configAPI.rename(config.id, formData.name);
@@ -283,6 +295,12 @@ const ConfigurationEditor = ({
         };
 
         console.log("Creating configuration with payload:", createPayload);
+        console.log('[ConfigEditor] Parent ID in payload:', {
+          parent_id: createPayload.parent_id,
+          isNull: createPayload.parent_id === null,
+          isUndefined: createPayload.parent_id === undefined,
+          isEmpty: createPayload.parent_id === '',
+        });
 
         // Note: USER configurations are automatically created as DRAFT by the backend
         // Validate payload before sending
@@ -292,7 +310,15 @@ const ConfigurationEditor = ({
           return;
         }
 
-        await configAPI.create(createPayload);
+        const createResponse = await configAPI.create(createPayload);
+        createdConfig = createResponse.data.config; // Store the created config
+        
+        console.log('[ConfigEditor] Created config:', {
+          name: createdConfig?.name,
+          id: createdConfig?.id,
+          type: createdConfig?.type,
+          parentId: createdConfig?.parent_id,
+        });
       } else {
         // Handle update
         let data;
@@ -321,7 +347,8 @@ const ConfigurationEditor = ({
         }
       }
 
-      onClose(true);
+      // Pass the newly created config to onClose if this was a create operation
+      onClose(true, createdConfig);
     } catch (err) {
       console.error("Failed to save configuration:", err);
       const errorMessage =

@@ -98,6 +98,20 @@ func (s *Service) Resolve(ctx mongo.SessionContext, cfg types.Configuration, inc
 	out.Metadata.ConfigName = cfg.Name
 	out.Metadata.ConfigType = string(cfg.Type)
 	out.Metadata.ChainLength = len(chain)
+
+	// Populate chain metadata
+	for _, c := range chain {
+		out.Metadata.Chain = append(out.Metadata.Chain, struct {
+			ID   string `json:"id"`
+			Name string `json:"name"`
+			Type string `json:"type"`
+		}{
+			ID:   c.ID,
+			Name: c.Name,
+			Type: string(c.Type),
+		})
+	}
+
 	return out, nil
 }
 
@@ -177,7 +191,7 @@ func (s *Service) expandComponentReferences(ctx context.Context, productData map
 
 		// Merge the component reference metadata with resolved data
 		expandedComponent := make(map[string]interface{})
-		
+
 		// Keep the original component reference metadata
 		if componentID, ok := refMap["componentId"]; ok {
 			expandedComponent["componentId"] = componentID
@@ -210,8 +224,19 @@ func (s *Service) inheritanceChain(ctx mongo.SessionContext, leaf types.Configur
 		if cur.ParentID == nil || *cur.ParentID == "" {
 			break
 		}
+
+		// Convert string parent ID to ObjectID
+		parentOID, err := primitive.ObjectIDFromHex(*cur.ParentID)
+		if err != nil {
+			// Log the error but continue (invalid parent ID format)
+			fmt.Printf("Warning: Invalid parent ID format: %s, error: %v\n", *cur.ParentID, err)
+			break
+		}
+
 		var parent types.Configuration
-		if err := s.cfgCol.FindOne(ctx, bson.M{"_id": *cur.ParentID}).Decode(&parent); err != nil {
+		if err := s.cfgCol.FindOne(ctx, bson.M{"_id": parentOID}).Decode(&parent); err != nil {
+			// Log the error for debugging
+			fmt.Printf("Warning: Failed to find parent config with ID %s: %v\n", *cur.ParentID, err)
 			break
 		}
 		cur = &parent

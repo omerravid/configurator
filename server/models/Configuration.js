@@ -155,11 +155,17 @@ class Configuration {
   }
 
   static async getInheritanceChain(configId) {
+    console.log('[getInheritanceChain] Starting with configId:', configId);
+    
     // Since SQLite doesn't support recursive CTEs easily, we'll do this iteratively
     const chain = [];
     let currentId = configId;
+    let iteration = 0;
 
     while (currentId) {
+      iteration++;
+      console.log(`[getInheritanceChain] Iteration ${iteration}, looking for configId:`, currentId);
+      
       const result = await db.query(
         `SELECT c.id, c.name, c.type, c.parent_id, c.data, c.status,
                 pc.name as parent_name, pc.type as parent_type
@@ -169,17 +175,35 @@ class Configuration {
         [currentId],
       );
 
-      if (result.rows.length === 0) break;
+      console.log(`[getInheritanceChain] Query returned ${result.rows.length} rows`);
+      
+      if (result.rows.length === 0) {
+        console.log('[getInheritanceChain] No more rows found, breaking');
+        break;
+      }
 
       const config = result.rows[0];
       config.data = JSON.parse(config.data);
+      
+      console.log(`[getInheritanceChain] Found config:`, {
+        id: config.id,
+        name: config.name,
+        type: config.type,
+        parent_id: config.parent_id,
+        dataKeys: Object.keys(config.data || {})
+      });
+      
       chain.push(config);
 
       currentId = config.parent_id;
+      console.log(`[getInheritanceChain] Next parent_id to look for:`, currentId);
     }
 
     // Reverse to get root first
-    return chain.reverse();
+    const reversed = chain.reverse();
+    console.log('[getInheritanceChain] Final chain:', reversed.map(c => `${c.name} (${c.type})`).join(' → '));
+    
+    return reversed;
   }
 
   static async update(id, { data, description }) {

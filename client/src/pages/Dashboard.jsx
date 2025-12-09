@@ -26,6 +26,7 @@ import {
   AdjustmentsHorizontalIcon,
   SunIcon,
   MoonIcon,
+  HomeIcon,
 } from "@heroicons/react/24/outline";
 
 const Dashboard = () => {
@@ -48,6 +49,7 @@ const Dashboard = () => {
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [configToDelete, setConfigToDelete] = useState(null);
   const [configBreadcrumb, setConfigBreadcrumb] = useState(null);
 
   // Helper function to extract actual ID from various parent_id formats
@@ -181,11 +183,18 @@ const Dashboard = () => {
     setLoading(true);
     setError(null);
     try {
+      console.log(`[Dashboard] Loading data for config: ${config.name} (${config.id}, type: ${config.type})`);
+      
       // Load both resolved and raw data
       const [resolvedResponse, rawResponse] = await Promise.all([
         configAPI.getById(config.id, true),
         configAPI.getRawById(config.id)
       ]);
+      
+      console.log(`[Dashboard] Resolved data keys:`, Object.keys(resolvedResponse.data.resolved || {}));
+      console.log(`[Dashboard] Resolved metadata:`, resolvedResponse.data.metadata);
+      console.log(`[Dashboard] Raw data keys:`, Object.keys(rawResponse.data.resolved || {}));
+      
       setResolvedData(resolvedResponse.data);
       setRawData(rawResponse.data);
     } catch (err) {
@@ -285,9 +294,10 @@ const Dashboard = () => {
     loadConfigurationData(config);
   };
 
-  const handleCreateChild = () => {
-    if (!selectedConfig) return;
-
+  const handleCreateChild = (config) => {
+    if (!config) return;
+    
+    setSelectedConfig(config);
     setShowCreateChild(true);
     setShowRename(false);
   };
@@ -305,28 +315,30 @@ const Dashboard = () => {
     setShowRename(false);
   };
 
-  const handleEdit = () => {
-    if (!selectedConfig) return;
-
+  const handleEdit = (config) => {
+    if (!config) return;
+    
+    setSelectedConfig(config);
     setShowEditor(true);
     setShowCreateChild(false);
     setShowRename(false);
   };
 
-  const handleRename = () => {
-    if (!selectedConfig) return;
-
+  const handleRename = (config) => {
+    if (!config) return;
+    
+    setSelectedConfig(config);
     setShowRename(true);
     setShowEditor(false);
     setShowCreateChild(false);
   };
 
-  const handleDuplicate = async () => {
-    if (!selectedConfig) return;
+  const handleDuplicate = async (config) => {
+    if (!config) return;
 
     try {
       // Get the raw configuration data to duplicate
-      const rawResponse = await configAPI.getRawById(selectedConfig.id);
+      const rawResponse = await configAPI.getRawById(config.id);
       const sourceData = rawResponse.data.resolved || {};
 
       // Validate that we have valid data to duplicate
@@ -339,25 +351,25 @@ const Dashboard = () => {
       }
 
       // Generate unique name with _copy suffix
-      const baseName = selectedConfig.name;
+      const baseName = config.name;
       const copyName = await generateUniqueCopyName(baseName);
 
       // Create a safe description
-      let safeDescription = `Copy of ${selectedConfig.name}`;
+      let safeDescription = `Copy of ${config.name}`;
       if (
-        selectedConfig.description &&
-        typeof selectedConfig.description === "string" &&
-        selectedConfig.description.length < 200 &&
-        !selectedConfig.description.includes("{")
+        config.description &&
+        typeof config.description === "string" &&
+        config.description.length < 200 &&
+        !config.description.includes("{")
       ) {
-        safeDescription = `Copy of ${selectedConfig.description}`;
+        safeDescription = `Copy of ${config.description}`;
       }
 
       // Create the duplicate configuration
       const newConfig = {
         name: copyName,
-        type: selectedConfig.type,
-        parent_id: selectedConfig.parent_id || null,
+        type: config.type,
+        parent_id: config.parent_id || null,
         data: sourceData,
         description: safeDescription,
       };
@@ -425,39 +437,39 @@ const Dashboard = () => {
     }
   };
 
-  const handleCommit = async () => {
-    logger.debug("handleCommit called", { selectedConfig });
+  const handleCommit = async (config) => {
+    logger.debug("handleCommit called", { config });
 
-    if (!selectedConfig) {
-      logger.debug("No selected config");
+    if (!config) {
+      logger.debug("No config provided");
       showToast("No configuration selected", "error");
       return;
     }
 
-    if (selectedConfig.type !== "USER" && selectedConfig.type !== "VERSION") {
-      logger.debug("Invalid config type", { type: selectedConfig.type });
-      showToast(`Cannot commit ${selectedConfig.type} configurations. Only USER and VERSION configurations can be committed.`, "error");
+    if (config.type !== "USER" && config.type !== "VERSION") {
+      logger.debug("Invalid config type", { type: config.type });
+      showToast(`Cannot commit ${config.type} configurations. Only USER and VERSION configurations can be committed.`, "error");
       return;
     }
 
-    if (selectedConfig.status !== "DRAFT") {
-      logger.debug("Invalid config status", { status: selectedConfig.status });
-      showToast(`Configuration is already ${selectedConfig.status}. Only DRAFT configurations can be committed.`, "error");
+    if (config.status !== "DRAFT") {
+      logger.debug("Invalid config status", { status: config.status });
+      showToast(`Configuration is already ${config.status}. Only DRAFT configurations can be committed.`, "error");
       return;
     }
 
-    logger.debug("Attempting to commit config", { id: selectedConfig.id });
+    logger.debug("Attempting to commit config", { id: config.id });
 
     try {
-      const response = await configAPI.commit(selectedConfig.id);
+      const response = await configAPI.commit(config.id);
       logger.debug("Commit response", { response });
 
       setRefreshTrigger((prev) => prev + 1);
       // Reload the current config
-      const updated = { ...selectedConfig, status: "COMMITTED" };
+      const updated = { ...config, status: "COMMITTED" };
       setSelectedConfig(updated);
 
-      showToast(`Configuration "${selectedConfig.name}" committed successfully`, "success");
+      showToast(`Configuration "${config.name}" committed successfully`, "success");
     } catch (err) {
       logger.error("Failed to commit configuration", err, { 
         response: err.response?.data,
@@ -470,24 +482,31 @@ const Dashboard = () => {
     }
   };
 
-  const handleDelete = () => {
-    if (!selectedConfig) {
+  const handleDelete = (config) => {
+    if (!config) {
       return;
     }
+    setSelectedConfig(config);
+    setConfigToDelete(config);
     setShowDeleteConfirm(true);
   };
 
-  const handleDeleteConfirm = async (config) => {
+  const handleDeleteConfirm = async () => {
     setShowDeleteConfirm(false);
 
+    if (!configToDelete) {
+      return;
+    }
+
     try {
-      const response = await configAPI.delete(config.id);
+      const response = await configAPI.delete(configToDelete.id);
       setSelectedConfig(null);
       setResolvedData(null);
+      setConfigToDelete(null);
 
       setRefreshTrigger((prev) => prev + 1);
 
-      showToast(`Configuration "${config.name}" deleted successfully`);
+      showToast(`Configuration "${configToDelete.name}" deleted successfully`);
     } catch (err) {
       logger.error("Failed to delete configuration", err);
       const errorMessage = err.response?.data?.error || err.message || "Failed to delete configuration";
@@ -498,6 +517,7 @@ const Dashboard = () => {
 
   const handleDeleteCancel = () => {
     setShowDeleteConfirm(false);
+    setConfigToDelete(null);
   };
 
   const handleArchive = async (config, archiveChildren = true) => {
@@ -531,7 +551,9 @@ const Dashboard = () => {
     }
   };
 
-  const handleEditorClose = (success) => {
+  const handleEditorClose = async (success, newConfig = null) => {
+    console.log('[Dashboard] handleEditorClose called:', { success, hasNewConfig: !!newConfig, newConfigName: newConfig?.name });
+    
     setShowEditor(false);
     setShowCreateProduct(false);
     setShowCreateComponent(false);
@@ -539,8 +561,16 @@ const Dashboard = () => {
     setShowRename(false);
     if (success) {
       setRefreshTrigger((prev) => prev + 1);
-      // Reload current config if it was edited
-      if (selectedConfig) {
+      await loadAllConfigurations();
+      
+      // If a new config was created (child, product, component), select it
+      if (newConfig) {
+        console.log('[Dashboard] Selecting newly created config:', newConfig.name);
+        setSelectedConfig(newConfig);
+        loadConfigurationData(newConfig);
+      } else if (selectedConfig) {
+        // Otherwise reload the current selected config (for edits/renames)
+        console.log('[Dashboard] Reloading existing selected config:', selectedConfig.name);
         loadConfigurationData(selectedConfig);
       }
     }
@@ -799,35 +829,37 @@ const Dashboard = () => {
     }
   };
 
+  // Home button handler - clears selection and returns to home view
+  const handleGoHome = () => {
+    setSelectedConfig(null);
+    setResolvedData(null);
+    setRawData(null);
+    setConfigBreadcrumb(null);
+  };
+
   // Context menu handlers for tree items
   const handleTreeEdit = (config) => {
-    setSelectedConfig(config);
-    handleEdit();
+    handleEdit(config);
   };
 
   const handleTreeRename = (config) => {
-    setSelectedConfig(config);
-    handleRename();
+    handleRename(config);
   };
 
   const handleTreeDuplicate = (config) => {
-    setSelectedConfig(config);
-    handleDuplicate();
+    handleDuplicate(config);
   };
 
   const handleTreeCreateChild = (config) => {
-    setSelectedConfig(config);
-    handleCreateChild();
+    handleCreateChild(config);
   };
 
   const handleTreeCommit = (config) => {
-    setSelectedConfig(config);
-    handleCommit();
+    handleCommit(config);
   };
 
   const handleTreeDelete = (config) => {
-    setSelectedConfig(config);
-    handleDelete();
+    handleDelete(config);
   };
 
   const handleTreeArchive = (config) => {
@@ -949,7 +981,13 @@ const Dashboard = () => {
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors">
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Cog6ToothIcon className="w-8 h-8 text-primary-600" />
+            <button
+              onClick={handleGoHome}
+              className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              title="Go to Home"
+            >
+              <HomeIcon className="w-8 h-8 text-primary-600" />
+            </button>
             <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Configuration Manager
             </h1>
@@ -1089,7 +1127,7 @@ const Dashboard = () => {
                           </React.Fragment>
                         ))}
                       </div>
-                    )}}
+                    )}
 
                     <h2 className={`text-xl font-semibold ${Boolean(selectedConfig.archived) ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}`}>
                       {selectedConfig.name}
@@ -1326,7 +1364,7 @@ const Dashboard = () => {
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog
-        config={selectedConfig}
+        config={configToDelete}
         isOpen={showDeleteConfirm}
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
