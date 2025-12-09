@@ -22,6 +22,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
+import { useEscapeKey } from "../utils/accessibility.jsx";
 import { logger } from "../utils/logger";
 import api, { userAPI, authAPI } from "../services/api";
 
@@ -135,6 +136,13 @@ const SettingsModal = ({ isOpen, onClose, onDataRefresh, selectedConfigId }) => 
       logger.debug("Re-auth modal should be visible now");
     }
   }, [showReAuthModal]);
+
+  // Handle Escape key to close modal
+  useEscapeKey(() => {
+    if (isOpen) {
+      handleClose();
+    }
+  }, isOpen);
 
   const loadAllStatus = async () => {
     // Use Promise.allSettled to ensure all requests complete even if some fail

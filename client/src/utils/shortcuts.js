@@ -209,8 +209,40 @@ export const useShortcuts = (shortcuts, options = {}) => {
       globalRegistry.register(keys, handler, { ...options, ...opts });
     });
 
-    // Cleanup: unregister on unmount
+    // Setup global event listener
+    const handler = (event) => {
+      // Don't trigger shortcuts when typing in inputs
+      const target = event.target;
+      const tagName = target.tagName.toLowerCase();
+      
+      if (tagName === 'input' || tagName === 'textarea' || tagName === 'select') {
+        // Allow some shortcuts even in inputs (like Escape)
+        if (event.key !== 'Escape') {
+          return;
+        }
+      }
+
+      const shortcut = globalRegistry.match(event);
+      
+      if (shortcut) {
+        if (shortcut.preventDefault) {
+          event.preventDefault();
+        }
+        
+        try {
+          shortcut.handler(event);
+          logger.debug('Keyboard shortcut triggered', { keys: shortcut.keys });
+        } catch (error) {
+          logger.error('Keyboard shortcut handler failed', error);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handler);
+
+    // Cleanup: unregister shortcuts and remove listener on unmount
     return () => {
+      document.removeEventListener('keydown', handler);
       Object.keys(shortcuts).forEach(keys => {
         globalRegistry.unregister(keys);
       });

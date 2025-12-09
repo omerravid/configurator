@@ -1,8 +1,16 @@
 import React, { useState } from "react";
 import { XMarkIcon, ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { useEscapeKey } from "../utils/accessibility.jsx";
 
 const HelpModal = ({ isOpen, onClose }) => {
   const [expandedSections, setExpandedSections] = useState({});
+
+  // Handle Escape key to close modal
+  useEscapeKey(() => {
+    if (isOpen) {
+      onClose();
+    }
+  }, isOpen);
 
   if (!isOpen) return null;
 

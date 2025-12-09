@@ -6,6 +6,7 @@ import {
   InformationCircleIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
+import { useEscapeKey } from '../utils/accessibility.jsx';
 
 /**
  * Confirmation Dialog Component
@@ -25,6 +26,13 @@ const ConfirmDialog = ({
   loading = false,
   children,
 }) => {
+  // Handle Escape key to cancel/close (unless loading)
+  useEscapeKey(() => {
+    if (isOpen && !loading) {
+      onClose();
+    }
+  }, isOpen && !loading);
+
   if (!isOpen) {
     return null;
   }

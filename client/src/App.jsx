@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -11,6 +11,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import LoadingSpinner from "./components/LoadingSpinner";
 import ErrorBoundary from "./components/ErrorBoundary";
+import GlobalShortcuts from "./components/GlobalShortcuts";
 
 // Lazy load pages for code splitting
 const Login = lazy(() => import("./pages/Login"));
@@ -39,25 +40,38 @@ const ProtectedRoute = ({ children }) => {
 
 const AppRoutes = () => {
   const { isAuthenticated } = useAuth();
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
   return (
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        <Route
-          path="/login"
-          element={isAuthenticated ? <Navigate to="/" /> : <Login />}
-        />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    </Suspense>
+    <GlobalShortcuts
+      onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+      onOpenSettings={() => {
+        // Will be handled by Dashboard in later steps
+        console.log('Settings shortcut triggered');
+      }}
+      onRefresh={() => {
+        // Custom refresh logic can be added here
+        console.log('Refresh shortcut triggered');
+      }}
+    >
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route
+            path="/login"
+            element={isAuthenticated ? <Navigate to="/" /> : <Login />}
+          />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Suspense>
+    </GlobalShortcuts>
   );
 };
 

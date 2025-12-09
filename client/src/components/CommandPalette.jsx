@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { MagnifyingGlassIcon, CommandLineIcon } from '@heroicons/react/24/outline';
-import { useFocusTrap } from '../utils/accessibility';
+import { useFocusTrap } from '../utils/accessibility.jsx';
 import { getAllShortcuts, getShortcutsByCategory, formatKeys } from '../utils/shortcuts';
 
 /**
