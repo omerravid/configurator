@@ -8,6 +8,7 @@ import {
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import { NotificationProvider } from "./context/NotificationContext";
 import LoadingSpinner from "./components/LoadingSpinner";
 import ErrorBoundary from "./components/ErrorBoundary";
 
@@ -64,15 +65,17 @@ function App() {
   return (
     <ErrorBoundary name="AppRoot">
       <ThemeProvider>
-        <ToastProvider>
-          <AuthProvider>
-            <Router>
-              <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-                <AppRoutes />
-              </div>
-            </Router>
-          </AuthProvider>
-        </ToastProvider>
+        <NotificationProvider position="top-right" maxNotifications={5}>
+          <ToastProvider>
+            <AuthProvider>
+              <Router>
+                <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+                  <AppRoutes />
+                </div>
+              </Router>
+            </AuthProvider>
+          </ToastProvider>
+        </NotificationProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

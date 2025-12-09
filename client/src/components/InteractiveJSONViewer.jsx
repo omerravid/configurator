@@ -151,7 +151,7 @@ const ProvenanceTooltip = React.memo(({ source, isVisible, position, path }) => 
       </div>
     </div>
   );
-};
+});
 
 const TreeNode = ({
   keyName,
