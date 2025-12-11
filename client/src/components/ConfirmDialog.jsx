@@ -64,7 +64,8 @@ const ConfirmDialog = ({
     },
   };
 
-  const config = variants[variant];
+  // Fallback to 'info' if variant is invalid
+  const config = variants[variant] || variants.info;
   const Icon = config.icon;
 
   const handleConfirm = async () => {

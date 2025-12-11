@@ -10,6 +10,7 @@ import HelpModal from "../components/HelpModal";
 import SettingsModal from "../components/SettingsModal";
 import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
 import AdvancedSearch from "../components/AdvancedSearch";
+import BulkOperations from "../components/BulkOperations";
 import { useToast } from "../context/ToastContext";
 import { configAPI } from "../services/api";
 import { logger } from "../utils/logger";
@@ -29,6 +30,9 @@ import {
   MoonIcon,
   HomeIcon,
   MagnifyingGlassIcon,
+  CheckCircleIcon,
+  ArchiveBoxIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 
 const Dashboard = () => {
@@ -54,6 +58,10 @@ const Dashboard = () => {
   const [configToDelete, setConfigToDelete] = useState(null);
   const [configBreadcrumb, setConfigBreadcrumb] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
+  const [selectedActiveIds, setSelectedActiveIds] = useState([]);
+  const [selectedArchivedIds, setSelectedArchivedIds] = useState([]);
+  const [showBulkOperations, setShowBulkOperations] = useState(false);
+  const [activeTab, setActiveTab] = useState('active'); // 'active' | 'archived'
 
   // Helper function to extract actual ID from various parent_id formats
   const extractParentId = (parentId) => {
@@ -165,7 +173,7 @@ const Dashboard = () => {
       return;
     }
     try {
-      const response = await configAPI.getAll();
+      const response = await configAPI.getAll(true); // Include archived configurations
       setAllConfigurations(response.data.configs || []);
 
     } catch (err) {
@@ -1021,6 +1029,112 @@ const Dashboard = () => {
     { value: 'updated_at', label: 'Date Modified' },
   ], []);
 
+  // Separate active and archived configurations
+  const activeConfigurations = useMemo(() => 
+    allConfigurations.filter(c => !Boolean(c.archived)),
+    [allConfigurations]
+  );
+
+  const archivedConfigurations = useMemo(() => 
+    allConfigurations.filter(c => Boolean(c.archived)),
+    [allConfigurations]
+  );
+
+  // Get current tab data
+  const currentTabConfigs = useMemo(() => 
+    activeTab === 'active' ? activeConfigurations : archivedConfigurations,
+    [activeTab, activeConfigurations, archivedConfigurations]
+  );
+
+  // Get current selection based on active tab
+  const currentSelectedIds = activeTab === 'active' ? selectedActiveIds : selectedArchivedIds;
+  const setCurrentSelectedIds = activeTab === 'active' ? setSelectedActiveIds : setSelectedArchivedIds;
+
+  // Total selection count for badge
+  const totalSelectedCount = selectedActiveIds.length + selectedArchivedIds.length;
+
+  // Bulk operations for ACTIVE configurations
+  const activeBulkOperations = useMemo(() => [
+    {
+      id: 'bulk-archive',
+      label: 'Archive',
+      icon: ArchiveBoxIcon,
+      variant: 'warning',
+      requiresConfirmation: true,
+      confirmMessage: (count) => `Archive ${count} configuration(s)? They can be restored later.`,
+      handler: async (config) => {
+        await configAPI.archive(config.id, false);
+      },
+    },
+    {
+      id: 'bulk-delete',
+      label: 'Delete',
+      icon: TrashIcon,
+      variant: 'danger',
+      requiresConfirmation: true,
+      confirmMessage: (count) => `Permanently delete ${count} configuration(s)? This cannot be undone!`,
+      handler: async (config) => {
+        await configAPI.delete(config.id);
+      },
+      hidden: user.role !== 'ADMIN',
+    },
+    {
+      id: 'bulk-duplicate',
+      label: 'Duplicate',
+      icon: DocumentDuplicateIcon,
+      variant: 'info',
+      requiresConfirmation: false,
+      handler: async (config) => {
+        // Reuse existing handleDuplicate logic
+        const rawResponse = await configAPI.getRawById(config.id);
+        const sourceData = rawResponse.data.resolved || {};
+        
+        const copyName = await generateUniqueCopyName(config.name);
+        const safeDescription = config.description || '';
+        
+        const newConfig = {
+          name: copyName,
+          type: config.type,
+          parent_id: config.parent_id || null,
+          data: sourceData,
+          description: safeDescription,
+        };
+        
+        await configAPI.create(newConfig);
+      },
+    },
+  ].filter(op => !op.hidden), [user.role]);
+
+  // Bulk operations for ARCHIVED configurations
+  const archivedBulkOperations = useMemo(() => [
+    {
+      id: 'bulk-restore',
+      label: 'Restore',
+      icon: ArrowPathIcon,
+      variant: 'success',
+      requiresConfirmation: true,
+      confirmMessage: (count) => `Restore ${count} archived configuration(s)?`,
+      handler: async (config) => {
+        await configAPI.restore(config.id);
+      },
+    },
+    {
+      id: 'bulk-delete',
+      label: 'Delete',
+      icon: TrashIcon,
+      variant: 'danger',
+      requiresConfirmation: true,
+      confirmMessage: (count) => `Permanently delete ${count} archived configuration(s)? This cannot be undone!`,
+      handler: async (config) => {
+        await configAPI.delete(config.id);
+      },
+      hidden: user.role !== 'ADMIN',
+    },
+  ].filter(op => !op.hidden), [user.role]);
+
+  // Get current operations based on active tab
+  const currentBulkOperations = activeTab === 'active' ? activeBulkOperations : archivedBulkOperations;
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       {/* Header */}
@@ -1095,6 +1209,24 @@ const Dashboard = () => {
               <span>Help</span>
             </button>
 
+            <button
+              onClick={() => setShowBulkOperations(!showBulkOperations)}
+              className={`flex items-center space-x-1 px-3 py-2 rounded-lg border transition-colors ${
+                showBulkOperations
+                  ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-300 dark:border-primary-700 text-primary-700 dark:text-primary-300'
+                  : 'btn-secondary'
+              }`}
+              title="Bulk Operations"
+            >
+              <CheckCircleIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">Bulk</span>
+              {totalSelectedCount > 0 && (
+                <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold rounded-full bg-primary-600 text-white">
+                  {totalSelectedCount}
+                </span>
+              )}
+            </button>
+
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <UserIcon className="w-4 h-4" />
               <span>{user.username}</span>
@@ -1156,23 +1288,134 @@ const Dashboard = () => {
             )}
           </div>
 
-          <div className="flex-1 overflow-auto">
-            <ConfigurationTree
-              selectedConfig={selectedConfig}
-              onConfigSelect={handleConfigSelect}
-              refreshTrigger={refreshTrigger}
-              onEdit={handleTreeEdit}
-              onRename={handleTreeRename}
-              onDuplicate={handleTreeDuplicate}
-              onCreateChild={handleTreeCreateChild}
-              onCommit={handleTreeCommit}
-              onDelete={handleTreeDelete}
-              onArchive={handleTreeArchive}
-              onRestore={handleTreeRestore}
-              onAddComponent={handleAddComponent}
-              user={user}
-            />
+          {/* Conditional rendering: ConfigurationTree OR Bulk Operations */}
+          {!showBulkOperations ? (
+            // Normal mode: Show ConfigurationTree
+            <div className="flex-1 overflow-auto">
+              <ConfigurationTree
+                selectedConfig={selectedConfig}
+                onConfigSelect={handleConfigSelect}
+                refreshTrigger={refreshTrigger}
+                onEdit={handleTreeEdit}
+                onRename={handleTreeRename}
+                onDuplicate={handleTreeDuplicate}
+                onCreateChild={handleTreeCreateChild}
+                onCommit={handleTreeCommit}
+                onDelete={handleTreeDelete}
+                onArchive={handleTreeArchive}
+                onRestore={handleTreeRestore}
+                onAddComponent={handleAddComponent}
+                user={user}
+              />
             </div>
+          ) : (
+            // Bulk mode: Show tabs and bulk operations
+            <div className="flex-1 flex flex-col overflow-hidden">
+              {/* Tab Header */}
+              <div className="flex items-center border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                <button
+                  onClick={() => setActiveTab('active')}
+                  className={`flex-1 px-4 py-3 text-sm font-medium transition-colors relative ${
+                    activeTab === 'active'
+                      ? 'text-primary-600 dark:text-primary-400 bg-gray-50 dark:bg-gray-900'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                >
+                  <span>Active</span>
+                  {activeConfigurations.length > 0 && (
+                    <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700">
+                      {activeConfigurations.length}
+                    </span>
+                  )}
+                  {selectedActiveIds.length > 0 && (
+                    <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-primary-600 text-white">
+                      {selectedActiveIds.length}
+                    </span>
+                  )}
+                  {activeTab === 'active' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600 dark:bg-primary-400" />
+                  )}
+                </button>
+                <button
+                  onClick={() => setActiveTab('archived')}
+                  className={`flex-1 px-4 py-3 text-sm font-medium transition-colors relative ${
+                    activeTab === 'archived'
+                      ? 'text-primary-600 dark:text-primary-400 bg-gray-50 dark:bg-gray-900'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                >
+                  <span>Archived</span>
+                  {archivedConfigurations.length > 0 && (
+                    <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700">
+                      {archivedConfigurations.length}
+                    </span>
+                  )}
+                  {selectedArchivedIds.length > 0 && (
+                    <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-primary-600 text-white">
+                      {selectedArchivedIds.length}
+                    </span>
+                  )}
+                  {activeTab === 'archived' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600 dark:bg-primary-400" />
+                  )}
+                </button>
+              </div>
+
+              {/* Bulk Operations Component */}
+              <div className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900" style={{ maxHeight: '60vh' }}>
+                <BulkOperations
+                  items={currentTabConfigs}
+                  selectedItems={currentSelectedIds}
+                  onSelectionChange={setCurrentSelectedIds}
+                  operations={currentBulkOperations}
+                  onOperationComplete={(result) => {
+                    if (result.successCount > 0) {
+                      showToast(
+                        `${result.successCount} configuration(s) processed successfully`,
+                        'success'
+                      );
+                      setRefreshTrigger(prev => prev + 1);
+                    }
+                    if (result.errorCount > 0) {
+                      showToast(
+                        `${result.errorCount} operation(s) failed. Check details below.`,
+                        'error'
+                      );
+                    }
+                    // Clear selection after operation
+                    if (activeTab === 'active') {
+                      setSelectedActiveIds([]);
+                    } else {
+                      setSelectedArchivedIds([]);
+                    }
+                  }}
+                  renderItem={(item, selected) => (
+                    <div className="flex items-center space-x-3 py-1">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2">
+                          <div className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
+                            {item.name}
+                          </div>
+                          <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${
+                            item.type === 'PRODUCT' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                            item.type === 'INSTANCE' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
+                            item.type === 'USER' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' :
+                            item.type === 'COMPONENT' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                            'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                          }`}>
+                            {item.type}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-2 mt-0.5">
+                          <span>{item.status || 'N/A'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                />
+              </div>
+            </div>
+          )}
           </div>
 
           {/* Main Content */}
