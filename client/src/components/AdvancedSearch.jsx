@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { MagnifyingGlassIcon, FunnelIcon, XMarkIcon, ChevronDownIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
 import { logger } from '../utils/logger';
@@ -16,11 +16,11 @@ import { logger } from '../utils/logger';
 
 const AdvancedSearch = ({
   data = [],
-  onSearch,
+  onSearch, // Called only when user takes action, not automatically
   searchFields = [],
   filters = [],
   sortOptions = [],
-  onFilterChange,
+  onFilterChange, // Called only when filters change, not continuously
   placeholder = 'Search...',
   showFilters = true,
   showSort = true,
@@ -111,34 +111,8 @@ const AdvancedSearch = ({
       });
     }
 
-    logger.debug('Search results', { 
-      searchTerm, 
-      activeFilters, 
-      sortBy, 
-      sortOrder, 
-      resultCount: results.length 
-    });
-
     return results;
   }, [data, searchTerm, activeFilters, sortBy, sortOrder, searchFields, filters]);
-
-  // Notify parent of changes
-  React.useEffect(() => {
-    if (onSearch) {
-      onSearch(filteredData, {
-        searchTerm,
-        activeFilters,
-        sortBy,
-        sortOrder,
-      });
-    }
-  }, [filteredData, searchTerm, activeFilters, sortBy, sortOrder, onSearch]);
-
-  React.useEffect(() => {
-    if (onFilterChange) {
-      onFilterChange(activeFilters);
-    }
-  }, [activeFilters, onFilterChange]);
 
   const handleFilterChange = useCallback((key, value) => {
     setActiveFilters(prev => ({

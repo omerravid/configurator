@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   ChevronRightIcon,
   ChevronDownIcon,
@@ -153,7 +153,7 @@ const ProvenanceTooltip = React.memo(({ source, isVisible, position, path }) => 
   );
 });
 
-const TreeNode = ({
+const TreeNode = React.memo(({
   keyName,
   value,
   path = "",
@@ -330,15 +330,9 @@ const TreeNode = ({
     if (!source || isRoot) return;
 
     onValueChange?.(currentPath, null); // null removes the override
-    console.log("Reset property:", currentPath);
   };
 
   const handleRulesClick = async () => {
-    console.log("=== TreeNode handleRulesClick DEBUG ===");
-    console.log("currentPath:", currentPath);
-    console.log("selectedConfig:", selectedConfig);
-    console.log("localStorage token:", localStorage.getItem('token') ? 'Present' : 'Missing');
-
     if (!selectedConfig?.id) {
       console.warn("No configuration ID available for rules");
       return;
@@ -347,12 +341,9 @@ const TreeNode = ({
     // Clean the path - remove root prefix and convert to dot notation
     const cleanPath = currentPath.startsWith("root.") ? currentPath.substring(5) : currentPath;
 
-    console.log("cleanPath:", cleanPath);
     const apiUrl = `/api/rules/configuration/${selectedConfig.id}/path/${encodeURIComponent(cleanPath)}`;
-    console.log("API URL:", apiUrl);
 
     try {
-      console.log("Making fetch request...");
       // Fetch existing rules for this property
       const response = await fetch(apiUrl, {
         headers: {
@@ -360,17 +351,12 @@ const TreeNode = ({
         }
       });
 
-      console.log("Response status:", response.status);
-      console.log("Response ok:", response.ok);
-
       let existingRules = [];
       if (response.ok) {
         const data = await response.json();
-        console.log("Raw API response:", data);
         // API returns { rules: [...] } so extract the rules array
         existingRules = Array.isArray(data.rules) ? data.rules : (Array.isArray(data) ? data : []);
       }
-      console.log("Existing rules:", existingRules);
 
       setRulesDialog({
         isOpen: true,
@@ -380,11 +366,6 @@ const TreeNode = ({
       });
     } catch (error) {
       console.error("Failed to fetch existing rules:", error);
-      console.error("Error details:", {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      });
       setRulesDialog({
         isOpen: true,
         configurationId: selectedConfig.id,
@@ -720,7 +701,6 @@ const TreeNode = ({
       case "VERSION":
         color = "text-amber-400";
         // Show component name with version in parentheses
-        console.log("VERSION source object:", source);
         if (source.parentName && source.name) {
           title = `From ${source.parentName} (${source.name})`;
         } else {
@@ -816,7 +796,7 @@ const TreeNode = ({
       )}
     </div>
   );
-};
+});
 
 const InteractiveJSONViewer = ({
   data,
@@ -830,16 +810,6 @@ const InteractiveJSONViewer = ({
   selectedConfig,
   onRefreshData, // New prop for triggering data refresh
 }) => {
-  console.log('[InteractiveJSONViewer] Received props:', {
-    dataKeys: data ? Object.keys(data) : 'null',
-    dataEmpty: !data || Object.keys(data).length === 0,
-    rawDataKeys: rawData ? Object.keys(rawData) : 'null',
-    metadataChainLength: metadata?.chainLength,
-    metadataChain: metadata?.chain,
-    selectedConfigName: selectedConfig?.name,
-    selectedConfigType: selectedConfig?.type,
-  });
-  
   const [hoveredSource, setHoveredSource] = useState(null);
   const [hoveredPath, setHoveredPath] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -862,7 +832,6 @@ const InteractiveJSONViewer = ({
   // This prevents showing an empty view for newly created configs
   useEffect(() => {
     if (dataMode === "changes" && (!rawData || Object.keys(rawData).length === 0)) {
-      console.log('[InteractiveJSONViewer] No changes detected, switching to "all" mode');
       setDataMode("all");
       sessionStorage.setItem('jsonViewerDataMode', "all");
     }
@@ -1011,9 +980,19 @@ const InteractiveJSONViewer = ({
     setHoveredPath(null);
   };
 
-  const handleMouseMove = (e) => {
+  // Throttle mouse move to avoid excessive state updates
+  const lastMoveTimeRef = useRef(0);
+  const handleMouseMove = useCallback((e) => {
+    // Only update tooltip position if tooltip is actually visible
+    // and throttle to max 60fps (16ms)
+    if (!showTooltip) return;
+    
+    const now = Date.now();
+    if (now - lastMoveTimeRef.current < 16) return;
+    
+    lastMoveTimeRef.current = now;
     setTooltipPosition({ x: e.clientX, y: e.clientY });
-  };
+  }, [showTooltip]);
 
   const handleValueChange = (path, newValue) => {
     // Strip "root." prefix from path since root is just a container
@@ -1082,8 +1061,6 @@ const InteractiveJSONViewer = ({
 
   const handleStructuralChange = (action, path, param1, param2) => {
     if (!onDataChange) return;
-
-    console.log("Structural change:", { action, path, param1, param2 });
 
     const setValueAtPath = (obj, path, value) => {
       if (!path || path === "root") return value;
@@ -1154,7 +1131,6 @@ const InteractiveJSONViewer = ({
 
         // Prevent renaming to the same name or empty name
         if (!newKey || newKey === oldKey) {
-          console.warn("Invalid rename operation");
           return;
         }
 
@@ -1162,7 +1138,6 @@ const InteractiveJSONViewer = ({
         if (parentValue && typeof parentValue === "object" && parentValue.hasOwnProperty(oldKey)) {
           // Check if new key already exists
           if (parentValue.hasOwnProperty(newKey)) {
-            console.warn(`Key "${newKey}" already exists`);
             // You could add a toast notification here if needed
             return;
           }
@@ -1195,10 +1170,7 @@ const InteractiveJSONViewer = ({
     const cleanPath = path.replace(/^root\./, "");
     const propertyPath = cleanPath ? `${cleanPath}.${propertyName}` : propertyName;
 
-    console.log("Adding property:", { path, propertyName, value, cleanPath, propertyPath });
-
     if (!propertyPath) {
-      console.warn("Cannot add property to root level");
       return;
     }
 
@@ -1208,8 +1180,6 @@ const InteractiveJSONViewer = ({
   const handlePropertyDelete = (path, propertyName) => {
     if (!onDataChange) return;
     const cleanPath = path.replace(/^root\./, "");
-
-    console.log("Deleting property:", { path, propertyName, cleanPath, selectedStructuralPath: path });
 
     // For all deletions, send null as the deletion marker
     // This works for both root level and nested properties
@@ -1487,7 +1457,6 @@ const InteractiveJSONViewer = ({
         propertyPath={rulesDialog.propertyPath}
         existingRules={rulesDialog.existingRules}
         onRulesUpdated={(updatedRules) => {
-          console.log("Rules updated:", updatedRules);
           showToast("Rules updated successfully", "success");
         }}
       />

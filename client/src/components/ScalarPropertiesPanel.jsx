@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   PencilIcon,
   PlusIcon,
@@ -209,17 +209,6 @@ const ScalarPropertiesPanel = ({
 
       const isComponentRef = hasComponentId && hasVersionId && hasComponentName;
 
-      console.log("Component detection details:", {
-        selectedPath,
-        actualValue,
-        hasComponentId: hasComponentId ? `Yes (${actualValue.componentId})` : 'No',
-        hasVersionId: hasVersionId ? `Yes (${actualValue.versionId})` : 'No',
-        hasComponentName: hasComponentName ? `Yes (${actualValue.componentName})` : 'No',
-        allKeys: Object.keys(actualValue),
-        isComponentRef,
-        configType
-      });
-
       return isComponentRef;
     }
 
@@ -229,7 +218,6 @@ const ScalarPropertiesPanel = ({
   // Get sub-objects for navigation (includes both regular objects and component references)
   const getSubObjects = (value) => {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
-      console.log("getSubObjects: No value or not object:", { value, type: typeof value });
       return [];
     }
 
@@ -245,91 +233,36 @@ const ScalarPropertiesPanel = ({
         actualValue.versionId &&
         actualValue.componentName;
 
-      console.log(`getSubObjects - checking key "${key}":`, {
-        actualValue,
-        isObject,
-        isComponentRef,
-        willInclude: isObject
-      });
-
       return isObject;
     });
 
-    console.log("getSubObjects result:", result);
     return result;
   };
 
-  const isCompRef = isComponentReference();
-  const componentRef = isCompRef ? getActualValueAndSource(selectedValue).actualValue : null;
-  const subObjects = getSubObjects(selectedValue);
-  const scalarProperties = getScalarProperties(selectedValue, !!componentRef);
-  const scalarArrays = getScalarArrays(selectedValue);
-  const actualSelectedValue = selectedValue ? getActualValueAndSource(selectedValue).actualValue : null;
-
-  // Debug logging for component detection and property filtering
-  console.log("ScalarPropertiesPanel Debug:", {
-    selectedPath,
-    configType,
-    isComponentRef: isCompRef,
-    componentRef,
-    selectedValue: actualSelectedValue,
-    selectedValueType: typeof actualSelectedValue,
-    allProperties: actualSelectedValue && typeof actualSelectedValue === 'object' ? Object.keys(actualSelectedValue) : [],
-    scalarPropertiesCount: scalarProperties.length,
-    subObjectsCount: subObjects.length,
-    rawSelectedValue: selectedValue,
-    isArrayElement: selectedPath.includes('[') && selectedPath.includes(']')
-  });
-
-  if (actualSelectedValue && typeof actualSelectedValue === 'object') {
-    console.log("Full Tools object structure:", JSON.stringify(actualSelectedValue, null, 2));
-
-    Object.entries(actualSelectedValue).forEach(([key, val]) => {
-      const { actualValue, source } = getActualValueAndSource(val);
-      const isScalar = (
-        actualValue === null ||
-        actualValue === undefined ||
-        typeof actualValue === "string" ||
-        typeof actualValue === "number" ||
-        typeof actualValue === "boolean"
-      );
-      const isComponentProp = isCompRef && ['componentId', 'versionId', 'componentName', 'versionName'].includes(key);
-      const isComponentRef = actualValue &&
-        typeof actualValue === "object" &&
-        !Array.isArray(actualValue) &&
-        actualValue.componentId &&
-        actualValue.versionId &&
-        actualValue.componentName;
-
-      console.log(`Property ${key}:`, {
-        rawValue: val,
-        actualValue,
-        source,
-        keys: actualValue && typeof actualValue === 'object' ? Object.keys(actualValue) : 'N/A',
-        type: typeof actualValue,
-        isScalar,
-        isComponentProp,
-        isComponentRef,
-        hasProvenance: val !== actualValue,
-        willShowAsScalar: isScalar && !isComponentProp && !isComponentRef,
-        willShowAsObject: !isScalar || isComponentRef
-      });
-    });
-  }
+  // Memoize expensive computations to prevent re-calculation on every render
+  const isCompRef = useMemo(() => isComponentReference(), [selectedValue]);
+  const componentRef = useMemo(() => 
+    isCompRef ? getActualValueAndSource(selectedValue).actualValue : null,
+    [isCompRef, selectedValue]
+  );
+  const actualSelectedValue = useMemo(() => 
+    selectedValue ? getActualValueAndSource(selectedValue).actualValue : null,
+    [selectedValue]
+  );
+  const subObjects = useMemo(() => getSubObjects(selectedValue), [selectedValue]);
+  const scalarProperties = useMemo(() => 
+    getScalarProperties(selectedValue, !!componentRef),
+    [selectedValue, componentRef]
+  );
+  const scalarArrays = useMemo(() => getScalarArrays(selectedValue), [selectedValue]);
 
 
   // Load available versions when a component is selected
   useEffect(() => {
-    console.log("Loading versions for component:", componentRef);
-
     if (componentRef) {
       setLoadingVersions(true);
       configAPI.getComponents()
         .then(response => {
-          console.log("Components API response:", response);
-          console.log("Response data type:", typeof response.data);
-          console.log("Response data:", response.data);
-
           // Handle different response structures
           let componentsArray;
           if (Array.isArray(response.data)) {
@@ -344,7 +277,6 @@ const ScalarPropertiesPanel = ({
           }
 
           const component = componentsArray.find(c => c.id === componentRef.componentId);
-          console.log("Found component for versions:", component);
 
           if (component) {
             // Include the component itself as the root version plus any child versions
@@ -368,7 +300,6 @@ const ScalarPropertiesPanel = ({
             allVersions.push(...versions);
 
             setAvailableVersions(allVersions);
-            console.log("Set available versions:", allVersions);
           } else {
             console.warn("Component not found in response:", componentRef.componentId);
             setAvailableVersions([]);
@@ -387,13 +318,7 @@ const ScalarPropertiesPanel = ({
   }, [componentRef?.componentId]);
 
   const validateValue = async (propertyName, value) => {
-    console.log("=== validateValue DEBUG ===");
-    console.log("propertyName:", propertyName);
-    console.log("value:", value);
-    console.log("selectedConfig:", selectedConfig);
-
     if (!selectedConfig?.id) {
-      console.log("No selectedConfig.id, returning true");
       return true;
     }
 
@@ -407,16 +332,8 @@ const ScalarPropertiesPanel = ({
       fullPropertyPath = `${cleanSelectedPath}.${propertyName}`;
     }
 
-    console.log("fullPropertyPath:", fullPropertyPath);
-    console.log("API payload:", {
-      configurationId: selectedConfig.id,
-      propertyPath: fullPropertyPath,
-      value: value
-    });
-
     try {
       setIsValidating(true);
-      console.log("Making validation request...");
       const response = await fetch('/api/rules/validate', {
         method: 'POST',
         headers: {
@@ -430,32 +347,22 @@ const ScalarPropertiesPanel = ({
         })
       });
 
-      console.log("Validation response status:", response.status);
       const result = await response.json();
-      console.log("Validation result:", result);
 
       if (!response.ok) {
-        console.log("Validation response not ok:", result);
         setValidationError(result.error || 'Validation failed');
         return false;
       }
 
       if (!result.isValid) {
-        console.log("Validation failed:", result.errors);
         setValidationError(result.errors.join(', '));
         return false;
       }
 
-      console.log("Validation passed");
       setValidationError("");
       return true;
     } catch (error) {
       console.error('Validation error:', error);
-      console.error("Error details:", {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      });
       setValidationError('Validation service unavailable');
       return false;
     } finally {
@@ -510,7 +417,6 @@ const ScalarPropertiesPanel = ({
         propertyPath = `${selectedPath}.${propertyName}`;
       }
 
-      console.log("ScalarPanel editing:", { propertyName, newValue, selectedPath, propertyPath });
       onValueChange?.(propertyPath, newValue);
     }
 
@@ -568,13 +474,6 @@ const ScalarPropertiesPanel = ({
         }
         break;
     }
-
-    console.log("Creating property:", {
-      name: newPropertyName,
-      type: propertyType,
-      value: parsedValue,
-      path: selectedPath
-    });
 
     // Check if we're adding a property to an array element
     const isArrayElementProperty = selectedPath.includes('[') && selectedPath.includes(']');
@@ -649,12 +548,6 @@ const ScalarPropertiesPanel = ({
       propertyPath = `${cleanSelectedPath}.${newPropertyName}`;
     }
 
-    console.log("Single file import:", {
-      configId: selectedConfig.id,
-      propertyPath,
-      fileName: selectedImportFile.name
-    });
-
     if (selectedImportFile.name.toLowerCase().endsWith('.json')) {
       // For JSON files, read content and parse as structured data
       const fileContent = await selectedImportFile.text();
@@ -725,22 +618,6 @@ const ScalarPropertiesPanel = ({
       formData.append('files', fileWithPath);
       formData.append('relativePaths', rel);
     });
-
-    console.log("=== FOLDER IMPORT DEBUG ===");
-    console.log("Folder import:", {
-      configId: selectedConfig.id,
-      propertyPath,
-      folderName: rootFolderName,
-      fileCount: selectedImportFiles.length
-    });
-    console.log("FormData contents:");
-    for (let [key, value] of formData.entries()) {
-      if (key === 'files') {
-        console.log(`  ${key}: File object - ${value.name || 'unknown'}`);
-      } else {
-        console.log(`  ${key}: ${value}`);
-      }
-    }
 
     // Use the enhanced folder import API that attaches to configuration
     const response = await configAPI.importFolderToProperty(formData);
@@ -865,14 +742,9 @@ const ScalarPropertiesPanel = ({
   };
 
   const handleArrayValueChange = (arrayName, index, newValue) => {
-    console.log("Array value change:", { arrayName, index, newValue, selectedPath });
-
     // Get the current array, properly extracting from provenance wrapper
     const arrayWithProvenance = actualSelectedValue[arrayName];
     const { actualValue: currentArray } = getActualValueAndSource(arrayWithProvenance);
-
-    console.log("Array with provenance:", arrayWithProvenance);
-    console.log("Extracted array:", currentArray);
 
     if (!Array.isArray(currentArray)) {
       console.error("Not an array:", currentArray);
@@ -893,7 +765,6 @@ const ScalarPropertiesPanel = ({
       arrayPath = `${selectedPath}.${arrayName}`;
     }
 
-    console.log("Updating array at path:", arrayPath, "with new array:", newArray);
     onValueChange?.(arrayPath, newArray);
   };
 
@@ -942,7 +813,6 @@ const ScalarPropertiesPanel = ({
       arrayPath = `${selectedPath}.${arrayName}`;
     }
 
-    console.log("Resetting array to default:", arrayPath);
     onValueChange?.(arrayPath, null); // null removes the override (undefined gets lost in JSON serialization)
     showToast(`Array "${arrayName}" reset to inherited value`, "success");
   };
@@ -971,12 +841,6 @@ const ScalarPropertiesPanel = ({
 
   // Handle property changes inside array elements - updates the entire array
   const handleArrayElementPropertyChange = (propertyName, newValue) => {
-    console.log("=== ARRAY ELEMENT PROPERTY CHANGE DEBUG ===");
-    console.log("selectedPath:", selectedPath);
-    console.log("propertyName:", propertyName);
-    console.log("newValue:", newValue);
-    console.log("actualSelectedValue:", actualSelectedValue);
-
     // Parse the selectedPath to get array path and index
     // Example: "root.ObjArray[0]" -> arrayPath: "root.ObjArray", index: 0
     const bracketStart = selectedPath.indexOf('[');
@@ -995,53 +859,38 @@ const ScalarPropertiesPanel = ({
       return;
     }
 
-    console.log("Parsed path info:", {
-      selectedPath,
-      arrayPath,
-      arrayIndex,
-      propertyName,
-      newValue
-    });
-
     // Get the current array from the resolved data
     // We need to traverse the path to get the array
     const cleanArrayPath = arrayPath.replace(/^root\.?/, '');
-    console.log("cleanArrayPath:", cleanArrayPath);
 
     // We need to get the array from the root data, not from actualSelectedValue
     // actualSelectedValue is the array element, not the parent containing the array
 
     // First, get the root data (we need to go up from selectedStructuralValue to root)
     const rootData = getCurrentData(); // Get the current data (resolved or raw)
-    console.log("rootData:", rootData);
 
     let currentData = rootData;
 
     if (cleanArrayPath) {
       const pathKeys = cleanArrayPath.split('.');
-      console.log("pathKeys:", pathKeys);
 
       // Navigate to the parent object containing the array
       for (let i = 0; i < pathKeys.length - 1; i++) {
         if (currentData && typeof currentData === 'object') {
           const extractedValue = getActualValueAndSource(currentData[pathKeys[i]]);
           currentData = extractedValue.actualValue;
-          console.log(`After navigating to ${pathKeys[i]}:`, currentData);
         }
       }
 
       // Get the array
       const arrayKey = pathKeys[pathKeys.length - 1];
-      console.log("arrayKey:", arrayKey);
       var arrayWithProvenance = currentData ? currentData[arrayKey] : null;
     } else {
       // Array is at root level
       var arrayWithProvenance = currentData;
     }
 
-    console.log("arrayWithProvenance:", arrayWithProvenance);
     const { actualValue: currentArray } = getActualValueAndSource(arrayWithProvenance);
-    console.log("currentArray:", currentArray);
 
     if (!Array.isArray(currentArray)) {
       console.error("Target is not an array:", currentArray);
@@ -1090,7 +939,6 @@ const ScalarPropertiesPanel = ({
         propertyPath = `${selectedPath}.${propertyName}`;
       }
 
-      console.log("Resetting property to default:", propertyPath);
       onValueChange?.(propertyPath, null); // null removes the override
       showToast(`Property "${propertyName}" reset to inherited value`, "success");
     }
@@ -1098,12 +946,6 @@ const ScalarPropertiesPanel = ({
 
   // Handle opening the rules dialog for a property or array
   const handleRulesClick = async (propertyName) => {
-    console.log("=== handleRulesClick DEBUG ===");
-    console.log("propertyName:", propertyName);
-    console.log("selectedConfig:", selectedConfig);
-    console.log("selectedPath:", selectedPath);
-    console.log("localStorage token:", localStorage.getItem('token') ? 'Present' : 'Missing');
-
     if (!selectedConfig?.id) {
       console.warn("No configuration ID available for rules");
       return;
@@ -1119,30 +961,22 @@ const ScalarPropertiesPanel = ({
       fullPropertyPath = `${cleanSelectedPath}.${propertyName}`;
     }
 
-    console.log("fullPropertyPath:", fullPropertyPath);
     const apiUrl = `/api/rules/configuration/${selectedConfig.id}/path/${encodeURIComponent(fullPropertyPath)}`;
-    console.log("API URL:", apiUrl);
 
     try {
       // Fetch existing rules for this property
-      console.log("Making fetch request...");
       const response = await fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
-      console.log("Response status:", response.status);
-      console.log("Response ok:", response.ok);
-
       let existingRules = [];
       if (response.ok) {
         const data = await response.json();
-        console.log("Raw API response:", data);
         // API returns { rules: [...] } so extract the rules array
         existingRules = Array.isArray(data.rules) ? data.rules : (Array.isArray(data) ? data : []);
       }
-      console.log("Existing rules:", existingRules);
 
       setRulesDialog({
         isOpen: true,
@@ -1152,11 +986,6 @@ const ScalarPropertiesPanel = ({
       });
     } catch (error) {
       console.error("Failed to fetch existing rules:", error);
-      console.error("Error details:", {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      });
       setRulesDialog({
         isOpen: true,
         configurationId: selectedConfig.id,
@@ -1168,12 +997,6 @@ const ScalarPropertiesPanel = ({
 
   // Handle opening the rules dialog for an array
   const handleArrayRulesClick = async (arrayName) => {
-    console.log("=== handleArrayRulesClick DEBUG ===");
-    console.log("arrayName:", arrayName);
-    console.log("selectedConfig:", selectedConfig);
-    console.log("selectedPath:", selectedPath);
-    console.log("localStorage token:", localStorage.getItem('token') ? 'Present' : 'Missing');
-
     if (!selectedConfig?.id) {
       console.warn("No configuration ID available for array rules");
       return;
@@ -1189,30 +1012,22 @@ const ScalarPropertiesPanel = ({
       fullPropertyPath = `${cleanSelectedPath}.${arrayName}`;
     }
 
-    console.log("fullPropertyPath:", fullPropertyPath);
     const apiUrl = `/api/rules/configuration/${selectedConfig.id}/path/${encodeURIComponent(fullPropertyPath)}`;
-    console.log("API URL:", apiUrl);
 
     try {
       // Fetch existing rules for this array
-      console.log("Making fetch request...");
       const response = await fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
-      console.log("Response status:", response.status);
-      console.log("Response ok:", response.ok);
-
       let existingRules = [];
       if (response.ok) {
         const data = await response.json();
-        console.log("Raw API response:", data);
         // API returns { rules: [...] } so extract the rules array
         existingRules = Array.isArray(data.rules) ? data.rules : (Array.isArray(data) ? data : []);
       }
-      console.log("Existing array rules:", existingRules);
 
       setRulesDialog({
         isOpen: true,
@@ -1222,11 +1037,6 @@ const ScalarPropertiesPanel = ({
       });
     } catch (error) {
       console.error("Failed to fetch existing array rules:", error);
-      console.error("Error details:", {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      });
       setRulesDialog({
         isOpen: true,
         configurationId: selectedConfig.id,
@@ -1369,7 +1179,6 @@ const ScalarPropertiesPanel = ({
 
   const copyToClipboard = async (text, label = "Value") => {
     // Always use fallback since Clipboard API is blocked in iframes
-    console.log(`Attempting to copy ${label}:`, text);
     try {
       const textArea = document.createElement("textarea");
       textArea.value = text;
@@ -1382,10 +1191,8 @@ const ScalarPropertiesPanel = ({
       document.body.removeChild(textArea);
 
       if (successful) {
-        console.log(`Successfully copied ${label}`);
         showToast(`${label} copied to clipboard!`);
       } else {
-        console.error(`Failed to copy ${label} - execCommand returned false`);
         showToast("Failed to copy to clipboard", "error");
       }
     } catch (err) {
@@ -1425,7 +1232,6 @@ const ScalarPropertiesPanel = ({
         label: "Copy Value",
         icon: ClipboardIcon,
         onClick: () => {
-          console.log("Copy Value clicked for:", propertyName, actualValue);
           copyToClipboard(JSON.stringify(actualValue), "Value");
         },
       },
@@ -1433,7 +1239,6 @@ const ScalarPropertiesPanel = ({
         label: "Copy Path",
         icon: MapIcon,
         onClick: () => {
-          console.log("Copy Path clicked for:", propertyName, "path:", cleanPath);
           copyToClipboard(cleanPath, "Path");
         },
       },
@@ -1441,7 +1246,6 @@ const ScalarPropertiesPanel = ({
         label: "Copy as JSON",
         icon: DocumentDuplicateIcon,
         onClick: () => {
-          console.log("Copy as JSON clicked for:", propertyName, actualValue);
           copyToClipboard(JSON.stringify(actualValue, null, 2), "JSON");
         },
       },
@@ -2267,4 +2071,4 @@ const ScalarPropertiesPanel = ({
   );
 };
 
-export default ScalarPropertiesPanel;
+export default React.memo(ScalarPropertiesPanel);

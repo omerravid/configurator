@@ -9,6 +9,7 @@ import ContextMenu from "../components/ContextMenu";
 import HelpModal from "../components/HelpModal";
 import SettingsModal from "../components/SettingsModal";
 import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
+import AdvancedSearch from "../components/AdvancedSearch";
 import { useToast } from "../context/ToastContext";
 import { configAPI } from "../services/api";
 import { logger } from "../utils/logger";
@@ -27,6 +28,7 @@ import {
   SunIcon,
   MoonIcon,
   HomeIcon,
+  MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 
 const Dashboard = () => {
@@ -51,6 +53,7 @@ const Dashboard = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [configToDelete, setConfigToDelete] = useState(null);
   const [configBreadcrumb, setConfigBreadcrumb] = useState(null);
+  const [showSearch, setShowSearch] = useState(false);
 
   // Helper function to extract actual ID from various parent_id formats
   const extractParentId = (parentId) => {
@@ -975,6 +978,49 @@ const Dashboard = () => {
     return false;
   };
 
+  // Search configuration
+  const searchFilters = useMemo(() => [
+    {
+      key: 'type',
+      label: 'Type',
+      type: 'select',
+      options: [
+        { value: 'PRODUCT', label: 'Product' },
+        { value: 'INSTANCE', label: 'Instance' },
+        { value: 'USER', label: 'User' },
+        { value: 'COMPONENT', label: 'Component' },
+        { value: 'VERSION', label: 'Version' },
+      ],
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { value: 'DRAFT', label: 'Draft' },
+        { value: 'COMMITTED', label: 'Committed' },
+      ],
+    },
+    {
+      key: 'archived',
+      label: 'Show Archived',
+      type: 'boolean',
+    },
+    {
+      key: 'created_by',
+      label: 'Created By',
+      type: 'text',
+      placeholder: 'Filter by username...',
+    },
+  ], []);
+
+  const searchSortOptions = useMemo(() => [
+    { value: 'name', label: 'Name' },
+    { value: 'type', label: 'Type' },
+    { value: 'created_at', label: 'Date Created' },
+    { value: 'updated_at', label: 'Date Modified' },
+  ], []);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       {/* Header */}
@@ -1077,10 +1123,37 @@ const Dashboard = () => {
         <div className="flex flex-1 overflow-hidden">
           {/* Left Panel - Configuration Tree */}
           <div className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-colors">
-          <div className="p-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-              Configurations
-            </h2>
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                Configurations
+              </h2>
+              <button
+                onClick={() => setShowSearch(!showSearch)}
+                className={`p-1.5 rounded-lg transition-colors ${
+                  showSearch
+                    ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+                }`}
+                title="Toggle search and filters"
+              >
+                <MagnifyingGlassIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            {showSearch && (
+              <div className="mt-3">
+                <AdvancedSearch
+                  data={allConfigurations}
+                  searchFields={['name', 'description', 'type', 'created_by']}
+                  filters={searchFilters}
+                  sortOptions={searchSortOptions}
+                  placeholder="Search configurations..."
+                  showFilters={true}
+                  showSort={true}
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex-1 overflow-auto">
