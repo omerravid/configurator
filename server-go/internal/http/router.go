@@ -1,7 +1,9 @@
 package http
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"your.module/config-manager/internal/backup"
@@ -20,9 +22,42 @@ func NewRouter(cfg config.Config, log *logger.Logger, mc *mongo.Client) *gin.Eng
 	// Add structured request logging middleware
 	r.Use(middleware.RequestLogging(log))
 
-	r.GET("/api/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "OK"})
-	})
+	// Health check (no auth). Supports both GET and HEAD so frontend connectivity
+	// checks can use lightweight HEAD requests.
+	healthHandler := func(c *gin.Context) {
+		// Consider the service unhealthy if it cannot reach Mongo quickly.
+		// This keeps the signal aligned with "can we actually serve requests?"
+		statusCode := http.StatusOK
+		status := "OK"
+		mongoOK := true
+
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 1*time.Second)
+		defer cancel()
+
+		if mc == nil || mc.DB == nil {
+			mongoOK = false
+			statusCode = http.StatusServiceUnavailable
+			status = "DEGRADED"
+		} else if err := mc.DB.Client().Ping(ctx, nil); err != nil {
+			mongoOK = false
+			statusCode = http.StatusServiceUnavailable
+			status = "DEGRADED"
+		}
+
+		// HEAD responses should not include a body.
+		if c.Request.Method == http.MethodHead {
+			c.Status(statusCode)
+			return
+		}
+
+		c.JSON(statusCode, gin.H{
+			"status":    status,
+			"mongo":     gin.H{"ok": mongoOK},
+			"timestamp": time.Now().UTC().Format(time.RFC3339),
+		})
+	}
+	r.GET("/api/health", healthHandler)
+	r.HEAD("/api/health", healthHandler)
 
 	authMw := middleware.Auth(middleware.AuthConfig{
 		JWTSecret: cfg.JWTSecret,

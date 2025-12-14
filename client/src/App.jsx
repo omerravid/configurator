@@ -15,6 +15,7 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import ErrorBoundary from "./components/ErrorBoundary";
 import GlobalShortcuts from "./components/GlobalShortcuts";
 import CommandPalette from "./components/CommandPalette";
+import OfflineStatusBanner from "./components/OfflineStatusBanner";
 
 // Lazy load pages for code splitting
 const Login = lazy(() => import("./pages/Login"));
@@ -147,6 +148,7 @@ function App() {
               <CommandRegistryProvider>
                 <Router>
                   <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+                    <OfflineStatusBanner />
                     <AppRoutes />
                   </div>
                 </Router>

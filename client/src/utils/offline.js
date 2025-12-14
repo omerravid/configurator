@@ -204,10 +204,28 @@ class OfflineQueue {
   async executeRequest(item) {
     const { url, method, headers, body } = item.request;
 
+    const normalizedHeaders = (() => {
+      // Ensure headers is a plain object and default JSON content type for bodies.
+      const h = headers && typeof headers === 'object' ? { ...headers } : {};
+      if (body != null && !h['Content-Type'] && !h['content-type']) {
+        h['Content-Type'] = 'application/json';
+      }
+      return h;
+    })();
+
+    const requestBody =
+      body == null
+        ? undefined
+        : typeof body === 'string'
+          ? body
+          : JSON.stringify(body);
+
     const response = await fetch(url, {
       method,
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
+      headers: normalizedHeaders,
+      body: requestBody,
+      // Allow future cookie-based auth (and avoids surprises if backend switches to cookies).
+      credentials: 'include',
     });
 
     if (!response.ok) {

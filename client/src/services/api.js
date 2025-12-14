@@ -1,6 +1,7 @@
 import axios from "axios";
 import { logger } from "../utils/logger";
 import { getToken, removeToken } from "../utils/tokenStorage";
+import { connectionManager, offlineQueue } from "../utils/offline";
 
 const API_BASE = "/api";
 
@@ -25,6 +26,69 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Offline queue: enqueue safe JSON mutations when offline/unreachable.
+    // - Only for requests with no response (network error)
+    // - Only for non-GET methods
+    // - Exclude auth endpoints and multipart/form-data uploads
+    try {
+      const cfg = error?.config;
+      const hasResponse = !!error?.response;
+
+      if (cfg && !hasResponse) {
+        const method = String(cfg.method || "get").toUpperCase();
+        const isMutation = method !== "GET" && method !== "HEAD" && method !== "OPTIONS";
+        const url = String(cfg.url || "");
+        const baseURL = String(cfg.baseURL || "");
+
+        const fullUrl = `${baseURL}${url}`; // baseURL is "/api"
+
+        const isAuthEndpoint =
+          fullUrl.includes("/api/auth/login") ||
+          fullUrl.includes("/api/auth/register") ||
+          fullUrl.includes("/api/auth/refresh") ||
+          fullUrl.includes("/api/auth/me");
+
+        const isMultipart =
+          typeof FormData !== "undefined" &&
+          cfg.data instanceof FormData;
+
+        const isExplicitlySkipped = cfg.__skipOfflineQueue === true;
+
+        const offline =
+          (typeof navigator !== "undefined" && navigator.onLine === false) ||
+          connectionManager?.isOnline === false;
+
+        if (offline && isMutation && !isAuthEndpoint && !isMultipart && !isExplicitlySkipped) {
+          // Axios headers may be complex objects; keep a minimal plain set.
+          const headers = {};
+          const h = cfg.headers || {};
+          if (h.Authorization) headers.Authorization = h.Authorization;
+          if (h["X-CSRF-Token"]) headers["X-CSRF-Token"] = h["X-CSRF-Token"];
+          if (h["Content-Type"]) headers["Content-Type"] = h["Content-Type"];
+
+          const body = cfg.data;
+
+          const id = offlineQueue.enqueue({
+            url: fullUrl,
+            method,
+            headers,
+            body,
+          });
+
+          const queuedError = new Error("Offline: request queued and will sync when back online.");
+          queuedError.isOfflineQueued = true;
+          queuedError.queueId = id;
+          throw queuedError;
+        }
+      }
+    } catch (queuedOrOther) {
+      // If we intentionally queued, reject with that error.
+      if (queuedOrOther?.isOfflineQueued) {
+        return Promise.reject(queuedOrOther);
+      }
+      // Otherwise fall through to normal handling.
+    }
+
     if (error.response?.status === 401) {
       const url = error.config?.url || '';
 
