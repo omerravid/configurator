@@ -12,6 +12,7 @@ import {
   TrashIcon,
   LockClosedIcon,
   XMarkIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import { configAPI } from "../services/api";
 import { useToast } from "../context/ToastContext";
@@ -178,17 +179,19 @@ const TreeNode = ({
   onArchive,
   onRestore,
   onAddComponent,
+  onExport,
   user,
   isExpanded,
   onExpansionChange,
   isNodeExpanded,
   isArchiveView = false,
+  contextMenu,
+  setContextMenu,
 }) => {
   const [children, setChildren] = useState([]);
   const [loadingChildren, setLoadingChildren] = useState(false);
   const [hasLoadedChildren, setHasLoadedChildren] = useState(false);
   const [showInheritanceView, setShowInheritanceView] = useState(false);
-  const [contextMenu, setContextMenu] = useState(null);
 
   // Load children if node is expanded on mount
   useEffect(() => {
@@ -284,6 +287,9 @@ const TreeNode = ({
     e.preventDefault();
     e.stopPropagation();
 
+    // Close any existing context menu first
+    setContextMenu(null);
+
     // Helper functions to check permissions
     const canEdit = () => {
       if (user?.role === "ADMIN") return true;
@@ -351,6 +357,11 @@ const TreeNode = ({
           onClick: () => onDuplicate(config),
         },
         {
+          label: `Export "${config.name}"`,
+          icon: ArrowDownTrayIcon,
+          onClick: () => onExport?.(config),
+        },
+        {
           label: `Create child configuration`,
           icon: PlusIcon,
           onClick: () => onCreateChild(config),
@@ -395,6 +406,13 @@ const TreeNode = ({
           onClick: () => onRestore(config),
         });
       }
+      
+      // Export option also available for archived configs
+      menuItems.push({
+        label: `Export "${config.name}"`,
+        icon: ArrowDownTrayIcon,
+        onClick: () => onExport?.(config),
+      });
       
       // Admins can also delete archived configurations
       if (user?.role === "ADMIN") {
@@ -632,25 +650,18 @@ const TreeNode = ({
                 onArchive={onArchive}
                 onRestore={onRestore}
                 onAddComponent={onAddComponent}
+                onExport={onExport}
                 user={user}
                 isExpanded={isNodeExpanded(child.id, level + 1)}
                 onExpansionChange={onExpansionChange}
                 isNodeExpanded={isNodeExpanded}
                 isArchiveView={isArchiveView}
+                contextMenu={contextMenu}
+                setContextMenu={setContextMenu}
               />
             ))
           )}
         </div>
-      )}
-
-      {/* Context Menu */}
-      {contextMenu && (
-        <ContextMenu
-          x={contextMenu.x}
-          y={contextMenu.y}
-          items={contextMenu.items}
-          onClose={() => setContextMenu(null)}
-        />
       )}
     </div>
   );
@@ -721,6 +732,7 @@ const ConfigurationTree = ({
   onArchive,
   onRestore,
   onAddComponent,
+  onExport,
   user,
 }) => {
   const { showToast } = useToast();
@@ -728,6 +740,7 @@ const ConfigurationTree = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('active'); // 'active' or 'archived'
+  const [contextMenu, setContextMenu] = useState(null); // Shared context menu state
 
   // Global expansion state management - persist across refreshes and per tab
   const getStoredExpansionState = () => {
@@ -987,13 +1000,26 @@ const ConfigurationTree = ({
           onArchive={onArchive}
           onRestore={onRestore}
           onAddComponent={onAddComponent}
+          onExport={onExport}
           user={user}
           isExpanded={isNodeExpanded(config.id, 0)}
           onExpansionChange={handleExpansionChange}
           isNodeExpanded={isNodeExpanded}
           isArchiveView={activeTab === 'archived'}
+          contextMenu={contextMenu}
+          setContextMenu={setContextMenu}
         />
         ))
+      )}
+
+      {/* Shared Context Menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={contextMenu.items}
+          onClose={() => setContextMenu(null)}
+        />
       )}
     </div>
   );

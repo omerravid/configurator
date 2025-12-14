@@ -1,53 +1,75 @@
 version: "3.8"
 
 services:
-  postgres:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: config_manager
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+  # MongoDB Database
+  mongo:
+    image: mongo:7
+    container_name: configurator-mongo
+    restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "27017:27017"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./server/models/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mongo_data:/data/db
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
       timeout: 5s
       retries: 5
 
+  # Go Backend API
   backend:
     build:
-      context: ./server
-      dockerfile: Dockerfile
+      context: ./server-go
+      dockerfile: build/Dockerfile
+    container_name: configurator-backend
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      - SERVER_PORT=3001
+      - MONGODB_URI=mongodb://mongo:27017
+      - MONGO_DB_NAME=config_manager
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - API_KEY=your-api-key-change-in-production
+      - STORAGE_TYPE=embedded
+      - EMBEDDED_STORAGE_PATH=/data/files
+      - SERVER_BASE_URL=http://localhost:3001
+      - BACKUP_BIN_MONGODUMP=/usr/local/bin/mongodump
+      - BACKUP_BIN_MONGORESTORE=/usr/local/bin/mongorestore
+      - LOG_LEVEL=info
     ports:
       - "3001:3001"
-    environment:
-      DATABASE_URL: postgresql://postgres:password@postgres:5432/config_manager
-      JWT_SECRET: your-super-secret-jwt-key-change-in-production
-      NODE_ENV: development
-    depends_on:
-      postgres:
-        condition: service_healthy
     volumes:
-      - ./server:/app
-      - /app/node_modules
+      - files_data:/data/files
+      - ./server-go/data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+  # React Frontend (Development)
   frontend:
     build:
       context: ./client
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
+      target: development
+    container_name: configurator-frontend
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_BASE_URL=http://localhost:3001/api
     ports:
       - "5173:5173"
-    environment:
-      VITE_API_BASE_URL: http://localhost:3001/api
     volumes:
       - ./client:/app
       - /app/node_modules
-    depends_on:
-      - backend
+    stdin_open: true
+    tty: true
 
 volumes:
-  postgres_data:
+  mongo_data:
+    name: configurator-mongo-data
+  files_data:
+    name: configurator-files-data

@@ -1,0 +1,76 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+*.txt
+LICENSE
+
+# IDE
+.vscode
+.idea
+.cursor
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Go
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+
+# Build artifacts
+dist
+build
+bin
+*.tar.gz
+*.zip
+
+# Test coverage
+coverage
+*.coverprofile
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+
+# Temporary files
+tmp
+temp
+.tmp
+.cache
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+backup
+backups
+*.backup
+
+# Docker
+docker-compose.override.yml
+
+

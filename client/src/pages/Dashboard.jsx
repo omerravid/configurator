@@ -11,9 +11,11 @@ import SettingsModal from "../components/SettingsModal";
 import DeleteConfirmDialog from "../components/DeleteConfirmDialog";
 import AdvancedSearch from "../components/AdvancedSearch";
 import BulkOperations from "../components/BulkOperations";
+import ImportModal from "../components/ImportModal";
 import { useToast } from "../context/ToastContext";
 import { configAPI } from "../services/api";
 import { logger } from "../utils/logger";
+import { exportConfigurations, exportSingleConfiguration } from "../utils/exportImport";
 import {
   PlusIcon,
   PencilIcon,
@@ -33,6 +35,8 @@ import {
   CheckCircleIcon,
   ArchiveBoxIcon,
   ArrowPathIcon,
+  ArrowDownTrayIcon,
+  ArrowUpTrayIcon,
 } from "@heroicons/react/24/outline";
 
 const Dashboard = () => {
@@ -62,6 +66,7 @@ const Dashboard = () => {
   const [selectedArchivedIds, setSelectedArchivedIds] = useState([]);
   const [showBulkOperations, setShowBulkOperations] = useState(false);
   const [activeTab, setActiveTab] = useState('active'); // 'active' | 'archived'
+  const [showImport, setShowImport] = useState(false);
 
   // Helper function to extract actual ID from various parent_id formats
   const extractParentId = (parentId) => {
@@ -881,6 +886,29 @@ const Dashboard = () => {
     handleRestore(config);
   };
 
+  const handleTreeExport = async (config) => {
+    try {
+      if (!config) {
+        showToast('No configuration selected', 'error');
+        return;
+      }
+
+      // Fetch the full configuration with data
+      logger.debug('Exporting configuration from tree', { id: config.id, name: config.name });
+      const rawResponse = await configAPI.getRawById(config.id);
+      const fullConfig = {
+        ...config,
+        data: rawResponse.data.resolved || {},
+      };
+
+      const result = exportSingleConfiguration(fullConfig);
+      showToast(`Exported "${config.name}" to ${result.filename}`, 'success');
+    } catch (error) {
+      logger.error('Failed to export configuration', error);
+      showToast(`Failed to export: ${error.message}`, 'error');
+    }
+  };
+
   const handleContextMenuShow = (e) => {
     e.preventDefault();
     if (!selectedConfig) return;
@@ -902,6 +930,11 @@ const Dashboard = () => {
         label: `Duplicate as sibling`,
         icon: DocumentDuplicateIcon,
         onClick: handleDuplicate,
+      },
+      {
+        label: `Export "${selectedConfig.name}"`,
+        icon: ArrowDownTrayIcon,
+        onClick: handleExportSelected,
       },
       {
         label: `Create child configuration`,
@@ -1135,6 +1168,73 @@ const Dashboard = () => {
   // Get current operations based on active tab
   const currentBulkOperations = activeTab === 'active' ? activeBulkOperations : archivedBulkOperations;
 
+  // Export/Import handlers
+  const handleExportAll = useCallback(() => {
+    try {
+      const result = exportConfigurations(allConfigurations);
+      showToast(`Exported ${result.count} configurations to ${result.filename}`, 'success');
+    } catch (error) {
+      logger.error('Failed to export configurations', error);
+      showToast(`Failed to export: ${error.message}`, 'error');
+    }
+  }, [allConfigurations, showToast]);
+
+  const handleExportSelected = useCallback(async () => {
+    try {
+      if (!selectedConfig) {
+        showToast('No configuration selected', 'error');
+        return;
+      }
+
+      // Fetch the full configuration with data
+      logger.debug('Exporting configuration', { id: selectedConfig.id, name: selectedConfig.name });
+      const rawResponse = await configAPI.getRawById(selectedConfig.id);
+      const fullConfig = {
+        ...selectedConfig,
+        data: rawResponse.data.resolved || {},
+      };
+
+      const result = exportSingleConfiguration(fullConfig);
+      showToast(`Exported "${selectedConfig.name}" to ${result.filename}`, 'success');
+    } catch (error) {
+      logger.error('Failed to export configuration', error);
+      showToast(`Failed to export: ${error.message}`, 'error');
+    }
+  }, [selectedConfig, showToast]);
+
+  const handleImport = async (configurations) => {
+    try {
+      const results = {
+        total: configurations.length,
+        successCount: 0,
+        failureCount: 0,
+        errors: [],
+      };
+
+      logger.info('Starting import', { count: configurations.length });
+
+      for (const config of configurations) {
+        try {
+          await configAPI.create(config);
+          results.successCount++;
+        } catch (error) {
+          results.failureCount++;
+          results.errors.push(`${config.name}: ${error.response?.data?.error || error.message}`);
+          logger.error('Failed to import configuration', { name: config.name, error });
+        }
+      }
+
+      // Refresh configurations list
+      setRefreshTrigger(prev => prev + 1);
+      await loadAllConfigurations();
+
+      return results;
+    } catch (error) {
+      logger.error('Import process failed', error);
+      throw error;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       {/* Header */}
@@ -1186,6 +1286,24 @@ const Dashboard = () => {
               <span className="hidden sm:inline">
                 {isDarkMode ? 'Light' : 'Dark'}
               </span>
+            </button>
+
+            <button
+              onClick={handleExportAll}
+              className="btn-secondary flex items-center space-x-1"
+              title="Export all configurations"
+            >
+              <ArrowDownTrayIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">Export</span>
+            </button>
+
+            <button
+              onClick={() => setShowImport(true)}
+              className="btn-secondary flex items-center space-x-1"
+              title="Import configurations"
+            >
+              <ArrowUpTrayIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">Import</span>
             </button>
 
 
@@ -1305,6 +1423,7 @@ const Dashboard = () => {
                 onArchive={handleTreeArchive}
                 onRestore={handleTreeRestore}
                 onAddComponent={handleAddComponent}
+                onExport={handleTreeExport}
                 user={user}
               />
             </div>
@@ -1684,6 +1803,14 @@ const Dashboard = () => {
         isOpen={showDeleteConfirm}
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
+      />
+
+      {/* Import Modal */}
+      <ImportModal
+        isOpen={showImport}
+        onClose={() => setShowImport(false)}
+        onImport={handleImport}
+        existingConfigurations={allConfigurations}
       />
     </div>
   );

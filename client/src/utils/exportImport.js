@@ -1,557 +1,328 @@
-import { logger } from './logger';
-
 /**
  * Export/Import Utilities
  * 
- * Provides functionality for exporting and importing data in various formats:
- * - JSON
- * - CSV
- * - Excel (XLSX)
- * - Configuration files
+ * Handles exporting configurations to JSON files and importing them back.
  */
 
+import { logger } from './logger';
+
 /**
- * Export data to JSON file
- * @param {any} data - Data to export
- * @param {string} filename - Filename without extension
+ * Export configurations to JSON file
+ * @param {Array} configurations - Array of configuration objects to export
+ * @param {string} filename - Optional filename (defaults to timestamp-based name)
  */
-export const exportToJSON = (data, filename = 'export') => {
+export const exportConfigurations = (configurations, filename = null) => {
   try {
-    const jsonString = JSON.stringify(data, null, 2);
+    if (!configurations || configurations.length === 0) {
+      throw new Error('No configurations to export');
+    }
+
+    // Generate filename if not provided
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    const defaultFilename = `configurations-export-${timestamp}.json`;
+    const finalFilename = filename || defaultFilename;
+
+    // Prepare export data with metadata
+    const exportData = {
+      version: '1.0',
+      exportedAt: new Date().toISOString(),
+      count: configurations.length,
+      configurations: configurations.map(config => {
+        // Ensure data is a plain object, not undefined or null
+        let configData = config.data;
+        if (configData === undefined || configData === null) {
+          configData = {};
+        } else if (typeof configData === 'string') {
+          // If data is a string, try to parse it
+          try {
+            configData = JSON.parse(configData);
+          } catch (e) {
+            logger.warn('Failed to parse config data, using empty object', { name: config.name });
+            configData = {};
+          }
+        } else if (typeof configData !== 'object' || Array.isArray(configData)) {
+          logger.warn('Invalid config data type, using empty object', { name: config.name, type: typeof configData });
+          configData = {};
+        }
+
+        return {
+          name: config.name,
+          type: config.type,
+          description: config.description || '',
+          parent_id: config.parent_id || null,
+          parent_name: config.parent_name || null,
+          data: configData,
+          status: config.status || 'DRAFT',
+          created_by: config.created_by,
+          created_by_username: config.created_by_username,
+          archived: Boolean(config.archived),
+          // Exclude internal IDs and timestamps for portability
+          // id, created_at, updated_at will be regenerated on import
+        };
+      }),
+    };
+
+    // Convert to JSON string with pretty formatting
+    const jsonString = JSON.stringify(exportData, null, 2);
+
+    // Create blob and download
     const blob = new Blob([jsonString], { type: 'application/json' });
-    downloadBlob(blob, `${filename}.json`);
-    
-    logger.info('Data exported to JSON', { filename });
-    return true;
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = finalFilename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    logger.info('Configurations exported successfully', {
+      count: configurations.length,
+      filename: finalFilename,
+    });
+
+    return {
+      success: true,
+      filename: finalFilename,
+      count: configurations.length,
+    };
   } catch (error) {
-    logger.error('Failed to export JSON', error);
+    logger.error('Failed to export configurations', error);
     throw error;
   }
 };
 
 /**
- * Export data to CSV file
- * @param {Array} data - Array of objects to export
- * @param {string} filename - Filename without extension
- * @param {Object} options - Export options
+ * Export single configuration to JSON file
+ * @param {Object} configuration - Configuration object to export
+ * @param {string} filename - Optional filename
  */
-export const exportToCSV = (data, filename = 'export', options = {}) => {
-  try {
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error('Data must be a non-empty array');
-    }
-
-    const {
-      delimiter = ',',
-      includeHeaders = true,
-      columns = null, // Specific columns to export
-    } = options;
-
-    // Get column names
-    const columnNames = columns || Object.keys(data[0]);
-
-    // Build CSV string
-    let csv = '';
-
-    // Add headers
-    if (includeHeaders) {
-      csv += columnNames.map(col => escapeCSV(col)).join(delimiter) + '\n';
-    }
-
-    // Add rows
-    data.forEach(row => {
-      const values = columnNames.map(col => {
-        const value = getNestedValue(row, col);
-        return escapeCSV(value);
-      });
-      csv += values.join(delimiter) + '\n';
-    });
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    downloadBlob(blob, `${filename}.csv`);
-
-    logger.info('Data exported to CSV', { filename, rows: data.length });
-    return true;
-  } catch (error) {
-    logger.error('Failed to export CSV', error);
-    throw error;
-  }
-};
-
-/**
- * Export data to Excel-compatible format (CSV with UTF-8 BOM)
- * @param {Array} data - Array of objects to export
- * @param {string} filename - Filename without extension
- * @param {Object} options - Export options
- */
-export const exportToExcel = (data, filename = 'export', options = {}) => {
-  try {
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error('Data must be a non-empty array');
-    }
-
-    const {
-      delimiter = ',',
-      includeHeaders = true,
-      columns = null,
-    } = options;
-
-    const columnNames = columns || Object.keys(data[0]);
-
-    let csv = '';
-
-    if (includeHeaders) {
-      csv += columnNames.map(col => escapeCSV(col)).join(delimiter) + '\n';
-    }
-
-    data.forEach(row => {
-      const values = columnNames.map(col => {
-        const value = getNestedValue(row, col);
-        return escapeCSV(value);
-      });
-      csv += values.join(delimiter) + '\n';
-    });
-
-    // Add UTF-8 BOM for Excel
-    const BOM = '\uFEFF';
-    const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
-    downloadBlob(blob, `${filename}.csv`);
-
-    logger.info('Data exported to Excel CSV', { filename, rows: data.length });
-    return true;
-  } catch (error) {
-    logger.error('Failed to export Excel', error);
-    throw error;
-  }
-};
-
-/**
- * Export configuration to file
- * @param {Object} config - Configuration object
- * @param {string} filename - Filename
- * @param {string} format - Format (json, yaml, toml)
- */
-export const exportConfiguration = (config, filename, format = 'json') => {
-  try {
-    let content;
-    let mimeType;
-    let extension;
-
-    switch (format.toLowerCase()) {
-      case 'json':
-        content = JSON.stringify(config, null, 2);
-        mimeType = 'application/json';
-        extension = 'json';
-        break;
-      
-      case 'yaml':
-      case 'yml':
-        // Simple YAML conversion (for complex YAML, use a library)
-        content = objectToYAML(config);
-        mimeType = 'text/yaml';
-        extension = 'yml';
-        break;
-      
-      default:
-        throw new Error(`Unsupported format: ${format}`);
-    }
-
-    const blob = new Blob([content], { type: mimeType });
-    const finalFilename = filename.includes('.') ? filename : `${filename}.${extension}`;
-    downloadBlob(blob, finalFilename);
-
-    logger.info('Configuration exported', { filename: finalFilename, format });
-    return true;
-  } catch (error) {
-    logger.error('Failed to export configuration', error);
-    throw error;
-  }
-};
-
-/**
- * Import data from JSON file
- * @param {File} file - File object
- * @returns {Promise<any>} Parsed data
- */
-export const importFromJSON = (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      try {
-        const data = JSON.parse(e.target.result);
-        logger.info('Data imported from JSON', { filename: file.name });
-        resolve(data);
-      } catch (error) {
-        logger.error('Failed to parse JSON', error);
-        reject(new Error('Invalid JSON file'));
-      }
-    };
-
-    reader.onerror = () => {
-      logger.error('Failed to read file', { filename: file.name });
-      reject(new Error('Failed to read file'));
-    };
-
-    reader.readAsText(file);
-  });
-};
-
-/**
- * Import data from CSV file
- * @param {File} file - File object
- * @param {Object} options - Import options
- * @returns {Promise<Array>} Parsed data
- */
-export const importFromCSV = (file, options = {}) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      try {
-        const {
-          delimiter = ',',
-          hasHeaders = true,
-          skipEmptyLines = true,
-        } = options;
-
-        const text = e.target.result;
-        const lines = text.split('\n');
-
-        if (lines.length === 0) {
-          reject(new Error('Empty CSV file'));
-          return;
-        }
-
-        // Parse headers
-        let headers;
-        let startIndex = 0;
-
-        if (hasHeaders) {
-          headers = parseCSVLine(lines[0], delimiter);
-          startIndex = 1;
-        } else {
-          // Generate column names
-          const firstLine = parseCSVLine(lines[0], delimiter);
-          headers = firstLine.map((_, i) => `column_${i + 1}`);
-        }
-
-        // Parse rows
-        const data = [];
-        for (let i = startIndex; i < lines.length; i++) {
-          const line = lines[i].trim();
-          
-          if (skipEmptyLines && !line) {
-            continue;
-          }
-
-          const values = parseCSVLine(line, delimiter);
-          
-          if (values.length !== headers.length) {
-            logger.warn('CSV row column mismatch', { 
-              line: i + 1, 
-              expected: headers.length, 
-              got: values.length 
-            });
-          }
-
-          const row = {};
-          headers.forEach((header, index) => {
-            row[header] = values[index] || '';
-          });
-          data.push(row);
-        }
-
-        logger.info('Data imported from CSV', { 
-          filename: file.name, 
-          rows: data.length 
-        });
-        resolve(data);
-      } catch (error) {
-        logger.error('Failed to parse CSV', error);
-        reject(new Error('Invalid CSV file'));
-      }
-    };
-
-    reader.onerror = () => {
-      logger.error('Failed to read file', { filename: file.name });
-      reject(new Error('Failed to read file'));
-    };
-
-    reader.readAsText(file);
-  });
-};
-
-/**
- * Import configuration from file
- * @param {File} file - File object
- * @returns {Promise<Object>} Parsed configuration
- */
-export const importConfiguration = (file) => {
-  return new Promise((resolve, reject) => {
-    const extension = file.name.split('.').pop().toLowerCase();
-
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      try {
-        const content = e.target.result;
-        let config;
-
-        switch (extension) {
-          case 'json':
-            config = JSON.parse(content);
-            break;
-          
-          case 'yaml':
-          case 'yml':
-            // Simple YAML parsing (for complex YAML, use a library)
-            config = yamlToObject(content);
-            break;
-          
-          default:
-            reject(new Error(`Unsupported file format: ${extension}`));
-            return;
-        }
-
-        logger.info('Configuration imported', { 
-          filename: file.name, 
-          format: extension 
-        });
-        resolve(config);
-      } catch (error) {
-        logger.error('Failed to parse configuration', error);
-        reject(new Error(`Invalid ${extension.toUpperCase()} file`));
-      }
-    };
-
-    reader.onerror = () => {
-      logger.error('Failed to read file', { filename: file.name });
-      reject(new Error('Failed to read file'));
-    };
-
-    reader.readAsText(file);
-  });
-};
-
-/**
- * Download blob as file
- * @param {Blob} blob - Blob to download
- * @param {string} filename - Filename
- */
-const downloadBlob = (blob, filename) => {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-};
-
-/**
- * Escape CSV value
- * @param {any} value - Value to escape
- * @returns {string} Escaped value
- */
-const escapeCSV = (value) => {
-  if (value === null || value === undefined) {
-    return '';
+export const exportSingleConfiguration = (configuration, filename = null) => {
+  if (!configuration) {
+    throw new Error('No configuration provided');
   }
 
-  const str = String(value);
-
-  // If contains comma, quote, or newline, wrap in quotes
-  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
-    return `"${str.replace(/"/g, '""')}"`;
-  }
-
-  return str;
-};
-
-/**
- * Parse CSV line
- * @param {string} line - CSV line
- * @param {string} delimiter - Delimiter
- * @returns {Array} Values
- */
-const parseCSVLine = (line, delimiter = ',') => {
-  const values = [];
-  let current = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    const nextChar = line[i + 1];
-
-    if (char === '"') {
-      if (inQuotes && nextChar === '"') {
-        // Escaped quote
-        current += '"';
-        i++; // Skip next quote
-      } else {
-        // Toggle quotes
-        inQuotes = !inQuotes;
-      }
-    } else if (char === delimiter && !inQuotes) {
-      // End of value
-      values.push(current);
-      current = '';
-    } else {
-      current += char;
-    }
-  }
-
-  // Add last value
-  values.push(current);
-
-  return values;
-};
-
-/**
- * Get nested value from object
- * @param {Object} obj - Object
- * @param {string} path - Path (e.g., "a.b.c")
- * @returns {any} Value
- */
-const getNestedValue = (obj, path) => {
-  return path.split('.').reduce((current, key) => current?.[key], obj);
-};
-
-/**
- * Simple object to YAML converter
- * @param {Object} obj - Object to convert
- * @param {number} indent - Indentation level
- * @returns {string} YAML string
- */
-const objectToYAML = (obj, indent = 0) => {
-  const spaces = '  '.repeat(indent);
-  let yaml = '';
-
-  if (Array.isArray(obj)) {
-    obj.forEach(item => {
-      if (typeof item === 'object' && item !== null) {
-        yaml += `${spaces}-\n${objectToYAML(item, indent + 1)}`;
-      } else {
-        yaml += `${spaces}- ${item}\n`;
-      }
-    });
-  } else if (typeof obj === 'object' && obj !== null) {
-    Object.entries(obj).forEach(([key, value]) => {
-      if (typeof value === 'object' && value !== null) {
-        yaml += `${spaces}${key}:\n${objectToYAML(value, indent + 1)}`;
-      } else {
-        yaml += `${spaces}${key}: ${value}\n`;
-      }
-    });
-  } else {
-    yaml += `${spaces}${obj}\n`;
-  }
-
-  return yaml;
-};
-
-/**
- * Simple YAML to object parser (very basic, for complex YAML use a library)
- * @param {string} yaml - YAML string
- * @returns {Object} Parsed object
- */
-const yamlToObject = (yaml) => {
-  // This is a very basic implementation
-  // For production, use a proper YAML library like js-yaml
-  const lines = yaml.split('\n');
-  const obj = {};
-  let currentKey = null;
-
-  lines.forEach(line => {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) {
-      return;
-    }
-
-    const match = trimmed.match(/^([^:]+):\s*(.*)$/);
-    if (match) {
-      const [, key, value] = match;
-      currentKey = key.trim();
-      
-      if (value) {
-        // Try to parse as JSON value
-        try {
-          obj[currentKey] = JSON.parse(value);
-        } catch {
-          obj[currentKey] = value;
-        }
-      }
-    }
+  logger.debug('Exporting single configuration', {
+    name: configuration.name,
+    type: configuration.type,
+    hasData: !!configuration.data,
   });
 
-  return obj;
+  const sanitizedName = configuration.name.replace(/[^a-z0-9_-]/gi, '_').toLowerCase();
+  const defaultFilename = `${sanitizedName}-export.json`;
+  
+  return exportConfigurations([configuration], filename || defaultFilename);
 };
 
 /**
- * Validate import file
- * @param {File} file - File to validate
- * @param {Object} options - Validation options
- * @returns {Object} Validation result
+ * Validate imported configuration data
+ * @param {Object} data - Imported JSON data
+ * @returns {Object} Validation result with errors array
  */
-export const validateImportFile = (file, options = {}) => {
-  const {
-    maxSize = 10 * 1024 * 1024, // 10MB default
-    allowedExtensions = ['json', 'csv', 'xlsx', 'yaml', 'yml'],
-  } = options;
-
+export const validateImportData = (data) => {
   const errors = [];
 
-  // Check file size
-  if (file.size > maxSize) {
-    errors.push(`File size exceeds ${maxSize / 1024 / 1024}MB limit`);
+  // Check if data exists
+  if (!data) {
+    errors.push('No data provided');
+    return { valid: false, errors };
   }
 
-  // Check extension
-  const extension = file.name.split('.').pop().toLowerCase();
-  if (!allowedExtensions.includes(extension)) {
-    errors.push(`File type .${extension} is not supported. Allowed: ${allowedExtensions.join(', ')}`);
+  // Debug logging
+  logger.debug('Validating import data', {
+    hasData: !!data,
+    dataType: typeof data,
+    hasConfigurations: 'configurations' in data,
+    configurationsType: typeof data.configurations,
+    isArray: Array.isArray(data.configurations),
+    keys: Object.keys(data),
+  });
+
+  // Check version
+  if (!data.version) {
+    errors.push('Missing version field');
   }
+
+  // Check configurations array
+  if (!Array.isArray(data.configurations)) {
+    errors.push(`configurations must be an array (got ${typeof data.configurations})`);
+    return { valid: false, errors };
+  }
+
+  if (data.configurations.length === 0) {
+    errors.push('No configurations found in import file');
+    return { valid: false, errors };
+  }
+
+  // Validate each configuration
+  data.configurations.forEach((config, index) => {
+    const configErrors = [];
+
+    // Required fields
+    if (!config.name || typeof config.name !== 'string') {
+      configErrors.push('missing or invalid name');
+    }
+
+    if (!config.type || !['PRODUCT', 'COMPONENT', 'VERSION', 'INSTANCE', 'USER'].includes(config.type)) {
+      configErrors.push('missing or invalid type');
+    }
+
+    // Data field validation
+    if (config.data !== undefined && typeof config.data !== 'object') {
+      configErrors.push('data must be an object');
+    }
+
+    if (configErrors.length > 0) {
+      errors.push(`Configuration ${index + 1} (${config.name || 'unnamed'}): ${configErrors.join(', ')}`);
+    }
+  });
 
   return {
     valid: errors.length === 0,
     errors,
+    count: data.configurations.length,
   };
 };
 
 /**
- * Batch export multiple items
- * @param {Array} items - Items to export
- * @param {Function} exportFn - Export function for single item
- * @param {string} format - Export format
- * @returns {Promise<void>}
+ * Parse and validate imported JSON file
+ * @param {File} file - File object from input
+ * @returns {Promise<Object>} Parsed and validated data
  */
-export const batchExport = async (items, exportFn, format = 'json') => {
-  logger.info('Starting batch export', { count: items.length, format });
-
-  for (const item of items) {
-    try {
-      await exportFn(item, format);
-    } catch (error) {
-      logger.error('Batch export item failed', { item: item.id, error });
-      throw error;
+export const parseImportFile = async (file) => {
+  return new Promise((resolve, reject) => {
+    // Check file type
+    if (!file.name.endsWith('.json')) {
+      reject(new Error('File must be a JSON file (.json)'));
+      return;
     }
-  }
 
-  logger.info('Batch export complete', { count: items.length });
+    // Check file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      reject(new Error('File size exceeds 10MB limit'));
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      try {
+        const jsonData = JSON.parse(event.target.result);
+        
+        // Validate the parsed data
+        const validation = validateImportData(jsonData);
+        
+        if (!validation.valid) {
+          reject(new Error(`Validation failed:\n${validation.errors.join('\n')}`));
+          return;
+        }
+
+        logger.info('Import file parsed successfully', {
+          filename: file.name,
+          count: jsonData.configurations.length,
+        });
+
+        resolve({
+          data: jsonData,
+          validation,
+        });
+      } catch (error) {
+        if (error instanceof SyntaxError) {
+          reject(new Error('Invalid JSON format'));
+        } else {
+          reject(error);
+        }
+      }
+    };
+
+    reader.onerror = () => {
+      reject(new Error('Failed to read file'));
+    };
+
+    reader.readAsText(file);
+  });
 };
 
-export default {
-  exportToJSON,
-  exportToCSV,
-  exportToExcel,
-  exportConfiguration,
-  importFromJSON,
-  importFromCSV,
-  importConfiguration,
-  validateImportFile,
-  batchExport,
+/**
+ * Prepare configurations for import (remove IDs, adjust names if conflicts)
+ * @param {Array} configurations - Configurations to import
+ * @param {Array} existingConfigurations - Existing configurations to check for conflicts
+ * @param {Object} options - Import options
+ * @returns {Array} Prepared configurations
+ */
+export const prepareConfigurationsForImport = (
+  configurations,
+  existingConfigurations = [],
+  options = {}
+) => {
+  const {
+    renameOnConflict = true,
+    preserveStatus = false,
+    setAsDraft = true,
+  } = options;
+
+  const existingNames = new Set(existingConfigurations.map(c => c.name));
+
+  return configurations.map(config => {
+    let name = config.name;
+
+    // Handle name conflicts
+    if (existingNames.has(name) && renameOnConflict) {
+      let counter = 1;
+      let newName = `${name}_imported`;
+      
+      while (existingNames.has(newName)) {
+        counter++;
+        newName = `${name}_imported_${counter}`;
+      }
+      
+      name = newName;
+      logger.info('Renamed configuration to avoid conflict', {
+        originalName: config.name,
+        newName: name,
+      });
+    }
+
+    // Prepare clean configuration object
+    const prepared = {
+      name,
+      type: config.type,
+      description: config.description || `Imported from ${config.name}`,
+      data: config.data || {},
+      // parent_id will be null - user must reassign if needed
+      parent_id: null,
+    };
+
+    // Handle status
+    if (!setAsDraft && preserveStatus && config.status) {
+      prepared.status = config.status;
+    }
+    // Otherwise, backend will default to DRAFT for USER type
+
+    return prepared;
+  });
 };
 
-
+/**
+ * Generate import summary report
+ * @param {Array} imported - Successfully imported configurations
+ * @param {Array} failed - Failed configuration imports
+ * @returns {Object} Summary report
+ */
+export const generateImportSummary = (imported, failed) => {
+  return {
+    total: imported.length + failed.length,
+    successCount: imported.length,
+    failureCount: failed.length,
+    imported: imported.map(c => ({
+      name: c.name,
+      type: c.type,
+      id: c.id,
+    })),
+    failed: failed.map(f => ({
+      name: f.config.name,
+      error: f.error,
+    })),
+  };
+};
